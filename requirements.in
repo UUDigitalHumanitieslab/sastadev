@@ -1,0 +1,4 @@
+pytest
+lxml
+xlrd>=1.2,<2
+xlsxwriter
