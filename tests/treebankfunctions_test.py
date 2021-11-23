@@ -1,5 +1,5 @@
 from lxml import etree
-from sastadev.treebankfunctions import getmarkedutt, indextransform, lastmainclauseof, simpleshow
+from ..sastadev.treebankfunctions import getmarkedutt, indextransform, lastmainclauseof, simpleshow
 
 streestrings = {}
 streestrings[1] = '''

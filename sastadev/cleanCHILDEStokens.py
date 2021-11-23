@@ -1,9 +1,10 @@
 import re
 from copy import deepcopy
 
-from sastadev import CHAT_Annotation, SDLOGGER, sastatok
-from sastadev.metadata import Meta, bpl_none
-from sastadev.sastatoken import show
+from . import CHAT_Annotation, sastatok
+from .config import SDLOGGER
+from .metadata import Meta, bpl_none
+from .sastatoken import show
 
 hexformat = '\\u{0:04X}'
 

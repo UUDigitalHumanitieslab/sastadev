@@ -1,7 +1,7 @@
-from sastadev import SDLOGGER
-from sastadev.dedup import getposition, mlux2
-from sastadev.macros import expandmacros
-from sastadev.treebankfunctions import (asta_recognised_nounnode, clausecats,
+from .config import SDLOGGER
+from .dedup import getposition, mlux2
+from .macros import expandmacros
+from .treebankfunctions import (asta_recognised_nounnode, clausecats,
                                         getattval, showtns)
 
 noun_xpath = './/node[%asta_noun%]'

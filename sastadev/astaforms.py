@@ -3,7 +3,7 @@ from collections import Counter, defaultdict
 from io import BytesIO
 
 import xlsxwriter
-from sastadev.treebankfunctions import getattval
+from .treebankfunctions import getattval
 
 green = '#00FF00'
 red = '#FF0000'

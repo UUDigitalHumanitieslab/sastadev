@@ -1,11 +1,11 @@
 from lxml import etree
-from sastadev.treebankfunctions import (getattval, inverted, getheadof, getdetof, copymodifynode,
+from .treebankfunctions import (getattval, inverted, getheadof, getdetof, copymodifynode,
                                         simpleshow, nominal, rbrother, lbrother, indextransform, getlemma)
-from sastadev.lexicon import getinflforms, informlexiconpos, getwordposinfo, pvinfl2dcoi
-from sastadev.metadata import mkSASTAMeta, bpl_node
-from sastadev.sastatoken import Token
-from sastadev import SDLOGGER
-from sastadev.tokenmd import TokenListMD
+from .lexicon import getinflforms, informlexiconpos, getwordposinfo, pvinfl2dcoi
+from .metadata import mkSASTAMeta, bpl_node
+from .sastatoken import Token
+from .config import SDLOGGER
+from .tokenmd import TokenListMD
 
 debug = False
 

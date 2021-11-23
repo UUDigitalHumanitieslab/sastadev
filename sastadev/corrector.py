@@ -15,25 +15,25 @@ waarbij
 import copy
 import re
 
-from sastadev.alpino import getdehetwordinfo
-from sastadev.cleanCHILDEStokens import cleantokens
-from sastadev.dedup import (cleanwordofnort, findjaneenou, getfilledpauses,
+from .alpino import getdehetwordinfo
+from .cleanCHILDEStokens import cleantokens
+from .dedup import (cleanwordofnort, findjaneenou, getfilledpauses,
                             getprefixwords, getrepeatedtokens)
-from sastadev.deregularise import correctinflection
-from sastadev.iedims import getjeforms
-from sastadev.lexicon import de, dets, het, informlexicon, known_word
-from sastadev.metadata import (bpl_node, bpl_none, bpl_word,
+from .deregularise import correctinflection
+from .iedims import getjeforms
+from .lexicon import de, dets, het, informlexicon, known_word
+from .metadata import (bpl_node, bpl_none, bpl_word,
                                defaultbackplacement, defaultpenalty,
                                mkSASTAMeta)
-from sastadev.namepartlexicon import isa_namepart
-from sastadev.sastatok import sasta_tokenize
-from sastadev.sastatoken import Token, tokenlist2stringlist
-from sastadev.stringfunctions import (consonants, deduplicate, endsinschwa,
+from .namepartlexicon import isa_namepart
+from .sastatok import sasta_tokenize
+from .sastatoken import Token, tokenlist2stringlist
+from .stringfunctions import (consonants, deduplicate, endsinschwa,
                                       fullworddehyphenate, monosyllabic,
                                       vowels)
-from sastadev.sva import getsvacorrections
-from sastadev.tokenmd import TokenListMD, TokenMD, mdlist2listmd
-from sastadev.treebankfunctions import find1
+from .sva import getsvacorrections
+from .tokenmd import TokenListMD, TokenMD, mdlist2listmd
+from .treebankfunctions import find1
 
 SASTA = 'SASTA'
 

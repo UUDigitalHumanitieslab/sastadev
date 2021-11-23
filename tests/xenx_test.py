@@ -1,7 +1,7 @@
 from lxml import etree
 
-from sastadev.treebankfunctions import getyield
-from sastadev.xenx import xenx
+from ..sastadev.treebankfunctions import getyield
+from ..sastadev.xenx import xenx
 
 teststr = {}
 

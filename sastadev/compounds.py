@@ -2,8 +2,8 @@ import csv
 import os
 from collections import defaultdict
 
-from sastadev import SDLOGGER, SD_DIR
-from sastadev.treebankfunctions import getattval
+from .config import SDLOGGER, SD_DIR
+from .treebankfunctions import getattval
 
 underscore = "_"
 FlatClass = 0

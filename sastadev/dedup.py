@@ -2,13 +2,15 @@ import os
 from copy import deepcopy
 
 from lxml import etree
-from sastadev import SD_DIR, SDLOGGER, compounds
-from sastadev.lexicon import informlexicon
-from sastadev.sastatoken import Token
-from sastadev.stringfunctions import deduplicate
-from sastadev.treebankfunctions import (all_lower_consonantsnode,
-                                        asta_recognised_wordnode, getattval,
-                                        getnodeyield, lastmainclauseof)
+
+from . import compounds
+from .config import SD_DIR, SDLOGGER
+from .lexicon import informlexicon
+from .sastatoken import Token
+from .stringfunctions import deduplicate
+from .treebankfunctions import (all_lower_consonantsnode,
+                                asta_recognised_wordnode, getattval,
+                                getnodeyield, lastmainclauseof)
 
 nodetype = etree._Element
 

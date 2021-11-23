@@ -1,7 +1,7 @@
 import re
 
-from sastadev.CHAT_Annotation import CHAT_patterns, interpunction, wordpat
-from sastadev.sastatoken import stringlist2tokenlist
+from .CHAT_Annotation import CHAT_patterns, interpunction, wordpat
+from .sastatoken import stringlist2tokenlist
 
 
 def alts(pats, grouping=False):

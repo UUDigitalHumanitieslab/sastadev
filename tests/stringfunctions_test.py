@@ -1,7 +1,7 @@
-from sastadev.stringfunctions import monosyllabic, syllableheadsre
+from ..sastadev.stringfunctions import monosyllabic, syllableheadsre
 
 
-def testcondition(condition, word):
+def condition(condition, word):
     if condition(word):
         print('OK:{}'.format(word))
     else:
@@ -15,9 +15,9 @@ def test_stringfunctions():
                        'hikken', 'doppen', 'dutten', 'yellen', 'ryen', 'Händler', 'Pëtri', 'bïty', 'Kölner', 'Kürer', 'Tÿding', 'naäap', 'meeëten', 'ciën', 'coöp']
 
     for word in monosyllabicwords:
-        testcondition(monosyllabic, word.lower())
+        condition(monosyllabic, word.lower())
     for word in disyllabicwords:
-        testcondition(monosyllabic, word.lower())
+        condition(monosyllabic, word.lower())
 
     for word in monosyllabicwords + disyllabicwords:
         ms = syllableheadsre.finditer(word)

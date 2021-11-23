@@ -1,6 +1,6 @@
 import re
 
-from sastadev import lexicon
+from . import lexicon
 
 comma = ','
 semicolon = ';'

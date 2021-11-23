@@ -1,6 +1,6 @@
 from lxml import etree
 
-from sastadev.imperatives import wond4, wondx, wx, wxyz, wxyz5, wxy, wond5plus
+from ..sastadev.imperatives import wond4, wondx, wx, wxyz, wxyz5, wxy, wond5plus
 
 testtreestr = {}
 

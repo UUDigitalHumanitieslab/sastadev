@@ -4,7 +4,8 @@ import re
 import sys
 from collections import defaultdict
 
-from sastadev import SD_DIR, treebankfunctions
+from .config import SD_DIR
+from . import treebankfunctions
 
 backslash = '\\'
 celexsep = backslash

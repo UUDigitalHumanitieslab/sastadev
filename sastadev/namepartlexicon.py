@@ -1,7 +1,7 @@
 import csv
 import os
 
-from sastadev import SD_DIR
+from .config import SD_DIR
 
 tab = '\t'
 namepartlexicon = {}

@@ -1,4 +1,5 @@
-from sastadev import PARSE_FUNC, lexicon, treebankfunctions
+from . import lexicon, treebankfunctions
+from .config import PARSE_FUNC
 
 
 def getalpinowordinfo(word):

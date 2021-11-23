@@ -1,6 +1,6 @@
 import re
 
-from sastadev.sastatok import fullre, fullsastare, myrepetition, sasta_tokenize
+from ..sastadev.sastatok import fullre, fullsastare, myrepetition, sasta_tokenize
 
 teststr = {}
 teststr[1] = r'Dat [:: dit] (i)s 0toch &he niet [x 3] zo efoudig [: eenvoudig], hoor!'

@@ -1,5 +1,5 @@
-from sastadev.TARSPscreening import screening4stage
-from sastadev.goldcountreader import get_goldcounts
+from ..sastadev.TARSPscreening import screening4stage
+from ..sastadev.goldcountreader import get_goldcounts
 import os
 
 

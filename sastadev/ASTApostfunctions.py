@@ -1,6 +1,6 @@
 from collections import Counter
 
-from sastadev.treebankfunctions import getattval
+from .treebankfunctions import getattval
 
 lpad = 3
 zero = '0'

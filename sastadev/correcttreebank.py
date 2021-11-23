@@ -2,19 +2,18 @@ from collections import defaultdict
 from copy import copy, deepcopy
 
 from lxml import etree
-from sastadev import PARSE_FUNC, SDLOGGER
-from sastadev.cleanCHILDEStokens import cleantext
-from sastadev.corrector import getcorrections
-from sastadev.lexicon import de, dets, known_word
-from sastadev.metadata import Meta, bpl_node, bpl_none, bpl_word
-from sastadev.sva import phicompatible
-from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (countav, find1, getattval,
-                                        getcompoundcount, getnodeyield,
-                                        getsentid, getyield, myfind,
-                                        showflatxml, simpleshow,
-                                        transplant_node)
-from sastadev.sastatok import sasta_tokenize
+
+from .cleanCHILDEStokens import cleantext
+from .config import PARSE_FUNC, SDLOGGER
+from .corrector import getcorrections
+from .lexicon import de, dets, known_word
+from .metadata import Meta, bpl_node, bpl_none, bpl_word
+from .sastatok import sasta_tokenize
+from .sva import phicompatible
+from .targets import get_mustbedone
+from .treebankfunctions import (countav, find1, getattval, getcompoundcount,
+                                getnodeyield, getsentid, getyield, myfind,
+                                showflatxml, simpleshow, transplant_node)
 
 corr0, corr1, corrn = '0', '1', 'n'
 validcorroptions = [corr0, corr1, corrn]

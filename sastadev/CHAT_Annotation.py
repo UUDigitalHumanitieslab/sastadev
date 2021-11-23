@@ -1,9 +1,9 @@
-from sastadev.sastatoken import Token, show
-from sastadev.metadata import Meta
-from sastadev import cleanCHILDEStokens
 import re
 
-from sastadev import SDLOGGER
+from . import cleanCHILDEStokens
+from .config import SDLOGGER
+from .metadata import Meta
+from .sastatoken import Token, show
 
 CHAT = 'CHAT'
 

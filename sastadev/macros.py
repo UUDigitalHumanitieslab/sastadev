@@ -1,6 +1,7 @@
-import re
-from . import SDLOGGER, SD_DIR
 import os.path as op
+import re
+
+from .config import SD_DIR, SDLOGGER
 
 idpat = r'([A-z_][A-z0-9_]*)'
 eqpat = r'='
