@@ -1,11 +1,13 @@
 from lxml import etree
-from treebankfunctions import (getattval, inverted, getheadof, getdetof, copymodifynode,
-                                        simpleshow, nominal, rbrother, lbrother, indextransform, getlemma)
-from lexicon import getinflforms, informlexiconpos, getwordposinfo, pvinfl2dcoi
-from metadata import mkSASTAMeta, bpl_node
-from sastatoken import Token
+
 from config import SDLOGGER
+from lexicon import getinflforms, getwordposinfo, informlexiconpos, pvinfl2dcoi
+from metadata import bpl_node, mkSASTAMeta
+from sastatoken import Token
 from tokenmd import TokenListMD
+from treebankfunctions import (copymodifynode, find1, getattval, getdetof,
+                               getheadof, getlemma, indextransform, inverted,
+                               lbrother, nominal, rbrother, simpleshow)
 
 debug = False
 
@@ -204,7 +206,7 @@ def getpotsubjs(tree):
             if childword == 'zij':
                 zijnode = getnode(zijsgnodestringtemplate, child)
                 results.append(zijnode)
-            # elif childword == 'ze':  # uitgezte want het levert fouten op
+            #elif childword == 'ze':  # uitgezte want het levert fouten op
             #    zenode = getnode(zesgnodestringtemplate, child)
             #    results.append(zenode)
             elif childpt == 'vnw' and childvwtype == 'pers' and childcase == 'obl' and childword not in ['je']:
@@ -239,7 +241,7 @@ def getpotsubjs(tree):
                 else:
                     childresults = getpotsubjs(child)  # here something should be done for coordinations
                     results += childresults
-                # results.append(child)
+                #results.append(child)
             elif childcat in ['pp', 'inf', 'ppart'] and childrel not in ['dp', '--']:
                 pass
             else:
@@ -249,65 +251,71 @@ def getpotsubjs(tree):
 
 
 def getpvs(tokensmd, tree, uttid):
-    pvs = tree.xpath(".//node[@pt='ww' and @wvorm='pv' and @word!='zij' and @word !='kijk']")  # we exclude the conjunctive 'zij'
-    # if we do not find a finite verb we analyse an infinitive as if it is a finite verb
-    if pvs == []:
-        pvs = tree.xpath(".//node[@pt='ww' and @wvorm='inf']")
-        if pvs != []:
-            thepv = pvs[0]
-            rb = rbrother(thepv, tree)
-            lb = lbrother(thepv, tree)
-            lblemma = getattval(lb, 'lemma')
-            lbrel = getattval(lb, 'rel')
-            if nominal(rb) or getattval(rb, 'pt') == 'lid' or (lblemma in ['je', 'het'] and lbrel == 'det'):
-                pass
-            else:
-                pvs = []
-# originally: but I do not understand it
-#            if nominal(rb):
-#                pvs = []
-#            if not(lblemma in ['je', 'het'] and lbrel == 'det'):
-#                pvs = []
-        if debug and pvs != []:
-            print('pv instead of infinitive')
-            simpleshow(tree)
-
-    # if we still did not find anything, try nouns that are also a verb form but restrict to cases
-    # with possessive je present, or with verb zij present
-    if pvs == []:
-        nouns = tree.xpath(".//node[@pt='n' or @pt='adj']")
-        zijverbs = tree.xpath(".//node[@pt='ww' and @word='zij']")
-        for noun in nouns:
-            nounword = getattval(noun, 'word')
-            nounpt = getattval(noun, 'pt')
-            nounstr = nounword.lower()
-            nounbegin = getattval(noun, 'begin')
-            nounend = getattval(noun, 'end')
-            zijverbfound = zijverbs != []
-            precedingjequery = precedingjequerytemplate.format(nounbegin=nounbegin)
-            precedingjes = tree.xpath(precedingjequery)
-            precedingjefound = precedingjes != []
-            wistfound = nounstr == 'wist'
-            if not(zijverbfound or precedingjefound or wistfound):
-                continue
-            if informlexiconpos(nounstr, 'ww'):
-                cands = getwordposinfo(nounstr, 'ww')
-                if cands == []:
-                    pvs = []
+    if tree is None:
+        return []
+    else:
+        pvs = tree.xpath(".//node[@pt='ww' and @wvorm='pv' and @word!='zij' and @word !='kijk' and @word!='ja']")  # we exclude the conjunctive 'zij'
+        # if we do not find a finite verb we analyse an infinitive as if it is a finite verb unless preceded by aan het or te
+        if pvs == []:
+            pvs = tree.xpath(".//node[@pt='ww' and @wvorm='inf']")
+            if pvs != []:
+                thepv = pvs[0]
+                if not ahi(thepv, tree) and not ti(thepv, tree):
+                    rb = rbrother(thepv, tree)
+                    lb = lbrother(thepv, tree)
+                    lblemma = getattval(lb, 'lemma')
+                    lbrel = getattval(lb, 'rel')
+                    if nominal(rb) or getattval(rb, 'pt') == 'lid' or (lblemma in ['je', 'het'] and lbrel == 'det'):
+                        pass
+                    else:
+                        pvs = []
                 else:
-                    if debug:
-                        print('pv instead of noun or adj')
-                        simpleshow(tree)
-                    first = cands[0]
-                    (pos, dehet, infl, lemma) = first
-                    dcoi_infl = pvinfl2dcoi(nounstr, infl, lemma)
-                    (wvorm, pvtijd, pvagr) = dcoi_infl
-                    postag = 'WW({wvorm}, {pvtijd}, {pvagr})'.format(wvorm='pv', pvtijd=pvtijd, pvagr=pvagr)
-                    pvnodestring = pvnodestringtemplate.format(lemma=lemma, word=nounstr, postag=postag, wvorm=wvorm,
-                                                               pvagr=pvagr, pvtijd=pvtijd, begin=nounbegin, end=nounend)
-                    pvnode = etree.fromstring(pvnodestring)
-                    pvs.append(pvnode)
-    return pvs
+                    pvs = []
+    # originally: but I do not understand it
+    #            if nominal(rb):
+    #                pvs = []
+    #            if not(lblemma in ['je', 'het'] and lbrel == 'det'):
+    #                pvs = []
+            if debug and pvs != []:
+                print('pv instead of infinitive')
+                simpleshow(tree)
+
+        # if we still did not find anything, try nouns that are also a verb form but restrict to cases
+        # with possessive je present, or with verb zij present
+        if pvs == []:
+            nouns = tree.xpath(".//node[@pt='n' or @pt='adj']")
+            zijverbs = tree.xpath(".//node[@pt='ww' and @word='zij']")
+            for noun in nouns:
+                nounword = getattval(noun, 'word')
+                nounpt = getattval(noun, 'pt')
+                nounstr = nounword.lower()
+                nounbegin = getattval(noun, 'begin')
+                nounend = getattval(noun, 'end')
+                zijverbfound = zijverbs != []
+                precedingjequery = precedingjequerytemplate.format(nounbegin=nounbegin)
+                precedingjes = tree.xpath(precedingjequery)
+                precedingjefound = precedingjes != []
+                wistfound = nounstr == 'wist'
+                if not(zijverbfound or precedingjefound or wistfound):
+                    continue
+                if informlexiconpos(nounstr, 'ww'):
+                    cands = getwordposinfo(nounstr, 'ww')
+                    if cands == []:
+                        pvs = []
+                    else:
+                        if debug:
+                            print('pv instead of noun or adj')
+                            simpleshow(tree)
+                        first = cands[0]
+                        (pos, dehet, infl, lemma) = first
+                        dcoi_infl = pvinfl2dcoi(nounstr, infl, lemma)
+                        (wvorm, pvtijd, pvagr) = dcoi_infl
+                        postag = 'WW({wvorm}, {pvtijd}, {pvagr})'.format(wvorm='pv', pvtijd=pvtijd, pvagr=pvagr)
+                        pvnodestring = pvnodestringtemplate.format(lemma=lemma, word=nounstr, postag=postag, wvorm=wvorm,
+                                                                   pvagr=pvagr, pvtijd=pvtijd, begin=nounbegin, end=nounend)
+                        pvnode = etree.fromstring(pvnodestring)
+                        pvs.append(pvnode)
+        return pvs
 
 
 def zijnimperativeok(vnode):
@@ -325,15 +333,35 @@ def zijnimperativeok(vnode):
     return result
 
 
+def ahi(node, tree):
+    nodepos = int(getattval(node, 'end'))
+    p1end = str(nodepos - 2)
+    p2end = str(nodepos - 1)
+    p1 = find1(tree, '//node[@pt="vz" and @end={} and @lemma="aan"]'.format(p1end))
+    p2 = find1(tree, '//node[@pt="lid" and @end={} and @lemma="het"]'.format(p2end))
+    result = p1 is not None and p2 is not None
+    return result
+
+
+def ti(node, tree):
+    nodepos = int(getattval(node, 'end'))
+    p1end = str(nodepos - 1)
+    p1 = find1(tree, '//node[@pt and @end={} and @lemma="te"]'.format(p1end))
+    result = p1 is not None
+    return result
+
+
 def getsvacorrectedutt(snode, thepv, tokens, metadata):
     newtokens = []
     pvbegin = getattval(thepv, 'begin')
     inversion = inverted(snode, thepv)
+    reducedtokens = [t for t in tokens if not t.skip]
+    tokenposmap = {i: reducedtokens[i].pos for i in range(len(reducedtokens))}
     newpv = getpvform(snode, thepv, inversion)
     if newpv is None:
         results = []
     else:
-        newpos = int(pvbegin)
+        newpos = tokenposmap[int(pvbegin)]
         newtoken = Token(newpv, newpos)
         for token in tokens:
             if token.pos != newpos:
@@ -350,79 +378,82 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
 
 
 def getsvacorrections(tokensmd, rawtree, uttid):
-    tree = indextransform(rawtree)
-    tokens = tokensmd.tokens
-    metadata = tokensmd.metadata
-    ltokens = len(tokens)
-    newtokens = []
-
-    pvs = getpvs(tokensmd, tree, uttid)
-    abnormalobj2matches = tree.xpath(abnormalobj2sentencexpath)
-    if len(pvs) != 1:
-        results = []
-    elif (tree.xpath(normalsentencexpath) != [] and abnormalobj2matches == []) or \
-            tree.xpath(normalwhqsentencexpath) != []:
-        thesubjs = tree.xpath(subjxpath)
-        if thesubjs != []:
-            thesubj = thesubjs[0]
-        else:
-            thesubj = None
-        prednode = getcopulapredicate(tree)
-        if prednode is not None:
-            thesubj = prednode
-        thepv = pvs[0]
-        if thesubj is not None:
-            if phicompatible(thesubj, thepv):
-                results = []
-            else:
-                results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
-        else:
-            results = []  # hier rekening houden met imperatieven!
+    if rawtree is None:
+        return []
     else:
-        potsubjs = []
-        rawpv = pvs[0]
-        thepv = replaceverb(rawpv)
-        pvstype = getattval(thepv, 'stype')
-        if abnormalobj2matches != []:
-            potsubjs = tree.xpath(abnormalobj2xpath)
-        if potsubjs == []:
-            potsubjs = getpotsubjs(tree)
-        if potsubjs == []:
+        tree = indextransform(rawtree)
+        tokens = tokensmd.tokens
+        metadata = tokensmd.metadata
+        ltokens = len(tokens)
+        newtokens = []
+
+        pvs = getpvs(tokensmd, tree, uttid)
+        abnormalobj2matches = tree.xpath(abnormalobj2sentencexpath)
+        if len(pvs) != 1:
             results = []
-        else:
-            nominativenode = findfirst(potsubjs, 'naamval', {'nomin'})
-            if nominativenode is not None:
-                thesubj = nominativenode
-            # next left out because dealt with in a different way
-            #   elif pvstype == 'imparative' and zijnimperativeok(thepv) and not modalinv(thepv):
-            #       sunode = findfirst(potsubjs, 'rel', {'su'})
-            #      if sunode is not None:
-            #          thesubj = sunode
-            #      else:
-            #          sunode = findfirst(potsubjs, 'lemma', {'je', 'jij', 'jullie', 'u'})
-            #          if sunode is not None:
-            #              thesubj = sunode
-            #          else:
-            #              thepvend = getattval(thepv, 'end')
-            #              jenodestring = jenodestringtemplate.format(begin=thepvend, end=thepvend, rel='su' )
-            #              jenode = etree.fromstring(jenodestring)
-            #              thesubj = jenode
+        elif (tree.xpath(normalsentencexpath) != [] and abnormalobj2matches == []) or \
+                tree.xpath(normalwhqsentencexpath) != []:
+            thesubjs = tree.xpath(subjxpath)
+            if thesubjs != []:
+                thesubj = thesubjs[0]
             else:
-                sortedpotsubjs = sorted(potsubjs, key=lambda x: getattval(x, 'end'))
-                thesubj = sortedpotsubjs[0]
-            thesubjlemma = getattval(thesubj, 'lemma')
-            if thesubjlemma == 'u':
-                usgnode = getnode(usgnodestringtemplate, thesubj)
-                thesubj = usgnode
-            thesubjpersoon = getattval(thesubj, 'persoon')
-            if thesubjpersoon == 'persoon':
-                thesubj = copymodifynode(thesubj, {'persoon': '3'})
-            if phicompatible(thesubj, thepv):
+                thesubj = None
+            prednode = getcopulapredicate(tree)
+            if prednode is not None:
+                thesubj = prednode
+            thepv = pvs[0]
+            if thesubj is not None:
+                if phicompatible(thesubj, thepv):
+                    results = []
+                else:
+                    results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
+            else:
+                results = []  # hier rekening houden met imperatieven!
+        else:
+            potsubjs = []
+            rawpv = pvs[0]
+            thepv = replaceverb(rawpv)
+            pvstype = getattval(thepv, 'stype')
+            if abnormalobj2matches != []:
+                potsubjs = tree.xpath(abnormalobj2xpath)
+            if potsubjs == []:
+                potsubjs = getpotsubjs(tree)
+            if potsubjs == []:
                 results = []
             else:
-                results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
+                nominativenode = findfirst(potsubjs, 'naamval', {'nomin'})
+                if nominativenode is not None:
+                    thesubj = nominativenode
+                # next left out because dealt with in a different way
+                #   elif pvstype == 'imparative' and zijnimperativeok(thepv) and not modalinv(thepv):
+                #       sunode = findfirst(potsubjs, 'rel', {'su'})
+                #      if sunode is not None:
+                #          thesubj = sunode
+                #      else:
+                #          sunode = findfirst(potsubjs, 'lemma', {'je', 'jij', 'jullie', 'u'})
+                #          if sunode is not None:
+                #              thesubj = sunode
+                #          else:
+                #              thepvend = getattval(thepv, 'end')
+                #              jenodestring = jenodestringtemplate.format(begin=thepvend, end=thepvend, rel='su' )
+                #              jenode = etree.fromstring(jenodestring)
+                #              thesubj = jenode
+                else:
+                    sortedpotsubjs = sorted(potsubjs, key=lambda x: getattval(x, 'end'))
+                    thesubj = sortedpotsubjs[0]
+                thesubjlemma = getattval(thesubj, 'lemma')
+                if thesubjlemma == 'u':
+                    usgnode = getnode(usgnodestringtemplate, thesubj)
+                    thesubj = usgnode
+                thesubjpersoon = getattval(thesubj, 'persoon')
+                if thesubjpersoon == 'persoon':
+                    thesubj = copymodifynode(thesubj, {'persoon': '3'})
+                if phicompatible(thesubj, thepv):
+                    results = []
+                else:
+                    results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
 
-    return results
+        return results
 
 
 def getpersons(vnode):
@@ -482,7 +513,7 @@ def phicompatible(snode, vnode):
     if subjgetal == 'mv':
         result = vnodepvagr == 'mv'
     elif subjgetal == 'getal':
-        # check if the person corresponds with verbperson
+        #check if the person corresponds with verbperson
         vnodepersons = getpersons(vnode)
         subjperson1 = getattval(subjnode, 'persoon')
         if subjperson1 == 'persoon':
