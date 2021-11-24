@@ -1,6 +1,7 @@
 from lxml import etree
 
-from .imperatives import wond4, wondx, wx, wxyz, wxyz5, wxy, wond5plus
+from ..imperatives import wond4, wondx, wx, wxyz, wxyz5, wxy, wond5plus
+
 
 testtreestr = {}
 
@@ -309,20 +310,68 @@ testtreestr[13] = '''
 </alpino_ds>
 '''
 
+testtreestr[14] = '''
+ <alpino_ds version="1.3">
+  <metadata>
+<meta type="text" name="charencoding" value="UTF8"/>
+<meta type="text" name="childage" value="5;01.04"/>
+<meta type="int" name="childmonths" value="61"/>
+<meta type="text" name="location" value="Amsterdam , The Netherlands"/>
+<meta type="text" name="pid" value="11312/c-00003328-1"/>
+<meta type="text" name="session" value="DLD03"/>
+<meta type="text" name="situation" value="Opname in het logopediekamertje van THE."/>
+<meta type="text" name="origutt" value="ga jij maar taan [= staan]. [+ G]"/>
+<meta type="text" name="parsefile" value="SLI_DLD03_u00000000187.xml"/>
+<meta type="text" name="speaker" value="CHI"/>
+<meta type="int" name="uttendlineno" value="256"/>
+<meta type="int" name="uttid" value="187"/>
+<meta type="int" name="uttstartlineno" value="256"/>
+<meta type="text" name="name" value="Diana"/>
+<meta type="text" name="SES" value=""/>
+<meta type="text" name="age" value="5;01.04"/>
+<meta type="text" name="corpus" value="SLI"/>
+<meta type="text" name="custom" value=""/>
+<meta type="text" name="education" value=""/>
+<meta type="text" name="group" value=""/>
+<meta type="text" name="language" value="nld"/>
+<meta type="int" name="months" value="61"/>
+<meta type="text" name="role" value="Target_Child"/>
+<meta type="text" name="sex" value=""/>
+<meta type="text" name="syn" value="WXY, Hwwi, jij"/>
+<meta type="int" name="uttno" value="187"/>
+<xmeta annotatedposlist="[3]" annotatedwordlist="['taan']" annotationposlist="[5]" annotationwordlist="['staan']" atype="text" backplacement="0" cat="None" name="Explanation" penalty="10" source="CHAT" subcat="None" value="['staan']"/><xmeta annotatedposlist="[7]" annotatedwordlist="['.']" annotationposlist="[9]" annotationwordlist="['G']" atype="text" backplacement="0" cat="None" name="Postcode" penalty="10" source="CHAT" subcat="None" value="['G']"/><xmeta annotatedposlist="[3]" annotatedwordlist="['taan']" annotationposlist="[3]" annotationwordlist="['staan']" atype="text" backplacement="2" cat="Lexical Error" name="ExplanationasReplacement" penalty="10" source="SASTA" subcat="None" value="ExplanationasReplacement"/><xmeta annotatedposlist="[3]" annotatedwordlist="['taan']" annotationposlist="[5]" annotationwordlist="['staan']" atype="text" backplacement="0" cat="None" name="Explanation" penalty="10" source="CHAT" subcat="None" value="['staan']"/><xmeta annotatedposlist="[7]" annotatedwordlist="['.']" annotationposlist="[9]" annotationwordlist="['G']" atype="text" backplacement="0" cat="None" name="Postcode" penalty="10" source="CHAT" subcat="None" value="['G']"/><xmeta annotatedposlist="[]" annotatedwordlist="[]" annotationposlist="[]" annotationwordlist="['ga', 'jij', 'maar', 'taan', '[=', 'staan', ']', '.', '[+ ', 'G', ']']" atype="list" backplacement="0" cat="None" name="tokenisation" penalty="10" source="CHAT/Tokenisation" subcat="None" value="['ga', 'jij', 'maar', 'taan', '[=', 'staan', ']', '.', '[+ ', 'G', ']']"/><xmeta annotatedposlist="[]" annotatedwordlist="[]" annotationposlist="[]" annotationwordlist="['ga', 'jij', 'maar', 'taan', '.']" atype="list" backplacement="0" cat="None" name="cleanedtokenisation" penalty="10" source="CHAT/Tokenisation" subcat="None" value="['ga', 'jij', 'maar', 'taan', '.']"/><xmeta annotatedposlist="[]" annotatedwordlist="[]" annotationposlist="[]" annotationwordlist="[0, 1, 2, 3, 7]" atype="list" backplacement="0" cat="None" name="cleanedtokenpositions" penalty="10" source="CHAT/Tokenisation" subcat="None" value="[0, 1, 2, 3, 7]"/><xmeta annotatedposlist="[]" annotatedwordlist="[]" annotationposlist="[]" annotationwordlist="ga jij maar staan ." atype="text" backplacement="0" cat="Correction" name="parsed_as" penalty="10" source="SASTA" subcat="None" value="ga jij maar staan ."/></metadata>
+<node begin="0" cat="top" end="5" id="0" rel="top">
+    <node begin="0" cat="sv1" end="4" id="1" rel="--">
+      <node begin="0" end="1" frame="verb(zijn,sg1,aux(inf))" id="2" infl="sg1" lcat="sv1" lemma="gaan" pos="verb" postag="WW(pv,tgw,ev)" pt="ww" pvagr="ev" pvtijd="tgw" rel="hd" root="ga" sc="aux(inf)" sense="ga" stype="ynquestion" tense="present" word="ga" wvorm="pv"/>
+      <node begin="1" case="nom" def="def" end="2" frame="pronoun(nwh,je,sg,de,nom,def)" gen="de" getal="ev" id="3" index="1" lcat="np" lemma="jij" naamval="nomin" num="sg" pdtype="pron" per="je" persoon="2v" pos="pron" postag="VNW(pers,pron,nomin,vol,2v,ev)" pt="vnw" rel="su" rnum="sg" root="jij" sense="jij" status="vol" vwtype="pers" wh="nwh" word="jij"/>
+      <node begin="1" cat="inf" end="4" id="4" rel="vc">
+        <node begin="1" end="2" id="5" index="1" rel="su"/>
+        <node begin="2" end="3" frame="adverb" id="6" lcat="advp" lemma="maar" pos="adv" postag="BW()" pt="bw" rel="mod" root="maar" sense="maar" word="maar"/>
+        <node begin="3" end="4" frame="verb(hebben,sg1,intransitive)" his="normal" his_1="normal" id="6" infl="sg1" lcat="sv1" lemma="tanen" pos="verb" postag="WW(pv,tgw,ev)" pt="ww" pvagr="ev" pvtijd="tgw" rel="hd" root="taan" sc="intransitive" sense="taan" stype="imparative" tense="present" word="taan" wvorm="pv" positie="vrij"/>
+    </node>
+    </node>
+    <node begin="4" end="5" frame="punct(punt)" id="8" lcat="punct" lemma="." pos="punct" postag="LET()" pt="let" rel="--" root="." sense="." special="punt" word="."/>
+  </node>
+  <sentence sentid="187">ga jij maar taan .</sentence><comments>
+    <comment>Q#ng1623162800|ga jij maar staan .|1|1|0.0009120530600000565</comment>
+  </comments>
+</alpino_ds>
+  '''
 
 testtrees = []
 for ctr in testtreestr:
-    # print(ctr)
+    #print(ctr)
     testtrees.append((ctr, etree.fromstring(testtreestr[ctr])))
 
-# testtrees = [(ctr, etree.fromstring(testtreestr[ctr])) for ctr in testtreestr ]
+#testtrees = [(ctr, etree.fromstring(testtreestr[ctr])) for ctr in testtreestr ]
 labeledfs = [('wx', wx), ('wxy', wxy), ('wxyz', wxyz), ('wxyz5', wxyz5), ('wondx', wondx), ('wond4', wond4), ('wond5plus', wond5plus)]
 
 
 def test_imperatives():
     for (treename, testtree) in testtrees:
-        print(treename)
-        for label, thef in labeledfs:
-            # print('starting', label)
-            results = thef(testtree)
-            print(label, len(results))
+        if True:  # treename == 14:
+            print(treename)
+            for label, thef in labeledfs:
+                #print('starting', label)
+                results = thef(testtree)
+                print(label, len(results))

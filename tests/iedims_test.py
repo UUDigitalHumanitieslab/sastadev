@@ -1,8 +1,7 @@
 import csv
 
-from .iedims import (bigfilesep, getbaseinlexicon, getjeformsnolex,
-                               slash)
-from . import lexicon
+from .. import lexicon
+from ..iedims import bigfilesep, getbaseinlexicon, getjeformsnolex, slash
 
 testset = [('cluppie', ['clubje', 'clupje']), ('bakkie', ['bakje']), ('dakkie', ['dakje']), ('darmpie', ['darmpje']),
            ('doppie', ['dopje']), ('rapie', ['raapje']), ('huisie', ['huisje']), ('kassie', ['kasje', 'kastje']),
