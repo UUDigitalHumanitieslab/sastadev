@@ -14,8 +14,6 @@ iniconfig==1.1.1
     # via pytest
 lxml==4.6.4
     # via -r requirements.in
-memoize==1.0.0
-    # via -r requirements.in
 packaging==21.3
     # via pytest
 pluggy==1.0.0
