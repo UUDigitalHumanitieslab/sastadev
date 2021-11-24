@@ -1,12 +1,12 @@
 from config import SDLOGGER
-from dedup import getposition, showtns
+from dedup import getposition
 from macros import expandmacros
 from metadata import (longrep, repeated, repeatedseqtoken, repetition,
                       substringrep)
 from stringfunctions import string2list
 from treebankfunctions import (asta_recognised_lexnode,
                                asta_recognised_nounnode, clausecats, find1,
-                               getattval, getnodeyield, getyield)
+                               getattval, getnodeyield, getyield, showtns)
 
 noun_xpath = './/node[%asta_noun%]'
 expanded_noun_xpath = expandmacros(noun_xpath)
