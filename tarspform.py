@@ -8,6 +8,8 @@ import xlsxwriter
 from config import SD_DIR
 from counterfunctions import counter2liststr
 
+tarspmethodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
+
 ordA = ord('A')
 comma = ','
 xlsxext = '.xlsx'
@@ -19,7 +21,7 @@ idcre = re.compile(idcpat)
 
 
 def getshortloc(colctr, rowctr):
-    # colctr must be smaller than 26
+    #colctr must be smaller than 26
     colstr = chr((colctr % 26) + ordA)
     rowstr = str(rowctr + 1)
     result = colstr + rowstr
@@ -108,7 +110,7 @@ def mktarspform(allresults, _, in_memory=False):
         else:
             worksheet.write(rowctr, colctr, curval)
 
-    # formatting
+    #formatting
     textwrap = workbook.add_format()
     textwrap.set_text_wrap()
     boldbottom = workbook.add_format()

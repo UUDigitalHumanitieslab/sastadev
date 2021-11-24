@@ -1,3 +1,4 @@
+
 target_intarget, target_xsid, target_all, target_byrole, target_bysyn = 0, 1, 2, 3, 4
 intargetxpath = '//meta[@name="intarget"]'
 xsidxpath = '//meta[@name="xsid"]'

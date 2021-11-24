@@ -11,9 +11,9 @@ finalre = re.compile(finalpattern)
 
 
 def tokenise(str):
-    # split by spaces
+    #split by spaces
     toklist1 = str.split()
-    # remove final interpunction
+    #remove final interpunction
     toklist2 = []
     for tok in toklist1:
         curtokpart = tok
@@ -29,7 +29,7 @@ def tokenise(str):
                 finallist = [m.group(2)] + finallist
                 curtokpart = m.group(1)
 
-    # remove initital punctuation
+    #remove initital punctuation
     toklist3 = []
     for tok in toklist2:
         curtokpart = tok

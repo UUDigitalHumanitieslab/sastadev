@@ -1,4 +1,4 @@
-from .tokeniseCHILDES import tokenise
+from ..tokeniseCHILDES import tokenise
 
 
 def test_tokenise_childes():
