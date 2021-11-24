@@ -1,8 +1,8 @@
-from .corrector import (getalternatives, getcorrection, getexpansions,
+from ..corrector import (getalternatives, getcorrection, getexpansions,
                          mkchatutt, space)
-from .sastatok import sasta_tokenize
-from .tokeniseCHILDES import tokenise
-from .tokenmd import TokenListMD
+from ..sastatok import sasta_tokenize
+from ..tokeniseCHILDES import tokenise
+from ..tokenmd import TokenListMD
 
 
 def test_token():

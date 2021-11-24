@@ -1,6 +1,6 @@
 from lxml import etree
 
-from .Sziplus import empty, notempty, sziplus6
+from ..Sziplus import empty, notempty, sziplus6
 
 testtree1str = '''  <alpino_ds version="1.3" id="Treebank_Schlichting_CHAT-115.xml">
     <node begin="0" cat="top" end="8" id="0" rel="top">
