@@ -6,11 +6,11 @@ import re
 from copy import copy, deepcopy
 
 from lxml import etree
-from .config import SDLOGGER
+from config import SDLOGGER
 
-from .lexicon import informlexicon, informlexiconpos, isa_namepart
-from .namepartlexicon import isa_namepart_uc
-from .stringfunctions import allconsonants
+from lexicon import informlexicon, informlexiconpos, isa_namepart
+from namepartlexicon import isa_namepart_uc
+from stringfunctions import allconsonants
 
 
 class Metadata:

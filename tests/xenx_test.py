@@ -1,7 +1,7 @@
 from lxml import etree
 
-from ..treebankfunctions import getyield
-from ..xenx import xenx
+from .treebankfunctions import getyield
+from .xenx import xenx
 
 teststr = {}
 

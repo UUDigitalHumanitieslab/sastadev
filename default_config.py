@@ -1,6 +1,6 @@
 import logging
 import os.path as op
-from .sentence_parser import parse
+from sentence_parser import parse
 
 
 # logging object

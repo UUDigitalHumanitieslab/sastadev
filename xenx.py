@@ -1,4 +1,4 @@
-from .treebankfunctions import getattval, clausecats
+from treebankfunctions import getattval, clausecats
 
 CONJXPATH = './/node[@cat="conj" and (count(node)=3 or count(node)=5)]'
 

@@ -10,8 +10,8 @@ Parameters:
 function to expose to other modules is: screening4stage(uttcount, results)
 
 '''
-from .allresults import scores2counts
-from .config import SDLOGGER
+from allresults import scores2counts
+from config import SDLOGGER
 
 stage1threshold = 95
 uttcountthreshold = 200

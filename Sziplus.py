@@ -1,4 +1,4 @@
-from .treebankfunctions import getattval
+from treebankfunctions import getattval
 
 clausequery = './/node[@cat="smain" or @cat="ssub" or @cat="sv1" or @cat="whq" or @cat="whrel" or @cat="whsub" or @cat="cp" ]'
 vrquery = './/node[@cat="whq" or @cat="whsub" or (@cat="whrel" and ../node[@cat="top"])]'

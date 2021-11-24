@@ -1,5 +1,5 @@
-from .Sziplus import getnodecount
-from .treebankfunctions import getattval
+from Sziplus import getnodecount
+from treebankfunctions import getattval
 
 noimplemmas = {'hoeven', 'moeten', 'mogen', 'kunnen', 'hebben', 'willen', 'hebben', 'zitten'}
 noimpwords = {'ben', 'bent', 'is', 'zijn'}

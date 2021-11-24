@@ -1,5 +1,5 @@
-from .treebankfunctions import parent, getattval, get_left_siblings
-from .macros import expandmacros
+from treebankfunctions import parent, getattval, get_left_siblings
+from macros import expandmacros
 
 
 nietxpath = './/node[@lemma="niet"]'

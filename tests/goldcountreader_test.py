@@ -1,6 +1,6 @@
 import os
 
-from ..goldcountreader import gcadd, oldget_goldcounts, tab, txtext
+from .goldcountreader import gcadd, oldget_goldcounts, tab, txtext
 
 
 def test_goldcountreader():

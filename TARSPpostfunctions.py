@@ -3,8 +3,8 @@ defines functions for the TARSP post part of the methods
 '''
 from collections import Counter
 
-from .treebankfunctions import getmeta
-from .query import core_process
+from treebankfunctions import getmeta
+from query import core_process
 
 
 OndVC = 'T071'

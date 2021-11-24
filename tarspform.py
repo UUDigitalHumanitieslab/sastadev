@@ -5,8 +5,8 @@ from io import BytesIO
 
 import xlrd
 import xlsxwriter
-from .config import SD_DIR
-from .counterfunctions import counter2liststr
+from config import SD_DIR
+from counterfunctions import counter2liststr
 
 ordA = ord('A')
 comma = ','

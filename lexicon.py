@@ -1,7 +1,7 @@
 
-from . import celexlexicon
-from . import treebankfunctions
-from .namepartlexicon import isa_namepart, isa_namepart_uc
+from import celexlexicon
+from import treebankfunctions
+from namepartlexicon import isa_namepart, isa_namepart_uc
 
 
 space = ' '

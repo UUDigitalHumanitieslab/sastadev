@@ -1,6 +1,6 @@
 import itertools
 
-from ..celexlexicon import getinflforms, getwordinfo
+from .celexlexicon import getinflforms, getwordinfo
 
 def celex_test():
     testwords = ['liepen', 'gevalt', 'gevallen', 'mouwen', 'stukjes', 'vaak', 'mooi', 'gouden', 'mooie', 'mooiere', 'pop', 'popje']
