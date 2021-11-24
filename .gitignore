@@ -25,4 +25,4 @@ env.bak/
 venv.bak/
 
 # configuration
-sastadev/config.py
+config.py
