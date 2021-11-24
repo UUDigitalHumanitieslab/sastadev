@@ -6,6 +6,8 @@
 #
 attrs==21.2.0
     # via pytest
+et-xmlfile==1.1.0
+    # via openpyxl
 importlib-metadata==4.8.2
     # via
     #   pluggy
@@ -13,6 +15,8 @@ importlib-metadata==4.8.2
 iniconfig==1.1.1
     # via pytest
 lxml==4.6.4
+    # via -r requirements.in
+openpyxl==3.0.9
     # via -r requirements.in
 packaging==21.3
     # via pytest
