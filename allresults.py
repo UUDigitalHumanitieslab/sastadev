@@ -1,11 +1,12 @@
 
 class AllResults:
-    def __init__(self, uttcount, coreresults, postresults, allmatches, filename):
+    def __init__(self, uttcount, coreresults, postresults, allmatches, filename, analysedtrees):
         self.uttcount = uttcount
         self.coreresults = coreresults
         self.postresults = postresults
         self.allmatches = allmatches
         self.filename = filename
+        self.analysedtrees = analysedtrees
 
 
 def scores2counts(scores):
