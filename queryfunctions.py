@@ -1,6 +1,5 @@
-from treebankfunctions import parent, getattval, get_left_siblings
 from macros import expandmacros
-
+from treebankfunctions import get_left_siblings, getattval, parent
 
 nietxpath = './/node[@lemma="niet"]'
 wordxpath = './/node[@pt]'
@@ -9,8 +8,8 @@ vzn1basexpath = './/node[ @cat="pp" and (node[@pt="vz"] and node[(@pt="n" or @pt
 vzn1xpath = expandmacros(vzn1basexpath)
 vzn2xpath = './/node[node[@lemma="in" and @rel="mwp"] and node[@lemma="deze" and @rel="mwp"]]'
 vzn3xpath = './/node[@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @begin=../node[@pt="vz"]/@end and count(node)<=3] ]'
-# vzn4basexpath = './/node[node[@pt="vz" and @rel="hd" and ../node[%Rpronoun% and @rel="obj1" and @end <= ../node[@rel="hd"]/@begin]]]'
-# vzn4xpath = expandmacros(vzn4basexpath)
+#vzn4basexpath = './/node[node[@pt="vz" and @rel="hd" and ../node[%Rpronoun% and @rel="obj1" and @end <= ../node[@rel="hd"]/@begin]]]'
+#vzn4xpath = expandmacros(vzn4basexpath)
 
 
 def xneg(stree):
@@ -52,5 +51,5 @@ def VzN(stree):
     results += stree.xpath(vzn1xpath)
     results += stree.xpath(vzn2xpath)
     results += stree.xpath(vzn3xpath)
-    # results += stree.xpath(vzn4xpath) # does not belong here after all, these will be scored under Vo/Bij
+    #results += stree.xpath(vzn4xpath) # does not belong here after all, these will be scored under Vo/Bij
     return results
