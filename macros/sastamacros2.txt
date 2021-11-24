@@ -314,7 +314,7 @@ test_STAP_BB_o = """ (  %bbo_pt% or %bbo_cat% or %bbo_mwu%) and
 """ 
 
 
-bijvbep = """( (%corebijvbep% or %onbepvnwmod% or %twdet% or %apdet% or %app% or %detn% or %detnp%) and not(%adjmodwwBB%))
+bijvbep = """( (%corebijvbep% or %onbepvnwmod% or %twdet% or %apdet% or %app% or %detn% or %detnp% or %possdetp%) and not(%adjmodwwBB%))
 """
 
 corebijvbep = """ (@rel="mod" and not(@pt="bw" or @cat="advp" or @cat="rel") and parent::node[@cat="np" and not(node[@rel="hd" and @lcat="ap"])])
@@ -337,3 +337,5 @@ detn = """ (@rel="det" and @pt="n")
 
 detnp = """ (@rel="det" and @cat="np")
 """
+
+possdetp = """(@rel="det" and @cat="detp" and node[@pt="n" and @rel="mod"] and node[@rel="hd"and @pt="vnw" and @vwtype="bez"]) """

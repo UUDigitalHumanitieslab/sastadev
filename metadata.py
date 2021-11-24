@@ -1,6 +1,6 @@
 from lxml import etree
 
-bpl_none, bpl_word, bpl_node, bpl_delete = tuple(range(4))
+bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma = tuple(range(7))
 defaultpenalty = 10
 defaultbackplacement = bpl_none
 
@@ -11,7 +11,7 @@ xmlformat = '''
        annotationposlist="{annotationposlist}" annotatedwordlist="{annotatedwordlist}"
        annotatedposlist="{annotatedposlist}"  cat="{cat}" subcat="{subcat}" source="{source}"
        backplacement="{backplacement}" penalty="{penalty}"
-/>
+/>\n
 '''
 
 
@@ -76,3 +76,19 @@ def mkSASTAMeta(token, nwt, name, value, cat, subcat=None, penalty=defaultpenalt
                   annotationwordlist=[nwt.word], cat=cat, subcat=subcat, source=SASTA, penalty=penalty,
                   backplacement=backplacement)
     return result
+
+
+#errormessages
+filled_pause = "Filled Pause"
+repeated = "Repeated word token"
+repeatedseqtoken = "Word token of a repeated word token sequence"
+repeatedjaneenou = "Repeated ja, nee, nou"
+janeenou = "ja, nee or nou filled pause"
+shortrep = 'Short Repetition'
+longrep = 'Long Repetition'
+intj = 'Interjection'
+unknownword = 'Unknown Word'
+unknownsymbol = 'Unknown Symbol'
+substringrep = 'Substring repetition'
+repetition = 'Repetition'
+fstoken = 'Retraced token'
