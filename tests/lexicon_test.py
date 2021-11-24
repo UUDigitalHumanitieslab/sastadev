@@ -1,4 +1,4 @@
-from ..sastadev.lexicon import informlexicon
+from ..lexicon import informlexicon
 
 
 def test_lexicon():

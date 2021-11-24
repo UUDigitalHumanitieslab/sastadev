@@ -1,4 +1,4 @@
-from ..sastadev.namepartlexicon import namepartlexicon
+from ..namepartlexicon import namepartlexicon
 
 
 def test_namepartlexicon():

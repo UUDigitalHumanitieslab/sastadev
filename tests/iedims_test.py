@@ -1,8 +1,8 @@
 import csv
 
-from ..sastadev.iedims import (bigfilesep, getbaseinlexicon, getjeformsnolex,
+from ..iedims import (bigfilesep, getbaseinlexicon, getjeformsnolex,
                                slash)
-from ..sastadev import lexicon
+from .. import lexicon
 
 testset = [('cluppie', ['clubje', 'clupje']), ('bakkie', ['bakje']), ('dakkie', ['dakje']), ('darmpie', ['darmpje']),
            ('doppie', ['dopje']), ('rapie', ['raapje']), ('huisie', ['huisje']), ('kassie', ['kasje', 'kastje']),

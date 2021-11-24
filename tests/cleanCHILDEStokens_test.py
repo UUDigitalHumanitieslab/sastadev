@@ -1,5 +1,5 @@
-from ..sastadev import sastatok
-from ..sastadev.cleanCHILDEStokens import space, scope_open, cleantext
+from .. import sastatok
+from ..cleanCHILDEStokens import space, scope_open, cleantext
 
 
 def test_nesting():

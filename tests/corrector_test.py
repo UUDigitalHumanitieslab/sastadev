@@ -1,5 +1,5 @@
-from ..sastadev.corrector import (getalternatives, getcorrection, mkchatutt, space)
-from ..sastadev.tokeniseCHILDES import tokenise
+from ..corrector import (getalternatives, getcorrection, mkchatutt, space)
+from ..tokeniseCHILDES import tokenise
 
 
 def test_token():

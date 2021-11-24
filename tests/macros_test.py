@@ -1,4 +1,4 @@
-from ..sastadev.macros import expandmacros
+from ..macros import expandmacros
 
 teststrings = ['b  = """number(@begin)"""', 'e = """number(@end)"""', 'single_name = """( @ntype = "eigen" or @postag="SPEC(deeleigen)"  )"""',
                'multi_name =  """( @cat=''mwu'' and node[@rel=''mwp'' and %single_name%] ) """', 'name =        """( %single_name% or %multi_name% )"""',

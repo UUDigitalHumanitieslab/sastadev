@@ -1,4 +1,4 @@
-from ..sastadev.stringfunctions import monosyllabic, syllableheadsre
+from ..stringfunctions import monosyllabic, syllableheadsre
 
 
 def condition(condition, word):

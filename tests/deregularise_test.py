@@ -1,7 +1,7 @@
 import os
 
-from ..sastadev.config import SD_DIR
-from ..sastadev.deregularise import (correctionfilename, getcorrections,
+from ..config import SD_DIR
+from ..deregularise import (correctionfilename, getcorrections,
                                    makeparadigm, tab)
 
 
