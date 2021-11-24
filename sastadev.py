@@ -27,7 +27,6 @@ All input is supposed to be encoded in UTF8, all output is also generated in UTF
 
 import csv
 import datetime
-import logging
 import os
 import re
 import sys
@@ -38,15 +37,15 @@ from typing import Any, Dict, List
 
 import xlrd
 import xlsxwriter
-from external_functions import str2functionmap
 from lxml import etree
-from xlsx import mkworkbook
 
 import compounds
 from allresults import AllResults, scores2counts
+from config import SDLOGGER
 from correcttreebank import (corr0, corr1, correcttreebank, corrn,
                              errorwbheader, validcorroptions)
 from counterfunctions import counter2liststr
+from external_functions import str2functionmap
 from goldcountreader import get_goldcounts
 from macros import expandmacros
 from methods import Method, allok, defaultfilters
@@ -63,6 +62,7 @@ from targets import get_mustbedone, get_targets
 from TARSPscreening import screening4stage
 from treebankfunctions import (getattval, getmeta, getuttid,
                                getxmetatreepositions, getyield)
+from xlsx import mkworkbook
 
 listDir = False
 if listDir:
@@ -136,7 +136,7 @@ def checkplatinum(goldscores, platinumscores, queries):
             if query_exists(queries[qid]):
                 diff1 = goldscores[qid][2] - platinumscores[qid]
                 if diff1 != Counter():
-                    logging.warning('{} has goldscores not in platinum: {}'.format(qid, diff1))
+                    SDLOGGER.warning('{} has goldscores not in platinum: {}'.format(qid, diff1))
 
 
 def mkerrorreport(errordict, errorreportfilename):
@@ -417,12 +417,12 @@ def getmethodfromfile(filename):
 
 def treatmethod(methodname, methodfilename):
     if methodname is None and methodfilename is None:
-        logging.error('Specify a method using -m ')
+        SDLOGGER.error('Specify a method using -m ')
         exit(-1)
     elif methodname is None and methodfilename is not None:
         resultmethodfilename = methodfilename
         resultmethodname = getmethodfromfile(methodfilename)
-        logging.warning('Method derived from the method file name: {}'.format(resultmethodname))
+        SDLOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is None:
         if methodname.lower() in supported_methods:
             resultmethodname = methodname.lower()
@@ -430,13 +430,13 @@ def treatmethod(methodname, methodfilename):
         else:
             resultmethodfilename = methodname
             resultmethodname = getmethodfromfile(methodname)
-            logging.warning('Method derived from the method file name: {}'.format(resultmethodname))
+            SDLOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is not None:
         if methodname.lower() in supported_methods:
             resultmethodname = methodname.lower()
             resultmethodfilename = methodfilename
         else:
-            logging.error('Unsupported method specified {}'.format(methodname))
+            SDLOGGER.error('Unsupported method specified {}'.format(methodname))
             exit(-1)
     return resultmethodname, resultmethodfilename
 
@@ -453,7 +453,7 @@ def getexactresults(allmatches):
             #@@hier de topnode opzoeken@@
             if m is None:
                 position = 0
-                logging.error('None match found')
+                SDLOGGER.error('None match found')
             else:
                 topnodes = m.xpath(topnodequery)
                 if topnodes != []:
@@ -466,7 +466,7 @@ def getexactresults(allmatches):
                     position = int(positionstr)
                 except ValueError:
                     position = 0
-                    logging.error('getexactresults ValueError')
+                    SDLOGGER.error('getexactresults ValueError')
                 else:
                     if not wholeuttmatch:
                         position += 1
@@ -538,11 +538,11 @@ if options.corr is None:
     options.corr = corrn
 if options.corr not in validcorroptions:
     validcorrstr = comma.join(validcorroptions)
-    logging.error('Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
+    SDLOGGER.error('Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
     exit(-1)
 
 if options.infilename is None:  # an XML file
-    logging.error('Specify an input treebank file name to analyse')
+    SDLOGGER.error('Specify an input treebank file name to analyse')
     exit(1)
 (inbase, inext) = os.path.splitext(options.infilename)
 
@@ -555,21 +555,21 @@ options.methodname, options.methodfilename = treatmethod(options.methodname, opt
 
 #testlogfilename = inbase + "-test" + logext
 #logfile = open(options.logfilename, 'w', encoding='utf8')
-logging.basicConfig(level=logging.INFO)
-handler = logging.FileHandler(options.logfilename, 'w', encoding='utf8')
+SDLOGGER.basicConfig(level=SDLOGGER.INFO)
+handler = SDLOGGER.FileHandler(options.logfilename, 'w', encoding='utf8')
 logformat = '%(levelname)s:%(message)s'
-formatter = logging.Formatter(logformat)
+formatter = SDLOGGER.Formatter(logformat)
 handler.setFormatter(formatter)
-root_logger = logging.getLogger()
+root_logger = SDLOGGER.getLogger()
 root_logger.addHandler(handler)
-root_logger.setLevel(logging.INFO)
+root_logger.setLevel(SDLOGGER.INFO)
 
-logging.info('Start of logging')
+SDLOGGER.info('Start of logging')
 
 if options.annotationfilename is not None and options.goldcountsfilename is not None:
-    logging.info('Annotation file and Gold counts file found; gold counts file ignored')
+    SDLOGGER.info('Annotation file and Gold counts file found; gold counts file ignored')
 elif options.goldfilename is not None and options.goldcountsfilename is not None:
-    logging.info('Gold Reference file and Gold counts file found; gold counts file ignored')
+    SDLOGGER.info('Gold Reference file and Gold counts file found; gold counts file ignored')
 
 
 if options.methodfilename is None:  # an xslx file
@@ -580,7 +580,7 @@ if options.platinuminfilename is None:
     options.platinuminfilename = inbase + platinumeditedsuffix + txtext
 
 if options.goldfilename is not None and options.annotationfilename is not None:
-    logging.info('annotationfile and goldfile specified. Annotationfile will be used.')
+    SDLOGGER.info('annotationfile and goldfile specified. Annotationfile will be used.')
 if options.goldfilename is None:
     options.goldfilename = inbase + ".gold" + ".tsv" + ".txt"
 if options.goldcountsfilename is None:
@@ -620,12 +620,12 @@ elif options.goldfilename != '' and os.path.exists(options.goldfilename):
 elif options.goldcountsfilename != '' and os.path.exists(options.goldcountsfilename):
     goldcounts = get_goldcounts(options.goldcountsfilename)
     if goldcounts == {}:
-        logging.error('No gold counts found. Aborting')
+        SDLOGGER.error('No gold counts found. Aborting')
         exit(-1)
     else:
         reffilename = options.goldcountsfilename
 else:
-    logging.error('Neither an annotationfile nor a goldfile, nor a gold count file specified. Aborting')
+    SDLOGGER.error('Neither an annotationfile nor a goldfile, nor a gold count file specified. Aborting')
     exit(1)
 
 #rawcoreresults = {}
@@ -633,7 +633,7 @@ else:
 rawexactresults = defaultdict(list)
 
 if not os.path.exists(options.infilename):
-    logging.error('Input treebank {} not found. Aborting'.format(options.infilename))
+    SDLOGGER.error('Input treebank {} not found. Aborting'.format(options.infilename))
     exit(1)
 
 # gather remarks on results of earlier runs, write them to a perm_file  and adapt the silverscore file
@@ -672,7 +672,7 @@ silverannotationsdict = getsilverannotations(perm_silverfullname, platinumchecke
 tree = etree.parse(options.infilename)
 origtreebank = tree.getroot()
 if origtreebank.tag != 'treebank':
-    logging.ERROR("Input treebank file does not contain a treebank element")
+    SDLOGGER.ERROR("Input treebank file does not contain a treebank element")
     exit(-1)
 allutts = {}
 uttcount = 0
@@ -702,7 +702,7 @@ errorwb.close()
 analysedtrees = []
 for syntree in treebank:
     uttcount += 1
-    #logging.error('uttcount={}'.format(uttcount))
+    #SDLOGGER.error('uttcount={}'.format(uttcount))
     mustbedone = get_mustbedone(syntree, targets)
     if mustbedone:
         analysedtrees.append(syntree)
@@ -745,7 +745,7 @@ if os.path.exists(options.platinuminfilename):
     platinumresults = read_referencefile(options.platinuminfilename, logfile)
     checkplatinum(goldscores, platinumresults, queries)
 else:
-    logging.info('Platinum file {} not found.'.format(options.platinuminfilename))
+    SDLOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
     platinumresults = {}
 
 #platinumoutfilename = base + platinumsuffix + txtext
@@ -757,7 +757,7 @@ countcomparisonfilename = base + '_countcomparison' + '.tsv' + '.txt'
 
 #print the invalid queries
 for q in invalidqueries:
-    logging.error("{}: {}: <{}>".format(q, invalidqueries[q], queries[q].query))
+    SDLOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], queries[q].query))
 
 #print the header
 print(resultsheaderstring, file=outfile)
@@ -882,7 +882,7 @@ for queryid in results:
             if uttid in allutts:
                 uttstr = space.join(allutts[uttid])
             else:
-                logging.warning('uttid {} not in allutts'.format(uttid))
+                SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
             platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid, uttstr]
             print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
@@ -966,7 +966,7 @@ for (ctr, message, queryfunction) in overallmethods:
             if thequery.original and queryfunction(thequery):
                 platinumcount += sum(platinumresults[queryid].values())
         else:
-            logging.warning('Query {} found in platinumresults but not in queries'.format(queryid))
+            SDLOGGER.warning('Query {} found in platinumresults but not in queries'.format(queryid))
 
     #resultsgoldintersectiocount
     resultsgoldintersectioncount = 0
@@ -979,7 +979,7 @@ for (ctr, message, queryfunction) in overallmethods:
                 resultsgoldintersectioncount += sum(intersection.values())
             else:
                 pass
-                #logging.warning('Query {} found in results but not in goldscores'.format(queryid))
+                #SDLOGGER.warning('Query {} found in results but not in goldscores'.format(queryid))
 
     #resultsplatinumintersectioncount
     resultsplatinumintersectioncount = 0
@@ -991,7 +991,7 @@ for (ctr, message, queryfunction) in overallmethods:
                 resultsplatinumintersectioncount += sum(intersection.values())
             else:
                 pass
-                #logging.warning('queryid {} not in platinumresults'.format(queryid))
+                #SDLOGGER.warning('queryid {} not in platinumresults'.format(queryid))
 
     #goldplatinumintersectioncount
     goldplatinumintersectioncount = 0
@@ -1005,9 +1005,9 @@ for (ctr, message, queryfunction) in overallmethods:
                     goldplatinumintersectioncount += sum(intersection.values())
                 else:
                     pass
-                    #logging.warning('Query {} in platinumresults but not in goldscores'.format(queryid))
+                    #SDLOGGER.warning('Query {} in platinumresults but not in goldscores'.format(queryid))
         else:
-            logging.warning('Query {} in platinumresults but not in queries'.format(queryid))
+            SDLOGGER.warning('Query {} in platinumresults but not in queries'.format(queryid))
 
     (recall, precision, f1score) = getevalscores(resultscount, goldcount, resultsgoldintersectioncount)
     (platinumrecall, platinumprecision, platinumf1score) = getevalscores(resultscount, platinumcount, resultsplatinumintersectioncount)
@@ -1080,4 +1080,4 @@ print(finalmessagetemplate1.format(qcount, undefinedqcount, definedqcount, inval
 print(finalmessagetemplate2.format(definedfornonemptygoldscore, lgoldscores, percentagecompletion1str))
 print(finalmessagetemplate3.format(definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
 print('Undefined queries:', undefinedqueries)
-logging.info("Done!")
+SDLOGGER.info("Done!")
