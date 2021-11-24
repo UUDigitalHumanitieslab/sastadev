@@ -15,9 +15,6 @@ waarbij
 import copy
 import re
 
-from expandquery import expandmacros
-from find_ngram import findmatches, ngram1
-
 from alpino import getdehetwordinfo
 from basicreplacements import (basicexpansions, basicreplacements,
                                getdisambiguationdict)
@@ -28,8 +25,10 @@ from dedup import (cleanwordofnort, find_duplicates2, find_janeenouduplicates,
                    getfilledpauses, getprefixwords, getrepeatedtokens,
                    getunwantedtokens, nodesfindjaneenou)
 from deregularise import correctinflection
+from find_ngram import findmatches, ngram1
 from iedims import getjeforms
 from lexicon import de, dets, getwordinfo, het, informlexicon, known_word
+from macros import expandmacros
 # from alternative import Alternative, Replacement, Metadata, Meta
 from metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
                       bpl_wordlemma, defaultbackplacement, defaultpenalty,

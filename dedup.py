@@ -1,20 +1,30 @@
+# to do
 import os
 from copy import deepcopy
 
 from lxml import etree
+from phonetics import phoneticise
 
-from . import compounds
-from .config import SD_DIR, SDLOGGER
-from .lexicon import informlexicon
-from .sastatoken import Token
-from .stringfunctions import deduplicate
-from .treebankfunctions import (all_lower_consonantsnode,
-                                asta_recognised_wordnode, getattval,
-                                getnodeyield, lastmainclauseof)
+import compounds
+from config import SD_DIR, SDLOGGER
+from lexicon import informlexicon
+from metadata import (filled_pause, fstoken, intj, janeenou, longrep, repeated,
+                      repeatedjaneenou, repeatedseqtoken, shortrep,
+                      substringrep, unknownsymbol, unknownword)
+from sastatoken import Token
+from stringfunctions import deduplicate, string2list
+from treebankfunctions import (all_lower_consonantsnode,
+                               asta_recognised_wordnode, find1, getattval,
+                               getnodeyield, lastmainclauseof, openclasspts)
 
 nodetype = etree._Element
 
 positionatt = 'end'
+
+xmetaxpath = './/xmeta'
+
+samplesizemdvalues = {repeatedjaneenou, shortrep, intj, unknownsymbol, filled_pause}
+mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou, fstoken}
 
 
 class DupInfo:
@@ -59,7 +69,7 @@ def dictmerge(dict1, dict2):
 
 normalisedict = {'c': 'k'}
 
-unwantedtokenlist = ['-', '--', '#', '–']
+unwantedtokenlist = ['-', '--', '#', '–', '\u2013', '\u2014', '\u2015']
 
 incomplete_zijn = '''
 // node[node[ @rel = "hd" and @lemma="zijn"] and
@@ -87,6 +97,9 @@ space = ' '
 
 janeenouset = set()
 janeenouset = {'ja', 'nee', 'nou'}
+
+janeeset = set()
+janeeset = {'ja', 'nee'}
 
 
 def getposition(nort):
@@ -156,7 +169,7 @@ def findcorrections(nodelist):
 
 def isxxx(node):
     theword = getword(node)
-    result = theword.lower() == 'xxx'
+    result = theword.lower() in {'xxx', 'yyy', 'www'}
     return result
 
 
@@ -242,6 +255,11 @@ def find_substringduplicates2(wl):
     return result, alldupinfo
 
 
+def find_simpleduplicates(wl):
+    result, _ = find_simpleduplicates2(wl)
+    return result
+
+
 def find_simpleduplicates2(wl):
     dupmapping = dict()
     result = []
@@ -254,6 +272,15 @@ def find_simpleduplicates2(wl):
             result.append(wl[i])
     alldupinfo = DupInfo(dupmapping, dict())
     return result, alldupinfo
+
+
+def getreptokenpos(nort, dupinfo):
+    nortpos = getposition(nort)
+    if nortpos in dupinfo:
+        result = str(dupinfo[nortpos])
+    else:
+        result = ''
+    return result
 
 
 def find_duplicates(wl):
@@ -269,8 +296,9 @@ def find_duplicates2(wl):  # applies to a sequence of Lassy word nodes or token 
     lwl = len(wl)
     ml = lwl // 2
     result = []
-    for curlen in range(ml, 0, -1):
-        for startpos in range(0, lwl - 2 * curlen + 1, 1):
+    for curlen in range(ml, 1, -1):  # minimum length is 2
+        # for startpos in range(0, lwl-2*curlen+1,1):
+        for startpos in range(lwl - 2 * curlen, -1, -1):   # find dup seqeunces starting at the rightmost position
             if isnortduplicate(wl[startpos:startpos + curlen], wl[startpos + curlen:startpos + 2 * curlen]):
                 result = [wl[p] for p in range(startpos, startpos + curlen)]
                 for p in range(startpos, startpos + curlen):
@@ -314,13 +342,7 @@ def find_janeenouduplicates2(wl):
 
 
 def normalisestring(str1):
-    result = ''
-    for ch in str1:
-        if ch in normalisedict:
-            repl = normalisedict[ch]
-            result += repl
-        else:
-            result += ch
+    result = phoneticise(str1)
     return result
 
 
@@ -339,12 +361,46 @@ def isnortduplicate(tlist1, tlist2):
     return result
 
 
+def nextnode(node, nodes):
+    for i, n in enumerate(nodes):
+        if n == node:
+            if i + 1 < len(nodes):
+                return nodes[i + 1]
+            else:
+                return None
+
+
+def nodesfindjaneenou(nodes):
+    janees = [n for n in nodes if getattval(n, 'lemma') in {'ja', 'nee'}]
+    nous = [n for n in nodes if getattval(n, 'lemma') == 'nou' and (getattval(n, 'rel') in {'mwp', 'tag', 'cnj'}
+                                                                    or getattval(nextnode(n, nodes), 'lemma') in {'ja', 'nee'})]
+    results = janees + nous
+    return results
+
+
+def treefindjaneenou(stree):
+    janees = stree.xpath('.//node[@lemma="ja" or @lemma="nee"]')
+    nous = stree.xpath('.//node[@lemma="nou" and (@rel="mwp" or @rel="tag" or @rel="cnj" )] ')
+    results = janees + nous
+    return results
+
+
 def findjaneenou(nortlist):
+    resultlist = findnodefromset(nortlist, janeenouset)
+    return resultlist
+
+
+def findjanee(nortlist):
+    resultlist = findnodefromset(nortlist, janeeset)
+    return resultlist
+
+
+def findnodefromset(nortlist, wordset):
     resultlist = []
     for node in nortlist:
         theword = getword(node)
         lctheword = theword.lower()
-        if lctheword in janeenouset:
+        if lctheword in wordset:
             resultlist.append(node)
     return resultlist
 
@@ -386,6 +442,9 @@ def mlux(stree):
 
 
 def mlux2(stree):
+    debug = False
+    if debug:
+        etree.dump(stree)
     resultnodelist = []
     alldupinfo = DupInfo()
     tokennodelist = getnodeyield(stree)
@@ -393,75 +452,104 @@ def mlux2(stree):
     cleantokennodelist = [n for n in tokennodelist if n not in excludednodes]
     alldupinfo = alldupinfo.merge(dupinfo)
 
-    # remove all if xxx occurs No this should not be done here
-    # xxxfound = any([isxxx(n) for n in cleantokennodelist])
-    # if xxxfound:
-    #    resultnodelist = cleantokennodelist
-    # else:
-    if True:
+    # remove all if xxx/yyy/www occurs ; this can be done here
+    xxxfound = any([isxxx(n) for n in cleantokennodelist])
+    if xxxfound:
+        resultnodelist = cleantokennodelist
+        cleantokennodelist = []
 
-        # remove unknown words
-        unknown_words = [n for n in cleantokennodelist if not(asta_recognised_wordnode(n))]
-        resultnodelist += unknown_words
-        cleantokennodelist = [n for n in cleantokennodelist if n not in unknown_words]
+    # add results that have been found earlier by reduce in correction and that are now in the metadata
+    # and exclude these nodes for further processing
+    if cleantokennodelist != []:
+        mdnodes = []
+        mlumds = stree.xpath(xmetaxpath)
+        for mlumd in mlumds:
+            if 'value' in mlumd.attrib and mlumd.attrib['value'] in mlumdvalues:
+                tokenbeginstr = mlumd.attrib['annotatedposlist']
+                tokenbegins = string2list(tokenbeginstr)
+                for tokenbegin in tokenbegins:
+                    nodexpath = './/node[@pt and @begin="{}"]'.format(tokenbegin)
+                    newnode = find1(stree, nodexpath)
+                    if newnode is not None:
+                        mdnodes.append(newnode)
+                    else:
+                        SDLOGGER.error('Metadata node not found in tree: md.begin={}'.format(tokenbegin))
+                        etree.dump(stree)
+        excludednodes += mdnodes
+        cleantokennodelist = [n for n in cleantokennodelist if n not in excludednodes]
+        resultnodelist += mdnodes
 
-        # ASTA sec 6.3 p. 11
-        # remove ja nee nou
-        janeenoulist = findjaneenou(cleantokennodelist)
-        resultnodelist += janeenoulist
-        cleantokennodelist = [n for n in cleantokennodelist if n not in janeenoulist]
-        # remove false starts maybe word + nee / of nee / eh word; of w of pos1 w of pos1
-        # remove of nee
+    # remove unknown words if open class
+    unknown_words = [n for n in cleantokennodelist if getattval(n, 'pt') in openclasspts
+                     and not(asta_recognised_wordnode(n))]
+    resultnodelist += unknown_words
+    cleantokennodelist = [n for n in cleantokennodelist if n not in unknown_words]
 
-        # remove tsw incl goh och hé oke
-        tswnodes = [n for n in cleantokennodelist if getattval(n, 'pt') == 'tsw']
-        resultnodelist += tswnodes
-        cleantokennodelist = [n for n in cleantokennodelist if n not in tswnodes]
+    # ASTA sec 6.3 p. 11
+    # remove ja nee nou
+    # janeenoulist = findjaneenou(cleantokennodelist)
 
-        # simple duplicates
-        dupnodelist, dupinfo = find_simpleduplicates2(cleantokennodelist)
-        resultnodelist += dupnodelist
-        alldupinfo = alldupinfo.merge(dupinfo)
-        cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
+    janeenoulist = nodesfindjaneenou(cleantokennodelist)
+    resultnodelist += janeenoulist
+    cleantokennodelist = [n for n in cleantokennodelist if n not in janeenoulist]
 
-        # for debugging
-        # print(showtns(cleantokennodelist))
-        dupnodelist, dupinfo = find_duplicates2(cleantokennodelist)
-        resultnodelist += dupnodelist
-        alldupinfo = alldupinfo.merge(dupinfo)
-        cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
+    # remove false starts maybe word + nee / of nee / eh word; of w of pos1 w of pos1
+    # remove of nee
 
-        # find prefix herhalingen >= 50%
-        def cond(x, y):
-            return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) > 0.5
-        prefixnodes, dupinfo = getprefixwords2(cleantokennodelist, cond)
-        resultnodelist += prefixnodes
-        alldupinfo = alldupinfo.merge(dupinfo)
-        cleantokennodelist = [n for n in cleantokennodelist if n not in prefixnodes]
+    # remove tsw incl goh och hé oke
+    tswnodes = [n for n in cleantokennodelist if getattval(n, 'pt') == 'tsw']
+    resultnodelist += tswnodes
+    cleantokennodelist = [n for n in cleantokennodelist if n not in tswnodes]
 
-        # find unknown words that are a substring of their successor
-        substringnodes, dupinfo = find_substringduplicates2(cleantokennodelist)
-        alldupinfo = alldupinfo.merge(dupinfo)
-        cleantokennodelist = [n for n in cleantokennodelist if n not in prefixnodes]
+    # remove other filled pauses
+    fpnodes = [n for n in cleantokennodelist if getattval(n, 'lemma') in filledpauseslexicon]
+    resultnodelist += fpnodes
+    cleantokennodelist = [n for n in cleantokennodelist if n not in fpnodes]
 
-        # corrections = findcorrections(cleantokennodelist)
-        # if corrections != []:
-        #    cleanwordlist = [getattval(n, 'word') for n in cleantokennodelist]
-        #    print(space.join(cleanwordlist), file=testfile)
-        # for (w, corr) in corrections:
-        #    print('--', getattval(w, 'word'), getattval(corr, 'word'), file=testfile)
+    # simple duplicates
+    dupnodelist, dupinfo = find_simpleduplicates2(cleantokennodelist)
+    resultnodelist += dupnodelist
+    alldupinfo = alldupinfo.merge(dupinfo)
+    cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
 
-        # remove dus als stopwoordje
+    # for debugging
+    # print(showtns(cleantokennodelist))
+    dupnodelist, dupinfo = find_duplicates2(cleantokennodelist)
+    resultnodelist += dupnodelist
+    alldupinfo = alldupinfo.merge(dupinfo)
+    cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
 
-        # remove words that consist of consonants only
-        resultnodelist = [n for n in resultnodelist if not(all_lower_consonantsnode(n))]
+    # find prefix herhalingen >= 50%
+    def cond(x, y): return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) > 0.5
+    prefixnodes, dupinfo = getprefixwords2(cleantokennodelist, cond)
+    resultnodelist += prefixnodes
+    alldupinfo = alldupinfo.merge(dupinfo)
+    cleantokennodelist = [n for n in cleantokennodelist if n not in prefixnodes]
 
-        # remove words in incomplete sentences
-        isws = incompletetreeleaves(stree)
-        pureisws = [n for n in isws if n in cleantokennodelist]
-        resultnodelist += pureisws
-        alldupinfo.icsws = pureisws
-        cleantokenlist = [n for n in cleantokennodelist if n not in pureisws]
+    # find unknown words that are a substring of their successor
+    substringnodes, dupinfo = find_substringduplicates2(cleantokennodelist)
+    alldupinfo = alldupinfo.merge(dupinfo)
+    cleantokennodelist = [n for n in cleantokennodelist if n not in prefixnodes]
+
+    # corrections = findcorrections(cleantokennodelist)
+    # if corrections != []:
+    #    cleanwordlist = [getattval(n, 'word') for n in cleantokennodelist]
+    #    print(space.join(cleanwordlist), file=testfile)
+    # for (w, corr) in corrections:
+    #    print('--', getattval(w, 'word'), getattval(corr, 'word'), file=testfile)
+
+    # remove dus als stopwoordje
+
+    # remove words that consist of consonants only
+    resultnodelist = [n for n in resultnodelist if not(all_lower_consonantsnode(n))]
+
+    # remove words in incomplete sentences
+    isws = incompletetreeleaves(stree)
+    pureisws = [n for n in isws if n in cleantokennodelist]
+    resultnodelist += pureisws
+    alldupinfo.icsws = pureisws
+    cleantokenlist = [n for n in cleantokennodelist if n not in pureisws]
+
     return resultnodelist, alldupinfo
 
 
@@ -531,6 +619,30 @@ def getprefixwords2(wlist, cond):
     return resultlist, dupinfo
 
 
+def newgetprefixwords2(wlist, cond):
+    resultlist = []
+    dupmapping = dict()
+    lwlist = len(wlist) - 1
+    tokenctr = lwlist
+    while tokenctr > 0:
+        repctr = tokenctr - 1
+        while repctr >= 0:
+            wr = wlist[repctr]
+            wt = wlist[tokenctr]
+
+            ok = isnortprefixof(wlist[repctr], wlist[tokenctr])
+            # @@@hier @@
+            if cond(wlist[repctr], wlist[tokenctr]):
+                resultlist.append(wlist[repctr])
+                reppos = getposition(wlist[repctr])
+                tokenpos = getposition(wlist[tokenctr])
+                dupmapping[reppos] = tokenpos
+            repctr -= 1
+        tokenctr = repctr
+    dupinfo = DupInfo(dict(), dupmapping)
+    return resultlist, dupinfo
+
+
 def isnamenort(node):
     theword = getword(node)
     result = theword[0].lower() != theword[0]
@@ -582,8 +694,30 @@ def samplesize2(stree):
     resultlist = []
     alldupinfo = DupInfo()
     # get the token nodes in sequence
-    tokennodelist = getnodeyield(stree)
+    originaltokennodelist = getnodeyield(stree)
+    tokennodelist = originaltokennodelist
+    excludednodes = []
     # hitprint(tokennodelist)
+
+    # add results that have been found earlier by reduce in correction and that are now in the metadata
+    # and exclude these nodes for further processing
+    mdnodes = []
+    mlumds = stree.xpath(xmetaxpath)
+    for mlumd in mlumds:
+        if 'value' in mlumd.attrib and mlumd.attrib['value'] in samplesizemdvalues:
+            tokenbeginstr = mlumd.attrib['annotatedposlist']
+            tokenbegins = string2list(tokenbeginstr)
+            for tokenbegin in tokenbegins:
+                nodexpath = './/node[@pt and @begin="{}"]'.format(tokenbegin)
+                newnode = find1(stree, nodexpath)
+                if newnode is not None:
+                    mdnodes.append(newnode)
+                else:
+                    SDLOGGER.error('Metadata node not found in tree: md.begin={}'.format(tokenbegin))
+                    etree.dump(stree)
+    excludednodes += mdnodes
+    tokennodelist = [n for n in tokennodelist if n not in excludednodes]
+    resultlist += mdnodes
 
     # throw out unwanted symbols - -- # etc
     unwantedtokens = getunwantedtokens(tokennodelist)
@@ -601,13 +735,12 @@ def samplesize2(stree):
     tokennodelist = [n for n in tokennodelist if n not in janeenouduplicatenodes]
     alldupinfo = alldupinfo.merge(dupinfo)
 
-    # temporarily remove ja nee nou to get the write short repetitions
+    # temporarily remove ja nee nou to get the right short repetitions
     janeenoutokens = findjaneenou(tokennodelist)
     temptokennodelist = [n for n in tokennodelist if n not in janeenoutokens]
 
     # find prefix herhalingen < 50%
-    def cond(x, y):
-        return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) <= 0.5
+    def cond(x, y): return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) <= 0.5
     prefixnodes, dupinfo = getprefixwords2(temptokennodelist, cond)
     resultlist += prefixnodes
     tokennodelist = [n for n in tokennodelist if n not in prefixnodes]
