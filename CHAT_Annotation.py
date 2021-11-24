@@ -1,9 +1,11 @@
 import re
 
-from . import cleanCHILDEStokens
-from .config import SDLOGGER
-from .metadata import Meta
-from .sastatoken import Token, show
+# from cleanCHILDEStokens import cleantokens
+import cleanCHILDEStokens
+from metadata import Meta, bpl_delete
+from sastatoken import Token, show
+
+from config import SDLOGGER
 
 CHAT = 'CHAT'
 
@@ -39,6 +41,8 @@ def refunction(x):
     result = fullre(x)
     return result
 
+# u2013 = en-dash, u2014 = em-dash, u2015 = horizontal bar
+
 
 # states
 bstate, mstate, estate = 0, 1, 2
@@ -49,7 +53,7 @@ simplewordpat = r'\w+'
 fullwordpat = fullre(wordpat)
 wordre = re.compile(fullwordpat)
 # interpunction = r'(:?' + r'[!\?\.,;]' + '|' + u'[\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):' + r')'
-interpunction = r'\-\-\-|\-\-|\-|\-' + r'|' + r'[!\?\.,;]' + '|' + u'[\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):'
+interpunction = r'\-\-\-|\-\-|\-|\-' + r'|' + r'[!\?\.,;]' + '|' + u'[\u2013\u2014\u2015\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):'
 filenamepat = r'[\w\.]+'
 fullfilenamepat = fullre(filenamepat)
 fullfilenamere = re.compile(fullfilenamepat)
@@ -426,20 +430,17 @@ def dropbrackets(w):
     return result
 
 
-def simplemetafunction(f):
-    return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos], annotatedwordlist=[w], source=CHAT)
+def simplemetafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos], annotatedwordlist=[w], source=CHAT)
+def simple_bpldel_metafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos], annotatedwordlist=[w], source=CHAT, backplacement=bpl_delete)
 
 
-def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
-    return Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedposlist=annotatedposlist, annotatedwordlist=annotatedwordlist, source=CHAT)
+def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
+    Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedposlist=annotatedposlist, annotatedwordlist=annotatedwordlist, source=CHAT)
+def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
+    Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist, annotatedposlist=annotatedposlist, source=CHAT)
 
 
-def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
-    return Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist, annotatedposlist=annotatedposlist, source=CHAT)
-
-
-def epsf(w):
-    return ''
+def epsf(w): return ''
 
 
 interposedpat = r'^&\*(\w\w\w:[\w:]+)$'
@@ -480,8 +481,7 @@ def dropsubstr(w, s):
     return result
 
 
-def dropchars(c):
-    return lambda w: dropchars2(w, c)
+def dropchars(c): return lambda w: dropchars2(w, c)
 
 
 def dropchars2(w, c):
@@ -491,8 +491,7 @@ def dropchars2(w, c):
 
 
 def CHAT_message(msg):
-    def result(x, y):
-        return SDLOGGER.warning(msg.format(x, y))
+    def result(x, y): return SDLOGGER.warning(msg.format(x, y))
     return result
 
 
@@ -509,7 +508,7 @@ annotations = [
     CHAT_Annotation('Noncompletion of a Word', '6.5:43', '8.5:48',
                     CHAT_InWordRegex(r'\(([-\w\']*)\)', r'\1'), complexmetafunction),
     CHAT_Annotation('Omitted Word', '6.5:43', '8.5:48-49',
-                    CHAT_SimpleRegex(r'0[\w:]+', dropzero, False), simplemetafunction(dropzero)),
+                    CHAT_SimpleRegex(r'0[\w:]+', dropzero, False), simple_bpldel_metafunction(dropzero)),
     CHAT_Annotation('Satellite at End', '7.4:58', '9.2:59-60',
                     CHAT_SimpleRegex(r'\s„\s', eps, False), simplemetafunction(identity)),
     CHAT_Annotation('Satellite in Beginning', '7.4:58', '9.2:59-60',

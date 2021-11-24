@@ -2,6 +2,42 @@ from .. import sastatok
 from ..cleanCHILDEStokens import space, scope_open, cleantext
 
 
+def test_1():
+    repkeep = False
+    teststr = {}
+    testlist = [u'Dit een \u201Cquote en een \u2018inner quote\u2019 er ook nog bij\u201D ja en  los \u201D en \u2019 ja +..',
+                r' hier is een (.) pauze, een langere (..), nog een langere (...) en een getimede (3.6) hier',
+                r'dan nu wee [/?] weet ik [^c] dit is 0een ^nie nieuwe &*LAU:hmm clause',
+                r' en [%xxx: wat is dat ] &eh www[>] maar mooi@a en [<] lelijk@x en myown@z:xxx en mooi [=? kooi] <heel iets> [?] anders',
+                r'en < scope scopeend > [:: test] klaar',
+                r'Das [: dat ] mooi@a een [/] een en < scope scopeend > [:: test] en [=? x] wat [?] helemaal opnieuw [///] drie [x 3 ] mooi [= beautiful] en dan [% commentaar ]'
+                r'Das [: dat is ] is  @ab xxx en <Pikkie Paus> [: Mickey Mouse] en  &+uh en  (ge)kocht  klaar ',
+                r'Das [: dat is ] is een [/] een <ja een> [/] ja een @ab xxx en <Pikkie Paus> [: Mickey Mouse] en yyy en www  maar &+uh en [/] (ge)kocht boeke(n) ei(gen)lijk klaar ',
+                r'Dat [:: dit] (i)s 0toch &he niet [x 3] zo efoudig [: eenvoudig], hoor!',
+                r'Dat (i)s 0toch &he niet [x 3] zo efoudig [: heel eenvoudig], hoor!',
+                r'Nu <een of twee> [=? een twee] of toch [?] <heel iets> [?] anders',
+                r'ja <ik wil> [/] ik wil graag doch [//] toch iest [: iets] anders [% commentaar] doen',
+                r'dat < kan &he iets >[/] en < ja <nog me> [//] nog meer > te doen> hoor!']
+    i = 0
+    for el in testlist:
+        teststr[i] = el
+        i += 1
+
+    for i in teststr:
+        print(teststr[i])
+        intokens = sastatok.sasta_tokenize(teststr[i])
+        intokenstrings = [str(token) for token in intokens]
+        print(space.join(intokenstrings))
+        (newtokens, metadata) = cleantext(teststr[i], repkeep)
+        tokenstrings = [str(token) for token in newtokens]
+        print(space.join(tokenstrings))
+        # mdstrs = [str(m) for m in metadata]
+        # print(space.join(mdstrs))
+        for m in metadata:
+            print(str(m))
+        print('')
+
+
 def test_nesting():
     teststr = {}
     testlist = [r'eerst < een heel> [/] een hele simpele < test > [//] proef ',

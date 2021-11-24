@@ -1,5 +1,8 @@
-from ..corrector import (getalternatives, getcorrection, mkchatutt, space)
+from ..corrector import (getalternatives, getcorrection, getexpansions,
+                         mkchatutt, space)
+from ..sastatok import sasta_tokenize
 from ..tokeniseCHILDES import tokenise
+from ..tokenmd import TokenListMD
 
 
 def test_token():
@@ -29,11 +32,12 @@ def test_token():
             print(str(metadatum))
 
 
-def test_corretor():
+def test_corrector():
     testutts = ['in het uh hier in het Breda uh silahe', 'Gaatie gaatie jaaaa, dat zijn mouwe met stukkies in de am-bu-lan-ce met de kopje thee']
     for testutt in testutts:
+        method = 'tarsp'
         testtokens = tokenise(testutt)
-        alternatives = getalternatives(testtokens, None, 0)
+        alternatives = getalternatives(testtokens, method, None, 0)
         # for el in alternatives:
         #    print(testtokens[el], space.join(alternatives[el]))
         # outputalternatives(testtokens, alternatives, sys.stdout)
@@ -42,3 +46,17 @@ def test_corretor():
             print(space.join(alternative))
             chatutt = mkchatutt(testtokens, alternative.word)
             print(space.join(chatutt))
+
+
+def test_expand():
+    testutts = ['je mag weleens inne als jij niet bijt .']
+    testutts = ["das mooi als jij inne gaat"]
+    # check second alternative
+    # @@add example with 2 replacements
+    for testutt in testutts:
+        testtokens = sasta_tokenize(testutt)
+        md = []
+        uttmd = TokenListMD(testtokens, md)
+        newuttmds = getexpansions(uttmd)
+        for newuttmd in newuttmds:
+            print(newuttmd)
