@@ -40,6 +40,9 @@ singlehyphenre = re.compile(singlehyphenpat)
 duppattern = r'(.)\1{2,}'
 dupre = re.compile(duppattern)
 
+purechatxxxcodes = {'xxx', 'yyy', 'www'}
+chatxxxcodes = purechatxxxcodes | {'xx'}
+
 
 def pad(wrd, i, c=space):
     if len(wrd) > i:
@@ -80,9 +83,11 @@ def barededup(word):
     return result
 
 
-def deduplicate(word, inlexicon):
+def deduplicate(word, inlexicon, exceptions=[]):
     newwords = []
-    if wre.match(word):  # we want to exclude tokens consisting of interpunction symbols only e.g  ---, --
+    if word in exceptions:
+        newwords = []
+    elif wre.match(word):  # we want to exclude tokens consisting of interpunction symbols only e.g  ---, --
         newword = dupre.sub(r'\1', word)
         if inlexicon(newword):
             newwords.append(newword)
@@ -145,8 +150,8 @@ def dehyphenate(word):
         head = word[0:1]
         tail = word[1:]
         if head == hyphen:
-            # newresult = head + tail
-            # results.append(newresult)
+            #newresult = head + tail
+            #results.append(newresult)
             rightresults = dehyphenate(tail)
             for rightresult in rightresults:
                 newresult = head + rightresult
@@ -225,8 +230,6 @@ def accentaigu(word):
 def aigu(c):
     theindex = barevowels.find(c)
     result = aiguvowels[theindex]
-    # TODO: Check this return
-    return result
 
 
 def nono(inval):
@@ -245,7 +248,7 @@ def allconsonants(inval):
 
 
 def string2list(liststr):
-    if liststr is None or len(liststr == 1):
+    if liststr is None or len(liststr) == 1:
         return []
     elif liststr[0] == '[' and liststr[-1] == ']':
         core = liststr[1:-1]

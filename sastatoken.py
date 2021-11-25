@@ -2,17 +2,21 @@ space = ' '
 
 
 class Token:
-    def __init__(self, word, pos):
+    def __init__(self, word, pos, skip=False, subpos=0):
         self.word = word
         self.pos = pos
+        self.subpos = subpos
+        self.skip = skip
 
     def __repr__(self):
-        fmtstr = 'Token(word={},pos={})'
-        result = fmtstr.format(repr(self.word), repr(self.pos))
+        fmtstr = 'Token(word={},pos={}, skip={}, subpos={})'
+        result = fmtstr.format(repr(self.word), repr(self.pos), repr(self.skip), repr(self.subpos))
         return result
 
     def __str__(self):
-        result = '{}:{}'.format(self.pos, self.word)
+        skipstr = ' (skip=True)' if self.skip else ''
+        subposstr = '.{}' if self.subpos != 0 else ''
+        result = '{}{}:{}{}'.format(self.pos, subposstr, self.word, skipstr)
         return result
 
 
@@ -25,8 +29,11 @@ def stringlist2tokenlist(list):
     return result
 
 
-def tokenlist2stringlist(tlist):
-    result = [t.word for t in tlist]
+def tokenlist2stringlist(tlist, skip=False):
+    if skip:
+        result = [t.word for t in tlist if not t.skip]
+    else:
+        result = [t.word for t in tlist]
     return result
 
 

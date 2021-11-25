@@ -1,4 +1,4 @@
-from .config import *
+from config import *
 from contextlib import contextmanager
 import socket
 from lxml import etree

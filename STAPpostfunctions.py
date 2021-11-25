@@ -1,7 +1,9 @@
 '''
 defines functions for the STAP post part of the methods
+
 '''
 from collections import Counter
+
 
 BB_ids = ['S010', 'S011', 'S012']
 

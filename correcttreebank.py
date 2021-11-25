@@ -3,17 +3,24 @@ from copy import copy, deepcopy
 
 from lxml import etree
 
-from .cleanCHILDEStokens import cleantext
-from .config import PARSE_FUNC, SDLOGGER
-from .corrector import getcorrections
-from .lexicon import de, dets, known_word
-from .metadata import Meta, bpl_node, bpl_none, bpl_word
-from .sastatok import sasta_tokenize
-from .sva import phicompatible
-from .targets import get_mustbedone
-from .treebankfunctions import (countav, find1, getattval, getcompoundcount,
-                                getnodeyield, getsentid, getyield, myfind,
-                                showflatxml, simpleshow, transplant_node)
+from basicreplacements import basicreplacements
+from cleanCHILDEStokens import cleantext
+from corrector import getcorrections, mkuttwithskips
+from lexicon import de, dets, known_word
+from metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_none,
+                      bpl_word, bpl_wordlemma)
+from sastatok import sasta_tokenize
+from sastatoken import tokenlist2stringlist
+from sva import phicompatible
+from targets import get_mustbedone
+from treebankfunctions import (adaptsentence, add_metadata, countav,
+                               deletewordnodes, find1, getattval, getbeginend,
+                               getcompoundcount, getnodeyield, getsentid,
+                               gettokposlist, getyield, myfind, showflatxml,
+                               simpleshow, transplant_node)
+from config import PARSE_FUNC, SDLOGGER
+
+ampersand = '&'
 
 corr0, corr1, corrn = '0', '1', 'n'
 validcorroptions = [corr0, corr1, corrn]
@@ -22,13 +29,18 @@ space = ' '
 origuttxpath = './/meta[@name="origutt"]/@value'
 uttidxpath = './/meta[@name="uttid"]/@value'
 metadataxpath = './/metadata'
+dezeAVntemplate = '<node begin="{begin}" buiging="met-e" end="{end}" frame="determiner(de,nwh,nmod,pro,nparg)" ' \
+                  'id="{id}" infl="de" lcat="np" lemma="deze" naamval="stan" npagr="rest" pdtype="det" pos="det" ' \
+                  'positie="nom" postag="VNW(aanw,det,stan,nom,met-e,rest)" pt="vnw" rel="obj1" root="deze" ' \
+                  'sense="deze" vwtype="aanw" wh="nwh" word="deze"/>'
 
 contextualproperties = ['rel', 'index', 'positie']
 
 errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
-                ['altid', 'altsent', 'penalty', 'dpcount', 'dhyphencount', 'dimcount', 'compcount', 'supcount',
-                 'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'goodcatcount']
+                ['altid', 'altsent', 'score', 'penalty', 'dpcount', 'dhyphencount', 'dimcount', 'compcount', 'supcount',
+                 'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'goodcatcount',
+                 'hyphencount', 'basicreplaceecount']
 
 
 def get_origandparsedas(metadatalist):
@@ -81,6 +93,7 @@ def correcttreebank(treebank, targets, method, corr=corrn):
         errorlogrows = []
         for stree in treebank:
             uttid = getuttid(stree)
+            # print(uttid)
             mustbedone = get_mustbedone(stree, targets)
             if mustbedone:
                 # to implement
@@ -111,13 +124,130 @@ def contextualise(node1, node2):
     return newnode
 
 
+def updatetokenpos(resulttree, tokenposdict):
+    # resulttree = deepcopy(stree)
+    for child in resulttree:
+        newchild = updatetokenpos(child, tokenposdict)
+    if ('pt' in resulttree.attrib or 'pos' in resulttree.attrib) and 'end' in resulttree.attrib and 'begin' in resulttree.attrib:
+        intend = int(resulttree.attrib['end'])
+        if intend in tokenposdict:
+            newendint = tokenposdict[intend]
+            resulttree.attrib['end'] = str(newendint)
+            resulttree.attrib['begin'] = str(newendint - 1)
+        else:
+            SDLOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
+            etree.dump(resulttree)
+            SDLOGGER.error('tokenposdict={}'.format(tokenposdict))
+    elif 'cat' in resulttree.attrib:
+        children = [ch for ch in resulttree]
+        (b, e) = getbeginend(children)
+        resulttree.attrib['begin'] = b
+        resulttree.attrib['end'] = e
+
+    return resulttree
+
+
+def findskippednodes(stree, tokenlist):
+    topnode = find1(stree, './/node[@cat="top"]')
+    # tokenposdict =  {i+1:tokenlist[i].pos+1 for i in range(len(tokenlist))}
+    tokenposdict = {}
+    elctr = 0
+    i = 0
+    for tok in tokenlist:
+        elctr += 1
+        if not tok.skip:
+            tokenposdict[elctr] = i + 1
+            i += 1
+    resultlist = findskippednodes2(topnode, tokenposdict)
+    return resultlist
+
+
+def findskippednodes2(stree, tokenposdict):
+    resultlist = []
+    if stree is None:
+        return resultlist
+    if 'pt' in stree.attrib or 'pos' in stree.attrib:
+        if int(stree.attrib['end']) not in tokenposdict:
+            resultlist.append(stree)
+    elif 'cat' in stree.attrib:
+        for child in stree:
+            resultlist += findskippednodes2(child, tokenposdict)
+    else:
+        pass
+    return resultlist
+
+
+def insertskips(newstree, tokenlist, stree):
+    '''
+
+    :param newstree: the corrected tree, with skipped elements absent
+    :param tokenposlist: list of all tokens with skips marked
+    :param stree: original stree with parses of the skipped elements
+    :return: adapted tree, with the skipped elements inserted (node from the original stree as -- under top, begin/ends updates
+    '''
+    # debug = True
+    debug = False
+
+    if debug:
+        print('\nnewstree:')
+        etree.dump(newstree)
+    resulttree = deepcopy(newstree)
+    # tokenpostree = deepcopy(stree)
+    # update begin/ends
+    reducedtokenlist = [t for t in tokenlist if not t.skip]
+    tokenposdict = {i + 1: reducedtokenlist[i].pos + 1 for i in range(len(reducedtokenlist))}
+    resulttree = updatetokenpos(resulttree, tokenposdict)
+    # tokenpostree = updatetokenpos(tokenpostree, tokenposdict)
+    if debug:
+        print('\nstree:')
+        etree.dump(stree)
+        # print('\ntokenpostree:')
+        # etree.dump(tokenpostree)
+        print('\nresulttree:')
+        etree.dump(resulttree)
+
+    # insert skipped elements
+    nodestoinsert = findskippednodes(stree, tokenlist)
+    nodestoinsertcopies = [deepcopy(n) for n in nodestoinsert]
+    # simpleshow(stree)
+    topnode = find1(resulttree, './/node[@cat="top"] ')
+    topchildren = [ch for ch in topnode]
+    allchildren = nodestoinsertcopies + topchildren
+    sortedchildren = sorted(allchildren, key=lambda x: x.attrib['end'], reverse=True)
+    # simpleshow(stree)
+    for ch in topnode:
+        topnode.remove(ch)
+    # simpleshow(stree)
+    for node in sortedchildren:
+        node.attrib['rel'] = '--'    # these are now extragrammatical with relation --
+        topnode.insert(0, node)
+    # simpleshow(stree)
+    (b, e) = getbeginend(sortedchildren)
+    topnode.attrib['begin'] = b
+    topnode.attrib['end'] = e
+    # simpleshow(stree)
+
+    sentlist = getyield(resulttree)
+    sent = space.join(sentlist)
+    sentnode = find1(resulttree, 'sentence')
+    sentnode.text = sent
+    if debug:
+        print('result of insertskips')
+        etree.dump(resulttree)
+
+    return resulttree
+
+
 def correct_stree(stree, method, corr):
     '''
 
-    :param stree:
-    :return:
+    :param stree: input stree
+    :param method:  method (tarsp, asta, stap)
+    :param corr: correctionoption
+    :return: corrected stree
     '''
 
+    # debug = True
     debug = False
     if debug:
         print('1:', end=': ')
@@ -137,6 +267,7 @@ def correct_stree(stree, method, corr):
     if origutt is None:
         SDLOGGER.error('Missing origutt in utterance {}'.format(uttid))
         return stree
+    # list of token positions
 
     # get the original metadata; these will be added later to the tree of each correction
     metadatalist = stree.xpath(metadataxpath)
@@ -151,14 +282,14 @@ def correct_stree(stree, method, corr):
     # allmetadata += origmetadata
     # clean in the tokenized manner
 
-    cleanutt, metadata = cleantext(origutt, False)
-    allmetadata += metadata
+    cleanutt, chatmetadata = cleantext(origutt, False)
+    allmetadata += chatmetadata
     cleanutttokens = sasta_tokenize(cleanutt)
     cleanuttwordlist = [t.word for t in cleanutttokens]
 
     # get corrections, given the stree
 
-    cwmds = getcorrections(cleanutt, method, stree)
+    ctmds = getcorrections(cleanutt, method, stree)
 
     if debug:
         print('2:', end=': ')
@@ -166,17 +297,24 @@ def correct_stree(stree, method, corr):
         print(showflatxml(stree))
 
     ptmds = []
-    for correctionwordlist, cwmdmetadata in cwmds:
+    for correctiontokenlist, cwmdmetadata in ctmds:
         cwmdmetadata += allmetadata
+        correctionwordlist = tokenlist2stringlist(correctiontokenlist, skip=True)
 
         # parse the corrections
         if correctionwordlist != cleanuttwordlist:
-            correction = space.join(correctionwordlist)
+            # @@@adapt this, skip the tokens to be skipped@@@
+            # correction = space.join(correctionwordlist)
+            correction, tokenposlist = mkuttwithskips(correctiontokenlist)
             cwmdmetadata += [Meta('parsed_as', correction, cat='Correction', source='SASTA')]
             newstree = PARSE_FUNC(correction)
             if newstree is None:
                 newstree = stree  # is this what we want?@@
             else:
+                # insert the leftout words and adapt the begin/ends of the nodes
+                # simpleshow(stree)
+                newstree = insertskips(newstree, correctiontokenlist, stree)
+                # simpleshow(stree)
                 mdcopy = deepcopy(origmetadata)
                 newstree.insert(0, mdcopy)
                 # copy the sentid attribute
@@ -185,9 +323,11 @@ def correct_stree(stree, method, corr):
                     sentencenode.attrib['sentid'] = sentid
                 if debug:
                     print(etree.tostring(newstree, pretty_print=True))
+                # etree.dump(newstree)
 
         else:
-            newstree = stree
+            # make sure to include the xmeta from CHAT cleaning!! variable allmetadata, or better metadata but perhaps rename to chatmetadata
+            newstree = add_metadata(stree, chatmetadata)
 
         ptmds.append((correctionwordlist, newstree, cwmdmetadata))
 
@@ -213,34 +353,73 @@ def correct_stree(stree, method, corr):
         print(showflatxml(stree))
 
     # do replacements in the tree
+    # etree.dump(thetree)
+    reverseposindex = gettokposlist(thetree)
 
     # resultposmeta = selectmeta('cleanedtokenpositions', allmetadata)
     # resultposlist = resultposmeta.value
 
+    newcorrection2 = thecorrection[2]
+    nodes2deletebegins = []
     for meta in thecorrection[2]:
         if meta.backplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
-            newnode = thetree.find('.//node[@end="{}"]'.format(nodeend))
-            oldnode = stree.find('.//node[@end="{}"]'.format(nodeend))
+            newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldnode = myfind(stree, './/node[@pt and @end="{}"]'.format(nodeend))
             if newnode is not None and oldnode is not None:
-                # adapt oldnode1 for contectual features
+                # adapt oldnode1 for contextual features
                 contextoldnode = contextualise(oldnode, newnode)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
-        elif meta.backplacement == bpl_word:
+        elif meta.backplacement == bpl_word or meta.backplacement == bpl_wordlemma:
             nodeend = meta.annotationposlist[-1] + 1
-            nodexpath = './/node[@begin="{}" and @end="{}"]'.format(nodeend - 1, nodeend)
+            nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(nodeend - 1, nodeend)
             newnode = myfind(thetree, nodexpath)
             oldnode = myfind(stree, nodexpath)
             if newnode is not None and oldnode is not None:
                 if 'word' in newnode.attrib and 'word' in oldnode.attrib:
                     newnode.attrib['word'] = oldnode.attrib['word']
+                    thetree = adaptsentence(thetree)
                 else:
                     if 'word' not in oldnode.attrib:
-                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node {}'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
                     if 'word' not in newnode.attrib:
-                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node {}'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+            if meta.backplacement == bpl_wordlemma:
+                if newnode is not None and oldnode is not None:
+                    if 'lemma' in newnode.attrib and 'lemma' in oldnode.attrib:
+                        newnode.attrib['lemma'] = oldnode.attrib['lemma']
+                        thetree = adaptsentence(thetree)
+                    else:
+                        if 'lemma' not in oldnode.attrib:
+                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                        if 'lemma' not in newnode.attrib:
+                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+
         elif meta.backplacement == bpl_none:
             pass
+        elif meta.backplacement == bpl_delete:
+            orignodebegin = str(meta.annotatedposlist[-1])
+            nodes2deletebegins.append(orignodebegin)  # just gather the begin sof the nodes to be deleted
+        elif meta.backplacement == bpl_indeze:
+            nodebegin = meta.annotatedposlist[-1]
+            nodeend = nodebegin + 1
+            oldnode = myfind(stree, './/node[@pt and @end="{}"]'.format(nodeend))
+            if oldnode is not None:
+                nodeid = oldnode.attrib['id']
+                dezeAVnode = etree.fromstring(dezeAVntemplate.format(begin=nodebegin, end=nodeend, id=nodeid))
+                thetree = transplant_node(oldnode, dezeAVnode, thetree)
+
+        # etree.dump(thetree, pretty_print=True)
+
+    # now do all the deletions at once, incl normalisation of begins and ends, and new sentence node
+    thetree = deletewordnodes(thetree, nodes2deletebegins)
+
+    # adapt the metadata
+    cleantokposlist = [meta.annotationwordlist for meta in newcorrection2 if meta.name == 'cleanedtokenpositions']
+    cleantokpos = cleantokposlist[0] if cleantokposlist != [] else []
+    newcorrection2 = [updatecleantokmeta(meta, nodes2deletebegins, cleantokpos) for meta in newcorrection2]
+
+    # etree.dump(thetree, pretty_print=True)
 
     if debug:
         print('5:', end=': ')
@@ -251,21 +430,36 @@ def correct_stree(stree, method, corr):
 
     # add the metadata to the tree
     fulltree = restoredtree
+    # print('dump 1:')
+    # etree.dump(fulltree, pretty_print=True)
 
     metadata = fulltree.find('.//metadata')
-    if metadata is None:
+    # remove the existing metadata
+    if metadata is not None:
+        metadata.getparent().remove(metadata)
+
+    # insert the original metadata
+
+    if origmetadata is None:
         metadata = etree.Element('metadata')
         fulltree.insert(0, metadata)
+    else:
+        fulltree.insert(0, origmetadata)
+        metadata = origmetadata
 
-    for meta in thecorrection[2]:
+    for meta in newcorrection2:
         metadata.append(meta.toElement())
 
-    # newfulltree = etree.ElementTree(fulltree)
-    # outfilename = 'correctedtree_{}.xml'.format(uttid)
-    # newfulltree.write(outfilename, encoding="UTF8", xml_declaration=False,
-    #                pretty_print=True)
+    if debug:
+        streesentlist = getyield(stree)
+        fulltreesentlist = getyield(fulltree)
+        if streesentlist != fulltreesentlist:
+            SDLOGGER.warning('Yield mismatch\nOriginal={original}\nAfter correction={newone}'.format(original=streesentlist,
+                                                                                                     newone=fulltreesentlist))
 
     # return this stree
+    # print('dump 2:')
+    # etree.dump(fulltree, pretty_print=True)
     return fulltree, orandalts
 
 
@@ -276,6 +470,21 @@ def getsentencenode(stree):
     else:
         result = sentnodes[0]
     return result
+
+
+def updatecleantokmeta(meta, begins, cleantokpos):
+    if meta is not None and meta.name in ['cleanedtokenisation', 'cleanedtokenpositions']:
+        sortedbegins = sorted(begins, key=lambda x: int(x), reverse=True)
+        newmeta = copy(meta)
+        for begin in sortedbegins:
+            intbegin = int(begin)
+            beginindex = cleantokpos.index(intbegin)
+            newmeta.annotationwordlist = newmeta.annotationwordlist[:beginindex] \
+                + newmeta.annotationwordlist[beginindex + 1:]
+        newmeta.value = newmeta.annotationwordlist
+        return newmeta
+    else:
+        return meta
 
 
 def getuttid(stree):
@@ -297,32 +506,62 @@ def getorigutt(stree):
     return origutt
 
 
+def scorefunction(obj): return (-obj.unknownwordcount, -obj.dpcount, -obj.dhyphencount, obj.goodcatcount,
+                                -obj.basicreplaceecount, -obj.hyphencount, obj.dimcount, obj.compcount, obj.supcount,
+                                obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount, -obj.penalty)
+
+
 class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount,
-                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, goodcatcount):
+                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, goodcatcount,
+                 hyphencount, basicreplaceecount):
         self.stree = stree
         self.altid = altid
         self.altsent = altsent
-        self.penalty = penalty
-        self.dpcount = dpcount
-        self.dhyphencount = dhyphencount
-        self.dimcount = dimcount
-        self.compcount = compcount
-        self.supcount = supcount
-        self.compoundcount = compoundcount
-        self.unknownwordcount = unknownwordcount
-        self.sucount = sucount
-        self.svaok = svaok
-        self.deplusneutcount = deplusneutcount
-        self.goodcatcount = goodcatcount
+        self.penalty = int(penalty)
+        self.dpcount = int(dpcount)
+        self.dhyphencount = int(dhyphencount)
+        self.dimcount = int(dimcount)
+        self.compcount = int(compcount)
+        self.supcount = int(supcount)
+        self.compoundcount = int(compoundcount)
+        self.unknownwordcount = int(unknownwordcount)
+        self.sucount = int(sucount)
+        self.svaok = int(svaok)
+        self.deplusneutcount = int(deplusneutcount)
+        self.goodcatcount = int(goodcatcount)
+        self.hyphencount = int(hyphencount)
+        self.basicreplaceecount = int(basicreplaceecount)
 
-    def alt2row(self, uttid, base, user1='', user2='', user3=''):
+    def alt2row(self, uttid, base, user1='', user2='', user3='', bestaltids=[], selected=None, origsent=None):
+        scores = ['BEST'] if self.altid in bestaltids else []
+        if self.altid == selected:
+            scores.append('SELECTED')
+        else:
+            scores.append('NOTSELECTED')
+        if self.altsent == origsent:
+            scores.append('IDENTICAL')
+        score = ampersand.join(scores)
         therow = [base, user1, user2, user3] + \
                  ['Alternative', uttid] + 2 * [''] +\
-                 [self.altid, self.altsent, self.penalty, self.dpcount, self.dhyphencount,
+                 [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount,
                   self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount, self.sucount,
-                  self.svaok, self.deplusneutcount, self.goodcatcount]
+                  self.svaok, self.deplusneutcount, self.goodcatcount, self.hyphencount, self.basicreplaceecount]
         return therow
+
+    def betterscorethan(self, alt):
+        score = {}
+        for name, obj in [('self', self), ('alt', alt)]:
+            score[name] = scorefunction(obj)
+        result = score['self'] > score['alt']
+        return result
+
+    def equalscoreas(self, alt):
+        score = {}
+        for name, obj in [('self', self), ('alt', alt)]:
+            score[name] = scorefunction(obj)
+        result = score['self'] == score['alt']
+        return result
 
 
 class Original():
@@ -347,7 +586,9 @@ class OrigandAlts():
 
     def OrigandAlts2rows(self, base, user1='', user2='', user3=''):
         origrow = self.orig.original2row(base, user1, user2, user3)
-        altsrows = [self.alts[altid].alt2row(self.orig.uttid, base, user1, user2, user3) for altid in self.alts]
+        origsent = origrow[-1]
+        bestaltids = getbestaltids(self.alts)
+        altsrows = [self.alts[altid].alt2row(self.orig.uttid, base, user1, user2, user3, bestaltids, self.selected, origsent) for altid in self.alts]
         laltsrows = len(altsrows)
         selectedrow = [base, user1, user2, user3] + \
                       ['Selected', self.orig.uttid, '', self.alts[self.selected].altsent, self.selected]
@@ -356,6 +597,18 @@ class OrigandAlts():
         else:
             rows = []
         return rows
+
+
+def getbestaltids(alts):
+    results = []
+    for altid in alts:
+        if results == []:
+            results = [altid]
+        elif alts[altid].betterscorethan(alts[results[0]]):
+            results = [altid]
+        elif alts[altid].equalscoreas(alts[results[0]]):
+            results.append(altid)
+    return results
 
 
 def getsvaokcount(nt):
@@ -374,10 +627,28 @@ def getdeplusneutcount(nt):
     counter = 0
     for i in range(ltheyield - 1):
         node1 = theyield[i]
-        node2 = theyield[i + 1]
-        if getattval(node1, 'lemma') in dets[de] and getattval(node2, 'genus') == 'onz':
-            counter += 1
+        if getattval(node1, 'lemma') in dets[de]:
+            node2 = theyield[i + 1]
+            word = getattval(node2, 'word')
+            parsedwordtree = PARSE_FUNC(word)
+            parsedwordnode = find1(parsedwordtree, './/node[@pt]')
+            if parsedwordnode is not None and getattval(parsedwordnode, 'genus') == 'onz' and\
+                    getattval(parsedwordnode, 'getal') == 'ev':
+                counter += 1
     return counter
+
+
+validwords = {"z'n"}
+punctuationsymbols = """.,?!:;"'"""
+
+
+def isvalidword(w):
+    if known_word(w):
+        return True
+    elif w in punctuationsymbols:
+        return True
+    elif w in validwords:
+        return True
 
 
 def selectcorrection(stree, ptmds, corr):
@@ -398,13 +669,17 @@ def selectcorrection(stree, ptmds, corr):
         compcount = countav(nt, 'graad', 'comp')
         supcount = countav(nt, 'graad', 'sup')
         compoundcount = getcompoundcount(nt)
-        unknownwordcount = len([w for w in nt.xpath('.//node[@pt]/@lemma') if not(known_word(w))])
+        unknownwordcount = len([w for w in nt.xpath('.//node[@pt!="tsw"]/@lemma') if not(isvalidword(w))])
         sucount = countav(nt, 'rel', 'su')
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
         goodcatcount = len([node for node in nt.xpath('.//node[@cat and (@cat!="du")]')])
+        hyphencount = len([node for node in nt.xpath('.//node[contains(@word, "-")]')])
+        basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
+                                  if getattval(node, 'word').lower() in basicreplacements])
         alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount, compcount, supcount,
-                          compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, goodcatcount)
+                          compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, goodcatcount,
+                          hyphencount, basicreplaceecount)
         alts[altid] = alt
         altid += 1
     orandalts = OrigandAlts(orig, alts)

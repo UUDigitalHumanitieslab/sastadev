@@ -2,8 +2,8 @@ import csv
 import os
 from collections import defaultdict
 
-from .config import SDLOGGER, SD_DIR
-from .treebankfunctions import getattval
+from config import SDLOGGER, SD_DIR
+from treebankfunctions import getattval
 
 underscore = "_"
 FlatClass = 0
@@ -27,7 +27,7 @@ def getcompounds(syntree):
     results = []
     tlist = syntree.xpath(getwordsxpath)
     for t in tlist:
-        _ = getattval(t, 'word')
+        w = getattval(t, 'word')
         lemma = getattval(t, 'lemma')
         pt = getattval(t, 'pt')
         if pt == 'n' and iscompound(lemma):

@@ -1,5 +1,5 @@
-from .Sziplus import getnodecount
-from .treebankfunctions import getattval
+from Sziplus import getnodecount
+from treebankfunctions import getattval
 
 noimplemmas = {'hoeven', 'moeten', 'mogen', 'kunnen', 'hebben', 'willen', 'hebben', 'zitten'}
 noimpwords = {'ben', 'bent', 'is', 'zijn'}
@@ -22,7 +22,7 @@ impquery = '''
      ]
 '''
 
-# //node[@cat="sv1" and
+#//node[@cat="sv1" and
 #    count(node)<=2 and
 #    (not(node[@rel="su"]) or (node[@rel="su" and @lemma="jij"])) and
 #    node[@rel="hd" and @pt="ww" and @pvtijd="tgw" and @pvagr="ev"
@@ -53,7 +53,7 @@ ynquery = '''
 def ynwi(syntree, ncf):
     results = []
     cands = syntree.xpath(ynquery)
-    # print('#cands', len(cands))
+    #print('#cands', len(cands))
     ok = True
     for cand in cands:
         hds = cand.xpath('node[@rel="hd"]')
@@ -70,17 +70,17 @@ def ynwi(syntree, ncf):
                 hdword = getattval(hd, 'words')
                 hdpotimp = (hdpvtijd == 'tgw' and hdpvagr == 'ev' and (hdlemma != 'zijn' or hdword == 'wees'))
                 ok = ok and (hdend < suend)
-                # print('ok=', ok)
-                # noimpmodlemmas = modlemmas.intersection(impmodlemmas)
-                # print('noimpmodlemmas', noimpmodlemmas)
-                # ok = ok and ((not hdpotimp) or noimpmodlemmas == {})
-                # print ('hdpotimp',hdpotimp)
-                # print('modlemmas', modlemmas)
-                # print('ok=', ok)
+                #print('ok=', ok)
+                #noimpmodlemmas = modlemmas.intersection(impmodlemmas)
+                #print('noimpmodlemmas', noimpmodlemmas)
+                #ok = ok and ((not hdpotimp) or noimpmodlemmas == {})
+                #print ('hdpotimp',hdpotimp)
+                #print('modlemmas', modlemmas)
+                #print('ok=', ok)
                 thenodecount = getnodecount(cand)
-                # print('thenodecount', thenodecount)
+                #print('thenodecount', thenodecount)
                 ok = ok and ncf(thenodecount)
-                # print('ok=', ok)
+                #print('ok=', ok)
                 if ok:
                     results.append(cand)
     return results
@@ -108,22 +108,22 @@ def impwi(syntree, nodecounts):
     for cand in cands:
         hds = cand.xpath('node[@rel="hd"]')
         modlemmas = set(cand.xpath('node[@rel="mod"]/@lemma'))
-        # print('modlemmas', modlemmas)
+        #print('modlemmas', modlemmas)
 
         for hd in hds:
             lemma = getattval(hd, 'lemma')
             ok = ok and (lemma not in noimplemmas)
-            # print('ok=', ok)
+            #print('ok=', ok)
             word = getattval(hd, 'word')
             ok = ok and (word not in noimpwords)
-            # print('ok=', ok)
+            #print('ok=', ok)
             stype = getattval(hd, 'stype')
             ok = ok and (stype == 'imparative' or (modlemmas.intersection(impmodlemmas) != {}))
-            # print('ok=', ok)
+            #print('ok=', ok)
 
         thenodecount = getnodecount(cand)
         ok = ok and thenodecount in nodecounts
-        # print('ok=', ok)
+        #print('ok=', ok)
         if ok:
             results.append(cand)
     return results

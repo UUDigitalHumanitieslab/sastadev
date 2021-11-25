@@ -4,9 +4,37 @@
 #
 #    pip-compile
 #
+attrs==21.2.0
+    # via pytest
+et-xmlfile==1.1.0
+    # via openpyxl
+importlib-metadata==4.8.2
+    # via
+    #   pluggy
+    #   pytest
+iniconfig==1.1.1
+    # via pytest
 lxml==4.6.4
     # via -r requirements.in
+openpyxl==3.0.9
+    # via -r requirements.in
+packaging==21.3
+    # via pytest
+pluggy==1.0.0
+    # via pytest
+py==1.11.0
+    # via pytest
+pyparsing==3.0.6
+    # via packaging
+pytest==6.2.5
+    # via -r requirements.in
+toml==0.10.2
+    # via pytest
+typing-extensions==4.0.0
+    # via importlib-metadata
 xlrd==1.2.0
     # via -r requirements.in
 xlsxwriter==3.0.2
     # via -r requirements.in
+zipp==3.6.0
+    # via importlib-metadata

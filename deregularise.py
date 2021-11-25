@@ -1,7 +1,7 @@
 import csv
 import re
 import os
-from .config import SD_DIR
+from config import SD_DIR
 
 tab = '\t'
 plussym = '+'
@@ -68,6 +68,7 @@ diphtongs = ['au', 'ei', 'ie', 'ij', 'oe', 'ou', 'ui']
 vccvpattern = alt(vowels) + plus(alt(consonants)) + alt(vowels)
 vccvre = re.compile(vccvpattern)
 tkofschip = ['t', 'k', 'o', 'f', 's', 'ch', 'p', 'sh', 'sj']
+irrplussuffix = 'Irregular form plus regular suffix'
 
 
 def addtrema(vowel):
@@ -212,6 +213,20 @@ def makepastsg(stem, stemFS):
 
 def makepastpl(stem, stemFS):
     form, meta = makepastsg(stem, stemFS)
+    result = form + 'n'
+    return result, meta
+
+
+def makepastpastsg(past, stem):
+    if stem[-1] in tkofschip or stem[-2:-1] in tkofschip:
+        result = past + 'te'
+    else:
+        result = past + 'de'
+    return result, irrplussuffix
+
+
+def makepastpastpl(past, stem):
+    form, meta = makepastpastsg(past, stem)
     result = form + 'n'
     return result, meta
 
@@ -374,6 +389,16 @@ def makeparadigm(word, forms):
     regularpastpl, metalabel = makepastpl(stem, stemFS)
     triples.append((regularpastpl, metalabel, goodpastpl))
 
+    # sliepte but exclude bande from bandde  wat about hieldden?
+    if goodpastsg[-2:] not in {'de', 'te'}:
+        wrongpastsg, metalabel = makepastpastsg(goodpastsg, stem)
+        triples.append((wrongpastsg, metalabel, goodpastsg))
+
+    # sliepten
+    if goodpastsg[-2:] not in {'de', 'te'}:
+        wrongpastpl, metalabel = makepastpastpl(goodpastsg, stem)
+        triples.append((wrongpastpl, metalabel, goodpastpl))
+
     # perfect participles
     pastparticiple, metalabel = makepastpart(stem, stemFS, takesge)
     triples.append((pastparticiple, metalabel, goodpastpart))
@@ -391,8 +416,9 @@ def makeparadigm(word, forms):
     epastpartwithe, metalabel = makepastpartwithe(stem, stemFS, takesge, prefix='e')
     triples.append((epastpartwithe, metalabel, goodpastpartwithe))
 
-    zeropastpartwithe, metalabel = makepastpartwithe(stem, stemFS, takesge, prefix='')
-    triples.append((zeropastpartwithe, metalabel, goodpastpartwithe))
+    # put off temporarily because past tense are more important
+    # zeropastpartwithe, metalabel = makepastpartwithe(stem, stemFS, takesge, prefix='')
+    # triples.append((zeropastpartwithe, metalabel, goodpastpartwithe))
 
     # perfect participle misspelled t ipv d gevalt
     wrongpastpart, metalabel = makewrongpastpart(stem, stemFS, takesge)

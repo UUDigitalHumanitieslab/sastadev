@@ -1,10 +1,10 @@
 import logging
 import os.path as op
-from .sentence_parser import parse
+from sentence_parser import parse
 
 
 # logging object
-SDLOGGER = logging
+SDLOGGER = logging.getLogger()
 
 # local directory
 SD_DIR = op.dirname(op.abspath(__file__))

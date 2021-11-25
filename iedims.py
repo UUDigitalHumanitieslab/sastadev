@@ -1,6 +1,6 @@
 import re
 
-from . import lexicon
+import lexicon
 
 comma = ','
 semicolon = ';'

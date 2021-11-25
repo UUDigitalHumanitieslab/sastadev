@@ -1,16 +1,16 @@
 '''
 various treebank functions
-'''
 
+'''
 import re
 from copy import copy, deepcopy
 
 from lxml import etree
-from .config import SDLOGGER
 
-from .lexicon import informlexicon, informlexiconpos, isa_namepart
-from .namepartlexicon import isa_namepart_uc
-from .stringfunctions import allconsonants
+#from lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
+import lexicon as lex
+from config import SDLOGGER
+from stringfunctions import allconsonants
 
 
 class Metadata:
@@ -39,8 +39,11 @@ space = ' '
 vertbar = '|'
 compoundsep = '_'
 
+numberpattern = r'^[\d\.,]+$'
+numberre = re.compile(numberpattern)
 
-# next 3 derived from the alpino dtd
+
+#next 3 derived from the alpino dtd
 allrels = ['hdf', 'hd', 'cmp', 'sup', 'su', 'obj1', 'pobj1', 'obj2', 'se', 'pc', 'vc', 'svp', 'predc', 'ld', 'me',
            'predm', 'obcomp', 'mod', 'body', 'det', 'app', 'whd', 'rhd', 'cnj', 'crd', 'nucl', 'sat', 'tag', 'dp',
            'top', 'mwp', 'dlink', '--']
@@ -49,6 +52,8 @@ allcats = ['smain', 'np', 'ppart', 'ppres', 'pp', 'ssub', 'inf', 'cp', 'du', 'ap
            'whsub', 'conj', 'whq', 'oti', 'ahi', 'detp', 'sv1', 'svan', 'mwu', 'top', 'cat', 'part']
 
 allpts = ['let', 'spec', 'bw', 'vg', 'lid', 'vnw', 'tw', 'ww', 'adj', 'n', 'tsw', 'vz']
+
+openclasspts = ['bw', 'ww', 'adj', 'n']
 
 clausecats = ['smain', 'ssub', 'inf', 'cp', 'ti', 'rel', 'whrel', 'whsub', 'whq', 'oti', 'ahi', 'sv1', 'svan']
 
@@ -69,10 +74,14 @@ hwws_circum = ['doen']
 
 tarsp_auxverbs = set(hwws_tijd + hwws_aspect + hwws_voice + hwws_modal + hwws_caus + hwws_circum)
 
-# uttidquery = "//meta[@name='uttid']/@value"
+potentialdet_onbvnws = {'al', 'alle', 'beide', 'een', 'elk', 'elke', 'ene', 'enig', 'enige', 'enkel', 'ettelijke',
+                        'evenveel', 'geen', 'ieder', 'meer', 'meerdere', 'menig', 'minder', 'minst', 'sommig',
+                        'teveel', 'tevéél', 'veel', 'weinig', 'één', 'keiveel'}
+
+#uttidquery = "//meta[@name='uttid']/@value"
 sentidxpath = './/sentence/@sentid'
 
-# altquery = "//meta[@name='alt']/@value"
+#altquery = "//meta[@name='alt']/@value"
 metaquerytemplate = "//meta[@name='{}']/@value"
 sentencexpathquery = "//sentence/text()"
 
@@ -463,7 +472,7 @@ def getqueryresult(syntree, xpathquery=None, noxpathquery=None):
         elif len(results) > 1:
             result1 = results[0]
             result = number2intstring(result1)
-            # issue a warning
+            ##issue a warning
         elif len(results) == 1:
             result1 = results[0]
             result = number2intstring(result1)
@@ -472,11 +481,14 @@ def getqueryresult(syntree, xpathquery=None, noxpathquery=None):
 
 def getnodeyield(syntree):
     resultlist = []
-    for node in syntree.iter():
-        if 'pt' in node.attrib or 'pos' in node.attrib:
-            resultlist.append(node)
-    sortedresultlist = sorted(resultlist, key=lambda x: int(getattval(x, 'end')))
-    return sortedresultlist
+    if syntree is None:
+        return []
+    else:
+        for node in syntree.iter():
+            if 'pt' in node.attrib or 'pos' in node.attrib:
+                resultlist.append(node)
+        sortedresultlist = sorted(resultlist, key=lambda x: int(getattval(x, 'end')))
+        return sortedresultlist
 
 
 def getyield(syntree):  # deze herformuleren in termen van getnodeyield na testen
@@ -538,7 +550,7 @@ def mark(str):
 
 
 def getwordpositions(matchtree, syntree):
-    # nothing special needs to be done for index nodes since they also have begin and end
+    #nothing special needs to be done for index nodes since they also have begin and end
     positions = []
     for node in matchtree.iter():
         if 'end' in node.attrib:
@@ -678,6 +690,19 @@ def is_duplicate_spec_noun(node):
     return result
 
 
+def onbvnwdet(node):
+    result = getattval(node, 'lemma') in potentialdet_onbvnws
+    return result
+
+
+def asta_recognised_lexnode(node):
+    if issubstantivised_verb(node):
+        result = False
+    else:
+        result = getattval(node, 'pt') == 'ww'
+    return result
+
+
 def asta_recognised_nounnode(node):
     if issubstantivised_verb(node):
         pos = 'ww'
@@ -701,8 +726,15 @@ def asta_recognised_wordnode(node):
     result = result or sasta_long(node)
     result = result or recognised_wordnode(node)
     result = result or recognised_lemmanode(node)
+    result = result or isnumber(node)
     result = result and not(all_lower_consonantsnode(node))
     result = result and not(short_nucl_n(node))
+    return result
+
+
+def isnumber(node):
+    word = getattval(node, 'word')
+    result = numberre.match(word)
     return result
 
 
@@ -735,27 +767,27 @@ def sasta_pseudonym(node):
 def recognised_wordnodepos(node, pos):
     word = getattval(node, 'word')
     lcword = word.lower()
-    result = informlexiconpos(word, pos) or informlexiconpos(lcword, pos) or \
-        iscompound(node) or isdiminutive(node) or isa_namepart_uc(word)
+    result = lex.informlexiconpos(word, pos) or lex.informlexiconpos(lcword, pos) or \
+        iscompound(node) or isdiminutive(node) or lex.isa_namepart_uc(word)
     return result
 
 
 def recognised_wordnode(node):
     word = getattval(node, 'word')
     lcword = word.lower()
-    result = informlexicon(word) or informlexicon(lcword) or iscompound(node) or isdiminutive(node) or isa_namepart(word)
+    result = lex.informlexicon(word) or lex.informlexicon(lcword) or iscompound(node) or isdiminutive(node) or lex.isa_namepart(word)
     return result
 
 
 def recognised_lemmanode(node):
     lemma = getattval(node, 'lemma')
-    result = informlexicon(lemma)
+    result = lex.informlexicon(lemma)
     return result
 
 
 def recognised_lemmanodepos(node, pos):
     lemma = getattval(node, 'lemma')
-    result = informlexiconpos(lemma, pos)
+    result = lex.informlexiconpos(lemma, pos)
     return result
 
 
@@ -794,10 +826,10 @@ def simpleshow2(stree, showchildren=True):
         if index != '':
             print(nodeformat.format(rel, '', indexstr), end=' ')
         else:
-            # print('top', end=' ')
+            #print('top', end=' ')
             for child in stree:
                 simpleshow2(child)
-            # print(']', end=' ')
+            #print(']', end=' ')
 
 
 def showflatxml(elem):
@@ -834,10 +866,11 @@ def uniquenodes(nodelist):
 
 def getindexednodesmap(stree):
     indexednodes = {}
-    for node in stree.iter():
-        if 'index' in node.attrib and ('pt' in node.attrib or 'cat' in node.attrib or 'pos' in node.attrib):
-            theindex = node.attrib['index']
-            indexednodes[theindex] = node
+    if stree is not None:
+        for node in stree.iter():
+            if 'index' in node.attrib and ('pt' in node.attrib or 'cat' in node.attrib or 'pos' in node.attrib):
+                theindex = node.attrib['index']
+                indexednodes[theindex] = node
     return indexednodes
 
 
@@ -847,20 +880,23 @@ def nodecopy(node):
     :param node: node, an lxml.etree Element
     :return: a node with no children, otherwise a copy of the input node
     '''
-    newnode = copy(node)
-    for ch in newnode:
-        newnode.remove(ch)
-    return newnode
+    if node is None:
+        return None
+    else:
+        newnode = copy(node)
+        for ch in newnode:
+            newnode.remove(ch)
+        return newnode
 
 
 def bareindexnode(node):
     result = terminal(node) and 'index' in node.attrib and 'postag' not in node.attrib and 'cat' not in node.attrib and 'pt' not in node.attrib and 'pos' not in node.attrib
-    # print(props2str(get_node_props(node)), result, file=sys.stderr)
+    #print(props2str(get_node_props(node)), result, file=sys.stderr)
     return(result)
 
 
 def terminal(node):
-    result = len(node) == 0
+    result = node is not None and len(node) == 0
     return(result)
 
 
@@ -878,26 +914,29 @@ def indextransform(stree):
 
 
 def indextransform2(stree, indexednodesmap):
-    if bareindexnode(stree):
-        theindex = getattval(stree, 'index')
-        therel = getattval(stree, 'rel')
-        newstree = deepcopy(indexednodesmap[theindex])
-        newstree.attrib['rel'] = therel
-        # simpleshow(newstree)
-        # print()
+    if stree is None:
+        return None
     else:
-        newstree = nodecopy(stree)
-        # simpleshow(newstree)
-        # print(id(stree))
-        # print(id(newstree))
-        # print(len(newstree))
-        # print(id(newstree.getparent()))
-        # print(id(None))
-        for child in stree:
-            newchild = indextransform2(child, indexednodesmap)
-            newstree.append(newchild)
+        if bareindexnode(stree):
+            theindex = getattval(stree, 'index')
+            therel = getattval(stree, 'rel')
+            newstree = deepcopy(indexednodesmap[theindex])
+            newstree.attrib['rel'] = therel
+            #simpleshow(newstree)
+            #print()
+        else:
+            newstree = nodecopy(stree)
+            #simpleshow(newstree)
+            #print(id(stree))
+            #print(id(newstree))
+            #print(len(newstree))
+            #print(id(newstree.getparent()))
+            #print(id(None))
+            for child in stree:
+                newchild = indextransform2(child, indexednodesmap)
+                newstree.append(newchild)
 
-    return newstree
+        return newstree
 
 
 def getstree(fullname):
@@ -930,7 +969,7 @@ def getstree(fullname):
             except ValueError as e:
                 SDLOGGER.error('Char Descoding Error: {}; file: {}'.format(e, fullname))
                 return None
-            except etree.ParseError:
+            except etree.ParseError as e:
                 SDLOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
                 return None
             else:
@@ -949,6 +988,27 @@ def getsentid(stree):
     return uttid
 
 
+def adaptsentence(stree):
+    # adapt the sentence
+    # find the sentence element's parent and its index
+    sentid = getsentid(stree)
+    sentencenode = stree.find('.//sentence')
+    if sentencenode is None:
+        SDLOGGER.ERROR('No sentence element found for stree with sentid={}'.format(sentid))
+        return stree
+    sentencenodeparent = sentencenode.getparent()
+    sentencenodeindex = sentencenodeparent.index(sentencenode)
+    sentencenodeparent.remove(sentencenode)
+    #del sentencenodeparent[sentencenodeindex]
+    theyield = getyield(stree)
+    theyieldstr = space.join(theyield)
+    newsentence = etree.Element('sentence')
+    newsentence.text = theyieldstr
+    newsentence.attrib['sentid'] = sentid
+    sentencenodeparent.insert(sentencenodeindex, newsentence)
+    return stree
+
+
 def transplant_node(node1, node2, stree):
     '''
     replace node1 by node2 in stree
@@ -958,24 +1018,24 @@ def transplant_node(node1, node2, stree):
     :param stree: tree in which the replacement takes place
     :return: None, the stree input parameter is modified
     '''
-    # find the parent of node1
-    # determine the index of node1
+    #find the parent of node1
+    #determine the index of node1
     sentid = getsentid(stree)
     parentindex = get_parentandindex(node1, stree)
     if parentindex is None:
         result = stree
     else:
         parent, index = parentindex
-        # SDLOGGER.debug(simpleshow(parent))
+        #SDLOGGER.debug(simpleshow(parent))
         del parent[index]
-        # SDLOGGER.debug(simpleshow(parent))
+        #SDLOGGER.debug(simpleshow(parent))
         parent.insert(index, node2)
-        # SDLOGGER.debug(simpleshow(parent))
+        #SDLOGGER.debug(simpleshow(parent))
         result = stree
-        # SDLOGGER.debug(simpleshow(stree))
+        #SDLOGGER.debug(simpleshow(stree))
 
-    # adapt the sentence
-    # find the sentence element's parent and its index
+    #adapt the sentence
+    #find the sentence element's parent and its index
     sentencenode = stree.find('.//sentence')
     sentencenodeparent = sentencenode.getparent()
     sentencenodeindex = sentencenodeparent.index(sentencenode)
@@ -1021,18 +1081,14 @@ def getspan(node):
 
 def lbrother(node, tree):
     nodebegin = getattval(node, 'begin')
-
-    def condition(n):
-        return getattval(n, 'end') == nodebegin
+    def condition(n): return getattval(n, 'end') == nodebegin
     result = findfirstnode(tree, condition)
     return result
 
 
 def rbrother(node, tree):
     nodeend = getattval(node, 'end')
-
-    def condition(n):
-        return getattval(n, 'begin') == nodeend
+    def condition(n): return getattval(n, 'begin') == nodeend
     result = findfirstnode(tree, condition)
     return result
 
@@ -1083,8 +1139,15 @@ comma = ','
 
 def str2list(liststr, sep=comma):
     bareliststr = liststr[1:-1]
-    rawlist = bareliststr.split(comma)
+    rawlist = bareliststr.split(sep)
     cleanlist = [x.strip() for x in rawlist]
+    return cleanlist
+
+
+def strliststr2list(liststr, sep=comma):
+    bareliststr = liststr[1:-1]
+    rawlist = bareliststr.split(sep)
+    cleanlist = [x.strip()[1:-1] for x in rawlist]
     return cleanlist
 
 
@@ -1099,13 +1162,222 @@ def find1(tree, xpathquery):
     return result
 
 
-def getxmetatreepositions(tree, xmetaname):
+def getxmetatreepositions(tree, xmetaname, poslistname='annotationposlist'):
     query = ".//xmeta[@name='{}']".format(xmetaname)
     xmeta = find1(tree, query)
-    annposstr = xmeta.get('annotationposlist')
+    if xmeta is None:
+        return []
+    annposstr = xmeta.get(poslistname)
     annposlist = str2list(annposstr)
     cleantok = find1(tree, './/xmeta[@name="cleanedtokenpositions"]')
+    if cleantok is None:
+        return []
     tokliststr = cleantok.get('value')
     toklist = str2list(tokliststr)
-    result = [str(toklist.index(pos)) for pos in annposlist]
+    result = [str(toklist.index(pos)) for pos in annposlist if pos in toklist]
     return result
+
+
+#topendxpath = './/node[@cat="top"]/@end'
+wordnodemodel = './/node[(@pt or (not(@pt) and not(@cat) and @index)) and @begin="{}"]'
+
+
+def gettokposlist(tree):
+    cleantok = find1(tree, './/xmeta[@name="cleanedtokenpositions"]')
+    if cleantok is None:
+        return []
+    tokliststr = cleantok.get('value')
+    toklist = str2list(tokliststr)
+    result = [str(pos) for pos in toklist]
+    return result
+
+
+def gettreepos(origpos, reverseindex):  # origuttpos2treepos
+    if origpos in reverseindex:
+        result = str(reverseindex.index(origpos))
+    else:
+        SDLOGGER.error('origpos {} not in reverseindex: {}'.format(origpos, reverseindex))
+        result = 0
+    return result
+
+
+def deletewordnode(tree, begin):
+    newtree = deepcopy(tree)
+    if newtree is None:
+        return newtree
+    else:
+        wordnodexpath = wordnodemodel.format(str(begin))
+        thenode = find1(newtree, wordnodexpath)
+        if thenode is not None:
+            thenode.getparent().remove(thenode)
+        # renumber begins and ends must be done outside this functions when all deletions have been done;
+        #updatebeginend(newtree, begin)
+
+        # adapt the cleantokenisation
+        # done outside this function
+
+        #adapt the sentence: do this after all deletions
+        #newtree = adaptsentence(newtree)
+
+        return newtree
+
+
+def deletechildlessparent(thenode):
+    if list(thenode) == []:
+        theparent = thenode.getparent()
+        theparent.remove(thenode)
+        deletechildlessparent(theparent)
+
+
+def deletewordnodes(tree, begins):
+    newtree = deepcopy(tree)
+    if newtree is None:
+        return newtree
+    else:
+        #wordnodexpath = wordnodemodel.format(str(begin))
+        thenodes = []
+        for begin in begins:
+            thenodes += newtree.xpath(wordnodemodel.format(str(begin)))
+        for thenode in thenodes:
+            if thenode is not None:
+                theparent = thenode.getparent()
+                theparent.remove(thenode)
+                # if the parent has no sons left, it should be deleted as well
+                deletechildlessparent(theparent)
+        #
+        # renumber begins and ends ;
+        normalisebeginend(newtree)
+
+        # adapt the cleantokenisation
+        # done outside this function
+
+        #adapt the sentence
+        newtree = adaptsentence(newtree)
+
+        return newtree
+
+
+def update_cleantokenisation(stree, begin):
+    '''
+    updates the tokenisation info of the cleaned utterance
+    :param stree: tree, will be modified
+    :param begin: value of the begin attribute of the deleted wordnode
+    :return: None
+    '''
+    intbegin = int(begin)
+    oldcleanedtokmeta = find1(stree, '//xmeta[@name="cleanedtokenisation"]')
+    cleanedtokmeta = copy(oldcleanedtokmeta)
+    oldcleanedtokposmeta = find1(stree, '//xmeta[@name="cleanedtokenpositions"]')
+    cleanedtokposmeta = copy(oldcleanedtokposmeta)
+    parent = oldcleanedtokmeta.getparent()
+    if not(cleanedtokmeta is None and cleanedtokposmeta is None):
+        cleanedtokstr = cleanedtokmeta.attrib['annotationwordlist']
+        cleanedtok = strliststr2list(cleanedtokstr)
+        newcleanedtok = cleanedtok[:intbegin] + cleanedtok[intbegin + 1:]
+        newcleanedtokstr = str(newcleanedtok)
+        cleanedtokmeta.attrib['annotationwordlist'] = newcleanedtokstr
+        cleanedtokmeta.attrib['value'] = newcleanedtokstr
+        parent.remove(oldcleanedtokmeta)
+        parent.append(cleanedtokmeta)
+
+        cleanedtokposstr = cleanedtokposmeta.attrib['annotationwordlist']
+        cleanedtokpos = str2list(cleanedtokposstr)
+        newcleanedtokpos = cleanedtokpos[:intbegin] + cleanedtokpos[intbegin + 1:]
+        newcleanedtokposintlist = [int(istr) for istr in newcleanedtokpos]
+        newcleanedtokposstr = str(newcleanedtokposintlist)
+        cleanedtokposmeta.attrib['annotationwordlist'] = newcleanedtokposstr
+        cleanedtokposmeta.attrib['value'] = newcleanedtokposstr
+        parent.remove(oldcleanedtokposmeta)
+        parent.append(cleanedtokposmeta)
+
+    return stree
+
+
+def getbeginend(nodelist):
+    minbegin = 1000
+    maxend = 0
+    for node in nodelist:
+        if bareindexnode(node):
+            continue
+        nodebegin = getattval(node, 'begin')
+        nodeend = getattval(node, 'end')
+        if int(nodebegin) < minbegin:
+            minbegin = int(nodebegin)
+        if int(nodeend) > maxend:
+            maxend = int(nodeend)
+    result = (str(minbegin), str(maxend))
+    return result
+
+
+def normalisebeginend(stree):
+    '''
+    :param stree: syntactic structure
+    :return: stree with the values of begin and end attributes normalised
+    '''
+    begins = [getattval(node, 'begin') for node in stree.xpath('.//node[@pt or @pos]')]
+    sortedbegins = sorted(begins, key=lambda x: int(x))
+    normalisebeginend2(stree, sortedbegins)
+
+
+def normalisebeginend2(stree, sortedbegins):
+    '''
+
+    :param stree: syntactic structure
+    :param sortedbegins: sorted list of begin values of @pt or @pos nodes
+    :return: None
+    '''
+    children = list(stree)
+    for child in children:
+        normalisebeginend2(child, sortedbegins)
+    if stree.tag == "node":
+        if children == []:
+            nodebegin = getattval(stree, 'begin')
+            intnodebegin = int(nodebegin)
+            newintbegin = sortedbegins.index(nodebegin)
+            newbegin = str(newintbegin)
+            newend = str(newintbegin + 1)
+            stree.attrib['begin'] = newbegin
+            stree.attrib['end'] = newend
+        else:
+            (minbegin, maxend) = getbeginend(children)
+            stree.attrib['begin'] = minbegin
+            stree.attrib['end'] = maxend
+
+
+def updatebeginend(stree, begin):  # do not use this anymore
+    '''
+    updates the begin and end values of nodes in a tree in which a word node with begin=begin has been removed
+    :param stree: Element_tree, input tree, which is modified
+    :param begin: (string representation of an integer): value of the begin attribute of the word node that has been removed
+    :return: None
+    '''
+    children = list(stree)
+    for child in children:
+        updatebeginend(child, begin)
+    if stree.tag == "node":
+        intbegin = int(begin)
+        if children == []:
+            nodebegin = getattval(stree, 'begin')
+            nodeend = getattval(stree, 'end')
+            intnodebegin = int(nodebegin)
+            intnodeend = int(nodeend)
+            if intnodebegin > intbegin:
+                stree.attrib['begin'] = str(intnodebegin - 1)
+            if intnodeend > intbegin:
+                stree.attrib['end'] = str(intnodeend - 1)
+        else:
+            (minbegin, maxend) = getbeginend(children)
+            stree.attrib['begin'] = minbegin
+            stree.attrib['end'] = maxend
+
+
+def add_metadata(intree, metalist):
+    tree = deepcopy(intree)
+    metadata = tree.find('.//metadata')
+    if metadata is None:
+        metadata = etree.Element('metadata')
+        tree.insert(0, metadata)
+
+    for meta in metalist:
+        metadata.append(meta.toElement())
+    return tree

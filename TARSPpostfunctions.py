@@ -1,11 +1,11 @@
 '''
 defines functions for the TARSP post part of the methods
+
 '''
 from collections import Counter
 
-from .treebankfunctions import getmeta
-from .query import core_process
-
+from query import core_process
+from treebankfunctions import getmeta
 
 OndVC = 'T071'
 OndWVC = 'T076'
@@ -97,13 +97,13 @@ def genpfi(stage, allresults, allqueries):
                and allqueries[qid].special1 != 'star2']
     coreresults = allresults.coreresults
     scoredqids = [qid for qid in theqids if qid in coreresults and len(coreresults[qid]) > 0]
-    # OndVC
+    #OndVC
     if OndWVC in theqids or OndWBVC in scoredqids:
         scoredqids.append(OndVC)
-    # XNeg
-    # OndB
-    # VCW
-    # BX
+    #XNeg
+    #OndB
+    #VCW
+    #BX
     result = len(scoredqids)
     return result
 

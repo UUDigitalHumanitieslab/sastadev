@@ -1,8 +1,8 @@
 import os
 
 from ..config import SD_DIR
-from ..deregularise import (correctionfilename, getcorrections,
-                                   makeparadigm, tab)
+from ..deregularise import (correctionfilename, getcorrections, makeparadigm,
+                            tab)
 
 
 def test_deregularise():
@@ -78,7 +78,7 @@ def test_deregularise():
         for (w, _, _) in triples:
             for corrected, m in getcorrections(w, correction):
                 print(w, corrected, m)
-    for w in ['aaneengeloopt', 'gekijken', 'gekeekt', 'uitgekijken', 'uitgekeekt']:
+    for w in ['sliepten', 'sliepte', 'aaneengeloopt', 'gekijken', 'gekeekt', 'uitgekijken', 'uitgekeekt']:
         for corrected, m in getcorrections(w, correction):
             print(w, corrected, m)
 

@@ -3,7 +3,9 @@ from collections import Counter, defaultdict
 from io import BytesIO
 
 import xlsxwriter
-from .treebankfunctions import getattval
+
+from ASTApostfunctions import wordcountperutt
+from treebankfunctions import getattval
 
 green = '#00FF00'
 red = '#FF0000'
@@ -262,6 +264,15 @@ def updatewithctr(resultdict, ctr, prop):
         resultdict[uttid][prop] = ctr[uttid]
 
 
+def intdictget(dct, keyname):
+    r1 = dictget(dct, keyname)
+    if r1 == '':
+        result = 0
+    else:
+        result = int(r1)
+    return result
+
+
 def dictget(dct, keyname):
     if keyname in dct:
         result = dct[keyname]
@@ -278,11 +289,12 @@ def resultdict2table(resultdict):
         correct = dictget(uttid_dict, 'correct')
         if correct != '':
             correct = 'J'
-        okpvs = dictget(uttid_dict, 'okpvs')
-        foutepvs = dictget(uttid_dict, 'foutepvs')
+        allpvs = intdictget(uttid_dict, 'allpvs')
+        foutepvs = intdictget(uttid_dict, 'foutepvs')
+        okpvs = max(0, allpvs - foutepvs)
         bijzincount = dictget(uttid_dict, 'bijzincount')
         remarks = dictget(uttid_dict, 'remarks')
-        paddeduttid = str(uttid).rjust(3, '0')
+        paddeduttid = uttid.rjust(3, '0')
         newrow = [paddeduttid, wc, correct, okpvs, foutepvs, bijzincount, remarks]
         table.append(newrow)
     sortedtable = sorted(table, key=lambda row: row[0])
@@ -291,11 +303,14 @@ def resultdict2table(resultdict):
 
 def getuttlist(allresults):
     resultdict = defaultdict(lambda: defaultdict(int))
-    update(resultdict, allresults.postresults, 'A047', 'wc')
+    wordcountdict = wordcountperutt(allresults)
+    for uttid in wordcountdict:
+        resultdict[uttid]['wc'] = wordcountdict[uttid]
+    # update(resultdict, allresults.postresults, 'A046', 'wc')
     update(resultdict, allresults.coreresults, 'A004', 'correct')
-    update(resultdict, allresults.coreresults, 'A024', 'okpvs')
+    update(resultdict, allresults.coreresults, 'A024', 'allpvs')
     subpvs = allresults.coreresults['A032'] if 'A032' in allresults.coreresults else Counter()
-    delpvs = allresults.coreresults['A033'] if 'A033' in allresults.coreresults else Counter()
+    delpvs = allresults.coreresults['A009'] if 'A009' in allresults.coreresults else Counter()
     tijdfoutpvs = allresults.coreresults['A041'] if 'A041' in allresults.coreresults else Counter()
     foutepvs = subpvs + delpvs + tijdfoutpvs
     updatewithctr(resultdict, foutepvs, 'foutepvs')

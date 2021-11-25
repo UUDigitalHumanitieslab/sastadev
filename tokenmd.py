@@ -6,7 +6,7 @@ class TokenListMD():
     def __repr__(self):
         tokstr = repr(self.tokens)
         mdstr = repr(self.metadata)
-        result = 'TokenMD({},{})'.format(tokstr, mdstr)
+        result = 'TokenListMD({},{})'.format(tokstr, mdstr)
         return result
 
 

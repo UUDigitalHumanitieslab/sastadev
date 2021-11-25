@@ -1,5 +1,7 @@
-from . import lexicon, treebankfunctions
-from .config import PARSE_FUNC
+import lexicon
+import treebankfunctions
+
+from config import PARSE_FUNC
 
 
 def getalpinowordinfo(word):

@@ -1,7 +1,8 @@
 import os.path as op
 import re
 
-from .config import SD_DIR, SDLOGGER
+from config import SD_DIR, SDLOGGER
+from generatemacros import generatemacros
 
 idpat = r'([A-z_][A-z0-9_]*)'
 eqpat = r'='
@@ -63,9 +64,9 @@ def expandmacrosdict(expr, macrodict):
 
 
 macrodir = op.join(SD_DIR, 'macros')
-macrofilenames = [op.join(macrodir, 'sastamacros1.txt'), op.join(macrodir, 'sastamacros2.txt')]
+macrofilenames = [op.join(macrodir, 'sastamacros1.txt'), op.join(macrodir, 'sastamacros2.txt'), op.join(macrodir, 'newimperatives.txt')]
 
-macrodict = {}
+macrodict = generatemacros()
 for macrofilename in macrofilenames:
     macrofile = open(macrofilename, 'r', encoding='utf8')
     macrodict = readmacros(macrofile, macrodict)
