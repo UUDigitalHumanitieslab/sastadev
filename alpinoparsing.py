@@ -5,7 +5,8 @@ import urllib.request
 from lxml import etree
 from memoize import memoize
 
-from config import SDLOGGER
+import logging
+#from config import SDLOGGER
 
 alpino_special_symbols_pattern = r'[\[\]]'
 alpino_special_symbols_re = re.compile(alpino_special_symbols_pattern)
@@ -35,10 +36,10 @@ def parse(origsent, escape=True):
     try:
         r1 = urllib.request.urlopen(fullurl)
     except urllib.request.HTTPError as e:
-        SDLOGGER.error('{}: parsing <{}> failed'.format(e, sent))
+        logging.error('{}: parsing <{}> failed'.format(e, sent))
         return None
     except urllib.error.URLError as e:
-        SDLOGGER.error('{}: parsing <{}> failed'.format(e, sent))
+        logging.error('{}: parsing <{}> failed'.format(e, sent))
         return None
     else:
         if 300 > r1.status >= 200:
@@ -47,7 +48,7 @@ def parse(origsent, escape=True):
             stree = etree.fromstring(streebytes)
             return stree
         else:
-            SDLOGGER.error('parsing failed:', r1.status, r1.reason, sent)
+            logging.error('parsing failed:', r1.status, r1.reason, sent)
             return None
 
 
