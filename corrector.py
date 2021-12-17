@@ -27,7 +27,7 @@ from dedup import (cleanwordofnort, find_duplicates2, find_janeenouduplicates,
 from deregularise import correctinflection
 from find_ngram import findmatches, ngram1
 from iedims import getjeforms
-from lexicon import de, dets, getwordinfo, het, informlexicon, known_word
+from lexicon import de, dets, getwordinfo, het, informlexicon, known_word, isa_namepart
 from macros import expandmacros
 # from alternative import Alternative, Replacement, Metadata, Meta
 from metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
@@ -35,7 +35,7 @@ from metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
                       filled_pause, fstoken, intj, janeenou, longrep,
                       mkSASTAMeta, repeated, repeatedjaneenou,
                       repeatedseqtoken, shortrep, substringrep, unknownsymbol)
-from namepartlexicon import isa_namepart
+#from namepartlexicon import namepart_isa_namepart
 from sastatok import sasta_tokenize
 from sastatoken import Token, tokenlist2stringlist
 from stringfunctions import (chatxxxcodes, consonants, deduplicate,

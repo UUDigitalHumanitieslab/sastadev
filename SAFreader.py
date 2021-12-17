@@ -70,7 +70,7 @@ def getlabels(labelstr, patterns):
         ms = pattern.finditer(labelstr)
         logstr = str([m.group(0) for m in ms if m.group(0) not in ' ;,-'])
         #print('Cannot interpret {};  found items: {}'.format(labelstr,logstr), file=sys.stderr)
-        logging.warning('Cannot interpret %s; found items: %s', labelstr, logstr)
+        SDLOGGER.warning('Cannot interpret %s; found items: %s', labelstr, logstr)
         #exit(-1)
     return results
 
@@ -352,58 +352,58 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
                         impliedqid = mapping[(implieditem, thelevel)]
                         update(results, impliedqid, (altlevel, altitem, thecounter))
                     else:
-                        logging.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
         elif (theitem, thelevel) in altcodes:
             (altitem, altlevel) = altcodes[(theitem, thelevel)]
             qid = mapping[(altitem, altlevel)]
             update(results, qid, (altlevel, altitem, thecounter))
-            logging.info('{} of level {} invalid code replaced by {} of level {}'.format(theitem, thelevel, altitem, altlevel))
+            SDLOGGER.info('{} of level {} invalid code replaced by {} of level {}'.format(theitem, thelevel, altitem, altlevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     if (implieditem, thecorrectlevel) in mapping:
                         impliedqid = mapping[(implieditem, thelevel)]
                         update(results, impliedqid, (altlevel, altitem, thecounter))
                     else:
-                        logging.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
         elif theitem in mappingitem2levelmap:
             thecorrectlevels = mappingitem2levelmap[theitem]
             if len(thecorrectlevels) == 1:
                 thecorrectlevel = thecorrectlevels[0]
                 qid = mapping[(theitem, thecorrectlevel)]
                 update(results, qid, (thecorrectlevel, theitem, thecounter))
-                logging.info('level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
+                SDLOGGER.info('level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
             elif len(thecorrectlevels) > 1:
-                logging.error('Item {} of level {} not a valid coding (wrong level, multiple candidate levels: {}'.format(theitem, thelevel, str(thecorrectlevels)))
+                SDLOGGER.error('Item {} of level {} not a valid coding (wrong level, multiple candidate levels: {}'.format(theitem, thelevel, str(thecorrectlevels)))
             else:
-                logging.error('{} of level {} not a valid coding (wrong level'.format(theitem, thelevel))
+                SDLOGGER.error('{} of level {} not a valid coding (wrong level'.format(theitem, thelevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     if (implieditem, thecorrectlevel) in mapping:
                         impliedqid = mapping[(implieditem, thecorrectlevel)]
                         update(results, impliedqid, (thecorrectlevel, theitem, thecounter))
                     else:
-                        logging.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
         elif theitem in altcodesitem2levelmap:
             thecorrectlevels = altcodesitem2levelmap[theitem]
             if len(thecorrectlevels) == 1:
                 (thecorrectitem, thecorrectlevel) = altcodes[(theitem, thecorrectlevels[0])]
                 qid = mapping[(thecorrectitem, thecorrectlevel)]
                 update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
-                logging.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem, thecorrectlevel, thecorrectitem))
+                SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem, thecorrectlevel, thecorrectitem))
             elif len(thecorrectlevels) > 1:
-                logging.error('Item {} of level {} not a valid coding (item replaced by {}, wrong level, multiple candidate levels: {}'.format(theitem. thelevel, thecorrectitem, thecorrectlevels))
+                SDLOGGER.error('Item {} of level {} not a valid coding (item replaced by {}, wrong level, multiple candidate levels: {}'.format(theitem. thelevel, thecorrectitem, thecorrectlevels))
             else:
-                logging.error('{} of level {} not a valid coding (alternative item, wrong level)'.format(theitem, thelevel))
+                SDLOGGER.error('{} of level {} not a valid coding (alternative item, wrong level)'.format(theitem, thelevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     if (implieditem, thecorrectlevel) in mapping:
                         impliedqid = mapping[(implieditem, thecorrectlevel)]
                         update(results, impliedqid, (thecorrectlevel, theitem, thecounter))
                     else:
-                        logging.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
 
         else:
-            logging.error('{} of level {} not a valid coding'.format(theitem, thelevel))
+            SDLOGGER.error('{} of level {} not a valid coding'.format(theitem, thelevel))
     return results
 
 
