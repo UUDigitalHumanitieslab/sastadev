@@ -4,13 +4,15 @@ from io import BytesIO
 
 import xlsxwriter
 
-from ASTApostfunctions import wordcountperutt
+from ASTApostfunctions import wordcountperutt, nounlemmaqid, verblemmaqid
 from treebankfunctions import getattval
 
 green = '#00FF00'
 red = '#FF0000'
 orange = '#FFBB9A'
 grey = '#B0B0B0'
+
+
 # green = 'green'
 # green = '#006100'
 # red = '#9C0006'
@@ -80,7 +82,6 @@ tabel = [['', 'GEM', 'SD'],
          ['Finietheidsindex', 0.99, 0.03],
          ['Aantal bijzinnen', 4.8, 2.78]]
 
-
 scores = [['', 'Score', 'SD'],
           ['Aantal zelfstandige naamwoorden', "='ZNW & WW'!B1", "=(B2-Tabel!B3)/Tabel!C3"],
           ['TTR zelfstandige naamwoorden', applytemplate3('ZNW & WW', 'B'), applytemplate1(3)],
@@ -107,9 +108,11 @@ sheet3hiddenrows = [['Aantal', '=COUNTA(B6:B105)', '', 'Som', 'Som', 'Som'],
                     ['Correct', '=COUNTIF(C6:C105,"J")', '', '', '', '']
                     ]
 
-sheet2header = ['Nummer', 'Zelfstandig naamwoord', 'Herhaling', 'Aantal', '', 'Lexicaal werkwoord', 'Herhaling', 'Aantal']
+sheet2header = ['Nummer', 'Zelfstandig naamwoord', 'Herhaling', 'Aantal', '', 'Lexicaal werkwoord', 'Herhaling',
+                'Aantal']
 sheet2colwidths = [10, 25, 20, 10, 5, 25, 20, 10]
-sheet3header = ['Uitingsnummer', 'Aantal woorden', 'Correct', "Goede PV's", "Foute en ontbrekende PV's", "Aantal bijzinnen", "Bijzonderheden"]
+sheet3header = ['Uitingsnummer', 'Aantal woorden', 'Correct', "Goede PV's", "Foute en ontbrekende PV's",
+                "Aantal bijzinnen", "Bijzonderheden"]
 
 
 def writetable(tabel, ws, startrow=0, startcol=0, rhformat=None, chformat=None, cellformat=None):
@@ -324,18 +327,22 @@ def astaform(allresults, _, in_memory=False):
     noundict = defaultdict(int)
     verbdict = defaultdict(int)
     allmatches = allresults.allmatches
-    for el in allmatches:
-        (qid, uttid) = el
-        if qid == 'A021':
-            for amatch in allmatches[el]:
-                # theword = normalizedword(amatch[0])
-                theword = getattval(amatch[0], 'lemma')
-                noundict[theword] += 1
-        if qid == 'A018':
-            for amatch in allmatches[el]:
-                # theword = normalizedword(amatch[0])
-                theword = getattval(amatch[0], 'lemma')
-                verbdict[theword] += 1
+    # for el in allmatches:
+    #     (qid, uttid) = el
+    #     if qid == 'A021':
+    #         for amatch in allmatches[el]:
+    #             # theword = normalizedword(amatch[0])
+    #             theword = getattval(amatch[0], 'lemma')
+    #             noundict[theword] += 1
+    #     if qid == 'A018':
+    #         for amatch in allmatches[el]:
+    #             # theword = normalizedword(amatch[0])
+    #             theword = getattval(amatch[0], 'lemma')
+    #             verbdict[theword] += 1
+    for (lemma, uttid) in allresults.postresults[nounlemmaqid]:
+        noundict[lemma] += 1
+    for (lemma, uttid) in allresults.postresults[verblemmaqid]:
+        verbdict[lemma] += 1
     vardict = getvardict(allresults)
     uttlist = getuttlist(allresults)
     astadata = AstaFormData(noundict, verbdict, vardict, uttlist)

@@ -5,24 +5,25 @@ for the moment at the utteranceid level, to be extend edto the wordposition per 
 and the function read_annotations() to obtain a score dictionary with queryid as keys and Counter() as values
 '''
 
-#todo
-#-additional columns unaligned treatment and generalisation
-#-code alternatives and replacemtne extensions
-#=codes written without spaces?
-
-import os
-import re
-from collections import Counter, defaultdict
+# todo
+# -additional columns unaligned treatment and generalisation
+# -code alternatives and replacemtne extensions
+# =codes written without spaces?
 
 import xlrd
-
+from collections import defaultdict
+from collections import Counter
+import re
+import os
 from config import SDLOGGER
-from readmethod import itemseppattern, read_method
+#import logging
+from readmethod import read_method, itemseppattern
 
 varitem = ''
 
 txtext = ".txt"
 comma = ","
+space = ' '
 tsvext = '.tsv'
 commaspace = ', '
 tab = '\t'
@@ -69,9 +70,9 @@ def getlabels(labelstr, patterns):
         results = []
         ms = pattern.finditer(labelstr)
         logstr = str([m.group(0) for m in ms if m.group(0) not in ' ;,-'])
-        #print('Cannot interpret {};  found items: {}'.format(labelstr,logstr), file=sys.stderr)
+        # print('Cannot interpret {};  found items: {}'.format(labelstr,logstr), file=sys.stderr)
         SDLOGGER.warning('Cannot interpret %s; found items: %s', labelstr, logstr)
-        #exit(-1)
+        # exit(-1)
     return results
 
 
@@ -136,8 +137,8 @@ def oldget_annotations(infilename, patterns):
     headers = {}
     lastrow = sheet.nrows
     lastcol = sheet.ncols
-#    firstwordcol = 2
-#    lastwordcol = lastcol - 4
+    #    firstwordcol = 2
+    #    lastwordcol = lastcol - 4
     levelcol = 1
     uttidcol = 0
     stagescol = -1
@@ -182,7 +183,7 @@ def oldget_annotations(infilename, patterns):
                     thelabelstr = sheet.cell_value(rowctr, colctr)
                     thelevel = sheet.cell_value(rowctr, levelcol)
                     if lastwordcol + 1 <= colctr < sheet.ncols:
-                        #prefix = headers[colctr] aangepast om het simpeler te houden
+                        # prefix = headers[colctr] aangepast om het simpeler te houden
                         prefix = ""
                     else:
                         prefix = ""
@@ -194,7 +195,7 @@ def oldget_annotations(infilename, patterns):
                     for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
                         thedata[(cleanlevel, cleanlabel)].append(uttid)
                         exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-    #wb.close() there is no way to close the workbook
+    # wb.close() there is no way to close the workbook
     for atuple in thedata:
         cdata[atuple] = Counter(thedata[atuple])
     return cdata
@@ -211,6 +212,8 @@ def get_annotations(infilename, patterns):
     thedata = defaultdict(list)
     cdata = {}
 
+    allutts = {}
+
     # To open Workbook
     wb = xlrd.open_workbook(infilename)
     sheet = wb.sheet_by_index(0)
@@ -221,14 +224,16 @@ def get_annotations(infilename, patterns):
     headers = {}
     lastrow = sheet.nrows
     lastcol = sheet.ncols
-#    firstwordcol = 2
-#    lastwordcol = lastcol - 4
+    #    firstwordcol = 2
+    #    lastwordcol = lastcol - 4
     levelcol = 1
     uttidcol = 0
     stagescol = -1
     commentscol = -1
 
     uttlevel = 'utt'
+
+    uttcount = 0
 
     for rowctr in range(startrow, lastrow):
         if rowctr == headerrow:
@@ -254,14 +259,21 @@ def get_annotations(infilename, patterns):
             thelevel = sheet.cell_value(rowctr, levelcol)
             thelevel = clean(thelevel)
             all_levels.add(thelevel)
+            # if thelevel == uttlevel:
+            #    uttcount += 1
+            curuttwlist = []
             for colctr in range(firstwordcol, sheet.ncols):
-                if thelevel in literallevels and colctr != stagescol and colctr != commentscol:
+                if thelevel == uttlevel:
+                    curcellval = sheet.cell_value(rowctr, colctr)
+                    if curcellval != '':
+                        curuttwlist.append(curcellval)
+                elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
                     thelabel = sheet.cell_value(rowctr, colctr)
                     if colctr > lastwordcol:
                         tokenposition = 0
                     else:
                         tokenposition = colctr - firstwordcol + 1
-                    #thedata[(thelevel, thelabel)].append(uttid)
+                    # thedata[(thelevel, thelabel)].append(uttid)
                     cleanlevel = thelevel
                     cleanlabel = thelabel
                     if cleanlabel != '':
@@ -270,7 +282,7 @@ def get_annotations(infilename, patterns):
                     thelabelstr = sheet.cell_value(rowctr, colctr)
                     thelevel = sheet.cell_value(rowctr, levelcol)
                     if lastwordcol + 1 <= colctr < sheet.ncols:
-                        #prefix = headers[colctr] aangepast om het simpeler te houden
+                        # prefix = headers[colctr] aangepast om het simpeler te houden
                         prefix = ""
                     else:
                         prefix = ""
@@ -281,8 +293,10 @@ def get_annotations(infilename, patterns):
                         tokenposition = colctr - firstwordcol + 1
                     for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
                         thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-    #wb.close() there is no way to close the workbook
-    return thedata
+            if curuttwlist != []:
+                allutts[uttid] = curuttwlist
+    # wb.close() there is no way to close the workbook
+    return allutts, thedata
 
 
 def update(thedict, qid, goldtuple):
@@ -322,7 +336,7 @@ def mkpatterns(allcodes):
     adaptedcodes = [codeadapt(c) for c in sortedallcodes]
     basepattern = r'' + '|'.join(adaptedcodes) + '|' + itemseppattern
     fullpattern = r'^(' + basepattern + r')*$'
-    return(re.compile(basepattern), re.compile(fullpattern))
+    return (re.compile(basepattern), re.compile(fullpattern))
 
 
 def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
@@ -333,7 +347,7 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
     allaltcodesitems = [item for (item, _) in altcodes]
     allitems = allmappingitems + allaltcodesitems
     patterns = mkpatterns(allitems)
-    basicdata = get_annotations(filename, patterns)
+    allutts, basicdata = get_annotations(filename, patterns)
     results = {}
     for thelevel, theitem in basicdata:
         thecounter = basicdata[(thelevel, theitem)]
@@ -357,7 +371,8 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
             (altitem, altlevel) = altcodes[(theitem, thelevel)]
             qid = mapping[(altitem, altlevel)]
             update(results, qid, (altlevel, altitem, thecounter))
-            SDLOGGER.info('{} of level {} invalid code replaced by {} of level {}'.format(theitem, thelevel, altitem, altlevel))
+            SDLOGGER.info(
+                '{} of level {} invalid code replaced by {} of level {}'.format(theitem, thelevel, altitem, altlevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     if (implieditem, thecorrectlevel) in mapping:
@@ -371,9 +386,14 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
                 thecorrectlevel = thecorrectlevels[0]
                 qid = mapping[(theitem, thecorrectlevel)]
                 update(results, qid, (thecorrectlevel, theitem, thecounter))
-                SDLOGGER.info('level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
+                SDLOGGER.info(
+                    'level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
             elif len(thecorrectlevels) > 1:
-                SDLOGGER.error('Item {} of level {} not a valid coding (wrong level, multiple candidate levels: {}'.format(theitem, thelevel, str(thecorrectlevels)))
+                SDLOGGER.error(
+                    'Item {} of level {} not a valid coding (wrong level, multiple candidate levels: {}'.format(theitem,
+                                                                                                                thelevel,
+                                                                                                                str(
+                                                                                                                    thecorrectlevels)))
             else:
                 SDLOGGER.error('{} of level {} not a valid coding (wrong level'.format(theitem, thelevel))
             if includeimplies:
@@ -389,11 +409,16 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
                 (thecorrectitem, thecorrectlevel) = altcodes[(theitem, thecorrectlevels[0])]
                 qid = mapping[(thecorrectitem, thecorrectlevel)]
                 update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
-                SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem, thecorrectlevel, thecorrectitem))
+                SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
+                                                                                                   thecorrectlevel,
+                                                                                                   thecorrectitem))
             elif len(thecorrectlevels) > 1:
-                SDLOGGER.error('Item {} of level {} not a valid coding (item replaced by {}, wrong level, multiple candidate levels: {}'.format(theitem. thelevel, thecorrectitem, thecorrectlevels))
+                SDLOGGER.error(
+                    'Item {} of level {} not a valid coding (item replaced by {}, wrong level, multiple candidate levels: {}'.format(
+                        theitem.thelevel, thecorrectitem, thecorrectlevels))
             else:
-                SDLOGGER.error('{} of level {} not a valid coding (alternative item, wrong level)'.format(theitem, thelevel))
+                SDLOGGER.error(
+                    '{} of level {} not a valid coding (alternative item, wrong level)'.format(theitem, thelevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     if (implieditem, thecorrectlevel) in mapping:
@@ -404,7 +429,7 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
 
         else:
             SDLOGGER.error('{} of level {} not a valid coding'.format(theitem, thelevel))
-    return results
+    return allutts, results
 
 
 def exact2global(thedata):
@@ -462,12 +487,12 @@ def read_annotations(methodfilename, annotationfilename, includeimplies=False):
 
 if __name__ == "__main__":
     # Give the location of the input file
-    #infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned Current.xlsx"
-    #infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned TagsCleaned Current.xlsx"
-    #infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\SchlichtingVoorbeeldGoldCurrent.xlsx"
+    # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned Current.xlsx"
+    # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned TagsCleaned Current.xlsx"
+    # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\SchlichtingVoorbeeldGoldCurrent.xlsx"
     infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\aangeleverde data\ASTA\SASTA sample 01.xlsx"
 
-    #Give the location of the method file
+    # Give the location of the method file
     methodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\ASTA\ASTA Index Current.xlsx'
 
     thedata = {}

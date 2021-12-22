@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 vertbar = '|'
 space = ' '
@@ -18,12 +19,12 @@ gravevowels = 'àèìòù\u00FD'
 tremavowels = 'äëïöüÿ'
 circumflexvowels = 'âêîôû\u0177'
 
-
 consonants = 'bcdfghjklmnpqrstvwxz\u00E7'  # \u00E7 is c cedilla
 dutch_base_vowels = barevowels + aiguvowels + gravevowels + tremavowels + circumflexvowels
 vowels = dutch_base_vowels
 dutch_base_diphthongs = ['aa', 'ee', 'ie', 'oo', 'uu', 'ij', 'ei', 'au', 'ou', 'ui', 'eu', 'oe']
-dutch_y_diphthongs = ['y' + d for d in dutch_base_vowels] + [d + 'y' for d in dutch_base_vowels]  # ryen gaat nog fout ye alleen samen nemen aan begin van woord
+dutch_y_diphthongs = ['y' + d for d in dutch_base_vowels] + [d + 'y' for d in
+                                                             dutch_base_vowels]  # ryen gaat nog fout ye alleen samen nemen aan begin van woord
 dutch_y_triphthongs = ['y' + d for d in dutch_base_diphthongs] + [d + 'y' for d in dutch_base_diphthongs]
 dutch_trema_diphthongs = ['äa', "ëe", 'ïe', 'öo', 'üu', 'ëi']
 dutch_diphthongs = dutch_base_diphthongs + dutch_y_diphthongs + dutch_trema_diphthongs
@@ -120,13 +121,13 @@ def delhyphenprefix(word, inlexicon):
         mwinlex = inlexicon(mainword)
         pfinlex = inlexicon(prefix)
         deduppf = barededup(word)
-        if prefix in hyphenprefixes and mwinlex:       # the word starts wit ha known prefix that uses hyphen such as ex (ex-vrouw)
+        if prefix in hyphenprefixes and mwinlex:  # the word starts wit ha known prefix that uses hyphen such as ex (ex-vrouw)
             result = []
         elif mainword.startswith(prefix) and mwinlex:  # this is the core case  e.g. ver-verkoop
             result = [mainword]
-        elif pfinlex and mwinlex:                       # for compounds with a hyphen: kat-oorbellen, generaal-majoor and for tennis-baan(?)
+        elif pfinlex and mwinlex:  # for compounds with a hyphen: kat-oorbellen, generaal-majoor and for tennis-baan(?)
             result = []
-        elif mainword.startswith(deduppf) and mwinlex:   # vver-verkoop
+        elif mainword.startswith(deduppf) and mwinlex:  # vver-verkoop
             result = [mainword]
         else:
             result = []
@@ -150,8 +151,8 @@ def dehyphenate(word):
         head = word[0:1]
         tail = word[1:]
         if head == hyphen:
-            #newresult = head + tail
-            #results.append(newresult)
+            # newresult = head + tail
+            # results.append(newresult)
             rightresults = dehyphenate(tail)
             for rightresult in rightresults:
                 newresult = head + rightresult
@@ -232,13 +233,42 @@ def aigu(c):
     result = aiguvowels[theindex]
 
 
+def testcondition(condition, word):
+    if condition(word):
+        print('OK:{}'.format(word))
+    else:
+        print('NO:{}'.format(word))
+
+
+def test():
+    monosyllabicwords = ['baai', 'eeuw', 'mooi', 'aap', 'deed', 'Piet', 'noot', 'duut', 'rijd', 'meid', 'rauw', 'koud',
+                         'buit', 'reuk', 'boer', 'la', 'de', 'hik', 'dop', 'dut',
+                         'yell', 'ry', 'Händl', 'Pëtr', 'bït', 'Köln', 'Kür', 'Tÿd']
+    disyllabicwords = ['baaien', 'eeuwen', 'mooie', 'aapje', 'deden', 'Pietje', 'noten', 'dut', 'rijden', 'meiden',
+                       'rauwe', 'koude', 'buitje', 'reuken', 'boeren', 'laden', 'dender',
+                       'hikken', 'doppen', 'dutten', 'yellen', 'ryen', 'Händler', 'Pëtri', 'bïty', 'Kölner', 'Kürer',
+                       'Tÿding', 'naäap', 'meeëten', 'ciën', 'coöp']
+
+    for word in monosyllabicwords:
+        testcondition(monosyllabic, word.lower())
+    for word in disyllabicwords:
+        testcondition(monosyllabic, word.lower())
+
+    for word in monosyllabicwords + disyllabicwords:
+        ms = syllableheadsre.finditer(word)
+        print(word, end=' -- ')
+        for m in ms:
+            print(m.group(0), end=', ')
+        print('')
+
+
 def nono(inval):
     result = (inval is None) or (inval == 0) or (inval == []) or (inval == '')
     return result
 
 
 def nonnull(inval):
-    result = not(nono(inval))
+    result = not (nono(inval))
     return result
 
 
@@ -254,3 +284,15 @@ def string2list(liststr):
         core = liststr[1:-1]
         parts = core.split(comma)
         return parts
+
+
+def realwordstring(w):
+    if len(w) != 1:
+        result = True
+    else:
+        result = not unicodedata.category(w).startswith('P')
+    return result
+
+
+if __name__ == '__main__':
+    test()

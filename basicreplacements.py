@@ -1,7 +1,6 @@
 from collections import defaultdict
-
+from metadata import bpl_word, bpl_node
 from deregularise import correctinflection
-from metadata import bpl_word
 
 pron = 'Pronunciation'
 orth = 'Orthography'
@@ -21,7 +20,9 @@ fndrop = 'Final n drop'
 zdev = 'Devoicing of /z/'
 wrongpron = 'Wrong Prunciation'
 phonrepl = '/{wrong}/ instead of /{correct}/'
-
+wronginfl = 'Incorrect inflection'
+morph = 'Morphology'
+overgen = 'Overgeneralisation'
 
 Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden', 'benevens', 'bij', 'binnen',
            'binnenuit', 'boven', 'bovenaan', 'bovenin', 'bovenop', 'buiten', 'dichtbij', 'door', 'doorheen', 'heen',
@@ -32,7 +33,6 @@ Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden'
 
 ervzvariants = [('der' + vz, 'er' + vz, pron, varpron, d_er) for vz in Rvzlist] + \
                [("d'r" + vz, 'er' + vz, pron, varpron, d_er) for vz in Rvzlist]
-
 
 basicreplacementlist = [('as', 'als', pron, infpron, codared), ('isse', 'is', pron, infpron, addschwa),
                         ('ooke', 'ook', pron, infpron, addschwa),
@@ -47,7 +47,13 @@ basicreplacementlist = [('as', 'als', pron, infpron, codared), ('isse', 'is', pr
                         ('da', 'dat', pron, infpron, codared),
                         ('si', 'zit', pron, infpron, codared),  # and zdev
                         ('ieduleen', 'iedereen', pron, wrongpron, phonrepl.format(wrong='l', correct='r')),
-                        ('allemaaw', 'allemaal', pron, wrongpron, phonrepl.format(wrong='w', correct='l'))
+                        ('allemaaw', 'allemaal', pron, wrongpron, phonrepl.format(wrong='w', correct='l')),
+                        ('amaal', 'allemaal', pron, infpron, varpron),
+                        ('wiw', 'wil', pron, wrongpron, phonrepl.format(wrong='w', correct='l')),
+                        ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der')),
+                        ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di')),
+                        ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron)),
+                        ('maggen', 'mogen', morph, wronginfl, overgen)
                         ] + ervzvariants
 # ('inne', 'in', pron, infpron, addschwa) # put off because it b;ock inne -> in de
 
@@ -70,14 +76,12 @@ basicexpansions = defaultdict(list)
 for w1, w2, c, n, v in basicexpansionlist:
     basicexpansions[w1].append((w2, c, n, v))
 
-
 knownreplacements = [
     ('ze', "z'n", pron, infpron, fndrop, bpl_word),
     ('desu', 'deze', pron, infpron, zdev, bpl_word),
     ('mij', 'mijn', pron, infpron, fndrop, bpl_word),
 
 ]
-
 
 knownreplacementsdict = {(repl[0], repl[1]): repl for repl in knownreplacements}
 

@@ -25,6 +25,7 @@ not(@lemma="al"
 	or @lemma="zo")
 """
 
+Rna = """(@lemma="daarna" or @lemma= "erna" or @lemma = "hierna") """
 
 STAP_BB_t = """ 
 not((((@frame="tmp_adverb"
@@ -43,7 +44,7 @@ not((((@frame="tmp_adverb"
     or (@rel="mod" and
         (@lemma="net" or @lemma="gauw"
         or @lemma="vroeger" or @lemma="toen"
-        or @lemma="soms" or @lemma="altijd")))
+        or @lemma="soms" or @lemma="altijd" )))
 """
 
 STAP_BB_p = """
@@ -123,7 +124,7 @@ BB = """ ((@rel="mod" or @rel="dp" or @rel="--" or @rel="nucl" or @rel="whd") an
 tempadv = """ (@frame="tmp_adverb" or  @frame="wh_tmp_adverb" or @frame="adjective(both(tmpadv))" or @special="tmp"  )
 """
 
-templemma = """ (@lemma="soms"  or @lemma="altijd" or @lemma="eerst" or @lemma="steeds" or @lemma="eerder" or @lemma="nou")
+templemma = """ (@lemma="soms"  or @lemma="altijd" or @lemma="eerst" or @lemma="steeds" or @lemma="eerder" or @lemma="nou" or %Rna%)
 """
 
 advpBBt = """ (@cat="advp" and %BB% and node[@rel="hd" and %temp% ])
