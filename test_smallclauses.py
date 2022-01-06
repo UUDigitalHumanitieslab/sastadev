@@ -17,7 +17,7 @@ mieke08 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\mieke
 aurisraw = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AURIS_ELISKA_ORIGINAL_ID.xml"
 tarsp02 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\Tarsp_02.xml"
 tarsp06 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\Tarsp_06.xml"
-schlichtingall = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\treebank_schlichting_all_examples\TREEBANK_SCHLICHTING_CHAT_ID.xml"
+#schlichtingall = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\treebank_schlichting_all_examples\TREEBANK_SCHLICHTING_CHAT_ID.xml"
 
 def makegen(lemma):
     if lemma is None or len(lemma) < 2:
@@ -89,6 +89,11 @@ def adj(node):
     result = getattval(node, 'pt') == 'adj'
     return result
 
+def perspro(node):
+    pt = getattval(node, 'pt')
+    vwtype = getattval(node, 'vwtype')
+    result = pt == 'vnw' and vwtype == 'pers'
+    return result
 
 def inf(node):
     result = getattval(node, 'pt') == 'ww' and getattval(node, 'wvorm') == 'inf'
@@ -160,11 +165,11 @@ def smallclauses(leaves, reducedleaves):
     if len(reducedleaves) == 2:
         #fword = word(first)
         #sword = word(second)
-        if (aanwvnw(first) or knownnoun(first)) and predadv(second):
+        if (aanwvnw(first) or knownnoun(first) or perspro(first)) and predadv(second):
             fpos = int(getattval(first, 'begin'))
             insertword = 'moet' if getal(first) != 'mv' else 'moeten'
             resultlist = [word(lv) for lv in leaves if bg(lv) <= fpos] + [insertword] + [word(lv) for lv in leaves if bg(lv) > fpos]
-        elif (aanwvnw(second) or knownnoun(second) or tw(second)) and predadv(first):
+        elif (aanwvnw(second) or knownnoun(second) or perspro(second) or tw(second)) and predadv(first):
             fpos = int(getattval(first, 'begin'))
             insertword = 'moet' if getal(second) != 'mv' else 'moeten'
             resultlist = [word(lv) for lv in leaves if bg(lv) <= fpos] + [insertword] + [word(lv) for lv in leaves if
@@ -225,7 +230,7 @@ def main():
     if smalltest:
         fullnames = [testbank]
     else:
-        fullnames = [schlichtingall, schlichtingtreebank,  mieke06, mieke08, aurisraw, tarsp02, tarsp06]
+        fullnames = [ schlichtingtreebank,  mieke06, mieke08, aurisraw, tarsp02, tarsp06]
     for infullname in fullnames:
         print(infullname)
         fulltreebank = getstree(infullname)
