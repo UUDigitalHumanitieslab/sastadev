@@ -42,17 +42,23 @@ filename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\woor
 lexiconheader, lexicondata = getxlsxdata(filename)
 
 semlexicon = {}
+trlexicon = {}
+genlexicon = {}
+
 for row in lexicondata:
-    lemma = row[1]
+    lemma = row[1].strip()
     pt = row[5]
     rawsems = row[6].split(semicolon)
     sems = [el.strip() for el in rawsems]
     semlexicon[(lemma, pt)] = sems
 
-trlexicon = {}
-for row in lexicondata:
-    lemma = row[1]
-    pt = row[5]
     rawtrs = row[8].split(semicolon)
     trs = [el.strip() for el in rawtrs]
     trlexicon[(lemma, pt)] = trs
+
+    rawgens = row[9].split(semicolon)
+    gens = [el.strip() for el in rawgens]
+    genlexicon[(lemma, pt)] = gens
+
+#next statement for debugging purposes
+junk = 0
