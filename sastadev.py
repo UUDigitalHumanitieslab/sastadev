@@ -716,9 +716,9 @@ else:
             doprequeries(syntree, queries, rawexactresults, allmatches)
             docorequeries(syntree, queries, rawexactresults, allmatches)
         uttid = getuttid(syntree)
-        uttno = getuttno(syntree)
-        allutts[uttno] = getyield(syntree)
-        # allutts[uttid] = getyield(syntree)
+        #uttno = getuttno(syntree)
+        #allutts[uttno] = getyield(syntree)
+        allutts[uttid] = getyield(syntree)
 
     # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
     # rawexactresults = getexactresults(allmatches)

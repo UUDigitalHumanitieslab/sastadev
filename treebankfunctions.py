@@ -1381,6 +1381,12 @@ def deletewordnode(tree, begin):
         return newtree
 
 
+def showtree(tree, text=None):
+    if text is not None:
+        print(text)
+    etree.dump(tree, pretty_print=True)
+
+
 def deletechildlessparent(thenode):
     if list(thenode) == []:
         theparent = thenode.getparent()
@@ -1389,7 +1395,11 @@ def deletechildlessparent(thenode):
 
 
 def deletewordnodes(tree, begins):
+    #print('tree:')
+    #etree.dump(tree, pretty_print=True)
     newtree = deepcopy(tree)
+    #print('newtree:')
+    #etree.dump(newtree, pretty_print=True)
     if newtree is None:
         return newtree
     else:
@@ -1473,7 +1483,9 @@ def normalisebeginend(stree):
     :param stree: syntactic structure
     :return: stree with the values of begin and end attributes normalised
     '''
-    begins = [getattval(node, 'begin') for node in stree.xpath('.//node[@pt or @pos]')]
+    #etree.dump(stree, pretty_print=True)
+    #begins = [getattval(node, 'begin') for node in stree.xpath('.//node[@pt or @pos]')]
+    begins = [getattval(node, 'begin') for node in stree.xpath('.//node[count(node)=0]')]
     sortedbegins = sorted(begins, key=lambda x: int(x))
     normalisebeginend2(stree, sortedbegins)
 

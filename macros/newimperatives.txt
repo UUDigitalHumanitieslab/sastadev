@@ -94,9 +94,17 @@ wond5plus = """(%ynquery% and %realcomplormodnodecount% >= 4)"""
 partofwhquestion = """((@cat="sv1" or @cat="ssub") and @rel="body" and parent::node[@cat="whq" or @cat="whsub" ]) """
 declarative = """(@cat="smain" or (@cat="ssub" and not(%partofwhquestion%)) or (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
 
-Tarsp_OndWB = """
-(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )
-"""
+Tarsp_OndB = """(%Ond% and  node[%Tarsp_Basic_B%]  and count(node) = 2)"""	
+
+Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
+
+Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
+
+Tarsp_OndW = """(%declarative% and %Ond% and  (%Tarsp_W%  or node[@rel="vc" and node[@rel="hd" and @pt="ww" and %realcomplormodnodecount% = 0]]) and 
+%realcomplormodnodecount% = 1 )"""
+
+Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+
 
 Tarsp_OndWBVC = """
 (%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 3 )
@@ -180,6 +188,8 @@ Tarsp_Ov3 = """(%declarative% and
 				not(%Tarsp_OndWB%) and 
 				not(%Tarsp_BBX%)and 
 				not(%Tarsp_WBVC%) and 
+				not(%Tarsp_OndB%) and
+				not(%Tarsp_OndVC%) and
 				%realcomplormodnodecount% = 2) """
 
 
@@ -194,7 +204,7 @@ Tarsp_coreW = """ ( @pt="ww" and (@wvorm="pv" or parent::node[@rel!="vc"]) and
         not(%Tarsp_kijkVU%) and
         not((@lemma="zijn" or @lemma="worden") and 
             parent::node[node[@rel="vc"]]) )"""
-			
+
 
 Tarsp_Hwwi = """(( @pt="ww" and @rel="hd" and @wvorm="pv" and
                   %Tarsp_hww% and

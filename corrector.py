@@ -46,6 +46,7 @@ from metadata import Meta, defaultbackplacement, defaultpenalty, bpl_node, bpl_n
 from alpinoparsing import parse, escape_alpino_input
 from expandquery import expandmacros
 from find_ngram import findmatches, ngram1, ngram2, ngram7, ngram10, ngram11, ngram16, ngram17
+from smallclauses import smallclauses
 
 SASTA = 'SASTA'
 
@@ -532,6 +533,13 @@ def getalternatives(origtokensmd, method, tree, uttid):
         newresults += correctPdit(uttmd, ntree, uttid)
     allalternativemds += newresults
 
+    newresults = []
+    for uttmd in allalternativemds:
+        utterance, _ = mkuttwithskips(uttmd.tokens)
+        ntree = PARSE_FUNC(utterance)
+        newresults += smallclauses(uttmd, ntree)
+    allalternativemds += newresults
+
     # final check whether the alternatives are improvements. It is not assumed that the original tokens is included in the alternatives
     finalalternativemds = lexcheck(tokensmd, allalternativemds)
 
@@ -708,7 +716,7 @@ def explanationasreplacement(tokensmd, tree):
                 bpl = bpl_node if known_word(oldword) else bpl_word
                 meta = mkSASTAMeta(oldtoken, newtoken, name='ExplanationasReplacement',
                                    value='ExplanationasReplacement',
-                                   cat='Lexical Error', backplacement=bpl_node)
+                                   cat='Lexical Error', backplacement=bpl)
                 newmetadata.append(meta)
                 result = TokenListMD(newtokens, newmetadata)
     return result

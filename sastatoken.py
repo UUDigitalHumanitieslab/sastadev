@@ -15,7 +15,7 @@ class Token:
 
     def __str__(self):
         skipstr = ' (skip=True)' if self.skip else ''
-        subposstr = '.{}' if self.subpos != 0 else ''
+        subposstr = '/{}'.format(self.subpos) if self.subpos != 0 else ''
         result = '{}{}:{}{}'.format(self.pos, subposstr, self.word, skipstr)
         return result
 

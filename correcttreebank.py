@@ -17,8 +17,9 @@ from treebankfunctions import (adaptsentence, add_metadata, countav,
                                deletewordnodes, find1, getattval, getbeginend,
                                getcompoundcount, getnodeyield, getsentid,
                                gettokposlist, getyield, myfind, showflatxml,
-                               simpleshow, transplant_node)
+                               simpleshow, transplant_node, showtree)
 from config import PARSE_FUNC, SDLOGGER
+from metadata import insertion
 
 ampersand = '&'
 
@@ -177,6 +178,10 @@ def findskippednodes2(stree, tokenposdict):
     return resultlist
 
 
+def blowup(token):
+    result = token.pos * 10 + token.subpos
+    return result
+
 def insertskips(newstree, tokenlist, stree):
     '''
 
@@ -185,7 +190,7 @@ def insertskips(newstree, tokenlist, stree):
     :param stree: original stree with parses of the skipped elements
     :return: adapted tree, with the skipped elements inserted (node from the original stree as -- under top, begin/ends updates
     '''
-    # debug = True
+    #debug = True
     debug = False
 
     if debug:
@@ -195,8 +200,10 @@ def insertskips(newstree, tokenlist, stree):
     # tokenpostree = deepcopy(stree)
     # update begin/ends
     reducedtokenlist = [t for t in tokenlist if not t.skip]
-    tokenposdict = {i + 1: reducedtokenlist[i].pos + 1 for i in range(len(reducedtokenlist))}
+    tokenposdict = {i + 1: blowup(reducedtokenlist[i]) + 1 for i in range(len(reducedtokenlist))}
+    showtree(resulttree, text='in: ')
     resulttree = updatetokenpos(resulttree, tokenposdict)
+    showtree(resulttree, text='out:')
     # tokenpostree = updatetokenpos(tokenpostree, tokenposdict)
     if debug:
         print('\nstree:')
@@ -255,7 +262,7 @@ def correct_stree(stree, method, corr):
         print(showflatxml(stree))
 
     allmetadata = []
-    allorandalts = []
+    orandalts = []
 
     # uttid:
     uttid = getuttid(stree)
@@ -266,7 +273,7 @@ def correct_stree(stree, method, corr):
     origutt = getorigutt(stree)
     if origutt is None:
         SDLOGGER.error('Missing origutt in utterance {}'.format(uttid))
-        return stree
+        return stree, orandalts
     # list of token positions
 
     # get the original metadata; these will be added later to the tree of each correction
@@ -347,14 +354,20 @@ def correct_stree(stree, method, corr):
 
     thetree = deepcopy(thecorrection[1])
 
-    if debug:
-        print('4:', end=': ')
-        simpleshow(stree)
-        print(showflatxml(stree))
+    debuga = True
+    if debuga:
+        print('4: (stree)')
+        etree.dump(stree, pretty_print=True)
 
     # do replacements in the tree
-    # etree.dump(thetree)
+    if debuga:
+        print('4b: (thetree)')
+        etree.dump(thetree, pretty_print=True)
     reverseposindex = gettokposlist(thetree)
+
+    if debuga:
+        print('4b: (thetree)')
+        etree.dump(thetree, pretty_print=True)
 
     # resultposmeta = selectmeta('cleanedtokenpositions', allmetadata)
     # resultposlist = resultposmeta.value
@@ -409,17 +422,22 @@ def correct_stree(stree, method, corr):
                 dezeAVnode = etree.fromstring(dezeAVntemplate.format(begin=nodebegin, end=nodeend, id=nodeid))
                 thetree = transplant_node(oldnode, dezeAVnode, thetree)
 
-        # etree.dump(thetree, pretty_print=True)
+        #etree.dump(thetree, pretty_print=True)
 
     # now do all the deletions at once, incl normalisation of begins and ends, and new sentence node
     thetree = deletewordnodes(thetree, nodes2deletebegins)
 
+    #etree.dump(thetree, pretty_print=True)
+
     # adapt the metadata
     cleantokposlist = [meta.annotationwordlist for meta in newcorrection2 if meta.name == 'cleanedtokenpositions']
     cleantokpos = cleantokposlist[0] if cleantokposlist != [] else []
-    newcorrection2 = [updatecleantokmeta(meta, nodes2deletebegins, cleantokpos) for meta in newcorrection2]
+    insertbegins = [meta.annotatedposlist for meta in newcorrection2 if meta.name == insertion ]
+    flatinsertbegins = [str(v) for el in insertbegins for v in el]
+    purenodes2deletebegins = [v for v in nodes2deletebegins if v not in flatinsertbegins]
+    newcorrection2 = [updatecleantokmeta(meta, purenodes2deletebegins, cleantokpos) for meta in newcorrection2]
 
-    # etree.dump(thetree, pretty_print=True)
+    #etree.dump(thetree, pretty_print=True)
 
     if debug:
         print('5:', end=': ')

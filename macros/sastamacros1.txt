@@ -128,6 +128,13 @@ pv = """(@pt="ww" and @wvorm="pv" )"""
 bxnp1 = """(@cat="np" and count(node)=2 and node[@rel="hd" and @pt="ww"] and node[@rel="mod" and @pt])"""
 bxnp2 = """(@cat="np" and count(node)=2 and node[@rel="hd"] and node[@rel="mod" and %singlewordbw%])"""
 
+Tarsp_Basic_VC = """((@rel="obj1" or @rel="pc"  or @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz")) and not(%Tarsp_Basic_B%) )"""
+
+
+Tarsp_Basic_B = """(@rel="mod" or @rel="ld" or @rel="predm"  or %Tarsp_B_predc%) """
+
+Tarsp_B_predc = """(@rel=predc and (@pt="vz" or @pt="bw" or @cat="pp" or @cat="advp" or %Rpronoun%))"""
+
 Tarsp_B = """(
        ((((@rel="mod" or @rel="ld" or @rel="predm") and
           (not(@cat) or @cat!="conj") and
