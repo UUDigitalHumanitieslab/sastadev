@@ -137,7 +137,7 @@ def updatetokenpos(resulttree, tokenposdict):
             resulttree.attrib['begin'] = str(newendint - 1)
         else:
             SDLOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
-            etree.dump(resulttree)
+            #etree.dump(resulttree)
             SDLOGGER.error('tokenposdict={}'.format(tokenposdict))
     elif 'cat' in resulttree.attrib:
         children = [ch for ch in resulttree]
@@ -201,9 +201,9 @@ def insertskips(newstree, tokenlist, stree):
     # update begin/ends
     reducedtokenlist = [t for t in tokenlist if not t.skip]
     tokenposdict = {i + 1: blowup(reducedtokenlist[i]) + 1 for i in range(len(reducedtokenlist))}
-    showtree(resulttree, text='in: ')
+    #showtree(resulttree, text='in: ')
     resulttree = updatetokenpos(resulttree, tokenposdict)
-    showtree(resulttree, text='out:')
+    #showtree(resulttree, text='out:')
     # tokenpostree = updatetokenpos(tokenpostree, tokenposdict)
     if debug:
         print('\nstree:')
@@ -354,7 +354,7 @@ def correct_stree(stree, method, corr):
 
     thetree = deepcopy(thecorrection[1])
 
-    debuga = True
+    debuga = False
     if debuga:
         print('4: (stree)')
         etree.dump(stree, pretty_print=True)

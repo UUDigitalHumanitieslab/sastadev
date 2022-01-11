@@ -2,19 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9ca1e0e0-24c6-4f42-bd3a-26abb519be4b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/smallclauses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/corrector.py" beforeDir="false" afterPath="$PROJECT_DIR$/corrector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/correcttreebank.py" beforeDir="false" afterPath="$PROJECT_DIR$/correcttreebank.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macros/newimperatives.txt" beforeDir="false" afterPath="$PROJECT_DIR$/macros/newimperatives.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macros/sastamacros1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/macros/sastamacros1.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metadata.py" beforeDir="false" afterPath="$PROJECT_DIR$/metadata.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/methods/TARSP Index Current.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/methods/TARSP Index Current.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sastadev.py" beforeDir="false" afterPath="$PROJECT_DIR$/sastadev.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sastalog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sastalog.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sastatoken.py" beforeDir="false" afterPath="$PROJECT_DIR$/sastatoken.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_smallclauses.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_smallclauses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/treebankfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/treebankfunctions.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -50,12 +39,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="13169" />
+          <entry key="py" value="13177" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="13169" />
+          <entry key="Python" value="13177" />
         </counts>
       </usages-collector>
     </session>
@@ -153,11 +142,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/correcttreebank.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="322" selection-start-line="322" selection-end-line="322" />
+            <state relative-caret-position="-748">
+              <caret line="357" column="12" selection-start-line="357" selection-start-column="7" selection-end-line="357" selection-end-column="12" />
               <folding>
                 <element signature="e#0#35#0" expanded="true" />
-                <marker date="1641891078664" expanded="true" signature="6626:6689" ph="..." />
+                <marker date="1641892039772" expanded="true" signature="6627:6690" ph="..." />
               </folding>
             </state>
           </provider>
@@ -183,9 +172,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>ngram1</find>
-      <find>ngramreducti</find>
-      <find>filled</find>
       <find>lepel</find>
       <find>zitten</find>
       <find>mama</find>
@@ -213,6 +199,9 @@
       <find>blow</find>
       <find>updatetokenpos</find>
       <find>insertskips</find>
+      <find>showtree</find>
+      <find>debug =</find>
+      <find>etree.dump</find>
     </findStrings>
     <replaceStrings>
       <replace>SDLOGGER</replace>
@@ -499,14 +488,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.110677086" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32967034" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.4010989" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32967034" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4010989" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -836,11 +826,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/correcttreebank.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="322" selection-start-line="322" selection-end-line="322" />
+        <state relative-caret-position="-748">
+          <caret line="357" column="12" selection-start-line="357" selection-start-column="7" selection-end-line="357" selection-end-column="12" />
           <folding>
             <element signature="e#0#35#0" expanded="true" />
-            <marker date="1641891078664" expanded="true" signature="6626:6689" ph="..." />
+            <marker date="1641892039772" expanded="true" signature="6627:6690" ph="..." />
           </folding>
         </state>
       </provider>
