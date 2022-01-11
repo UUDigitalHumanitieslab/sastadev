@@ -1,6 +1,6 @@
 import logging
 import os.path as op
-from sentence_parser import parse
+import sentence_parser
 
 
 # logging object
@@ -15,4 +15,4 @@ ALPINO_PORT = 7001
 
 # Function to parse a sentence with Alpino
 # Should take a string as input and return an lxml.etree
-PARSE_FUNC = parse
+PARSE_FUNC = sentence_parser.parse

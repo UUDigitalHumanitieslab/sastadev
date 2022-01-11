@@ -1,7 +1,9 @@
-from config import *
-from contextlib import contextmanager
 import socket
+from contextlib import contextmanager
+
 from lxml import etree
+
+import config
 
 
 class AlpinoSentenceParser:
@@ -10,7 +12,7 @@ class AlpinoSentenceParser:
     @contextmanager
     def connection(self):
         try:
-            s = socket.create_connection((ALPINO_HOST, ALPINO_PORT))
+            s = socket.create_connection((config.ALPINO_HOST, config.ALPINO_PORT))
             yield s
             s.close()
         except socket.error:
