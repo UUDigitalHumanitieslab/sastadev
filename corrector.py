@@ -1,15 +1,5 @@
 ''''
-Jij moet er dan voor zorgen dat je in de CHAT file die je produceert iedere uiting afgaat en een call doet naar een functie
-
-getcorrection
-met als argument de string van de uiting.
-
-Deze functie geeft dan terug een tuple (correction, metadata)
-
-waarbij
-•	correction een string is die je op moet nemen in de chat file als de verbeterde uiting
-•	metadata metadata zijn a la PaQu (type, name, value) o.a. origutt van type text met als waarde de inputstring
-
+to be added
 '''
 
 import copy
@@ -36,7 +26,7 @@ from stringfunctions import (chatxxxcodes, consonants, deduplicate,
                              vowels)
 from sva import getsvacorrections
 from tokenmd import TokenListMD, TokenMD, mdlist2listmd
-from treebankfunctions import find1, getattval, getnodeyield
+from treebankfunctions import find1, getattval, getnodeyield, showtree, treeinflate, fatparse
 from lxml import etree
 import sys
 # from alternative import Alternative, Replacement, Metadata, Meta
@@ -414,11 +404,12 @@ def getcorrection(utt, tree=None, interactive=False):
     return result
 
 
-def getcorrections(utt, method, tree=None, interactive=False):
-    origutt = utt
+def getcorrections(rawtokens, method, tree=None, interactive=False):
     allmetadata = []
-    rawtokens = sasta_tokenize(utt)
+    # rawtokens = sasta_tokenize(utt)
     wordlist = tokenlist2stringlist(rawtokens)
+    utt = space.join(wordlist)
+    origutt = utt
 
     # check whether the tree has the same yield
     origtree = tree
@@ -427,7 +418,7 @@ def getcorrections(utt, method, tree=None, interactive=False):
 
     if treewordlist != wordlist:
         revisedutt = space.join(wordlist)
-        tree = PARSE_FUNC(revisedutt)
+        tree = fatparse(revisedutt, rawtokens)
 
     tokens, metadata = cleantokens(rawtokens, repkeep=False)
     allmetadata += metadata
@@ -490,8 +481,9 @@ def getalternatives(origtokensmd, method, tree, uttid):
     # now turn each sequence of (token, md) pairs into a pair (tokenlist, mergedmetadata)
     newaltuttmds = []
     for altuttmd in altutts:
-        newaltuttmd = mdlist2listmd(altuttmd)
-        newaltuttmds.append(newaltuttmd)
+        if altuttmd != []:
+            newaltuttmd = mdlist2listmd(altuttmd)
+            newaltuttmds.append(newaltuttmd)
 
     # basic expansions
 
@@ -509,8 +501,8 @@ def getalternatives(origtokensmd, method, tree, uttid):
     for uttmd in allalternativemds:
         # utterance = space.join([token.word for token in uttmd.tokens])
         utterance, _ = mkuttwithskips(uttmd.tokens)
-        ntree = PARSE_FUNC(utterance)
-        newresults += getwrongdetalternatives(uttmd, ntree, uttid)
+        fatntree = fatparse(utterance, uttmd.tokens)
+        newresults += getwrongdetalternatives(uttmd, fatntree, uttid)
     allalternativemds += newresults
 
     newresults = []
@@ -519,9 +511,11 @@ def getalternatives(origtokensmd, method, tree, uttid):
         utterance, _ = mkuttwithskips(uttmd.tokens)
         # reducedtokens = [t for t in uttmd.tokens if not t.skip]
         # reduceduttmd = TokenListMD(reducedtokens, uttmd.metadata)
-        ntree = PARSE_FUNC(utterance)
-        # simpleshow(ntree)
-        uttalternativemds = getsvacorrections(uttmd, ntree, uttid)
+        fatntree = fatparse(utterance, uttmd.tokens)
+        debug = False
+        if debug:
+            showtree(fatntree)
+        uttalternativemds = getsvacorrections(uttmd, fatntree, uttid)
         newresults += uttalternativemds
     allalternativemds += newresults
 
@@ -529,15 +523,16 @@ def getalternatives(origtokensmd, method, tree, uttid):
     for uttmd in allalternativemds:
         # utterance = space.join([token.word for token in uttmd.tokens])
         utterance, _ = mkuttwithskips(uttmd.tokens)
-        ntree = PARSE_FUNC(utterance)
-        newresults += correctPdit(uttmd, ntree, uttid)
+        fatntree = fatparse(utterance, uttmd.tokens)
+        newresults += correctPdit(uttmd, fatntree, uttid)
     allalternativemds += newresults
 
     newresults = []
     for uttmd in allalternativemds:
         utterance, _ = mkuttwithskips(uttmd.tokens)
-        ntree = PARSE_FUNC(utterance)
-        newresults += smallclauses(uttmd, ntree)
+        fatntree = fatparse(utterance, uttmd.tokens)
+        newresults += smallclauses(uttmd, fatntree)
+        # showtree(fatntree, text='fatntree')
     allalternativemds += newresults
 
     # final check whether the alternatives are improvements. It is not assumed that the original tokens is included in the alternatives
@@ -969,7 +964,7 @@ def correctPdit(tokensmd, tree, uttid):
     tokenctr = 0
     prevtoken = None
     for token in tokens:
-        tokennode = next(filter(lambda x: getattval(x, 'begin') == str(tokenctr), tokennodes), None)
+        tokennode = next(filter(lambda x: getattval(x, 'begin') == str(token.pos + token.subpos), tokennodes), None)
         tokenlemma = getattval(tokennode, 'lemma')
         if not token.skip and prevtoken is not None and not prevtoken.skip and tokenlemma in {'dit', 'dat', 'deze',
                                                                                               'die'}:
@@ -981,10 +976,9 @@ def correctPdit(tokensmd, tree, uttid):
                 prevparent = prevtokennode.getparent()
                 prevparentrel, prevparentcat = getattval(prevparent, 'rel'), getattval(prevparent, 'cat')
                 indezemwp = getindezemwp(prevtokennode, tokennode)
-                if (prevpt == 'vz' and prevparentcat != 'pp' and tokenrel not in {'obj1',
-                                                                                  'det'} and tokenpt == 'vnw') or \
+                if (prevpt == 'vz' and prevparentcat != 'pp' and tokenrel not in {'det'} and tokenpt == 'vnw') or \
                         indezemwp:
-                    newtoken = Token('hem', tokenctr)
+                    newtoken = Token('hem', token.pos, subpos=token.subpos)
                     bpl = bpl_indeze if indezemwp else bpl_node
                     meta = mkSASTAMeta(token, newtoken, name='parsed as', value='hem', cat='AlpinoImprovement',
                                        backplacement=bpl)

@@ -54,6 +54,7 @@ nonfinvc = """(@rel="vc" and %nonfincat%) """
 realcomplormodnode = """node[%realcomplormod%]"""
 realcomplormod = """(not(%particlesvp%) and not(%indexnode%) and not(%nonfinvc%) and not(@rel="hd"))"""
 indexnode = """(@index and not (@cat or @pt or @pos))"""
+suindexnode = """(%indexnode% and @rel="su") """
 nonfinindexnode = """(%indexnode% and parent::node[%nonfinvc%])"""
 
 particlesvp = """(@rel="svp" and @pt="vz")"""
@@ -100,8 +101,10 @@ Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
-Tarsp_OndW = """(%declarative% and %Ond% and  (%Tarsp_W%  or node[@rel="vc" and node[@rel="hd" and @pt="ww" and %realcomplormodnodecount% = 0]]) and 
-%realcomplormodnodecount% = 1 )"""
+Tarsp_OndW = """(%declarative% and %Ond% and  (%Tarsp_W%  or node[%Tarsp_onlyWinVC%]) and %realcomplormodnodecount% = 0 )"""
+
+Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww" and %realcomplormodnodecount% = 0])"""
+
 
 Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
 
@@ -200,11 +203,12 @@ Tarsp_kijkVU = """(@pt="ww" and @lemma="kijken" and @wvorm="pv" and @pvagr="ev" 
 
 Tarsp_pporvc = """ (((@rel="pc" or @rel="mod" or @rel="ld") and @cat="pp")  or @rel="vc")"""
 
-Tarsp_coreW = """ ( @pt="ww" and (@wvorm="pv" or parent::node[@rel!="vc"]) and 
+Tarsp_coreW = """ ( @pt="ww" and (@wvorm="pv" or parent::node[@rel!="vc"] or %Tarsp_BarenonfinW%) and 
         not(%Tarsp_kijkVU%) and
         not((@lemma="zijn" or @lemma="worden") and 
             parent::node[node[@rel="vc"]]) )"""
 
+Tarsp_BarenonfinW = """parent::node[@rel="vc" and  parent::node[@cat="smain" and count(node)=1]]"""
 
 Tarsp_Hwwi = """(( @pt="ww" and @rel="hd" and @wvorm="pv" and
                   %Tarsp_hww% and

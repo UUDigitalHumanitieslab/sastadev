@@ -176,9 +176,13 @@ pobj1B = """(@rel="pc" and ../node[@rel="hd" and %locverb%])"""
 singlewordbw = """ (@pt="bw" or %Rpronoun% or %adjadv%)
 """
 
+
+
 corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
-coreBX = """(node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!=niet]/@begin ]])"""
+coreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!=niet]/@begin ]]) )"""
+
+Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and @rel="vc" and parent::node[@cat="smain" and count(node)=1] and node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and count(node[%realcomplormod%])=1 )"""
 
 
 ASTA_pred =  """(@rel="predc" or @rel="predm" or (@rel="hd" and parent::node[@rel="predc" or @rel="predm"]))"""
@@ -486,3 +490,11 @@ robustdelpv = """(not(@rel="dp" and @begin > ancestor::node[@cat="top"]/descenda
 
 delpv = """(%coredelpv% and %robustdelpv%)"""
 
+Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or @lemma="daarom") and 
+@lemma!="er" and @lemma!="daar" and @lemma!="hier" and (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or starts-with(@lemma, 'hier')))"""
+
+Tarsp_VzN = """(%vzn1xpath% or %vzn2xpath% ) """
+
+vzn1xpath = """(@cat="pp" and (node[@pt="vz"] and node[(@pt="n" or @pt="vnw") and not (%Rpronoun%) and @rel="obj1"] and not(node[@pt="vz" and @vztype="fin"])))"""
+vzn2xpath = """(node[@lemma="in" and @rel="mwp"] and node[@lemma="deze" and @rel="mwp"])"""
+vzn3xpath = """(@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @begin>=../node[@pt="vz"]/@end and count(node)<=3] )"""

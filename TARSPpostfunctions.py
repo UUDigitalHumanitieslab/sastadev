@@ -6,6 +6,7 @@ from collections import Counter
 
 from query import core_process
 from treebankfunctions import getmeta
+from config import SDLOGGER
 
 OndVC = 'T071'
 OndWVC = 'T076'
@@ -74,8 +75,11 @@ def getstage(uttcounts, allresults):
     cands = []
     gtotaal = allresults.postresults['T152']
     for el in uttcounts:
-        if uttcounts[el] / gtotaal >= gofase_minthreshold:
-            cands.append(el)
+        if gtotaal != 0:
+            if uttcounts[el] / gtotaal >= gofase_minthreshold:
+                cands.append(el)
+        else:
+            SDLOGGER.error('gtotaal has value 0')
     if cands == []:
         result = 1
     else:

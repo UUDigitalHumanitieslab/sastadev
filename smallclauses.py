@@ -174,16 +174,16 @@ def mktokenlist(leaves, themap, fpos, inserttokens):
 
 
 def mkinsertmeta(inserttokens, resultlist):
-    insertposs = [token.pos * 10 + token.subpos for token in inserttokens]
+    insertposs = [token.pos + token.subpos for token in inserttokens]
     insertwordlist = [token.word for token in inserttokens]
     tokenmappinglist = [token.pos if token.subpos == 0 else None for token in resultlist]
-    meta1 = Meta(insertion, insertwordlist, annotatedposlist=insertposs,
-                 annotatedwordlist=[], annotationposlist=insertposs,
-                 annotationwordlist=insertwordlist, cat=smallclause, source=SASTA, penalty=defaultpenalty,
-                 backplacement=bpl_delete)
+    metadata1 = [Meta(insertion, [insertword], annotatedposlist=[insertpos],
+                 annotatedwordlist=[], annotationposlist=[insertpos],
+                 annotationwordlist=[insertword], cat=smallclause, source=SASTA, penalty=defaultpenalty,
+                 backplacement=bpl_delete) for insertword, insertpos in zip(insertwordlist, insertposs)]
     meta2 = Meta(insertiontokenmapping, tokenmappinglist, cat=tokenmapping, source=SASTA, penalty=0,
                  backplacement=bpl_none)
-    metadata = [meta1, meta2]
+    metadata = metadata1 + [meta2]
     return metadata
 
 
@@ -195,7 +195,7 @@ def smallclauses(tokensmd, tree):
         return resultlist
     tokens = tokensmd.tokens
     treewords = [word(tokennode) for tokennode in leaves]
-    tokenwords = [token.word for token in tokens]
+    tokenwords = [token.word for token in tokens if not token.skip]
     if treewords != tokenwords:
         SDLOGGER.error('Token mismatch: {} v. {}'.format(treewords, tokenwords))
         return []
@@ -262,8 +262,11 @@ def smallclauses(tokensmd, tree):
             inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
             resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
-
-    return [TokenListMD(resultlist, metadata)]
+    if resultlist == []:
+        result = []
+    else:
+        result = [TokenListMD(resultlist, metadata)]
+    return result
 
 
 

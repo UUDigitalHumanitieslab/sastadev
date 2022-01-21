@@ -12,6 +12,7 @@ from config import SDLOGGER
 from stringfunctions import allconsonants
 # from lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
 import lexicon as lex
+from config import PARSE_FUNC
 
 
 class Metadata:
@@ -184,6 +185,12 @@ def ismainclausenode(node):
     return result
 
 
+def getnodeendmap(stree):
+    leaves = getnodeyield(stree)
+    result = {getattval(leave, 'end'): i + 1 for i, leave in enumerate(leaves)}
+    return result
+
+
 def getuttid(syntree):
     result = getmeta(syntree, 'uttid')
     if result is None:
@@ -198,6 +205,7 @@ def getuttno(syntree):
     if result is None:
         result = '0'
     return result
+
 
 def getuttidorno(syntree):
     result = getmeta(syntree, 'xsid')
@@ -441,8 +449,9 @@ def inverted(thesubj, thepv):
     subjbegin = getattval(thesubj, 'begin')
     subjlemma = getattval(thesubj, 'lemma')
     pvend = getattval(thepv, 'end')
+    # maybe defien immediately-follows for inflated trees
     inversion = '2' == subjperson[0] and tense == 'tgw' and subjnumber in ['ev', 'getal'] and \
-                pvend == subjbegin and subjlemma in ['jij', 'je']  # getal added for je
+                pvend <= subjbegin and subjlemma in ['jij', 'je']  # getal added for je
     return inversion
 
 
@@ -1131,11 +1140,11 @@ def test():
 def getsentid(stree):
     sentidlist = stree.xpath(sentidxpath)
     if sentidlist == []:
-        SDLOGGER.error('Missing uttid')
-        uttid = 'None'
+        SDLOGGER.error('Missing sentid')
+        result = 'None'
     else:
-        uttid = str(sentidlist[0])
-    return uttid
+        result = str(sentidlist[0])
+    return result
 
 
 def testindextransform():
@@ -1384,7 +1393,10 @@ def deletewordnode(tree, begin):
 def showtree(tree, text=None):
     if text is not None:
         print(text)
-    etree.dump(tree, pretty_print=True)
+    if tree is not None:
+        etree.dump(tree, pretty_print=True)
+    else:
+        print('None')
 
 
 def deletechildlessparent(thenode):
@@ -1395,11 +1407,11 @@ def deletechildlessparent(thenode):
 
 
 def deletewordnodes(tree, begins):
-    #print('tree:')
-    #etree.dump(tree, pretty_print=True)
+    # print('tree:')
+    # etree.dump(tree, pretty_print=True)
     newtree = deepcopy(tree)
-    #print('newtree:')
-    #etree.dump(newtree, pretty_print=True)
+    # print('newtree:')
+    # etree.dump(newtree, pretty_print=True)
     if newtree is None:
         return newtree
     else:
@@ -1413,9 +1425,14 @@ def deletewordnodes(tree, begins):
                 theparent.remove(thenode)
                 # if the parent has no sons left, it should be deleted as well
                 deletechildlessparent(theparent)
+                children = [n for n in theparent]
+                (minbegin, maxend) = getbeginend(children)
+                theparent.attrib['begin'] = minbegin
+                theparent.attrib['end'] = maxend
+
         #
         # renumber begins and ends ;
-        normalisebeginend(newtree)
+        # normalisebeginend(newtree) temporarily put off
 
         # adapt the cleantokenisation
         # done outside this function
@@ -1424,6 +1441,75 @@ def deletewordnodes(tree, begins):
         newtree = adaptsentence(newtree)
 
         return newtree
+
+
+def treeinflate(stree, start=10, inc=10):
+    # fatstree = deepcopy(stree)
+    if stree is None:
+        pass
+    else:
+        for child in stree:
+            treeinflate(child, start, inc)
+        children = [ch for ch in stree]
+        if stree.tag == 'node':
+            ib = int(getattval(stree, 'begin'))
+            ie = int(getattval(stree, 'end'))
+            newib = (ib + 1) * 10
+            stree.attrib['begin'] = str(newib)
+            if iswordnode(stree):
+                stree.attrib['end'] = str(newib + 1)
+            elif 'cat' in stree.attrib:
+                (b, e) = getbeginend(children)
+                stree.attrib['begin'] = b
+                stree.attrib['end'] = e
+            else:
+                stree.attrib['begin'] = str((ib + 1) * 10)
+                stree.attrib['end'] = str((ie * 10) + 1)
+
+
+def updatetokenpos(resulttree, tokenposdict):
+    # resulttree = deepcopy(stree)
+    if resulttree is None:
+        return resulttree
+    for child in resulttree:
+        newchild = updatetokenpos(child, tokenposdict)
+    if ('pt' in resulttree.attrib or 'pos' in resulttree.attrib) and \
+            'end' in resulttree.attrib and 'begin' in resulttree.attrib:
+        intend = int(resulttree.attrib['end'])
+        if intend in tokenposdict:
+            newendint = tokenposdict[intend]
+            resulttree.attrib['end'] = str(newendint)
+            resulttree.attrib['begin'] = str(newendint - 1)
+        else:
+            SDLOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
+            # etree.dump(resulttree)
+            SDLOGGER.error('tokenposdict={}'.format(tokenposdict))
+    elif 'cat' in resulttree.attrib:
+        children = [ch for ch in resulttree]
+        (b, e) = getbeginend(children)
+        resulttree.attrib['begin'] = b
+        resulttree.attrib['end'] = e
+
+    return resulttree
+
+
+def treewithtokenpos(thetree, tokenlist):
+    resulttree = deepcopy(thetree)
+    thetreeleaves = getnodeyield(thetree)
+    intbegins = [int(getattval(n, 'begin')) for n in thetreeleaves]
+    tokenlistbegins = [t.pos + t.subpos for t in tokenlist]
+    pospairs = zip(intbegins, tokenlistbegins)
+    thetreetokenposdict = {treepos + 1: tokenpos + 1 for treepos, tokenpos in pospairs}
+    resulttree = updatetokenpos(resulttree, thetreetokenposdict)
+    return resulttree
+
+
+def fatparse(utterance, tokenlist):
+    stree = PARSE_FUNC(utterance)
+    fatstree = deepcopy(stree)
+    treeinflate(fatstree, start=10, inc=10)
+    fatstree = treewithtokenpos(fatstree, tokenlist)
+    return fatstree
 
 
 def update_cleantokenisation(stree, begin):
@@ -1483,10 +1569,10 @@ def normalisebeginend(stree):
     :param stree: syntactic structure
     :return: stree with the values of begin and end attributes normalised
     '''
-    #etree.dump(stree, pretty_print=True)
-    #begins = [getattval(node, 'begin') for node in stree.xpath('.//node[@pt or @pos]')]
-    begins = [getattval(node, 'begin') for node in stree.xpath('.//node[count(node)=0]')]
-    sortedbegins = sorted(begins, key=lambda x: int(x))
+    # etree.dump(stree, pretty_print=True)
+    # begins = [getattval(node, 'begin') for node in stree.xpath('.//node[@pt or @pos]')]  # we must include indexed nodes but not have duplicates
+    begins = {getattval(node, 'begin') for node in stree.xpath('.//node[count(node)=0]')}
+    sortedbegins = sorted(list(begins), key=lambda x: int(x))
     normalisebeginend2(stree, sortedbegins)
 
 

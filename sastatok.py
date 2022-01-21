@@ -61,5 +61,5 @@ def sasta_tokenize(instring):
     if instring is None:
         return []
     tokenstring = fullsastare.findall(instring)
-    result = stringlist2tokenlist(tokenstring)
+    result = stringlist2tokenlist(tokenstring, start=10, inc=10)
     return result

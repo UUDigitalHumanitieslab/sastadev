@@ -7,7 +7,7 @@ from sastatoken import Token
 from tokenmd import TokenListMD
 from treebankfunctions import (copymodifynode, find1, getattval, getdetof,
                                getheadof, getlemma, indextransform, inverted,
-                               lbrother, nominal, rbrother, simpleshow)
+                               lbrother, nominal, rbrother, simpleshow, showtree)
 
 debug = False
 
@@ -356,12 +356,11 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
     pvbegin = getattval(thepv, 'begin')
     inversion = inverted(snode, thepv)
     reducedtokens = [t for t in tokens if not t.skip]
-    tokenposmap = {i: reducedtokens[i].pos for i in range(len(reducedtokens))}
     newpv = getpvform(snode, thepv, inversion)
     if newpv is None:
         results = []
     else:
-        newpos = tokenposmap[int(pvbegin)]
+        newpos = int(pvbegin)
         newtoken = Token(newpv, newpos)
         for token in tokens:
             if token.pos != newpos:
@@ -378,6 +377,9 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
 
 
 def getsvacorrections(tokensmd, rawtree, uttid):
+    debug = False
+    if debug:
+        showtree(rawtree, text='rawtree')
     if rawtree is None:
         return []
     else:

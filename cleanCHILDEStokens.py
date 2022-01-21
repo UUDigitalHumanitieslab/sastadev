@@ -83,7 +83,7 @@ def checkline(line, newline, outfilename, lineno, logfile):
         print('charcodes=<{}>'.format(thecodes), file=logfile)
 
 
-def cleantext(utt, repkeep):
+def cleantext(utt, repkeep, tokenoutput=False):
     newutt = robustness(utt)
     tokens = sastatok.sasta_tokenize(newutt)
     inwordlist = [t.word for t in tokens]
@@ -95,10 +95,13 @@ def cleantext(utt, repkeep):
     resultposlist = [t.pos for t in newtokens]
     newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
     newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
-    newmeta3 = Meta('cleanedtokenpositions', resultposlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
+    newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
     metadata += [newmeta1, newmeta2, newmeta3]
     resultmetadata = metadata
-    return (resultstring, resultmetadata)
+    if tokenoutput:
+        return(newtokens, resultmetadata)
+    else:
+        return (resultstring, resultmetadata)
 
 
 def cleantokens(tokens, repkeep):
