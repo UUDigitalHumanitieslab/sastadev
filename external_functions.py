@@ -63,3 +63,10 @@ for f in thefunctions:
     str2functionmap[fname] = f
 
 junk = 0
+
+# Used by SASTA to find form functions
+form_map = {
+    'TARSP': mktarspform,
+    'ASTA': astaform,
+    'STAP': makestapform
+}
