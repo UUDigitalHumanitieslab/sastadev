@@ -35,7 +35,7 @@ class AlpinoSentenceParser:
             return xml.decode('utf-8')
 
 
-@lru_cache
+@lru_cache(maxsize=128)
 def parse(sentence):
     ''' Wrapper for use in sastadev'''
     alp = AlpinoSentenceParser()
