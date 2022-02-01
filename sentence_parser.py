@@ -1,7 +1,12 @@
-from config import *
-from contextlib import contextmanager
+from functools import lru_cache
 import socket
+from contextlib import contextmanager
+
 from lxml import etree
+
+import config
+
+from alpinoparsing import escape_alpino_input
 
 
 class AlpinoSentenceParser:
@@ -10,13 +15,14 @@ class AlpinoSentenceParser:
     @contextmanager
     def connection(self):
         try:
-            s = socket.create_connection((ALPINO_HOST, ALPINO_PORT))
+            s = socket.create_connection((config.ALPINO_HOST, config.ALPINO_PORT))
             yield s
             s.close()
         except socket.error:
             raise
 
     def parse_sentence(self, sentence: str, buffer_size=8096) -> str:
+        sentence = escape_alpino_input(sentence)
         with self.connection() as s:
             sentence += '\n\n'   # flag end of file
             s.sendall(sentence.encode('utf-8'))
@@ -29,6 +35,7 @@ class AlpinoSentenceParser:
             return xml.decode('utf-8')
 
 
+@lru_cache
 def parse(sentence):
     ''' Wrapper for use in sastadev'''
     alp = AlpinoSentenceParser()
