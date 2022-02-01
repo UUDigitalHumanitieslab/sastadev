@@ -297,7 +297,7 @@ def resultdict2table(resultdict):
         okpvs = max(0, allpvs - foutepvs)
         bijzincount = dictget(uttid_dict, 'bijzincount')
         remarks = dictget(uttid_dict, 'remarks')
-        paddeduttid = uttid.rjust(3, '0')
+        paddeduttid = str(uttid).rjust(3, '0')
         newrow = [paddeduttid, wc, correct, okpvs, foutepvs, bijzincount, remarks]
         table.append(newrow)
     sortedtable = sorted(table, key=lambda row: row[0])
