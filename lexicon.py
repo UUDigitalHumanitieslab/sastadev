@@ -1,6 +1,6 @@
 import celexlexicon
 import treebankfunctions
-from namepartlexicon import isa_namepart
+from namepartlexicon import namepart_isa_namepart, namepart_isa_namepart_uc
 
 space = ' '
 
@@ -18,6 +18,15 @@ het = '2'
 dets = {}
 dets[de] = ['de', 'die', 'deze', 'onze', 'welke', 'iedere', 'elke', 'zulke']
 dets[het] = ['het', 'dat', 'dit', 'ons', 'welk', 'ieder', 'elk', 'zulk']
+
+
+def isa_namepart(word):
+    return namepart_isa_namepart(word)
+
+def isa_namepart_uc(word):
+    return namepart_isa_namepart_uc(word)
+
+
 
 
 def lookup(dct, key):

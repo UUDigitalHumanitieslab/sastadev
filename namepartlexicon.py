@@ -7,11 +7,11 @@ tab = '\t'
 namepartlexicon = {}
 
 
-def isa_namepart(word):
+def namepart_isa_namepart(word):
     return word in namepartlexicon
 
 
-def isa_namepart_uc(word):
+def namepart_isa_namepart_uc(word):
     if word is None or word == '':
         result = False
     else:
