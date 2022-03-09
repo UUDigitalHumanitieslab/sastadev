@@ -542,7 +542,7 @@ def phicompatible(snode, vnode):
         elif '2i' in vnodepersons:
             subjbegin = getattval(subjnode, 'begin')
             vnodeend = getattval(vnode, 'end')
-            result = subjperson == '2' and '2i' in vnodepersons and subjbegin == vnodeend and \
+            result = subjperson == '2' and '2i' in vnodepersons and subjbegin >= vnodeend and \
                 subjnodelemma in ['jij', 'je']
         elif 'u' in vnodepersons:
             subjnodelemma = getattval(subjnode, 'lemma')

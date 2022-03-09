@@ -12,6 +12,9 @@ chatspecials = ['xxx', 'yyy']
 
 lexicon = celex
 
+#Alpino often analyses certain words as tsw though they should be analysed as nouns
+tswnouns = ['baby', 'jongen', 'juf', 'jufforouw', 'mam', 'mama', 'mamma', 'meisje', 'mens', 'meneer', 'mevrouw',
+            'pap', 'papa', 'pappa', 'stouterd', 'opa', 'oma']
 
 de = '1'
 het = '2'

@@ -2,23 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9ca1e0e0-24c6-4f42-bd3a-26abb519be4b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/checkcorrection.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db2docx.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHAT_Annotation.py" beforeDir="false" afterPath="$PROJECT_DIR$/CHAT_Annotation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TARSPpostfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/TARSPpostfunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alpino.py" beforeDir="false" afterPath="$PROJECT_DIR$/alpino.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cleanCHILDEStokens.py" beforeDir="false" afterPath="$PROJECT_DIR$/cleanCHILDEStokens.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/corrector.py" beforeDir="false" afterPath="$PROJECT_DIR$/corrector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/correcttreebank.py" beforeDir="false" afterPath="$PROJECT_DIR$/correcttreebank.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/find_ngram.py" beforeDir="false" afterPath="$PROJECT_DIR$/find_ngram.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lexicon.py" beforeDir="false" afterPath="$PROJECT_DIR$/lexicon.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/macros/newimperatives.txt" beforeDir="false" afterPath="$PROJECT_DIR$/macros/newimperatives.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/macros/sastamacros1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/macros/sastamacros1.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metadata.py" beforeDir="false" afterPath="$PROJECT_DIR$/metadata.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/methods/TARSP Index Current.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/methods/TARSP Index Current.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mismatches.py" beforeDir="false" afterPath="$PROJECT_DIR$/mismatches.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/queryfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/queryfunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/methods/ASTA Index Current.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/methods/ASTA Index Current.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readcsv.py" beforeDir="false" afterPath="$PROJECT_DIR$/readcsv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sastadev.py" beforeDir="false" afterPath="$PROJECT_DIR$/sastadev.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sastalog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sastalog.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sastatok.py" beforeDir="false" afterPath="$PROJECT_DIR$/sastatok.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sastatoken.py" beforeDir="false" afterPath="$PROJECT_DIR$/sastatoken.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smallclauses.py" beforeDir="false" afterPath="$PROJECT_DIR$/smallclauses.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sva.py" beforeDir="false" afterPath="$PROJECT_DIR$/sva.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/treebankfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/treebankfunctions.py" afterDir="false" />
@@ -33,42 +30,47 @@
     <session id="-1849218364">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="5" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.100" value="1" />
+          <entry key="project.open.time.12" value="2" />
+          <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.133" value="1" />
           <entry key="project.open.time.16" value="1" />
           <entry key="project.open.time.161" value="1" />
+          <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.20" value="1" />
           <entry key="project.open.time.22" value="1" />
-          <entry key="project.open.time.25" value="1" />
+          <entry key="project.open.time.23" value="1" />
+          <entry key="project.open.time.25" value="2" />
           <entry key="project.open.time.26" value="1" />
           <entry key="project.open.time.28" value="1" />
           <entry key="project.open.time.29" value="1" />
+          <entry key="project.open.time.39" value="1" />
           <entry key="project.open.time.58" value="1" />
           <entry key="project.open.time.78" value="1" />
-          <entry key="project.opened" value="15" />
+          <entry key="project.opened" value="22" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="92" />
+          <entry key="py" value="125" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="92" />
+          <entry key="Python" value="125" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="22684" />
+          <entry key="py" value="42878" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="22684" />
+          <entry key="Python" value="42878" />
         </counts>
       </usages-collector>
     </session>
@@ -76,26 +78,104 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/corrector.py">
+        <entry file="file://$PROJECT_DIR$/correcttreebank.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="978" column="87" selection-start-line="978" selection-start-column="87" selection-end-line="978" selection-end-column="87" />
+            <state relative-caret-position="5321">
+              <caret line="337" selection-start-line="335" selection-end-line="337" />
+              <folding>
+                <element signature="e#0#35#0" expanded="true" />
+                <marker date="1643707541982" expanded="true" signature="6559:6562" ph="..." />
+                <marker date="1643707541982" expanded="true" signature="9467:9614" ph="..." />
+                <marker date="1643707541982" expanded="true" signature="27695:27880" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/treebankfunctions.py">
+        <entry file="file://$PROJECT_DIR$/../../lassy/anncor-checks.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="1" column="16" selection-start-line="1" selection-start-column="8" selection-end-line="1" selection-end-column="16" />
+            <state relative-caret-position="7208">
+              <caret line="449" column="12" selection-start-line="449" selection-start-column="12" selection-end-line="449" selection-end-column="12" />
               <folding>
-                <element signature="e#37#47#0" expanded="true" />
-                <marker date="1642609598694" expanded="true" signature="5386:5520" ph="..." />
-                <marker date="1642609598694" expanded="true" signature="49099:49104" ph="..." />
-                <marker date="1642609598694" expanded="true" signature="49886:51642" ph="..." />
-                <marker date="1642609598694" expanded="true" signature="51457:51642" ph="..." />
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../lassy/adhocselfiles.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="782">
+              <caret line="47" column="34" selection-start-line="47" selection-start-column="34" selection-end-line="47" selection-end-column="34" />
+              <folding>
+                <element signature="e#0#27#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/smallclauses.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4505">
+              <caret line="274" column="29" selection-start-line="274" selection-start-column="29" selection-end-line="274" selection-end-column="29" />
+              <folding>
+                <element signature="e#0#27#0" expanded="true" />
+                <marker date="1643199143103" expanded="true" signature="3715:3785" ph="..." />
+                <marker date="1643199143103" expanded="true" signature="5258:6035" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/checkcorrection.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="13" column="24" selection-start-line="13" selection-start-column="24" selection-end-line="13" selection-end-column="24" />
+              <folding>
+                <element signature="e#70#79#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/db2docx.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3264">
+              <caret line="197" selection-start-line="197" selection-end-line="197" />
+              <folding>
+                <element signature="e#0#25#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../../sastadevaux/quickparse.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="34">
+              <caret line="2" selection-start-line="2" selection-end-line="2" />
+              <folding>
+                <marker date="1646144808763" expanded="true" signature="144:289" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tokeniseCHILDES.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cleanCHILDEStokens.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="99" column="13" selection-start-line="99" selection-start-column="4" selection-end-line="99" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -103,89 +183,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sastadev.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="236">
-              <caret line="736" column="9" selection-start-line="736" selection-start-column="9" selection-end-line="736" selection-end-column="9" />
+            <state relative-caret-position="11356">
+              <caret line="705" selection-start-line="705" selection-end-line="705" />
               <folding>
                 <element signature="e#1160#1194#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/external_functions.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="48" selection-start-line="7" selection-start-column="45" selection-end-line="7" selection-end-column="48" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/queryfunctions.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="9" column="131" lean-forward="true" selection-start-line="6" selection-end-line="9" selection-end-column="131" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/find_ngram.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3927">
-              <caret line="235" column="45" selection-start-line="235" selection-start-column="45" selection-end-line="235" selection-end-column="45" />
-              <folding>
-                <marker date="1642757076841" expanded="true" signature="7229:7306" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../../sastadevaux/expandquery.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="17" column="24" selection-end-line="31" selection-end-column="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/../../sastadevaux/testquery.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="202">
-              <caret line="36" column="33" lean-forward="true" selection-start-line="36" selection-start-column="33" selection-end-line="36" selection-end-column="33" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sastatoken.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="714">
-              <caret line="42" column="43" selection-start-line="42" selection-start-column="43" selection-end-line="42" selection-end-column="43" />
-              <folding>
-                <marker date="1642607306784" expanded="true" signature="1801:1806" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CHAT_Annotation.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="9129">
-              <caret line="544" column="31" selection-start-line="544" selection-start-column="31" selection-end-line="544" selection-end-column="31" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <marker date="1642513559026" expanded="true" signature="19721:19966" ph="..." />
               </folding>
             </state>
           </provider>
@@ -202,36 +203,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>etree.dump</find>
-      <find>exactm</find>
-      <find>etree.d</find>
-      <find>getutt</find>
-      <find>Miss</find>
-      <find>Missing utt</find>
-      <find>getuttid</find>
-      <find>getno</find>
-      <find>updateto</find>
-      <find>deletewo</find>
-      <find>deletio</find>
-      <find>deletewordnodes</find>
-      <find>getnodeendmap</find>
-      <find>adapt</find>
-      <find>indezemwp</find>
-      <find>correctPdit</find>
-      <find>mkinsertmeta</find>
-      <find>exactmis</find>
-      <find>token mismatch</find>
-      <find>mis</find>
-      <find>Omit</find>
-      <find>smallc</find>
-      <find>misma</find>
-      <find>mism</find>
-      <find>getsvacorrections</find>
-      <find>debug =</find>
-      <find>getmarkpos</find>
-      <find>treebank</find>
-      <find>VzN</find>
-      <find>correctP</find>
+      <find>inser</find>
+      <find>debug = T</find>
+      <find>correct</find>
+      <find>debug</find>
+      <find>mktokenlist</find>
+      <find>small</find>
+      <find>tokens</find>
+      <find>correctt</find>
+      <find>cleante</find>
+      <find>miss</find>
+      <find>tokenposdict</find>
+      <find>updatetokenpos</find>
+      <find>illegalcleanedchatwords</find>
+      <find>illegal</find>
+      <find>pur</find>
+      <find>fil</find>
+      <find>zip(</find>
+      <find>wrongovergen</find>
+      <find>dir</find>
+      <find>selectcorrection</find>
+      <find>disambig</find>
+      <find>cleantext</find>
+      <find>Alternative</find>
+      <find>dis</find>
+      <find>ambig</find>
+      <find>fl</find>
+      <find>fileli</find>
+      <find>fl_print</find>
+      <find>FL</find>
+      <find>45</find>
     </findStrings>
     <replaceStrings>
       <replace>SDLOGGER</replace>
@@ -263,40 +264,49 @@
         <option value="$PROJECT_DIR$/TARSPpostfunctions.py" />
         <option value="$PROJECT_DIR$/metadata.py" />
         <option value="$PROJECT_DIR$/sastatok.py" />
-        <option value="$PROJECT_DIR$/cleanCHILDEStokens.py" />
         <option value="$PROJECT_DIR$/CHAT_Annotation.py" />
-        <option value="$PROJECT_DIR$/correcttreebank.py" />
         <option value="$PROJECT_DIR$/mismatches.py" />
         <option value="$PROJECT_DIR$/sastatoken.py" />
-        <option value="$PROJECT_DIR$/treebankfunctions.py" />
-        <option value="$PROJECT_DIR$/sva.py" />
-        <option value="$PROJECT_DIR$/smallclauses.py" />
         <option value="$PROJECT_DIR$/queryfunctions.py" />
         <option value="$PROJECT_DIR$/find_ngram.py" />
-        <option value="$PROJECT_DIR$/sastadev.py" />
-        <option value="$PROJECT_DIR$/corrector.py" />
         <option value="$PROJECT_DIR$/../../sastadevaux/testquery.py" />
+        <option value="$PROJECT_DIR$/lexicon.py" />
+        <option value="$PROJECT_DIR$/readcsv.py" />
+        <option value="$PROJECT_DIR$/smallclauses.py" />
+        <option value="$PROJECT_DIR$/cleanCHILDEStokens.py" />
+        <option value="$PROJECT_DIR$/sastadev.py" />
+        <option value="$PROJECT_DIR$/deregularise.py" />
+        <option value="$PROJECT_DIR$/treebankfunctions.py" />
+        <option value="$PROJECT_DIR$/corrector.py" />
+        <option value="$PROJECT_DIR$/alpino.py" />
+        <option value="$PROJECT_DIR$/sva.py" />
+        <option value="$PROJECT_DIR$/correcttreebank.py" />
+        <option value="$PROJECT_DIR$/../../lassy/anncor-checks.py" />
+        <option value="$PROJECT_DIR$/../../lassy/adhocselfiles.py" />
+        <option value="$PROJECT_DIR$/checkcorrection.py" />
+        <option value="$PROJECT_DIR$/db2docx.py" />
+        <option value="$PROJECT_DIR$/../../sastadevaux/quickparse.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-15" />
-    <option name="y" value="-20" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-25" />
+    <option name="y" value="1" />
     <option name="width" value="1940" />
-    <option name="height" value="1050" />
+    <option name="height" value="1039" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/jodijk/Dropbox/jodijk/myprograms/python/sastadev/sastadev/sastadev.py" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/find_ngram.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../sastadevaux/quickparse.py" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -310,7 +320,49 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.testquery">
+  <component name="RunManager" selected="Python.quickparse">
+    <configuration name="acetest" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../lassy" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../lassy/anncor-checks.py" />
+      <option name="PARAMETERS" value="-f &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\lassy\acetest\laura47_0186.xml&quot;" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="adhocselfiles" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../lassy" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../lassy/adhocselfiles.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="asta01" type="PythonConfigurationType" factoryName="Python">
       <module name="sastadev" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -353,6 +405,48 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="checkcorrections" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/checkcorrection.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="db2docx" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/db2docx.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="find_ngram" type="PythonConfigurationType" factoryName="Python">
       <module name="sastadev" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -374,6 +468,48 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="quickparse" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../sastadevaux" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../sastadevaux/quickparse.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="sctest" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sastadev.py" />
+      <option name="PARAMETERS" value="-f &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadevaux\sctest\sctestbank.xml&quot; -m &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadev\sastadev\methods\TARSP Index Current.xlsx&quot; -a &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadevaux\sctest\sctestbank.xlsx&quot;" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="sdtest" type="PythonConfigurationType" factoryName="Python">
       <module name="sastadev" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -388,6 +524,27 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../sastadevaux/sd_test.py" />
       <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="stap03 (dev)" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sastadev.py" />
+      <option name="PARAMETERS" value="-f &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\stapdata\STAP_03.xml&quot; -a  &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\stapdata\STAP_03.xlsx&quot; -m &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadev\sastadev\methods\STAP_Index_Current.xlsx&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -458,6 +615,48 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="tarsp_03 (dev)  nocorr" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sastadev.py" />
+      <option name="PARAMETERS" value="-f &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\tarsp\Tarsp_03.xml&quot; -m &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadev\sastadev\methods\TARSP Index Current.xlsx&quot; -a &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\SASTA_Tarsp_sample_03.xlsx&quot; --corr=0" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tarsp_03 (dev) " type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sastadev.py" />
+      <option name="PARAMETERS" value="-f &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\tarsp\Tarsp_03.xml&quot; -m &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadev\sastadev\methods\TARSP Index Current.xlsx&quot; -a &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\SASTA_Tarsp_sample_03.xlsx&quot;" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="tbs2zip" type="PythonConfigurationType" factoryName="Python">
       <module name="sastadev" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -472,6 +671,27 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../sastadevaux/tbs2zip.py" />
       <option name="PARAMETERS" value="-h" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_asta" type="PythonConfigurationType" factoryName="Python">
+      <module name="sastadev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Odijk101\AppData\Local\Continuum\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sastadev.py" />
+      <option name="PARAMETERS" value="-f &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\astadata\ASTA\test_asta.xml&quot; -a  &quot;D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\astadata\ASTA\test_asta.xlsx&quot; -m &quot;D:\jodijk\Dropbox\jodijk\myprograms\python\sastadev\sastadev\methods\ASTA Index Current.xlsx&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -565,17 +785,27 @@
     </configuration>
     <list>
       <item itemvalue="Python.asta01" />
+      <item itemvalue="Python.test_asta" />
       <item itemvalue="Python.tarsp10" />
       <item itemvalue="Python.tarsp_02 (dev)" />
+      <item itemvalue="Python.tarsp_03 (dev) " />
+      <item itemvalue="Python.tarsp_03 (dev)  nocorr" />
       <item itemvalue="Python.sdtest" />
       <item itemvalue="Python.tbs2zip" />
       <item itemvalue="Python.asta10" />
       <item itemvalue="Python.stap10" />
+      <item itemvalue="Python.stap03 (dev)" />
       <item itemvalue="Python.test_smallclauses" />
       <item itemvalue="Python.test_stap" />
       <item itemvalue="Python.test_tarsp" />
+      <item itemvalue="Python.acetest" />
+      <item itemvalue="Python.checkcorrections" />
+      <item itemvalue="Python.adhocselfiles" />
       <item itemvalue="Python.find_ngram" />
       <item itemvalue="Python.testquery" />
+      <item itemvalue="Python.quickparse" />
+      <item itemvalue="Python.sctest" />
+      <item itemvalue="Python.db2docx" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -592,16 +822,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
+    <frame x="-20" y="1" width="1552" height="831" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.110677086" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.11053316" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32967034" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32967034" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4010989" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32177532" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39805827" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -652,7 +881,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/treebankfunctions.py</url>
-          <line>1572</line>
+          <line>1681</line>
           <option name="timeStamp" value="37" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -662,7 +891,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/correcttreebank.py</url>
-          <line>203</line>
+          <line>202</line>
           <option name="timeStamp" value="79" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -672,7 +901,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/correcttreebank.py</url>
-          <line>202</line>
+          <line>201</line>
           <option name="timeStamp" value="97" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -682,7 +911,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/correcttreebank.py</url>
-          <line>247</line>
+          <line>246</line>
           <option name="timeStamp" value="102" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -692,28 +921,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/correcttreebank.py</url>
-          <line>548</line>
+          <line>561</line>
           <option name="timeStamp" value="145" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/mismatches.py</url>
           <line>117</line>
           <option name="timeStamp" value="149" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/corrector.py</url>
-          <line>977</line>
-          <option name="timeStamp" value="155" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/corrector.py</url>
-          <line>526</line>
-          <option name="timeStamp" value="156" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/corrector.py</url>
-          <line>533</line>
-          <option name="timeStamp" value="158" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../../sastadevaux/testquery.py</url>
@@ -735,11 +949,132 @@
           <line>39</line>
           <option name="timeStamp" value="162" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../sastadevaux/quickparse.py</url>
+          <line>22</line>
+          <option name="timeStamp" value="163" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../sastadevaux/quickparse.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="164" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/db2docx.py</url>
+          <line>317</line>
+          <option name="timeStamp" value="167" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/db2docx.py</url>
+          <line>211</line>
+          <option name="timeStamp" value="171" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treebankfunctions.py</url>
+          <line>1488</line>
+          <option name="timeStamp" value="185" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treebankfunctions.py</url>
+          <line>1559</line>
+          <option name="timeStamp" value="188" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dedup.py</url>
+          <line>455</line>
+          <option name="timeStamp" value="189" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treebankfunctions.py</url>
+          <line>1598</line>
+          <option name="timeStamp" value="222" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/mismatches.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="223" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/db2docx.py</url>
+          <line>249</line>
+          <option name="timeStamp" value="224" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sastadev.py</url>
+          <line>732</line>
+          <option name="timeStamp" value="226" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sastadev.py</url>
+          <line>705</line>
+          <option name="timeStamp" value="227" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/correcttreebank.py</url>
+          <line>323</line>
+          <option name="timeStamp" value="228" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/checkcorrection.py</url>
+          <line>63</line>
+          <option name="timeStamp" value="238" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sva.py</url>
+          <line>407</line>
+          <option name="timeStamp" value="251" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/correcttreebank.py</url>
+          <line>332</line>
+          <option name="timeStamp" value="252" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/correcttreebank.py</url>
+          <line>101</line>
+          <option name="timeStamp" value="253" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../lassy/anncor-checks.py</url>
+          <line>339</line>
+          <option name="timeStamp" value="254" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../lassy/anncor-checks.py</url>
+          <line>632</line>
+          <option name="timeStamp" value="255" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../lassy/adhocselfiles.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="257" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../lassy/adhocselfiles.py</url>
+          <line>21</line>
+          <option name="timeStamp" value="258" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/db2docx.py</url>
+          <line>179</line>
+          <option name="timeStamp" value="259" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/db2docx.py</url>
+          <line>45</line>
+          <option name="timeStamp" value="260" />
+        </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="leaves[1]" />
+        <watch expression="nodeendmap" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="breakpointCondition">
@@ -756,77 +1091,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/allresults.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="23" selection-start-line="23" selection-end-line="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SAFreader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7276">
-          <caret line="435" column="7" selection-start-line="435" selection-start-column="7" selection-end-line="435" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/stringfunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5049">
-          <caret line="297" column="10" selection-start-line="297" selection-start-column="10" selection-end-line="297" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/targets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="619">
-          <caret line="47" lean-forward="true" selection-start-line="47" selection-end-line="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/filefunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-59" />
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/ntpath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="112" selection-start-line="112" selection-end-line="112" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/stapforms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="18" column="11" selection-start-line="18" selection-start-column="11" selection-end-line="18" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/astaforms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5950">
-          <caret line="357" selection-start-line="357" selection-end-line="357" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ASTApostfunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
-          <caret line="162" column="10" selection-start-line="162" selection-start-column="10" selection-end-line="162" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" selection-start-line="11" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../sastadevaux/sd_test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
@@ -855,9 +1119,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lexicon.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/namepartlexicon.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -869,13 +1130,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="9" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dedup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2907">
-          <caret line="187" column="32" selection-start-line="187" selection-start-column="32" selection-end-line="187" selection-end-column="32" />
         </state>
       </provider>
     </entry>
@@ -921,16 +1175,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../sastadevaux/runsasta.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="986">
-          <caret line="62" column="12" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
-          <folding>
-            <element signature="e#913#946#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/tokenize.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1068">
@@ -959,41 +1203,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cleanCHILDEStokens.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="103" column="11" selection-start-line="103" selection-start-column="11" selection-end-line="103" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/smallclauses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2924">
-          <caret line="181" column="37" selection-start-line="181" selection-start-column="37" selection-end-line="181" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/correcttreebank.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" column="16" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
-          <folding>
-            <marker date="1642582529675" expanded="true" signature="6539:6542" ph="..." />
-            <marker date="1642582529675" expanded="true" signature="9468:9615" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mismatches.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1887">
-          <caret line="117" selection-start-line="117" selection-end-line="117" />
-          <folding>
-            <marker date="1642588387392" expanded="true" signature="3474:3917" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/metadata.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1054">
@@ -1001,29 +1210,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sva.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8483">
-          <caret line="508" selection-start-line="508" selection-end-line="508" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/expandquery.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/treebankfunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="16" selection-start-line="1" selection-start-column="8" selection-end-line="1" selection-end-column="16" />
-          <folding>
-            <element signature="e#37#47#0" expanded="true" />
-            <marker date="1642609598694" expanded="true" signature="5386:5520" ph="..." />
-            <marker date="1642609598694" expanded="true" signature="49099:49104" ph="..." />
-            <marker date="1642609598694" expanded="true" signature="49886:51642" ph="..." />
-            <marker date="1642609598694" expanded="true" signature="51457:51642" ph="..." />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/external_functions.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -1036,9 +1224,27 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3927">
           <caret line="235" column="45" selection-start-line="235" selection-start-column="45" selection-end-line="235" selection-end-column="45" />
-          <folding>
-            <marker date="1642757076841" expanded="true" signature="7229:7306" ph="..." />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lexicon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="14" column="83" selection-start-line="14" selection-start-column="83" selection-end-line="14" selection-end-column="83" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/codecs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="320" selection-start-line="320" selection-end-line="320" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/queryfunctions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="9" column="131" selection-start-line="6" selection-end-line="9" selection-end-column="131" />
         </state>
       </provider>
     </entry>
@@ -1049,60 +1255,237 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../sastadevaux/testquery.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="561">
+          <caret line="36" column="33" selection-start-line="36" selection-start-column="33" selection-end-line="36" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/readcsv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="697">
+          <caret line="43" selection-start-line="43" selection-end-line="43" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/sastatoken.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="714">
           <caret line="42" column="43" selection-start-line="42" selection-start-column="43" selection-end-line="42" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/docx/table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="392">
+          <caret line="455" selection-start-line="455" selection-end-line="455" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/copy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="137" selection-start-line="137" selection-end-line="137" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/xlrd/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="110" selection-start-line="110" selection-end-line="110" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dedup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8279">
+          <caret line="503" column="22" selection-start-line="503" selection-start-column="19" selection-end-line="503" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mismatches.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1904">
+          <caret line="118" selection-start-line="118" selection-end-line="118" />
           <folding>
-            <marker date="1642607306784" expanded="true" signature="1801:1806" ph="..." />
+            <marker date="1642588387392" expanded="true" signature="3474:3917" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/deregularise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4624">
+          <caret line="275" column="28" selection-start-line="275" selection-start-column="16" selection-end-line="275" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda3/Lib/site-packages/docx/image/image.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="45" selection-start-line="45" selection-end-line="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/treebankfunctions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="1602" column="69" selection-start-line="1602" selection-start-column="69" selection-end-line="1602" selection-end-column="69" />
+          <folding>
+            <element signature="e#37#47#0" expanded="true" />
+            <marker date="1643620529169" expanded="true" signature="5386:5520" ph="..." />
+            <marker date="1643620529169" expanded="true" signature="49080:49163" ph="..." />
+            <marker date="1643620529169" expanded="true" signature="49367:50242" ph="..." />
+            <marker date="1643620529169" expanded="true" signature="51305:51310" ph="..." />
+            <marker date="1643620529169" expanded="true" signature="52092:55670" ph="..." />
+            <marker date="1643620529169" expanded="true" signature="52117:52201" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CHAT_Annotation.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9129">
-          <caret line="544" column="31" selection-start-line="544" selection-start-column="31" selection-end-line="544" selection-end-column="31" />
+        <state relative-caret-position="102">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/corrector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6834">
+          <caret line="436" selection-start-line="436" selection-end-line="436" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../sastadevaux/runsasta.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="986">
+          <caret line="62" column="12" selection-start-line="62" selection-start-column="12" selection-end-line="62" selection-end-column="12" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <marker date="1642513559026" expanded="true" signature="19721:19966" ph="..." />
+            <element signature="e#913#946#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sva.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6766">
+          <caret line="407" selection-start-line="407" selection-end-line="407" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/alpino.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="476">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/correcttreebank.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5321">
+          <caret line="337" selection-start-line="335" selection-end-line="337" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+            <marker date="1643707541982" expanded="true" signature="6559:6562" ph="..." />
+            <marker date="1643707541982" expanded="true" signature="9467:9614" ph="..." />
+            <marker date="1643707541982" expanded="true" signature="27695:27880" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../lassy/anncor-checks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7208">
+          <caret line="449" column="12" selection-start-line="449" selection-start-column="12" selection-end-line="449" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../lassy/adhocselfiles.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="782">
+          <caret line="47" column="34" selection-start-line="47" selection-start-column="34" selection-end-line="47" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smallclauses.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4505">
+          <caret line="274" column="29" selection-start-line="274" selection-start-column="29" selection-end-line="274" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+            <marker date="1643199143103" expanded="true" signature="3715:3785" ph="..." />
+            <marker date="1643199143103" expanded="true" signature="5258:6035" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/checkcorrection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="13" column="24" selection-start-line="13" selection-start-column="24" selection-end-line="13" selection-end-column="24" />
+          <folding>
+            <element signature="e#70#79#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/db2docx.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3264">
+          <caret line="197" selection-start-line="197" selection-end-line="197" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sastadev.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="736" column="9" selection-start-line="736" selection-start-column="9" selection-end-line="736" selection-end-column="9" />
+        <state relative-caret-position="11356">
+          <caret line="705" selection-start-line="705" selection-end-line="705" />
           <folding>
             <element signature="e#1160#1194#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/corrector.py">
+    <entry file="file://$PROJECT_DIR$/tokeniseCHILDES.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cleanCHILDEStokens.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="978" column="87" selection-start-line="978" selection-start-column="87" selection-end-line="978" selection-end-column="87" />
+        <state relative-caret-position="120">
+          <caret line="99" column="13" selection-start-line="99" selection-start-column="4" selection-end-line="99" selection-end-column="13" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/queryfunctions.py">
+    <entry file="file://$PROJECT_DIR$/../../sastadevaux/quickparse.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="131" lean-forward="true" selection-start-line="6" selection-end-line="9" selection-end-column="131" />
+        <state relative-caret-position="34">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../sastadevaux/testquery.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="36" column="33" lean-forward="true" selection-start-line="36" selection-start-column="33" selection-end-line="36" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <marker date="1646144808763" expanded="true" signature="144:289" ph="..." />
           </folding>
         </state>
       </provider>

@@ -22,7 +22,9 @@ scope_close = '>'
 emptyreplacement = eps
 anybutrb = r'[^\]]*'
 
+errormarking = 'Error Marking'
 omittedword = 'Omitted Word'
+specialform = 'Special Form'
 
 def fullre(pat):
     result = r'^' + pat + r'$'
@@ -534,7 +536,7 @@ annotations = [
     # here additional things could be done
     CHAT_Annotation('Overlap Precedes', '8.4:71-72', '10.3:75',
                     CHAT_SimpleScopedRegex(r'\[\<[0-9]?\]', keep, True, monadic), simplescopedmetafunction),
-    CHAT_Annotation('Special Form', '6.3:37', '8.3:43-44', CHAT_SimpleRegex(specialformpat, getsfword, False),
+    CHAT_Annotation(specialform, '6.3:37', '8.3:43-44', CHAT_SimpleRegex(specialformpat, getsfword, False),
                     simplemetafunction(getsfvalue)),
     CHAT_Annotation('Unintelligible Speech', '6.4:41', '8.4:47', CHAT_SimpleRegex(r'xxx', keep, False),
                     simplemetafunction(epsf)),
@@ -613,9 +615,9 @@ annotations = [
                     simplemetafunction(identity)),
 
     # erroR marking crucially before [/] [//] [///] etc
-    CHAT_Annotation('Error Marking', '8.5:75', '10.5:78', CHAT_SimpleScopedRegex(r'\[\*\]', keep, True, monadic),
+    CHAT_Annotation(errormarking, '8.5:75', '10.5:78', CHAT_SimpleScopedRegex(r'\[\*\]', keep, True, monadic),
                     simplescopedmetafunction),
-    CHAT_Annotation('Error Marking', '8.5:75', '10.5:78',
+    CHAT_Annotation(errormarking, '8.5:75', '10.5:78',
                     CHAT_ComplexRegex((r'\[\*', r'[\w:\-\+=]+', r'\]'), (keep, eps), False),
                     complexmetafunction),
 

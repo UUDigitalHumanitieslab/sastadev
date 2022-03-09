@@ -20,6 +20,16 @@ bstate, mstate, estate = 0, 1, 2
 
 bstate, ostate, oostate, costate, ccstate = 0, 1, 2, 3, 4
 
+#this should be identical to the checkpattern of cleanCHILDESMD
+# #checkpattern = re.compile(r'[][\(\)&%@/=><_0^~↓↑↑↓⇗↗→↘⇘∞≈≋≡∙⌈⌉⌊⌋∆∇⁎⁇°◉▁▔☺∬Ϋ123456789·\u22A5\u00B7\u0001\u2260\u21AB]')
+# checkpattern = re.compile(r'[][\(\)&%@/=><_0^~↓↑↑↓⇗↗→↘⇘∞≈≋≡∙⌈⌉⌊⌋∆∇⁎⁇°◉▁▔☺∬Ϋ·\u22A5\u00B7\u0001\u2260\u21AB]')
+# # + should not occur except as compound marker black+board
+# # next one split up in order to do substitutions
+# pluspattern = re.compile(r'(\W)\+|\+(\W)')
+# pluspattern1 = re.compile(r'(\W)\+')
+# pluspattern2 = re.compile(r'\+(\W)')
+illegalcleanedchatsymbols = '<>'
+
 
 def findscopeclose(tokens, offset=0):
     tokenctr = 0
@@ -83,6 +93,10 @@ def checkline(line, newline, outfilename, lineno, logfile):
         print('charcodes=<{}>'.format(thecodes), file=logfile)
 
 
+def purifytokens(tokens):
+    result = [token for token in tokens if token.word not in illegalcleanedchatsymbols]
+    return result
+
 def cleantext(utt, repkeep, tokenoutput=False):
     newutt = robustness(utt)
     tokens = sastatok.sasta_tokenize(newutt)
@@ -90,6 +104,8 @@ def cleantext(utt, repkeep, tokenoutput=False):
     intokenstrings = [str(token) for token in tokens]
     # print(space.join(intokenstrings))
     (newtokens, metadata) = cleantokens(tokens, repkeep)
+    #remove symbol tokens that should not be there anymore
+    newtokens = purifytokens(newtokens)
     resultwordlist = [t.word for t in newtokens]
     resultstring = smartjoin(resultwordlist)
     resultposlist = [t.pos for t in newtokens]
@@ -136,7 +152,10 @@ def removesuspects(str):
     return result
 
 
-robustnessrules = [(re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
+robustnessrules = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
+                   (re.compile('#'), '#', '', 'Number Sign (#, Unicode U+0023) removed'),
+                   #(re.compile('#'), '#', '(.)', 'Number Sign (#, Unicode U+0023) replaced by CHAT (short) pause code: (.)'),
+                   (re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
                    (re.compile(r'\[\+trn\]'), '[+trn]', '[+ trn]', 'Missing space'),
                    (re.compile(r'\[:(?![:\s])'), '[:', '[: ', 'Missing space'),
                    (re.compile(r'(?<=\w)\+\.\.\.'), '+...', ' +...', 'Missing space'),

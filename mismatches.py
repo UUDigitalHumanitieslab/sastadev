@@ -115,7 +115,7 @@ def getmarkposition(position, nodeendmap, uttid):
         if str(position) in nodeendmap[uttid]:
             result = nodeendmap[uttid][str(position)]
         else:
-            SDLOGGER.error('getmarkposition: No mapping found for position {}'.format(position))
+            SDLOGGER.error('getmarkposition: No mapping found for position {} in utterance {}'.format(position, uttid))
             result = 1
     else:
         SDLOGGER.error('getmarkposition: No mappings found for uttid {}'.format(uttid))

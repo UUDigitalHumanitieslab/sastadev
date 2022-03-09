@@ -2,7 +2,7 @@ from config import SDLOGGER
 from treebankfunctions import getstree, getnodeyield, getattval
 from dedup import filledpauseslexicon
 from top3000 import ishuman, transitive, intransitive, pseudotr, isanimate, genlexicon
-from lexicon import known_word
+from lexicon import known_word, tswnouns
 from namepartlexicon import namepart_isa_namepart
 from sastatoken import Token, show
 from tokenmd import TokenListMD
@@ -11,7 +11,7 @@ from metadata import Meta, bpl_delete, defaultpenalty, insertion, smallclause, S
 
 space = ' '
 biglocvzs = ['achter', 'beneden', 'binnen', 'boven', 'bovenop', 'buiten', 'dichtbij']
-surenouns = ['mama', 'papa']
+#surenouns = ['mama', 'papa'] replaced by tswnouns from lexicon
 longvowels = ['a', 'é', 'i', 'o', 'u', 'y']
 vowels = ['a', 'e', 'i', 'o', 'u']
 
@@ -36,7 +36,7 @@ def realword(node):
     result = result and getattval(node, 'pt') not in ['tsw', 'let']
     result = result and getattval(node, 'lemma') not in ['xx', 'xxx', 'yyy', 'www', 'hè']
     result = result and getattval(node, 'lemma') not in filledpauseslexicon
-    result = result or lemma(node) in surenouns
+    result = result or lemma(node) in tswnouns
 
 
     return result
@@ -135,6 +135,10 @@ def biglocvz(node):
     result = getattval(node, 'lemma') in biglocvzs
     return result
 
+def istswnoun(node):
+    result = getattval(node, 'lemma') in tswnouns
+    return result
+
 def getleavestr(leaves):
     leaveseq = ['{}:{}:{}:{}'.format(getattval(leave, 'end'), getattval(leave, 'word'), getattval(leave, 'lemma'),
                                      getattval(leave, 'pt')) for leave
@@ -147,7 +151,7 @@ def knownnoun(node):
     lemma = getattval(node, 'lemma')
     postag = pt(node)
     result = postag == 'n' and (known_word(word) or known_word(lemma))
-    result = result or lemma in surenouns
+    result = result or lemma in tswnouns
     return result
 
 def nominal(node):
@@ -166,7 +170,14 @@ def mktoken(node, map):
     return result
 
 
-def mktokenlist(leaves, themap, fpos, inserttokens):
+def mktokenlist(tokens, fpos, inserttokens):
+    resultlist = [token for token in tokens if token.pos <= fpos] + \
+                 inserttokens + \
+                 [token for token in tokens if token.pos > fpos]
+    return resultlist
+
+
+def oldmktokenlist(leaves, themap, fpos, inserttokens):
     resultlist = [mktoken(lv, themap) for lv in leaves if bg(lv) <= fpos] + \
                  inserttokens + \
                  [mktoken(lv, themap) for lv in leaves if bg(lv) > fpos]
@@ -212,35 +223,35 @@ def smallclauses(tokensmd, tree):
         if (aanwvnw(first) or knownnoun(first) or perspro(first)) and (predadv(second)or vz(second) or bw(second)):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('moet' if getal(first) != 'mv' else 'moeten', fpos, subpos=5)]
-            resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         elif (aanwvnw(second) or knownnoun(second) or perspro(second) or tw(second)) and predadv(first):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('moet' if getal(second) != 'mv' else 'moeten', fpos, subpos=5)]
-            resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+            resultlist = mktokenlist(tokens,  fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         elif (aanwvnw(first) or knownnoun(first)) and adj(second):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('is' if getal(first) != 'mv' else 'zijn', fpos, subpos=5)]
-            resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         elif (aanwvnw(second) or knownnoun(second) or tw(second)) and biglocvz(first):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('is' if getal(first) != 'mv' else 'zijn', fpos, subpos=5)]
-            resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
         elif knownnoun(first) and knownnoun(second) and not(lemma(first) == lemma(second)):
             if hasgenitive(first):
                 genform = makegen(lemma(first))
                 fpos = int(getattval(first, 'begin'))
                 inserttokens = [Token('[: ' + genform + ']', fpos, subpos=5)]
-                resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+                resultlist = mktokenlist(tokens, fpos, inserttokens)
                 metadata += mkinsertmeta(inserttokens, resultlist)
             else:
                 fpos = int(getattval(first, 'begin'))
                 inserttokens = [Token('is' if getal(first) != 'mv' else 'zijn', fpos, subpos=5)]
-                resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+                resultlist = mktokenlist(tokens, fpos, inserttokens)
                 metadata += mkinsertmeta(inserttokens, resultlist)
-        elif (aanwvnw(first) or knownnoun(first)) and inf(second):
+        elif (aanwvnw(first) or knownnoun(first) or istswnoun(first)) and inf(second):
             if intransitive(second):
                 firstsubject = True
             elif transitive(second) and ishuman(first):
@@ -255,12 +266,12 @@ def smallclauses(tokensmd, tree):
             else:
                 fpos = -1
                 inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
-            resultlist =  mktokenlist(leaves, themap, fpos, inserttokens)
+            resultlist =  mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         elif not nominal(first) and not ww(first) and inf(second):
             fpos = -1
             inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
-            resultlist = mktokenlist(leaves, themap, fpos, inserttokens)
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
     if resultlist == []:
         result = []

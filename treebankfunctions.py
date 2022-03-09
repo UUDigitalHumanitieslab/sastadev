@@ -191,6 +191,17 @@ def getnodeendmap(stree):
     return result
 
 
+def getxselseuttid(syntree):
+    result = getmeta(syntree, 'xsid')
+    if result is None:
+        result = getmeta(syntree, 'uttid')
+        if result is None:
+            result = getsentid(syntree)
+            if result is None:
+                result = '0'
+    return result
+
+
 def getuttid(syntree):
     result = getmeta(syntree, 'uttid')
     if result is None:
@@ -1406,7 +1417,7 @@ def deletechildlessparent(thenode):
         deletechildlessparent(theparent)
 
 
-def deletewordnodes(tree, begins):
+def olddeletewordnodes(tree, begins):
     # print('tree:')
     # etree.dump(tree, pretty_print=True)
     newtree = deepcopy(tree)
@@ -1442,6 +1453,66 @@ def deletewordnodes(tree, begins):
 
         return newtree
 
+def childless(node):
+    children = [ch for ch in node]
+    result = children == []
+    return result
+
+def deletewordnodes(tree, begins):
+    newtree = deepcopy(tree)
+    newtree = deletewordnodes2(newtree, begins)
+    newtree = adaptsentence(newtree)
+    return newtree
+
+def deletewordnodes2(tree, begins):
+    if tree is None:
+        return tree
+    for child in tree:
+        if child.tag == 'node':
+            newchild = deletewordnodes2(child, begins)
+        else:
+            newchild = child
+    for child in tree:
+        if child.tag == 'node':
+            childbegin = getattval(child, 'begin')
+            childbeginint  = int(childbegin)
+            if childbeginint in begins and childless(child):
+                tree.remove(child)
+            if 'cat' in child.attrib and childless(child):  # if its children have been deleted earlier
+                tree.remove(child)
+     # tree  begin en end bijwerken
+    if tree. tag == 'node':
+        newchildren = [n for n in tree]
+        if newchildren != []:
+            (minbegin, maxend) = getbeginend(newchildren)
+            tree.attrib['begin'] = minbegin
+            tree.attrib['end'] = maxend
+    return tree
+
+
+def olddeletewordnodes2(tree, begins):
+    if tree is None:
+        return tree
+    else:
+        for child in tree:
+            newchild = deletewordnodes2(child, begins)
+        if tree.tag == 'node':
+            nodebegin = getattval(tree, 'begin')
+            children = [child for child in tree]
+            if int(nodebegin) in begins:  # only words and indexnodes can be deleted
+                theparent = tree.getparent()
+                if theparent is not None:
+                    if children == []:
+                        theparent.remove(tree)
+                        # if the parent has no sons left, it should be deleted as well
+                        deletechildlessparent(theparent)
+                    if theparent.tag == 'node':
+                        newchildren = [n for n in theparent]
+                        (minbegin, maxend) = getbeginend(newchildren)
+                        theparent.attrib['begin'] = minbegin
+                        theparent.attrib['end'] = maxend
+        return tree
+
 
 def treeinflate(stree, start=10, inc=10):
     # fatstree = deepcopy(stree)
@@ -1467,37 +1538,80 @@ def treeinflate(stree, start=10, inc=10):
                 stree.attrib['end'] = str((ie * 10) + 1)
 
 
-def updatetokenpos(resulttree, tokenposdict):
-    # resulttree = deepcopy(stree)
-    if resulttree is None:
-        return resulttree
-    for child in resulttree:
-        newchild = updatetokenpos(child, tokenposdict)
-    if ('pt' in resulttree.attrib or 'pos' in resulttree.attrib) and \
-            'end' in resulttree.attrib and 'begin' in resulttree.attrib:
-        intend = int(resulttree.attrib['end'])
-        if intend in tokenposdict:
-            newendint = tokenposdict[intend]
-            resulttree.attrib['end'] = str(newendint)
-            resulttree.attrib['begin'] = str(newendint - 1)
-        else:
-            SDLOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
-            # etree.dump(resulttree)
-            SDLOGGER.error('tokenposdict={}'.format(tokenposdict))
-    elif 'cat' in resulttree.attrib:
-        children = [ch for ch in resulttree]
-        (b, e) = getbeginend(children)
-        resulttree.attrib['begin'] = b
-        resulttree.attrib['end'] = e
+def isidentitymap(dct):
+    result = all([key == value for key, value in dct.items()])
+    return result
 
-    return resulttree
 
+def updatetokenpos(stree, tokenposdict):
+    if stree is None:
+        return stree
+    if isidentitymap(tokenposdict):
+        return stree
+    resulttree = deepcopy(stree)
+    resulttree = updatetokenpos2(resulttree, tokenposdict)
+    finaltree = updateindexnodes(resulttree)
+
+    return finaltree
+
+def updatetokenpos2(node, tokenposdict):
+    if node is None:
+        return node
+    for child in node:
+        newchild = updatetokenpos2(child, tokenposdict)
+    if node.tag == 'node':
+        if ('pt' in node.attrib or 'pos' in node.attrib) and \
+                'end' in node.attrib and 'begin' in node.attrib:
+            intend = int(node.attrib['end'])
+            if intend in tokenposdict:
+                newendint = tokenposdict[intend]
+                node.attrib['end'] = str(newendint)
+                node.attrib['begin'] = str(newendint - 1)
+            else:
+                SDLOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
+                fulltrees = node.xpath('ancestor::node[@cat="top"]')
+                if fulltrees != []:
+                    fulltree = fulltrees[0]
+                else:
+                    fulltree = node
+                sent = getyield(fulltree)
+                SDLOGGER.error('utterance={}'.format(sent))
+                # etree.dump(resulttree)
+                SDLOGGER.error('tokenposdict={}'.format(tokenposdict))
+        elif 'cat' in node.attrib:
+            children = [ch for ch in node]
+            (b, e) = getbeginend(children)
+            node.attrib['begin'] = b
+            node.attrib['end'] = e
+    return node
+
+
+
+def updateindexnodes(stree):
+    #presupposes that the non bareindex nodes have been adapted already
+    indexednodesmap = getindexednodesmap(stree)
+    newstree = deepcopy(stree)
+    for node in newstree.iter():
+        if node.tag == 'node':
+            if bareindexnode(node):
+                idx = getattval(node, 'index')
+                newbegin = getattval(indexednodesmap[idx], 'begin')
+                newend = getattval(indexednodesmap[idx], 'end')
+                node.attrib['begin'] = newbegin
+                node.attrib['end'] = newend
+    return newstree
 
 def treewithtokenpos(thetree, tokenlist):
     resulttree = deepcopy(thetree)
     thetreeleaves = getnodeyield(thetree)
     intbegins = [int(getattval(n, 'begin')) for n in thetreeleaves]
     tokenlistbegins = [t.pos + t.subpos for t in tokenlist]
+    if len(intbegins) != len(tokenlistbegins):
+        SDLOGGER.error('token mismatch')
+        SDLOGGER.error('tree yield={}'.format(getyield(thetree)))
+        SDLOGGER.error('tokenlist={}'.format(tokenlist))
+        SDLOGGER.error('intbegins={}'.format(intbegins))
+        SDLOGGER.error('tokenlistbegins ={}'.format(tokenlistbegins))
     pospairs = zip(intbegins, tokenlistbegins)
     thetreetokenposdict = {treepos + 1: tokenpos + 1 for treepos, tokenpos in pospairs}
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
@@ -1508,7 +1622,13 @@ def fatparse(utterance, tokenlist):
     stree = PARSE_FUNC(utterance)
     fatstree = deepcopy(stree)
     treeinflate(fatstree, start=10, inc=10)
-    fatstree = treewithtokenpos(fatstree, tokenlist)
+    debug = False
+    if debug:
+        showtree(fatstree, text='fatparse: fatstree')
+    reducedtokenlist = [token for token in tokenlist if not token.skip]
+    fatstree = treewithtokenpos(fatstree, reducedtokenlist)
+    if debug:
+        showtree(fatstree, text='fatparse: fatstree')
     return fatstree
 
 

@@ -16,7 +16,7 @@ from dedup import (cleanwordofnort, find_duplicates2, find_janeenouduplicates,
                    getunwantedtokens, nodesfindjaneenou)
 from deregularise import correctinflection
 from iedims import getjeforms
-from lexicon import de, dets, getwordinfo, het, informlexicon, known_word, isa_namepart
+from lexicon import de, dets, getwordinfo, het, informlexicon, known_word, isa_namepart, tswnouns
 from macros import expandmacros
 # from namepartlexicon import namepart_isa_namepart
 from sastatok import sasta_tokenize
@@ -168,7 +168,8 @@ def reduce(tokens, tree):
     # remove tsw incl goh och hé oke but not ja, nee, nou
     tswtokens = [n for n in reducedtokens if n.pos in token2nodemap
                  and getattval(token2nodemap[n.pos], 'pt') == 'tsw'
-                 and getattval(token2nodemap[n.pos], 'lemma') not in {'ja', 'nee', 'nou'}]
+                 and getattval(token2nodemap[n.pos], 'lemma') not in {'ja', 'nee', 'nou'}
+                 and getattval(token2nodemap[n.pos], 'lemma') not in tswnouns]
     tswpositions = [n.pos for n in tswtokens]
     allremovetokens += tswtokens
     allremovepositions == tswpositions
@@ -573,7 +574,7 @@ def mkuttwithskips(tokens, delete=True):
     return result, tokenposlist
 
 
-def getexpansions(uttmd):
+def oldgetexpansions(uttmd):
     expansionfound = False
     newtokens = []
     tokenctr = 0
@@ -600,6 +601,50 @@ def getexpansions(uttmd):
             tokenposlist.append(token.pos)
             tokenctr += 1
             newtokenctr += 1
+
+    # adapt the metadata
+    if expansionfound:
+        meta2 = Meta('OrigCleanTokenPosList', tokenposlist, annotatedposlist=[],
+                     annotatedwordlist=[], annotationposlist=tokenposlist,
+                     annotationwordlist=[], cat='Tokenisation', subcat=None, source=SASTA, penalty=defaultpenalty,
+                     backplacement=bpl_none)
+        newmd.append(meta2)
+        result = [TokenListMD(newtokens, newmd)]
+    else:
+        result = []
+
+    return result
+
+
+
+def getexpansions(uttmd):
+    expansionfound = False
+    newtokens = []
+    tokenctr = 0
+    #newtokenctr = 0
+    tokenposlist = []
+    newmd = uttmd.metadata
+    for tokenctr, token in enumerate(uttmd.tokens):
+        if token.word.lower() in basicexpansions:
+            expansionfound = True
+            for (rlist, c, n, v) in basicexpansions[token.word.lower()]:
+                rlisttokenctr = 0
+                for rlisttokenctr, rw in enumerate(rlist):
+                    if rlisttokenctr == 0:
+                        newtoken = Token(rw, token.pos)
+                    else:
+                        newtoken = Token(rw, token.pos, subpos=rlisttokenctr)
+                    newtokens.append(newtoken)
+                    tokenposlist.append(token.pos)
+                    nwt = Token(space.join(rlist), token.pos)
+                meta1 = mkSASTAMeta(token, nwt, n, v, c, subcat=None, penalty=defaultpenalty,
+                                    backplacement=bpl_none)
+                newmd.append(meta1)
+
+        else:
+            newtoken = Token(token.word, token.pos)
+            newtokens.append(newtoken)
+            tokenposlist.append(token.pos)
 
     # adapt the metadata
     if expansionfound:
@@ -928,10 +973,10 @@ def getwrongdetalternatives(tokensmd, tree, uttid):
                         meta = mkSASTAMeta(token, newcurtoken, name='GrammarError', value='deheterror', cat='Error',
                                            backplacement=bpl_node)
                         metadata.append(meta)
+                        correctiondone = True
                     else:
                         newcurtokenword = token.word
                 newtokens.append(Token(newcurtokenword, token.pos))
-                correctiondone = True
             else:
                 newcurtokenword = token.word
                 newtokens.append(token)
@@ -962,6 +1007,7 @@ def correctPdit(tokensmd, tree, uttid):
     metadata = tokensmd.metadata
     newtokens = []
     tokenctr = 0
+    nonskiptokenctr = 0
     prevtoken = None
     for token in tokens:
         tokennode = next(filter(lambda x: getattval(x, 'begin') == str(token.pos + token.subpos), tokennodes), None)
@@ -970,7 +1016,7 @@ def correctPdit(tokensmd, tree, uttid):
                                                                                               'die'}:
             tokenrel = getattval(tokennode, 'rel')
             tokenpt = getattval(tokennode, 'pt')
-            prevtokennode = tokennodes[tokenctr - 1] if tokenctr > 0 else None
+            prevtokennode = tokennodes[nonskiptokenctr - 1] if tokenctr > 0 else None
             if prevtokennode is not None:
                 prevpt = getattval(prevtokennode, 'pt')
                 prevparent = prevtokennode.getparent()
@@ -992,6 +1038,8 @@ def correctPdit(tokensmd, tree, uttid):
         else:
             newtokens.append(token)
         tokenctr += 1
+        if not token.skip:
+            nonskiptokenctr += 1
         prevtoken = token
     result = TokenListMD(newtokens, metadata)
     if correctiondone:

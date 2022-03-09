@@ -44,7 +44,7 @@ from SAFreader import get_annotations, get_golddata, richscores2scores, exact2gl
 from SAFreader import all_levels
 from external_functions import str2functionmap
 from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
-    showtree, getnodeendmap
+    showtree, getnodeendmap, getxselseuttid
 from SRFreader import read_referencefile
 from goldcountreader import get_goldcounts
 from TARSPscreening import screening4stage
@@ -286,7 +286,7 @@ def isxpathquery(query):
 
 def doqueries(syntree, queries, exactresults, allmatches, criterion):
     uttid = getuttid(syntree)
-    #uttid = getuttidorno(syntree)
+    # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)
     # core queries
@@ -314,8 +314,8 @@ def doqueries(syntree, queries, exactresults, allmatches, criterion):
                 exactresults[queryid] = []
             # matchingids = [uttid for x in matches]
             for m in matches:
-                #showtree(m)
-                #showtree(syntree)
+                # showtree(m)
+                # showtree(syntree)
                 if (queryid, uttid) in allmatches:
                     allmatches[(queryid, uttid)].append((m, syntree))
                 else:
@@ -488,7 +488,6 @@ def exact2results(exactresults):
     return results
 
 
-
 def adaptpositions(rawexactresults, nodeendmap):
     newexactresults = {}
     for qid in rawexactresults:
@@ -499,7 +498,6 @@ def adaptpositions(rawexactresults, nodeendmap):
             newlist.append(newtuple)
         newexactresults[qid] = newlist
     return newexactresults
-
 
 
 def passfilter(rawexactresults, method):
@@ -733,24 +731,31 @@ else:
             analysedtrees.append(syntree)
             doprequeries(syntree, queries, rawexactresults, allmatches)
             docorequeries(syntree, queries, rawexactresults, allmatches)
-        uttid = getuttid(syntree)
-        #showtree(syntree)
-        nodeendmap[uttid] = getnodeendmap(syntree)
 
-        #uttno = getuttno(syntree)
-        #allutts[uttno] = getyield(syntree)
-        allutts[uttid] = getyield(syntree)
+            # uttid = getuttid(syntree)
+            uttid = getxselseuttid(syntree)
+            # showtree(syntree)
+            if uttid in nodeendmap:
+                SDLOGGER.error('Duplicate uttid in sample: {}'.format(uttid))
+            nodeendmap[uttid] = getnodeendmap(syntree)
+
+            # uttno = getuttno(syntree)
+            # allutts[uttno] = getyield(syntree)
+            allutts[uttid] = getyield(syntree)
 
     # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
     # rawexactresults = getexactresults(allmatches)
     rawexactresults2 = passfilter(rawexactresults, themethod)
+    exactresults = adaptpositions(rawexactresults2, nodeendmap)
+
+    #pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
+    #@@to be implemented @@ of misschien in de loop hierboven al?
 
 # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
 # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
 
 # adapt the exactresults  positions to the reference
 
-exactresults = adaptpositions(rawexactresults2, nodeendmap)
 
 coreresults = exact2results(exactresults)
 
@@ -906,7 +911,7 @@ for queryid in results:
     # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
     if exact:
         newrows = exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches, allutts,
-                                  platinumcheckfile,  silverannotationsdict, annotationinput )
+                                  platinumcheckfile, silverannotationsdict, annotationinput)
         allrows += newrows
     else:
         if theresultsminusgold != {}:
@@ -983,7 +988,9 @@ overallmethods = [(1, 'Overall (defined pre and core queries in the profile)',
 logheader = ['datetime', 'treebank', 'scorenr,' 'R', 'P', 'F1', 'P-R', 'P-P', 'P-F1', 'GP-R', 'GP-P', 'GP-F1', 'ref',
              'method']
 logname = 'sastalog.txt'
-biglogfile = open(logname, 'a', encoding='utf8')
+logpath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
+logfullname = os.path.join(logpath, logname)
+biglogfile = open(logfullname, 'a', encoding='utf8')
 
 exactlynow = datetime.datetime.now()
 now = exactlynow.replace(microsecond=0).isoformat()

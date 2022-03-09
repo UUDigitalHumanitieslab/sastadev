@@ -4,8 +4,7 @@ from copy import copy, deepcopy
 from lxml import etree
 
 from basicreplacements import basicreplacements
-from cleanCHILDEStokens import cleantext
-from corrector import getcorrections, mkuttwithskips
+from corrector import getcorrections, mkuttwithskips, disambiguationdict
 from lexicon import de, dets, known_word
 from metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_none,
                       bpl_word, bpl_wordlemma)
@@ -23,6 +22,7 @@ from config import PARSE_FUNC, SDLOGGER
 from metadata import insertion
 from sastatoken import inflate, deflate, tokeninflate, insertinflate
 from CHAT_Annotation import omittedword
+from cleanCHILDEStokens import cleantext
 
 ampersand = '&'
 
@@ -180,15 +180,14 @@ def insertskips(newstree,  tokenlist, stree):
     :param stree: original stree with parses of the skipped elements
     :return: adapted tree, with the skipped elements inserted (node from the original stree as -- under top, begin/ends updates
     '''
-    # debug = True
     debug = False
 
     if debug:
-        print('\nnewstree:')
-        etree.dump(newstree)
+        showtree(newstree, 'newstree:')
+        showtree(stree, 'stree')
     reducedtokenlist = [t for t in tokenlist if not t.skip]
     resulttree = treewithtokenpos(newstree, reducedtokenlist)
-    debug = False
+
     if debug:
         showtree(resulttree, text='resulttree:')
     streetokenlist = [ t for t in tokenlist if t.subpos == 0]
@@ -312,8 +311,14 @@ def correct_stree(stree, method, corr):
     fatstree = deepcopy(stree)
     treeinflate(fatstree)
     # adapt the begins and ends  in the tree based on the token positions
+    debug = False
+    if debug:
+        showtree(fatstree, text='fatstree voor:')
     tokenlist = [t for t in cleanutttokens]
     fatstree = treewithtokenpos(fatstree, tokenlist)
+    if debug:
+        showtree(fatstree, text='fatstree na:')
+    debug = False
     #(fatstree, text='fattened tree:')
 
     ctmds = getcorrections(cleanutttokens, method, fatstree)
@@ -329,10 +334,14 @@ def correct_stree(stree, method, corr):
         correctionwordlist = tokenlist2stringlist(correctiontokenlist, skip=True)
 
         # parse the corrections
-        if correctionwordlist != cleanuttwordlist:
+        if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
             correction, tokenposlist = mkuttwithskips(correctiontokenlist)
             cwmdmetadata += [Meta('parsed_as', correction, cat='Correction', source='SASTA')]
-            fatnewstree = fatparse(correction, correctiontokenlist)
+            reducedcorrectiontokenlist = [token for token in correctiontokenlist if not token.skip]
+            fatnewstree = fatparse(correction, reducedcorrectiontokenlist)
+            debugb = False
+            if debugb:
+                showtree(fatnewstree, text='fatnewstree')
 
             if fatnewstree is None:
                 fatnewstree = fatstree  # is this what we want?@@
@@ -348,7 +357,7 @@ def correct_stree(stree, method, corr):
                 sentencenode = getsentencenode(fatnewstree)
                 if sentencenode is not None:
                     sentencenode.attrib['sentid'] = sentid
-                if debug:
+                if debugb:
                     showtree(fatnewstree)
                 # etree.dump(fatnewstree)
 
@@ -397,8 +406,12 @@ def correct_stree(stree, method, corr):
     newcorrection2 = thecorrection[2]
     nodes2deletebegins = []
     # next adapted, the tree is fat already
+    debug = False
+    if debug:
+        showtree(thetree, text='thetree before treewithtokenpos')
     thetree = treewithtokenpos(thetree, correctiontokenlist)
-    #showtree(thetree, text='thetree')
+    if debug:
+        showtree(thetree, text='thetree after treewithtokenpos')
     for meta in thecorrection[2]:
         if meta.backplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
@@ -563,14 +576,14 @@ def getorigutt(stree):
 
 
 def scorefunction(obj): return (-obj.unknownwordcount, -obj.dpcount, -obj.dhyphencount, obj.goodcatcount,
-                                -obj.basicreplaceecount, -obj.hyphencount, obj.dimcount, obj.compcount, obj.supcount,
+                                -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount, obj.dimcount, obj.compcount, obj.supcount,
                                 obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount, -obj.penalty)
 
 
 class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount,
                  compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, goodcatcount,
-                 hyphencount, basicreplaceecount):
+                 hyphencount, basicreplaceecount, ambigcount):
         self.stree = stree
         self.altid = altid
         self.altsent = altsent
@@ -588,6 +601,7 @@ class Alternative():
         self.goodcatcount = int(goodcatcount)
         self.hyphencount = int(hyphencount)
         self.basicreplaceecount = int(basicreplaceecount)
+        self.ambigcount = int(ambigcount)
 
     def alt2row(self, uttid, base, user1='', user2='', user3='', bestaltids=[], selected=None, origsent=None):
         scores = ['BEST'] if self.altid in bestaltids else []
@@ -707,6 +721,12 @@ def isvalidword(w):
         return True
 
 
+def countambigwords(stree):
+    leaves = getnodeyield(stree)
+    ambignodes = [leave for leave in leaves if getattval(leave, 'word').lower() in disambiguationdict]
+    result = len(ambignodes)
+    return result
+
 def selectcorrection(stree, ptmds, corr):
     # to be implemented@@
     # it is presupposed that ptmds is not []
@@ -733,9 +753,10 @@ def selectcorrection(stree, ptmds, corr):
         hyphencount = len([node for node in nt.xpath('.//node[contains(@word, "-")]')])
         basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
                                   if getattval(node, 'word').lower() in basicreplacements])
+        ambigwordcount = countambigwords(nt)
         alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount, compcount, supcount,
                           compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, goodcatcount,
-                          hyphencount, basicreplaceecount)
+                          hyphencount, basicreplaceecount, ambigwordcount)
         alts[altid] = alt
         altid += 1
     orandalts = OrigandAlts(orig, alts)

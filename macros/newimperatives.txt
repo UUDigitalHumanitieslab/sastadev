@@ -57,6 +57,8 @@ indexnode = """(@index and not (@cat or @pt or @pos))"""
 suindexnode = """(%indexnode% and @rel="su") """
 nonfinindexnode = """(%indexnode% and parent::node[%nonfinvc%])"""
 
+fillednode = """node[not(%indexnode%)]"""
+
 particlesvp = """(@rel="svp" and @pt="vz")"""
 
 realcomplormodnodecount = """count(%realcomplormodnode% | node[%nonfinvc%]/%realcomplormodnode%)"""
@@ -107,6 +109,10 @@ Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww" and %realcomplor
 
 
 Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+
+Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and node[%Tarsp_Basic_VC%] and count(%fillednode%)=2)"""
+
+Tarsp_VCW_X = """(%Tarsp_BasicVCW% or (node[%nonfinvc% and %Tarsp_BasicVCW%] and count(node)=1) )""" 
 
 
 Tarsp_OndWBVC = """

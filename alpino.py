@@ -30,9 +30,12 @@ def getdehetwordinfo(wrd):
 
     # we only want to consider nouns or words of unknown word class (such as kopje in CELEX)
     wordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[0] in ['n', 'None']]
-    # if any of the alternatives is a de-word, we empty the whole list
-    if any([wordinfo[1] == lexicon.de for wordinfo in wordinfos]):
-        wordinfos = []
+    # if any of the alternatives is a de-word, we keep only these
+    dewordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[1] == lexicon.de]
+    if dewordinfos != []:
+        wordinfos = dewordinfos
+    #if any([wordinfo[1] == lexicon.de for wordinfo in wordinfos]):
+    #    wordinfos = []
 
     # if not found yet we check with Alpino
     if wordinfos != []:

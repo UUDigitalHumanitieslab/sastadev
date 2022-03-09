@@ -59,6 +59,7 @@ Tarsp_vc_sibling = """parent::node[ node[@rel="vc"]]"""
 Tarsp_predc_sibling = """parent::node[ node[@rel="predc"]]"""
 Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
+Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
 
 Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and 
  ((
@@ -66,7 +67,7 @@ Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and
    @lemma = "hebben" 
    ) and 
    not(%Tarsp_vc_sibling%)) or
-   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling%)
+   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
  )
 """
 
@@ -78,7 +79,7 @@ Tarsp_Kop = """
 
     ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or
 
-     (@lemma="zijn" and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%))
+     (@lemma="zijn" and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%) and not(%Tarsp_onlymodR_sibling%))
     )
  )
 """
@@ -312,7 +313,12 @@ spec_noun = """ (@pt="spec" and (@pos="name" or starts-with(@frame,"proper_name"
  
  """
  
- asta_noun = """ ((@pt="n" and not(%ASTA_filled_pause%) and not(%ASTA_numeral%)) or (@pt="ww" and @positie="nom") or (%monthname%) or @pos="name")
+ asta_numvrij = """(@pt="tw" and @positie="vrij" and @rel!="mwp" and @rel!="det" and @rel!="mod" )"""
+ 
+ asta_noun = """ ((@pt="n" and not(%ASTA_filled_pause%) and not(%ASTA_numeral%)) or 
+                  (@pt="ww" and @positie="nom") or 
+				  (%monthname%) or 
+				  @pos="name" )
  """
 
 
