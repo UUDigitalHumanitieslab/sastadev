@@ -1,6 +1,8 @@
 from xlsx import getxlsxdata
 from treebankfunctions import getattval
 from namepartlexicon import namepart_isa_namepart
+from config import SD_DIR
+import os
 
 def ishuman(node):
     lemma = getattval(node, 'lemma')
@@ -36,7 +38,7 @@ def intransitive(node):
 
 semicolon = ';'
 
-filename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\woordenlijsten\Woordenlijsten Current.xlsx'
+filename = os.path.join(SD_DIR, r'top3000\Woordenlijsten Current.xlsx')
 
 
 lexiconheader, lexicondata = getxlsxdata(filename)

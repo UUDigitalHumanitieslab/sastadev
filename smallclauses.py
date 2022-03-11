@@ -15,6 +15,8 @@ biglocvzs = ['achter', 'beneden', 'binnen', 'boven', 'bovenop', 'buiten', 'dicht
 longvowels = ['a', 'é', 'i', 'o', 'u', 'y']
 vowels = ['a', 'e', 'i', 'o', 'u']
 
+uniquelynominativeperspros = ['ik', 'jij', 'hij', 'zij', 'wij', 'ikke', "'k", "k", "ie", "we"]
+
 
 def makegen(lemma):
     if lemma is None or len(lemma) < 2:
@@ -90,6 +92,11 @@ def perspro(node):
     pt = getattval(node, 'pt')
     vwtype = getattval(node, 'vwtype')
     result = pt == 'vnw' and vwtype == 'pers'
+    return result
+
+def nomperspro(node):
+    lemma = getattval(node, 'lemma')
+    result = perspro(node) and lemma in uniquelynominativeperspros
     return result
 
 def inf(node):
@@ -225,7 +232,8 @@ def smallclauses(tokensmd, tree):
             inserttokens = [Token('moet' if getal(first) != 'mv' else 'moeten', fpos, subpos=5)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
-        elif (aanwvnw(second) or knownnoun(second) or perspro(second) or tw(second)) and predadv(first):
+        #elif (aanwvnw(second) or knownnoun(second) or perspro(second) or tw(second)) and predadv(first):
+        elif nomperspro(second)  and predadv(first):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('moet' if getal(second) != 'mv' else 'moeten', fpos, subpos=5)]
             resultlist = mktokenlist(tokens,  fpos, inserttokens)

@@ -37,9 +37,9 @@ JO_kijken_naar = """        parent::node[@cat="pp" and
 robusttopicdrop = """(@cat="sv1" and ../node[@lemma="."])"""
 
 Tarsp_hww = """
- (@lemma="kunnen" or
+ (@lemma = "kunnen" or
   @lemma = "moeten" or
-  @lemma= "hoeven" or
+  @lemma = "hoeven" or
   @lemma = "blijven" or
   @lemma = "willen" or
   @lemma = "zullen" or   
