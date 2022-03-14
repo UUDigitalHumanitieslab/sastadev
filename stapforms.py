@@ -1,16 +1,16 @@
-import logging
+from io import BytesIO
 import os
-from shutil import copyfile
+from shutil import copyfile, copyfileobj
 from collections import defaultdict
 
 from openpyxl import load_workbook
 from allresults import AllResults
-from config import SD_DIR
+from config import SD_DIR, SDLOGGER
 
 scoresheetname = 'STAP 1 - 5'
 maxutt = 50
 zerocount = 0
-basexl = os.path.join(SD_DIR, r'form_templates\STAP Excel VUmc 2018.xlsx')
+basexl = os.path.join(SD_DIR, 'form_templates', 'STAP Excel VUmc 2018.xlsx')
 
 NS = 'S001'
 OS = 'S002'
@@ -57,21 +57,27 @@ def data2rowtuples(data):
     return rowlist
 
 
-def makestapform(allresults, _, basexl=basexl):
-    # copy the basexl to a new one with the appropriate name
+def makestapform(allresults, _, basexl=basexl, in_memory=False):
+    if not in_memory:
+        # copy the basexl to a new one with the appropriate name
+        (base, ext) = os.path.splitext(allresults.filename)
+        target = base + '_STAP-Form' + '.xlsx'
 
-    (base, ext) = os.path.splitext(allresults.filename)
-    formxl = base + '_STAP-Form' + '.xlsx'
+        copyfile(basexl, target)
 
-    copyfile(basexl, formxl)
+        # open the workbook
+        wb = load_workbook(filename=target)
+    else:
+        target = BytesIO()
+        with open(basexl, 'rb') as source:
+            copyfileobj(fsrc=source, fdst=target)
+        wb = load_workbook(target)
 
     # gather the results
 
     # put the results in the right order
     rowlist = data2rowtuples(allresults.coreresults)
 
-    # open the workbook
-    wb = load_workbook(filename=formxl)
     ws = wb[scoresheetname]
 
     cols = ['U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF']
@@ -88,13 +94,14 @@ def makestapform(allresults, _, basexl=basexl):
                 cellkey = col + uttidrowstr
                 ws[cellkey] = el
         else:
-            logging.error('Unexpected utterance id encountered: {}'.format(uttid))
+            SDLOGGER.error('Unexpected utterance id encountered: {}'.format(uttid))
 
     # save the workbook
-    wb.save(formxl)
+    wb.save(target)
+    wb.close()
 
     # return the workbook- not needed
-    # return wb
+    return target
 
 
 def test():
