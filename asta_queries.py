@@ -213,13 +213,18 @@ def asta_bijzin(stree):
         if getattval(cn1, 'begin') == getattval(cn0, 'begin'):
             cn0end = getattval(cn0, 'end')
             newbegin = cn0end
-            newokptnode = find1(cn1, '//node[@pt and @begin={newbegin}]'.format(newbegin=newbegin))
-            result = sortedclausenodes[2:] + okptnodes + [newokptnode]
+            newokptnodexpath = '//node[@pt and @begin="{newbegin}"]'.format(newbegin=newbegin)
+            newokptnode = find1(cn1, newokptnodexpath)
+            result = sortedclausenodes[2:] + okptnodes
+            if newokptnode is not None:
+                result += [newokptnode]
         else:
             result = sortedclausenodes[1:] + okptnodes
     else:
         result = sortedclausenodes[1:] + okptnodes
 
+   #ad hoc statement to ensure that there are no None matches should not happen anymore
+    result = [el for el in result if el is not None]
     return result
 
 

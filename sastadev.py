@@ -315,7 +315,8 @@ def doqueries(syntree, queries, exactresults, allmatches, criterion):
             # matchingids = [uttid for x in matches]
             for m in matches:
                 # showtree(m)
-                # showtree(syntree)
+                if m is None:
+                    showtree(syntree)
                 if (queryid, uttid) in allmatches:
                     allmatches[(queryid, uttid)].append((m, syntree))
                 else:
