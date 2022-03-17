@@ -17,7 +17,8 @@ xmlformat = '''
 
 class Meta:
     def __init__(self, name, value, annotationwordlist=[], annotationposlist=[], annotatedposlist=[],
-                 annotatedwordlist=[], atype='text', cat=None, subcat=None, source=None, penalty=defaultpenalty,
+                 annotatedwordlist=[], annotationcharlist=[], annotationcharposlist=[], annotatedcharlist=[],
+                 annotatedcharposlist=[], atype='text', cat=None, subcat=None, source=None, penalty=defaultpenalty,
                  backplacement=defaultbackplacement):
         self.atype = atype
         self.name = name
@@ -25,6 +26,10 @@ class Meta:
         self.annotationposlist = annotationposlist
         self.annotatedwordlist = annotatedwordlist
         self.annotatedposlist = annotatedposlist
+        self.annotationcharlist = annotationcharlist
+        self.annotationcharposlist = annotationcharposlist
+        self.annotatedcharlist = annotatedcharlist
+        self.annotatedcharposlist = annotatedcharposlist
         self.value = value
         self.cat = cat
         self.subcat = subcat
@@ -93,3 +98,7 @@ substringrep = 'Substring repetition'
 repetition = 'Repetition'
 fstoken = 'Retraced token'
 falsestart = 'Retracing with Correction'
+insertion = 'Insertion'
+smallclause = 'Small Clause Treatment'
+tokenmapping = 'Token Mapping'
+insertiontokenmapping = 'Insertion Token Mapping'

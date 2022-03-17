@@ -6,10 +6,10 @@ tab = '\t'
 mysep = tab
 
 
-def readcsv(filename, sep=mysep, header=True, quotechar='"'):
+def readcsv(filename, sep=mysep, header=True, quotechar='"', encoding='utf8'):
     result = []
     try:
-        infile = open(filename, 'r', encoding='utf8', newline='')
+        infile = open(filename, 'r', encoding=encoding, newline='')
     except FileNotFoundError as e:
         SDLOGGER.error(e)
         return result
@@ -25,11 +25,11 @@ def readcsv(filename, sep=mysep, header=True, quotechar='"'):
     return result
 
 
-def readheadedcsv(filename, sep=mysep, quotechar='"'):
+def readheadedcsv(filename, sep=mysep, quotechar='"', encoding='utf8'):
     result = []
     header = []
     try:
-        infile = open(filename, 'r', encoding='utf8', newline='')
+        infile = open(filename, 'r', encoding=encoding, newline='')
     except FileNotFoundError as e:
         SDLOGGER.error(e)
         return header, result

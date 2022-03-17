@@ -26,3 +26,7 @@ venv.bak/
 
 # configuration
 config.py
+
+# additional files
+.idea/
+sastalog.txt

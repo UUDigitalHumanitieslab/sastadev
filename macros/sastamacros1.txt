@@ -37,9 +37,9 @@ JO_kijken_naar = """        parent::node[@cat="pp" and
 robusttopicdrop = """(@cat="sv1" and ../node[@lemma="."])"""
 
 Tarsp_hww = """
- (@lemma="kunnen" or
+ (@lemma = "kunnen" or
   @lemma = "moeten" or
-  @lemma= "hoeven" or
+  @lemma = "hoeven" or
   @lemma = "blijven" or
   @lemma = "willen" or
   @lemma = "zullen" or   
@@ -59,6 +59,7 @@ Tarsp_vc_sibling = """parent::node[ node[@rel="vc"]]"""
 Tarsp_predc_sibling = """parent::node[ node[@rel="predc"]]"""
 Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
+Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
 
 Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and 
  ((
@@ -66,7 +67,7 @@ Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and
    @lemma = "hebben" 
    ) and 
    not(%Tarsp_vc_sibling%)) or
-   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling%)
+   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
  )
 """
 
@@ -78,7 +79,7 @@ Tarsp_Kop = """
 
     ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or
 
-     (@lemma="zijn" and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%))
+     (@lemma="zijn" and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%) and not(%Tarsp_onlymodR_sibling%))
     )
  )
 """
@@ -128,6 +129,13 @@ pv = """(@pt="ww" and @wvorm="pv" )"""
 bxnp1 = """(@cat="np" and count(node)=2 and node[@rel="hd" and @pt="ww"] and node[@rel="mod" and @pt])"""
 bxnp2 = """(@cat="np" and count(node)=2 and node[@rel="hd"] and node[@rel="mod" and %singlewordbw%])"""
 
+Tarsp_Basic_VC = """((@rel="obj1" or @rel="pc"  or @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz")) and not(%Tarsp_Basic_B%) )"""
+
+
+Tarsp_Basic_B = """(@rel="mod" or @rel="ld" or @rel="predm"  or %Tarsp_B_predc%) """
+
+Tarsp_B_predc = """(@rel=predc and (@pt="vz" or @pt="bw" or @cat="pp" or @cat="advp" or %Rpronoun%))"""
+
 Tarsp_B = """(
        ((((@rel="mod" or @rel="ld" or @rel="predm") and
           (not(@cat) or @cat!="conj") and
@@ -169,9 +177,13 @@ pobj1B = """(@rel="pc" and ../node[@rel="hd" and %locverb%])"""
 singlewordbw = """ (@pt="bw" or %Rpronoun% or %adjadv%)
 """
 
+
+
 corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
-coreBX = """(node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!=niet]/@begin ]])"""
+coreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!=niet]/@begin ]]) )"""
+
+Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and @rel="vc" and parent::node[@cat="smain" and count(node)=1] and node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and count(node[%realcomplormod%])=1 )"""
 
 
 ASTA_pred =  """(@rel="predc" or @rel="predm" or (@rel="hd" and parent::node[@rel="predc" or @rel="predm"]))"""
@@ -301,7 +313,12 @@ spec_noun = """ (@pt="spec" and (@pos="name" or starts-with(@frame,"proper_name"
  
  """
  
- asta_noun = """ ((@pt="n" and not(%ASTA_filled_pause%) and not(%ASTA_numeral%)) or (@pt="ww" and @positie="nom") or (%monthname%) or @pos="name")
+ asta_numvrij = """(@pt="tw" and @positie="vrij" and @rel!="mwp" and @rel!="det" and @rel!="mod" )"""
+ 
+ asta_noun = """ ((@pt="n" and not(%ASTA_filled_pause%) and not(%ASTA_numeral%)) or 
+                  (@pt="ww" and @positie="nom") or 
+				  (%monthname%) or 
+				  @pos="name" )
  """
 
 
@@ -479,3 +496,11 @@ robustdelpv = """(not(@rel="dp" and @begin > ancestor::node[@cat="top"]/descenda
 
 delpv = """(%coredelpv% and %robustdelpv%)"""
 
+Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or @lemma="daarom") and 
+@lemma!="er" and @lemma!="daar" and @lemma!="hier" and (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or starts-with(@lemma, 'hier')))"""
+
+Tarsp_VzN = """(%vzn1xpath% or %vzn2xpath% ) """
+
+vzn1xpath = """(@cat="pp" and (node[@pt="vz"] and node[(@pt="n" or @pt="vnw") and not (%Rpronoun%) and @rel="obj1"] and not(node[@pt="vz" and @vztype="fin"])))"""
+vzn2xpath = """(node[@lemma="in" and @rel="mwp"] and node[@lemma="deze" and @rel="mwp"])"""
+vzn3xpath = """(@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @begin>=../node[@pt="vz"]/@end and count(node)<=3] )"""

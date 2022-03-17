@@ -43,7 +43,8 @@ from config import SDLOGGER
 from SAFreader import get_annotations, get_golddata, richscores2scores, exact2global, richexact2global
 from SAFreader import all_levels
 from external_functions import str2functionmap
-from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno
+from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
+    showtree, getnodeendmap, getxselseuttid
 from SRFreader import read_referencefile
 from goldcountreader import get_goldcounts
 from TARSPscreening import screening4stage
@@ -53,7 +54,7 @@ from methods import allok
 from query import pre_process, core_process, post_process, form_process, is_preorcore, query_inform, query_exists, \
     is_pre, is_core
 from macros import expandmacros
-from mismatches import mismatches, exactmismatches
+from mismatches import mismatches, exactmismatches, getmarkposition
 from xlsx import mkworkbook
 import xlsxwriter
 from counterfunctions import counter2liststr
@@ -285,7 +286,7 @@ def isxpathquery(query):
 
 def doqueries(syntree, queries, exactresults, allmatches, criterion):
     uttid = getuttid(syntree)
-    #uttid = getuttidorno(syntree)
+    # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)
     # core queries
@@ -313,6 +314,9 @@ def doqueries(syntree, queries, exactresults, allmatches, criterion):
                 exactresults[queryid] = []
             # matchingids = [uttid for x in matches]
             for m in matches:
+                # showtree(m)
+                if m is None:
+                    showtree(syntree)
                 if (queryid, uttid) in allmatches:
                     allmatches[(queryid, uttid)].append((m, syntree))
                 else:
@@ -483,6 +487,18 @@ def exact2results(exactresults):
         resultvalue = Counter(uttidlist)
         results[qid] = resultvalue
     return results
+
+
+def adaptpositions(rawexactresults, nodeendmap):
+    newexactresults = {}
+    for qid in rawexactresults:
+        newlist = []
+        for (uttid, position) in rawexactresults[qid]:
+            newposition = getmarkposition(position, nodeendmap, uttid)
+            newtuple = (uttid, newposition)
+            newlist.append(newtuple)
+        newexactresults[qid] = newlist
+    return newexactresults
 
 
 def passfilter(rawexactresults, method):
@@ -669,6 +685,7 @@ silverannotationsdict = getsilverannotations(perm_silverfullname, platinumchecke
                                              platinumoutfilename, options.platinuminfilename, goldscores)
 
 analysedtrees = []
+nodeendmap = {}
 
 # @vanaf nu gaat het om een treebank, dus hier een if statement toevoegen-done
 if annotationinput:
@@ -715,17 +732,30 @@ else:
             analysedtrees.append(syntree)
             doprequeries(syntree, queries, rawexactresults, allmatches)
             docorequeries(syntree, queries, rawexactresults, allmatches)
-        uttid = getuttid(syntree)
-        uttno = getuttno(syntree)
-        allutts[uttno] = getyield(syntree)
-        # allutts[uttid] = getyield(syntree)
+
+            # uttid = getuttid(syntree)
+            uttid = getxselseuttid(syntree)
+            # showtree(syntree)
+            if uttid in nodeendmap:
+                SDLOGGER.error('Duplicate uttid in sample: {}'.format(uttid))
+            nodeendmap[uttid] = getnodeendmap(syntree)
+
+            # uttno = getuttno(syntree)
+            # allutts[uttno] = getyield(syntree)
+            allutts[uttid] = getyield(syntree)
 
     # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
     # rawexactresults = getexactresults(allmatches)
-    exactresults = passfilter(rawexactresults, themethod)
+    rawexactresults2 = passfilter(rawexactresults, themethod)
+    exactresults = adaptpositions(rawexactresults2, nodeendmap)
+
+    #pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
+    #@@to be implemented @@ of misschien in de loop hierboven al?
 
 # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
 # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
+
+# adapt the exactresults  positions to the reference
 
 
 coreresults = exact2results(exactresults)
@@ -959,7 +989,9 @@ overallmethods = [(1, 'Overall (defined pre and core queries in the profile)',
 logheader = ['datetime', 'treebank', 'scorenr,' 'R', 'P', 'F1', 'P-R', 'P-P', 'P-F1', 'GP-R', 'GP-P', 'GP-F1', 'ref',
              'method']
 logname = 'sastalog.txt'
-biglogfile = open(logname, 'a', encoding='utf8')
+logpath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
+logfullname = os.path.join(logpath, logname)
+biglogfile = open(logfullname, 'a', encoding='utf8')
 
 exactlynow = datetime.datetime.now()
 now = exactlynow.replace(microsecond=0).isoformat()

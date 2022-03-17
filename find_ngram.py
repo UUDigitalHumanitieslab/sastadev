@@ -192,6 +192,8 @@ def cond17(ns, lvs, i): return lemma(ns[0]) == 'te' and getattval(ns[1], 'his') 
 def cond17a(ns, lvs, i): return lemma(ns[0]) == 'te' and word(ns[1]) == 'kregen' and lemma(ns[2]) == 'te'
 
 
+def cond18(ns, lvs, i): return pt(ns[0]) == 'vz' and lemma(ns[1]) in {'dit', 'dat', 'deze', 'die'}
+
 ngram1 = Ngram(4, cond1)
 ngram2 = Ngram(4, cond2)
 ngram3 = Ngram(2, cond3)
@@ -211,7 +213,7 @@ ngram16 = Ngram(4, cond16)  # geen beroerte een beroerte
 ngram16a = Ngram(4, cond16a)  # geen beroerte een beroerte test
 ngram17 = Ngram(4, cond17)  # te kregen te krijgen
 ngram17a = Ngram(4, cond17a)  # te kregen te krijgen test
-
+ngram18 = Ngram(2, cond18)  # met dit
 
 def main():
 
@@ -231,7 +233,7 @@ def main():
                 leaves = getnodeyield(tree)
                 cleanleaves = [leave for leave in leaves if getattval(leave, 'word') not in filledpauseslexicon]
                 cleanwordlist = [getattval(leave, 'word') for leave in cleanleaves]
-                matches = findmatches(ngram1, cleanleaves)
+                matches = findmatches(ngram18, cleanleaves)
                 # matches = sipvjpvjsi(cleanleaves, tree)
                 for match in matches:
                     uttid = getuttid(tree)
