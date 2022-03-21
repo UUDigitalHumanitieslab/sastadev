@@ -6,7 +6,7 @@ from lxml import etree
 
 import config
 
-from alpinoparsing import escape_alpino_input
+from alpinoparsing import escape_alpino_input, isempty
 
 
 class AlpinoSentenceParser:
@@ -38,6 +38,8 @@ class AlpinoSentenceParser:
 @lru_cache(maxsize=128)
 def parse(sentence):
     ''' Wrapper for use in sastadev'''
+    if isempty(sentence):
+        return None
     alp = AlpinoSentenceParser()
     xml = alp.parse_sentence(sentence)
     return etree.fromstring(bytes(xml, encoding='utf-8'))
