@@ -7,7 +7,7 @@ comma = ','
 
 altitemsep = comma
 implies_sep = comma
-itemseppattern = r'[,-; ]'
+itemseppattern = r'[,-;\s]'
 
 
 def getboolean(str):
