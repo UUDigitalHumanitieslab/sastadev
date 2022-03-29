@@ -63,6 +63,7 @@ from rpf1 import getscores, getevalscores, sumfreq
 from targets import get_mustbedone, get_targets
 from correcttreebank import correcttreebank, corr0, corr1, corrn, validcorroptions, errorwbheader
 from methods import Method, defaultfilters
+from dataconfig import intreebanksfolder
 
 listDir = False
 if listDir:
@@ -74,15 +75,23 @@ stap = 'stap'
 asta = 'asta'
 gramat = 'gramat'
 
+codepath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
+methodspath = os.path.join(codepath, 'methods')
+
 supported_methods = {}
-supported_methods[tarsp] = './methods/TARSP Index Current.xlsx'
-supported_methods[asta] = './methods/ASTA Index Current.xlsx'
-supported_methods[stap] = './methods/TARSP Index Current.xlsx'
+supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
+supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 platinumchecksuffix = '_platinum.check.tsv'
 platinumcheckeditedsuffix = '_platinum.check-edited.tsv'
 platinumsuffix = '.platinum.tsv'
 platinumeditedsuffix = '.platinum-edited.tsv'
+bronzesuffix = '_bronze'
+silversuffix = '_silver'
+
+path2permfolder = 'silverperm'
+
 
 # target_intarget, target_xsid, target_all = 0, 1, 2
 # intargetxpath = '//meta[@name="intarget"]'
@@ -518,7 +527,8 @@ def passfilter(rawexactresults, method):
     return exactresults
 
 
-defaulttarsp = r"TARSP Index Current.xlsx"
+#defaulttarsp = r"TARSP Index Current.xlsx"
+defaulttarsp = supported_methods[tarsp]
 
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="infilename",
@@ -551,13 +561,44 @@ if options.corr is None:
 if options.corr not in validcorroptions:
     validcorrstr = comma.join(validcorroptions)
     SDLOGGER.error('Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
-    exit(-1)
+    exit(1)
 
 # @ hier ook toestaan dat er een annotatiefile als input komt (.xlsx)-done
 if options.infilename is None:  # an XML file or an.xlsx file
     SDLOGGER.error('Specify an input treebank file name to analyse (.xml) or the name of an annotationfile (.xlsx)')
     exit(1)
+elif not os.path.exists(options.infilename):
+    SDLOGGER.error('File {} not found. Aborting'.format(options.infilename))
+    exit(1)
 (inbase, inext) = os.path.splitext(options.infilename)
+basepath, basefilename = os.path.split(options.infilename)
+corepath, lastfolder = os.path.split(basepath)
+corefilename, inext = os.path.splitext(basefilename)
+
+if lastfolder == intreebanksfolder:
+    intreebankinput = True
+    analysespath = os.path.join(corepath,'analyses')
+    bronzepath = os.path.join(corepath, 'bronze')
+    silverpath = os.path.join(corepath, 'silver')
+    outtreebankspath = os.path.join(corepath, 'outtreebanks')
+    resultspath = os.path.join(corepath, 'results')
+    silverpermpath = os.path.join(corepath, path2permfolder)
+    loggingpath = os.path.join(corepath, 'logging')
+    formspath = os.path.join(corepath, 'forms')
+
+    outpaths = [analysespath, outtreebankspath, resultspath, silverpermpath, loggingpath, formspath, silverpath]
+
+    for outpath in outpaths:
+        try:
+            os.makedirs(outpath)
+        except FileExistsError:
+            pass
+else:
+    intreebankinput = False
+    analysespath = bronzepath = outtreebankspath = resultspath = loggingpath = formspath = basepath
+    silverpermpath = os.path.join(basepath, path2permfolder)
+
+
 if inext not in ['.xml', '.xlsx']:
     SDLOGGER.error('Illegal input file type: must be a treebank (.xml) or an annotationfile (.xlsx)')
     exit(1)
@@ -567,7 +608,7 @@ else:
     annotationinput = False
 
 if options.logfilename is None:
-    options.logfilename = inbase + logext
+    options.logfilename = os.path.join(loggingpath, corefilename + logext)
 
 options.methodname, options.methodfilename = treatmethod(options.methodname, options.methodfilename)
 
@@ -589,19 +630,30 @@ if options.annotationfilename is not None and options.goldcountsfilename is not 
 elif options.goldfilename is not None and options.goldcountsfilename is not None:
     SDLOGGER.info('Gold Reference file and Gold counts file found; gold counts file ignored')
 
-if options.methodfilename is None:  # an xslx file
-    options.methodfilename = defaulttarsp
+# this is not needed anymore because of treatmethod
+#if options.methodfilename is None:  # an xslx file
+#    options.methodfilename = defaulttarsp
 if options.annotationfilename is None:  # an xlsx file
-    options.annotationfilename = inbase + ".anno" + '.xslx'
+    options.annotationfilename = os.path.join(bronzepath, corefilename + bronzesuffix + xlsxext)
 if options.platinuminfilename is None:
-    options.platinuminfilename = inbase + platinumeditedsuffix + txtext
+    if intreebankinput:
+        options.platinuminfilename = os.path.join(silverpath, corefilename + platinumeditedsuffix + txtext)
+    else:
+        options.platinuminfilename = inbase + platinumeditedsuffix + txtext
 
 if options.goldfilename is not None and options.annotationfilename is not None:
     SDLOGGER.info('annotationfile and goldfile specified. Annotationfile will be used.')
+
 if options.goldfilename is None:
-    options.goldfilename = inbase + ".gold" + ".tsv" + ".txt"
+    if intreebankinput:
+        options.goldfilename = os.path.join(bronzepath, corefilename + ".gold" + ".tsv" + ".txt")
+    else:
+        options.goldfilename = inbase + ".gold" + ".tsv" + ".txt"
 if options.goldcountsfilename is None:
-    options.goldcountsfilename = inbase + ".goldcounts" + ".xlsx"
+    if intreebankinput:
+        options.goldcountsfilename = os.path.join(bronzepath, corefilename + ".goldcounts" + xlsxext)
+    else:
+        options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
 invalidqueries = {}
 
@@ -657,25 +709,31 @@ if not os.path.exists(options.infilename):
 
 # gather remarks on results of earlier runs, write them to a perm_file  and adapt the silverscore file
 
-path2permfolder = 'silverperm'
-(pathname, barefilename) = os.path.split(options.infilename)
-(base, ext) = os.path.splitext(barefilename)
-(fullbase, _) = os.path.splitext(options.infilename)
-permpath = os.path.join(pathname, path2permfolder)
+#(pathname, barefilename) = os.path.split(options.infilename)
+#(base, ext) = os.path.splitext(barefilename)
+#(fullbase, _) = os.path.splitext(options.infilename)
+#permpath = os.path.join(pathname, path2permfolder)
+
+#pathname = basepath
+#barefilename = basefilename
+base = corefilename
+ext = inext
+permpath = silverpermpath
+fullbase = inbase
 
 try:
     os.makedirs(permpath)
 except FileExistsError:
     pass
 
-perm_silverfilename = permprefix + base + '.xlsx'
+perm_silverfilename = permprefix + corefilename + '.xlsx'
 perm_silverfullname = os.path.join(permpath, perm_silverfilename)
 #
-platinumcheckeditedfullname = fullbase + platinumcheckeditedsuffix + '.xlsx'
+platinumcheckeditedfullname = os.path.join(resultspath, corefilename + platinumcheckeditedsuffix + '.xlsx')
 
-platinumoutfilename = fullbase + platinumsuffix + txtext
-platinumcheckfilename = fullbase + platinumchecksuffix + txtext
-silvercheckfilename = fullbase + platinumchecksuffix + '.xlsx'
+platinumoutfilename = os.path.join(resultspath, corefilename + platinumsuffix + txtext)
+platinumcheckfilename = os.path.join(resultspath, corefilename + platinumchecksuffix + txtext)
+silvercheckfilename = os.path.join(resultspath, corefilename + platinumchecksuffix + '.xlsx')
 
 (platbase, platext) = os.path.splitext(platinumcheckfilename)
 platinumcheckxlfullname = platbase + '.xlsx'
@@ -706,21 +764,21 @@ else:
 
     # create the new treebank
     fulltreebank = etree.ElementTree(treebank)
-    newtreebankfilename = fullbase + '_corrected' + '.xml'
-    fulltreebank.write(newtreebankfilename, encoding="UTF8", xml_declaration=False,
+    newtreebankfullname = os.path.join(outtreebankspath, corefilename + '_corrected' + '.xml')
+    fulltreebank.write(newtreebankfullname, encoding="UTF8", xml_declaration=False,
                        pretty_print=True)
 
     # create error file
-    errorreportfilename = fullbase + '_errorreport' + '.xlsx'
+    errorreportfilename = os.path.join(resultspath, corefilename + '_errorreport' + '.xlsx')
     mkerrorreport(errordict, errorreportfilename)
 
     # create error logging
-    errorloggingfilename = fullbase + '_errorlogging' + '.xlsx'
+    errorloggingfullname = os.path.join(loggingpath, corefilename + '_errorlogging' + '.xlsx')
 
     allerrorrows = []
     for orandalts in allorandalts:
-        allerrorrows += orandalts.OrigandAlts2rows(base)
-    errorwb = mkworkbook(errorloggingfilename, [errorwbheader], allerrorrows, freeze_panes=(1, 1))
+        allerrorrows += orandalts.OrigandAlts2rows(corefilename)
+    errorwb = mkworkbook(errorloggingfullname, [errorwbheader], allerrorrows, freeze_panes=(1, 1))
     errorwb.close()
 
     analysedtrees = []
@@ -771,10 +829,10 @@ dopostqueries(allresults, postquerylist, queries)
 dopostqueries(allresults, formquerylist, queries)
 
 (base, ext) = os.path.splitext(options.infilename)
-outputfilename = base + "_analysis" + tsvext + txtext
-outfile = open(outputfilename, 'w', encoding='utf8')
+outputfullname = os.path.join(resultspath, corefilename + "_analysis" + tsvext + txtext)
+outfile = open(outputfullname, 'w', encoding='utf8')
 
-outxlsx = base + "_analysis" + xlsxext
+outxlsx = os.path.join(resultspath, corefilename + "_analysis" + xlsxext)
 outworkbook = xlsxwriter.Workbook(outxlsx, {"strings_to_numbers": True})
 outworksheet = outworkbook.add_worksheet()
 outstartrow = 0
@@ -796,7 +854,7 @@ platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
 # platinumcheckfilename = base + platinumchecksuffix + txtext
 platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
 
-countcomparisonfilename = base + '_countcomparison' + '.tsv' + '.txt'
+countcomparisonfilename = os.path.join(resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
 # print the invalid queries
 for q in invalidqueries:
@@ -936,8 +994,8 @@ for queryid in results:
                                  uttstr]
             print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
-platinumcheckfullname = platinumcheckfile.name
-(base, ext) = os.path.splitext(platinumcheckfullname)
+#platinumcheckfullname = platinumcheckfile.name
+#(base, ext) = os.path.splitext(platinumcheckfilename)
 # platinumcheckxlfullname = base + '.xlsx'
 wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
 wb.close()
@@ -989,7 +1047,7 @@ overallmethods = [(1, 'Overall (defined pre and core queries in the profile)',
 logheader = ['datetime', 'treebank', 'scorenr,' 'R', 'P', 'F1', 'P-R', 'P-P', 'P-F1', 'GP-R', 'GP-P', 'GP-F1', 'ref',
              'method']
 logname = 'sastalog.txt'
-logpath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
+logpath = r'.'
 logfullname = os.path.join(logpath, logname)
 biglogfile = open(logfullname, 'a', encoding='utf8')
 

@@ -935,7 +935,7 @@ def bareindexnode(node):
 
 
 def terminal(node):
-    result = node is not None and len(node) == 0
+    result = isinstance(node, etree._Element) and node is not None and len(node) == 0
     return (result)
 
 

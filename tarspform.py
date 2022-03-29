@@ -8,7 +8,8 @@ import xlsxwriter
 from config import SD_DIR
 from counterfunctions import counter2liststr
 
-tarspmethodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
+#tarspmethodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
+
 
 ordA = ord('A')
 comma = ','
@@ -18,6 +19,9 @@ idpat = r'^[TSA][0-9]{3}$'
 idcpat = r'^[TSA][0-9]{3}c$'
 idre = re.compile(idpat)
 idcre = re.compile(idcpat)
+
+tarspformsuffixext = '_TARSP-Form' + xlsxext
+intreebanksfolder = 'intreebanks'
 
 
 def getshortloc(colctr, rowctr):
@@ -87,7 +91,12 @@ def mktarspform(allresults, _, in_memory=False):
 
     if not in_memory:
         (base, ext) = os.path.splitext(allresults.filename)
-        target = base + '_TARSP-Form' + xlsxext
+        core, filename = os.path.split(base)
+        root, lastfolder = os.path.split(core)
+        if lastfolder == intreebanksfolder:
+            target = os.path.join(root, 'forms', filename + tarspformsuffixext)
+        else:
+            target = base + tarspformsuffixext
     else:
         target = BytesIO()
 

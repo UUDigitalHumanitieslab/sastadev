@@ -273,7 +273,7 @@ def correct_stree(stree, method, corr):
         print(showflatxml(stree))
 
     allmetadata = []
-    orandalts = []
+    #orandalts = []
 
     # uttid:
     uttid = getuttid(stree)
@@ -284,7 +284,8 @@ def correct_stree(stree, method, corr):
     origutt = getorigutt(stree)
     if origutt is None:
         SDLOGGER.error('Missing origutt in utterance {}'.format(uttid))
-        return stree, orandalts
+        origutt = space.join(getyield(stree))
+        #return stree, orandalts
     # list of token positions
 
     # get the original metadata; these will be added later to the tree of each correction
