@@ -1,6 +1,7 @@
 import csv
 import re
 import os
+from typing import Dict, List, Tuple
 from .config import SD_DIR
 
 tab = '\t'
@@ -45,7 +46,7 @@ separable_prefixes = ['aan', 'aaneen', 'aantoe', 'achter', 'achteraan', 'achtern
 sorted_separable_prefixes = sorted(separable_prefixes, key=lambda x: len(x))
 
 
-def correctinflection(word):
+def correctinflection(word: str) -> List[Tuple[str, str]]:
     result = getcorrections(word, correction)
     return result
 
@@ -296,7 +297,7 @@ def makewrongpastpart(stem, stemFS, takesge, prefix='ge'):
     return result, overgen
 
 
-def getcorrections(thestr, correction):
+def getcorrections(thestr: str, correction: Dict[str, Tuple[str, str]]) -> List[Tuple[str, str]]:
     results = []
     if thestr in correction:
         result = correction[thestr]
