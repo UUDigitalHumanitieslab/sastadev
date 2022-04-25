@@ -7,6 +7,7 @@ import xlrd
 import xlsxwriter
 from config import SD_DIR
 from counterfunctions import counter2liststr
+from forms import getformfilename
 
 #tarspmethodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
 
@@ -20,8 +21,10 @@ idcpat = r'^[TSA][0-9]{3}c$'
 idre = re.compile(idpat)
 idcre = re.compile(idcpat)
 
-tarspformsuffixext = '_TARSP-Form' + xlsxext
-intreebanksfolder = 'intreebanks'
+tarspformsuffix = '_TARSP-Form'
+
+#tarspformsuffixext = tarspformsuffix + xlsxext
+#intreebanksfolder = 'intreebanks'
 
 
 def getshortloc(colctr, rowctr):
@@ -90,13 +93,14 @@ def mktarspform(allresults, _, in_memory=False):
     global basesheet
 
     if not in_memory:
-        (base, ext) = os.path.splitext(allresults.filename)
-        core, filename = os.path.split(base)
-        root, lastfolder = os.path.split(core)
-        if lastfolder == intreebanksfolder:
-            target = os.path.join(root, 'forms', filename + tarspformsuffixext)
-        else:
-            target = base + tarspformsuffixext
+        target = getformfilename(allresults.filename, tarspformsuffix )
+        #(base, ext) = os.path.splitext(allresults.filename)
+        #core, filename = os.path.split(base)
+        #root, lastfolder = os.path.split(core)
+        #if lastfolder == intreebanksfolder:
+        #    target = os.path.join(root, 'forms', filename + tarspformsuffixext)
+        #else:
+        #   target = base + tarspformsuffixext
     else:
         target = BytesIO()
 

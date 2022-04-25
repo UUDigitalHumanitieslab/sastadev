@@ -1,4 +1,5 @@
 from lxml import etree
+from typing import List
 
 bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma = tuple(range(7))
 defaultpenalty = 10
@@ -82,6 +83,8 @@ def mkSASTAMeta(token, nwt, name, value, cat, subcat=None, penalty=defaultpenalt
                   backplacement=backplacement)
     return result
 
+
+Metadata = List[Meta]
 
 #errormessages
 filled_pause = "Filled Pause"

@@ -1,6 +1,6 @@
 '''
-offers the function get_annotations() to obtain a dictionary with the annotations from a file
-for the moment at the utteranceid level, to be extend edto the wordposition per uttid level
+This module offers the function get_annotations() to obtain a dictionary with the annotations from a file
+for the moment at the utteranceid level, to be extended to the wordposition per uttid level
 
 and the function read_annotations() to obtain a score dictionary with queryid as keys and Counter() as values
 '''
@@ -10,7 +10,9 @@ and the function read_annotations() to obtain a score dictionary with queryid as
 # -code alternatives and replacemtne extensions
 # =codes written without spaces?
 
-import xlrd
+from typing import Any, Dict, List, Match, Optional, Pattern, Tuple
+from sastatypes import FileName, Item, Item2LevelsDict, Level, Position, QueryDict, QId, UttId, UttWordDict
+import xlrd  # type: ignore
 from collections import defaultdict
 from collections import Counter
 import re
@@ -45,14 +47,14 @@ stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
 
 
-def nested_dict(n, type):
+def nested_dict(n:int, type: type):  # I do not know hpw to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
         return defaultdict(type)
     else:
         return defaultdict(lambda: nested_dict(n - 1, type))
 
 
-def clean(label):
+def clean(label: str) -> str:
     result = label
     result = result.lstrip()
     result = result.rstrip()
@@ -60,7 +62,7 @@ def clean(label):
     return result
 
 
-def getlabels(labelstr, patterns):
+def getlabels(labelstr: str, patterns: Tuple[Pattern, Pattern]) -> List[str]:
     results = []
     (pattern, fullpattern) = patterns
     if fullpattern.match(labelstr):
@@ -76,17 +78,17 @@ def getlabels(labelstr, patterns):
     return results
 
 
-def iswordcolumn(str):
+def iswordcolumn(str: str) -> Optional[Match[str]]:
     result = wordcolheaderre.match(str.lower())
     return result
 
 
-def isfirstwordcolumn(str):
+def isfirstwordcolumn(str: str) -> Optional[Match[str]]:
     result = firstwordcolheaderre.match(str.lower())
     return result
 
 
-def enrich(labelstr, lcprefix):
+def enrich(labelstr: str, lcprefix: str) -> str:
     labels = labelstr.split(labelsep)
     newlabels = []
     for label in labels:
@@ -99,8 +101,9 @@ def enrich(labelstr, lcprefix):
     return result
 
 
-def getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns):
-    results = []
+def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, patterns: Tuple[Pattern, Pattern]) \
+        -> List[Tuple[str, str]]:
+    results: List[Tuple[str, str]] = []
     lcthelabelstr = thelabelstr.lower()
     lcprefix = prefix.lower().strip()
     lcthelabelstr = enrich(lcthelabelstr, lcprefix)
@@ -201,7 +204,8 @@ def oldget_annotations(infilename, patterns):
     return cdata
 
 
-def get_annotations(infilename, patterns):
+def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
+        -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
     '''
     Reads the file with name filename in SASTA Annotation Format
     :param infilename:
@@ -210,7 +214,7 @@ def get_annotations(infilename, patterns):
     '''
 
     thedata = defaultdict(list)
-    cdata = {}
+    #cdata = {}
 
     allutts = {}
 
@@ -299,7 +303,8 @@ def get_annotations(infilename, patterns):
     return allutts, thedata
 
 
-def update(thedict, qid, goldtuple):
+def update(thedict: Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]], qid: QId,
+           goldtuple: Tuple[Level, Item, List[Tuple[UttId, Position]]]):
     (level, item, thecounter) = goldtuple
     if qid in thedict:
         (oldlevel, olditem, oldcounter) = thedict[qid]
@@ -308,8 +313,8 @@ def update(thedict, qid, goldtuple):
         thedict[qid] = goldtuple
 
 
-def getitem2levelmap(mapping):
-    resultmap: Dict[Any, List[Any]] = {}
+def oldgetitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, List[Level]]:
+    resultmap: Dict[Item, List[Level]] = {}
     for (item, level) in mapping:
         if item in resultmap:
             resultmap[item].append(level)
@@ -317,8 +322,18 @@ def getitem2levelmap(mapping):
             resultmap[item] = [level]
     return resultmap
 
+def getitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Level]:
+    resultmap: Dict[Item, Level] = {}
+    for (item, level) in mapping:
+        if item in resultmap:
+            SDLOGGER.error('Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
+        else:
+            resultmap[item] = level
+    return resultmap
 
-def codeadapt(c):
+
+
+def codeadapt(c: str) -> str:
     result = c
     result = re.sub(r'\.', r'\\.', result)
     result = re.sub(r'\(', r'\\(', result)
@@ -330,7 +345,7 @@ def codeadapt(c):
     return result
 
 
-def mkpatterns(allcodes):
+def mkpatterns(allcodes: List[str]) -> Tuple[Pattern, Pattern]:
     basepattern = r''
     sortedallcodes = sorted(allcodes, key=len, reverse=True)
     adaptedcodes = [codeadapt(c) for c in sortedallcodes]
@@ -339,8 +354,12 @@ def mkpatterns(allcodes):
     return (re.compile(basepattern), re.compile(fullpattern))
 
 
-def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
-    item2levelmap = {}
+
+
+def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]],
+                 queries: QueryDict, includeimplies: bool=False) \
+        -> Tuple[UttWordDict, Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]]]:
+    # item2levelmap = {}
     mappingitem2levelmap = getitem2levelmap(mapping)
     altcodesitem2levelmap = getitem2levelmap(altcodes)
     allmappingitems = [item for (item, _) in mapping]
@@ -348,25 +367,27 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
     allitems = allmappingitems + allaltcodesitems
     patterns = mkpatterns(allitems)
     allutts, basicdata = get_annotations(filename, patterns)
-    results = {}
+    results: Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]] = {}
     for thelevel, theitem in basicdata:
         thecounter = basicdata[(thelevel, theitem)]
+        # unclear why this below here is needed
+#        if (theitem, thelevel) in mapping:
+#            mappingitem = theitem
+#        elif (varitem, thelevel) in mapping:
+#            mappingitem = varitem
+#        else:
+#            mappingitem = theitem
         if (theitem, thelevel) in mapping:
-            mappingitem = theitem
-        elif (varitem, thelevel) in mapping:
-            mappingitem = varitem
-        else:
-            mappingitem = theitem
-        if (mappingitem, thelevel) in mapping:
-            qid = mapping[(mappingitem, thelevel)]
+            qid = mapping[(theitem, thelevel)]
             update(results, qid, (thelevel, theitem, thecounter))
             if includeimplies:
                 for implieditem in queries[qid].implies:
-                    if (implieditem, thecorrectlevel) in mapping:
-                        impliedqid = mapping[(implieditem, thelevel)]
-                        update(results, impliedqid, (altlevel, altitem, thecounter))
+                    impliedlevel = mappingitem2levelmap[implieditem]
+                    if (implieditem, impliedlevel) in mapping:
+                        impliedqid = mapping[(implieditem, impliedlevel)]
+                        update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif (theitem, thelevel) in altcodes:
             (altitem, altlevel) = altcodes[(theitem, thelevel)]
             qid = mapping[(altitem, altlevel)]
@@ -375,55 +396,40 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
                 '{} of level {} invalid code replaced by {} of level {}'.format(theitem, thelevel, altitem, altlevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
-                    if (implieditem, thecorrectlevel) in mapping:
-                        impliedqid = mapping[(implieditem, thelevel)]
-                        update(results, impliedqid, (altlevel, altitem, thecounter))
+                    impliedlevel = mappingitem2levelmap[implieditem]
+                    if (implieditem, impliedlevel) in mapping:
+                        impliedqid = mapping[(implieditem, impliedlevel)]
+                        update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
-        elif theitem in mappingitem2levelmap:
-            thecorrectlevels = mappingitem2levelmap[theitem]
-            if len(thecorrectlevels) == 1:
-                thecorrectlevel = thecorrectlevels[0]
-                qid = mapping[(theitem, thecorrectlevel)]
-                update(results, qid, (thecorrectlevel, theitem, thecounter))
-                SDLOGGER.info(
-                    'level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
-            elif len(thecorrectlevels) > 1:
-                SDLOGGER.error(
-                    'Item {} of level {} not a valid coding (wrong level, multiple candidate levels: {}'.format(theitem,
-                                                                                                                thelevel,
-                                                                                                                str(
-                                                                                                                    thecorrectlevels)))
-            else:
-                SDLOGGER.error('{} of level {} not a valid coding (wrong level'.format(theitem, thelevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+        elif theitem in mappingitem2levelmap:   # valid item but wrong level
+            thecorrectlevel = mappingitem2levelmap[theitem]
+            qid = mapping[(theitem, thecorrectlevel)]
+            update(results, qid, (thecorrectlevel, theitem, thecounter))
+            SDLOGGER.info(
+                'level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
-                    if (implieditem, thecorrectlevel) in mapping:
-                        impliedqid = mapping[(implieditem, thecorrectlevel)]
-                        update(results, impliedqid, (thecorrectlevel, theitem, thecounter))
+                    impliedlevel = mappingitem2levelmap[implieditem]
+                    if (implieditem, impliedlevel) in mapping:
+                        impliedqid = mapping[(implieditem, impliedlevel)]
+                        update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
-        elif theitem in altcodesitem2levelmap:
-            thecorrectlevels = altcodesitem2levelmap[theitem]
-            if len(thecorrectlevels) == 1:
-                (thecorrectitem, thecorrectlevel) = altcodes[(theitem, thecorrectlevels[0])]
-                qid = mapping[(thecorrectitem, thecorrectlevel)]
-                update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
-                SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
-                                                                                                   thecorrectlevel,
-                                                                                                   thecorrectitem))
-            elif len(thecorrectlevels) > 1:
-                SDLOGGER.error(
-                    'Item {} of level {} not a valid coding (item replaced by {}, wrong level, multiple candidate levels: {}'.format(
-                        theitem.thelevel, thecorrectitem, thecorrectlevels))
-            else:
-                SDLOGGER.error(
-                    '{} of level {} not a valid coding (alternative item, wrong level)'.format(theitem, thelevel))
+                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+        elif theitem in altcodesitem2levelmap:  # valid alternative item but wrong level
+            theitemlevel = altcodesitem2levelmap[theitem]
+            (thecorrectitem, thecorrectlevel) = altcodes[(theitem, theitemlevel)]
+            qid = mapping[(thecorrectitem, thecorrectlevel)]
+            update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
+            SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
+                                                                                                thecorrectlevel,
+                                                                                               thecorrectitem))
             if includeimplies:
                 for implieditem in queries[qid].implies:
-                    if (implieditem, thecorrectlevel) in mapping:
-                        impliedqid = mapping[(implieditem, thecorrectlevel)]
-                        update(results, impliedqid, (thecorrectlevel, theitem, thecounter))
+                    impliedlevel = mappingitem2levelmap[implieditem]
+                    if (implieditem, impliedlevel) in mapping:
+                        impliedqid = mapping[(implieditem, impliedlevel)]
+                        update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
                         SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
 
@@ -432,7 +438,7 @@ def get_golddata(filename, mapping, altcodes, queries, includeimplies=False):
     return allutts, results
 
 
-def exact2global(thedata):
+def exact2global(thedata: Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]) -> Dict[Tuple[Level, Item], Counter]:
     '''
     turns a dictionary with  as values a list of (uttid, pos) tuples into a dictionary with the same keys and as values a counter of uttid
     :param thedata:
@@ -462,58 +468,58 @@ def richexact2global(thedata):
     return cdata
 
 
-def richscores2scores(richscores):
+def richscores2scores(richscores: Dict[QId, Tuple[Level, Item, Any]]) -> Dict[QId, Any]:
     scores = {}
     for queryid in richscores:
         scores[queryid] = richscores[queryid][2]
     return scores
 
+# hieronder verouderd en niet correct
+# def read_annotations(methodfilename: FileName, annotationfilename: FileName, includeimplies: bool=False) -> Dict[Tuple[Level, Item], Counter]:
+#     '''
+#
+#     :param methodfilename: the name of the file containing the method (.xlsx)
+#     :param annotationfilename: the  filename of the file containing the annotations (.xlsx)
+#     :param includeimplies: a parameter to specify whether information in the implies column of the method must be taken into account (default False, keep it that way)
+#     :return: a dictionary with as key-value pairs with as key a queryid  and as value a Counter() with uttid as key
+#     '''
+#
+#     (queries, item2idmap, altcodes, postquerylist) = read_method(methodfilename)
+#     allutts, richexactscores = get_golddata(annotationfilename, item2idmap, altcodes, queries, includeimplies)
+#     exactscores = richscores2scores(richexactscores)
+#     results = exact2global(exactscores)
+#     return results
 
-def read_annotations(methodfilename, annotationfilename, includeimplies=False):
-    '''
-
-    :param methodfilename: the name of the file containing the method (.xlsx)
-    :param annotationfilename: the  filename of the file containing the annotations (.xlsx)
-    :param includeimplies: a parameter to specify whether information in the implies column of the method must be taken into account (default False, keep it that way)
-    :return: a dictionary with as key-value pairs with as key a queryid  and as value a Counter() with uttid as key
-    '''
-
-    (queries, item2idmap, altcodes, postquerylist) = read_method(methodfilename)
-    richexactscores = get_golddata(annotationfilename, item2idmap, altcodes, queries, includeimplies)
-    exactscores = richscores2scores(richexactscores)
-    results = exact2global(exactscores)
-    return results
-
-
-if __name__ == "__main__":
-    # Give the location of the input file
-    # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned Current.xlsx"
-    # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned TagsCleaned Current.xlsx"
-    # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\SchlichtingVoorbeeldGoldCurrent.xlsx"
-    infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\aangeleverde data\ASTA\SASTA sample 01.xlsx"
-
-    # Give the location of the method file
-    methodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\ASTA\ASTA Index Current.xlsx'
-
-    thedata = {}
-    thedata = read_annotations(methodfilename, infilename)
-
-    (base, ext) = os.path.splitext(infilename)
-    outputfilename = base + "_testgold" + tsvext + txtext
-    outfile = open(outputfilename, 'w', encoding='utf8')
-
-    for qid in thedata:
-        print(qid, thedata[qid], sep=tab, file=outfile)
-
-'''
-    #header
-    mysep = tab
-    print('Level', 'Item', 'Count', 'Utts', sep=mysep, file=outfile)
-    for atuple in thedata:
-        (thelevel, theitem) = atuple
-        thelist = list(thedata[atuple])
-        sortedlist = sorted(thelist)
-        sortedstrlist= map(str, sortedlist)
-        print(thelevel, theitem, len(sortedlist), commaspace.join(sortedstrlist), sep=mysep, file=outfile)
-
-'''
+# hieronder verouderd en niet meer correct
+# if __name__ == "__main__":
+#     # Give the location of the input file
+#     # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned Current.xlsx"
+#     # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned TagsCleaned Current.xlsx"
+#     # infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\SchlichtingVoorbeeldGoldCurrent.xlsx"
+#     infilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\aangeleverde data\ASTA\SASTA sample 01.xlsx"
+#
+#     # Give the location of the method file
+#     methodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\ASTA\ASTA Index Current.xlsx'
+#
+#     thedata = {}
+#     thedata = read_annotations(methodfilename, infilename)
+#
+#     (base, ext) = os.path.splitext(infilename)
+#     outputfilename = base + "_testgold" + tsvext + txtext
+#     outfile = open(outputfilename, 'w', encoding='utf8')
+#
+#     for qid in thedata:
+#         print(qid, thedata[qid], sep=tab, file=outfile)
+#
+# '''
+#     #header
+#     mysep = tab
+#     print('Level', 'Item', 'Count', 'Utts', sep=mysep, file=outfile)
+#     for atuple in thedata:
+#         (thelevel, theitem) = atuple
+#         thelist = list(thedata[atuple])
+#         sortedlist = sorted(thelist)
+#         sortedstrlist= map(str, sortedlist)
+#         print(thelevel, theitem, len(sortedlist), commaspace.join(sortedstrlist), sep=mysep, file=outfile)
+#
+# '''

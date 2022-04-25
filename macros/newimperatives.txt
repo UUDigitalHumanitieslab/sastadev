@@ -65,15 +65,15 @@ realcomplormodnodecount = """count(%realcomplormodnode% | node[%nonfinvc%]/%real
 
 wx = """(%basicimperative%
         and  %realcomplormodnodecount% <= 1)"""
-]"""
+
 
 wxy = """(%basicimperative%
         and  %realcomplormodnodecount% = 2)"""
-]""" 
+
 
 wxyz = """(%basicimperative%
         and  %realcomplormodnodecount% = 3)"""
-]""" 
+
 
 wxyz5 = """(%basicimperative%
         and  %realcomplormodnodecount% = 4)"""

@@ -4,12 +4,12 @@ from copy import copy, deepcopy
 from lxml import etree
 
 from basicreplacements import basicreplacements
-from corrector import getcorrections, mkuttwithskips, disambiguationdict
+from corrector import Correction, getcorrections, mkuttwithskips, disambiguationdict
 from lexicon import de, dets, known_word
 from metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_none,
                       bpl_word, bpl_wordlemma)
 from sastatok import sasta_tokenize
-from sastatoken import tokenlist2stringlist
+from sastatoken import tokenlist2stringlist, Token
 from sva import phicompatible
 from targets import get_mustbedone
 from treebankfunctions import (adaptsentence, add_metadata, countav,
@@ -23,6 +23,10 @@ from metadata import insertion
 from sastatoken import inflate, deflate, tokeninflate, insertinflate
 from CHAT_Annotation import omittedword
 from cleanCHILDEStokens import cleantext
+
+from typing import Dict, List, Optional, Set, Sequence, Tuple, Union
+from sastatypes import AltId, CorrectionMode, ErrorDict, UttId, MetaElement, MethodName, Penalty, Position, PositionStr, \
+    SynTree, Targets, Treebank
 
 ampersand = '&'
 
@@ -46,8 +50,104 @@ errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                  'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'goodcatcount',
                  'hyphencount', 'basicreplaceecount']
 
+ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
+Tuple15int = Tuple[int, int, int, int, int, int, int, int, int, int, int, int, int, int, int]
 
-def get_origandparsedas(metadatalist):
+class Alternative():
+    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount,
+                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, goodcatcount,
+                 hyphencount, basicreplaceecount, ambigcount):
+        self.stree: SynTree = stree
+        self.altid: AltId = altid
+        self.altsent: str = altsent
+        self.penalty: Penalty = int(penalty)
+        self.dpcount: int = int(dpcount)
+        self.dhyphencount: int = int(dhyphencount)
+        self.dimcount: int = int(dimcount)
+        self.compcount: int = int(compcount)
+        self.supcount: int = int(supcount)
+        self.compoundcount: int = int(compoundcount)
+        self.unknownwordcount: int = int(unknownwordcount)
+        self.sucount: int = int(sucount)
+        self.svaok: int = int(svaok)
+        self.deplusneutcount: int = int(deplusneutcount)
+        self.goodcatcount: int = int(goodcatcount)
+        self.hyphencount: int = int(hyphencount)
+        self.basicreplaceecount: int = int(basicreplaceecount)
+        self.ambigcount: int = int(ambigcount)
+
+    def alt2row(self, uttid: UttId, base: str, user1: str ='', user2:str ='', user3: str ='', bestaltids: List[AltId]=[],
+                selected: Optional[AltId] = None, origsent: Optional[str] = None) -> List[str]:
+        scores = ['BEST'] if self.altid in bestaltids else []
+        if self.altid == selected:
+            scores.append('SELECTED')
+        else:
+            scores.append('NOTSELECTED')
+        if self.altsent == origsent:
+            scores.append('IDENTICAL')
+        score = ampersand.join(scores)
+        part4 = list(map(str,[self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount,
+                  self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount, self.sucount,
+                  self.svaok, self.deplusneutcount, self.goodcatcount, self.hyphencount, self.basicreplaceecount]))
+        therow: list = [base, user1, user2, user3] + \
+                 ['Alternative', uttid] + 2 * [''] + part4
+
+        return therow
+
+    def betterscorethan(self, alt) -> bool:   # looping reference to Alternative needed
+        score = {}
+        for name, obj in [('self', self), ('alt', alt)]:
+            score[name] = scorefunction(obj)
+        result = score['self'] > score['alt']
+        return result
+
+    def equalscoreas(self, alt) -> bool:
+        score = {}
+        for name, obj in [('self', self), ('alt', alt)]:
+            score[name] = scorefunction(obj)
+        result = score['self'] == score['alt']
+        return result
+
+
+class Original():
+    def __init__(self, uttid, stree):
+        self.uttid: UttId = uttid
+        self.stree: SynTree = stree
+
+    def original2row(self, base: str, user1: str = '', user2: str = '', user3: str = '') -> List[str]:
+        origutt = getorigutt(self.stree)
+        origtokenlist = getyield(self.stree)
+        origsent = space.join(origtokenlist)
+        theuttid = self.uttid if self.uttid is not None else '??'
+        therow = [base, user1, user2, user3] + \
+                 ['Original', theuttid, origutt, origsent]
+        return therow
+
+
+
+class OrigandAlts():
+    def __init__(self, orig, alts, selected=0):
+        self.orig = orig
+        self.alts: Dict[AltId, Alternative] = alts  # a dictionary with altid as key
+        self.selected: AltId = selected
+
+    def OrigandAlts2rows(self, base: str, user1: str = '', user2:str = '', user3:str = '') -> List[str]:
+        origrow = self.orig.original2row(base, user1, user2, user3)
+        origsent = origrow[-1]
+        bestaltids = getbestaltids(self.alts)
+        altsrows = [self.alts[altid].alt2row(self.orig.uttid, base, user1, user2, user3, bestaltids, self.selected, origsent) for altid in self.alts]
+        laltsrows = len(altsrows)
+        selectedrow = [base, user1, user2, user3] + \
+                      ['Selected', self.orig.uttid, '', self.alts[self.selected].altsent, str(self.selected)]
+        if laltsrows > 1:
+            rows = [origrow] + altsrows + [selectedrow]
+        else:
+            rows = []
+        return rows
+
+
+
+def get_origandparsedas(metadatalist: List[MetaElement]) -> Tuple[Optional[str], Optional[str]]:
     parsed_as = None
     origutt = None
     for meta in metadatalist:
@@ -60,7 +160,7 @@ def get_origandparsedas(metadatalist):
     return origutt, parsed_as
 
 
-def mkmetarecord(meta, origutt, parsed_as):
+def mkmetarecord(meta: MetaElement, origutt:Optional[str], parsed_as: Optional[str]) -> Tuple[Optional[str], List[str]]:
     if meta is None:
         return None, []
     key = meta.attrib['name']
@@ -75,8 +175,8 @@ def mkmetarecord(meta, origutt, parsed_as):
         return key, []
 
 
-def updateerrordict(errordict, uttid, oldtree, newtree):
-    metadatalist = newtree.find(metadataxpath)
+def updateerrordict(errordict: ErrorDict, uttid: UttId, oldtree: SynTree, newtree: SynTree) -> ErrorDict:
+    metadatalist: List[MetaElement] = newtree.find(metadataxpath)
     if metadatalist is not None:
         origutt, parsed_as = get_origandparsedas(metadatalist)
 
@@ -87,14 +187,15 @@ def updateerrordict(errordict, uttid, oldtree, newtree):
     return errordict
 
 
-def correcttreebank(treebank, targets, method, corr=corrn):
-    allorandalts = []
-    errordict = defaultdict(list)
+def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, corr: CorrectionMode = corrn) \
+        -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
+    allorandalts: List[Optional[OrigandAlts]] = []
+    errordict: ErrorDict = defaultdict(list)
     if corr == corr0:
         return treebank, errordict, allorandalts
     else:
-        newtreebank = etree.Element('treebank')
-        errorlogrows = []
+        newtreebank: Treebank = etree.Element('treebank')
+        #errorlogrows = []
         for stree in treebank:
             uttid = getuttid(stree)
             # print(uttid)
@@ -114,7 +215,7 @@ def correcttreebank(treebank, targets, method, corr=corrn):
         return newtreebank, errordict, allorandalts
 
 
-def contextualise(node1, node2):
+def contextualise(node1: SynTree, node2: SynTree) -> SynTree:
     '''
     copies the contextually determined properties of node2 to node1
     :param node1:
@@ -127,7 +228,7 @@ def contextualise(node1, node2):
             newnode.attrib[prop] = node2.attrib[prop]
     return newnode
 
-def updatemetadata(metadata, tokenposdict):
+def updatemetadata(metadata: List[Meta], tokenposdict: Dict[Position, Position]):
     begintokenposdict = {k-1: v-1 for (k, v) in tokenposdict.items()}
     newmetadata = []
     for meta in metadata:
@@ -137,14 +238,14 @@ def updatemetadata(metadata, tokenposdict):
         newmetadata.append(newmeta)
     return newmetadata
 
-def updatetokenposmd(intree, metadata, tokenposdict):
+def updatetokenposmd(intree: SynTree, metadata: List[Meta], tokenposdict: Dict[Position, Position]):
     resulttree = updatetokenpos(intree, tokenposdict)
     newmetadata = updatemetadata(metadata, tokenposdict)
     return resulttree, newmetadata
 
 
 
-def findskippednodes(stree, tokenlist):
+def findskippednodes(stree: SynTree, tokenlist: List[Token]) -> List[SynTree]:
     debug = False
     if debug:
         showtree(stree, text='findskippednodes:stree:')
@@ -155,8 +256,8 @@ def findskippednodes(stree, tokenlist):
     return resultlist
 
 
-def findskippednodes2(stree, tokenposset):
-    resultlist = []
+def findskippednodes2(stree: SynTree, tokenposset: Set[Position]) -> List[SynTree]:
+    resultlist: List[SynTree] = []
     if stree is None:
         return resultlist
     if 'pt' in stree.attrib or 'pos' in stree.attrib:
@@ -172,7 +273,7 @@ def findskippednodes2(stree, tokenposset):
 
 
 
-def insertskips(newstree,  tokenlist, stree):
+def insertskips(newstree: SynTree,  tokenlist: List[Token], stree: SynTree) -> SynTree:
     '''
 
     :param newstree: the corrected tree, with skipped elements absent
@@ -248,7 +349,7 @@ def insertskips(newstree,  tokenlist, stree):
 
     return resulttree
 
-def getomittedwordbegins(metalist):
+def getomittedwordbegins(metalist: List[Meta]) -> List[Position]:
     results = []
     for meta in metalist:
         if meta.name == omittedword:
@@ -256,7 +357,7 @@ def getomittedwordbegins(metalist):
     return results
 
 
-def correct_stree(stree, method, corr):
+def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
 
     :param stree: input stree
@@ -322,7 +423,7 @@ def correct_stree(stree, method, corr):
     debug = False
     #(fatstree, text='fattened tree:')
 
-    ctmds = getcorrections(cleanutttokens, method, fatstree)
+    ctmds : List[Correction] = getcorrections(cleanutttokens, method, fatstree)
 
     debug = False
     if debug:
@@ -405,7 +506,7 @@ def correct_stree(stree, method, corr):
     # resultposlist = resultposmeta.value
 
     newcorrection2 = thecorrection[2]
-    nodes2deletebegins = []
+    nodes2deletebegins: List[PositionStr] = []
     # next adapted, the tree is fat already
     debug = False
     if debug:
@@ -433,9 +534,11 @@ def correct_stree(stree, method, corr):
                     thetree = adaptsentence(thetree)
                 else:
                     if 'word' not in oldnode.attrib:
-                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
+                        simpleshow(oldnode, showchildren=False)
                     if 'word' not in newnode.attrib:
-                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
+                        simpleshow(oldnode, showchildren=False)
             if meta.backplacement == bpl_wordlemma:
                 if newnode is not None and oldnode is not None:
                     if 'lemma' in newnode.attrib and 'lemma' in oldnode.attrib:
@@ -443,9 +546,11 @@ def correct_stree(stree, method, corr):
                         thetree = adaptsentence(thetree)
                     else:
                         if 'lemma' not in oldnode.attrib:
-                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node: '.format(uttid))
+                            simpleshow(oldnode, showchildren=False)
                         if 'lemma' not in newnode.attrib:
-                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node'.format(uttid, simpleshow(oldnode, showchildren=False)))
+                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid))
+                            simpleshow(oldnode, showchildren=False)
 
         elif meta.backplacement == bpl_none:
             pass
@@ -468,8 +573,8 @@ def correct_stree(stree, method, corr):
     if debug:
         showtree(thetree, text='thetree before deletion:')
 
-    nodes2deletebegins = [int(b) for b in nodes2deletebegins]
-    thetree = deletewordnodes(thetree, nodes2deletebegins)
+    nodes2deleteintbegins = [int(b) for b in nodes2deletebegins]
+    thetree = deletewordnodes(thetree, nodes2deleteintbegins)
 
     if debug:
         showtree(thetree, text='thetree after deletion:')
@@ -533,7 +638,7 @@ def correct_stree(stree, method, corr):
     return fulltree, orandalts
 
 
-def getsentencenode(stree):
+def getsentencenode(stree: SynTree) -> SynTree:
     sentnodes = stree.xpath('.//sentence')
     if sentnodes == []:
         result = None
@@ -542,7 +647,7 @@ def getsentencenode(stree):
     return result
 
 
-def updatecleantokmeta(meta, begins, cleantokpos):
+def updatecleantokmeta(meta: Meta, begins: List[str], cleantokpos: List[int]) -> Meta:
     if meta is not None and meta.name in ['cleanedtokenisation', 'cleanedtokenpositions']:
         sortedbegins = sorted(begins, key=lambda x: int(x), reverse=True)
         newmeta = copy(meta)
@@ -557,7 +662,7 @@ def updatecleantokmeta(meta, begins, cleantokpos):
         return meta
 
 
-def oldgetuttid(stree):
+def oldgetuttid(stree: SynTree) -> UttId:
     uttidlist = stree.xpath(uttidxpath)
     if uttidlist == []:
         SDLOGGER.error('Missing uttid')
@@ -567,7 +672,7 @@ def oldgetuttid(stree):
     return uttid
 
 
-def getorigutt(stree):
+def getorigutt(stree: SynTree) -> Optional[str]:
     origuttlist = stree.xpath(origuttxpath)
     if origuttlist == []:
         origutt = None
@@ -576,102 +681,18 @@ def getorigutt(stree):
     return origutt
 
 
-def scorefunction(obj): return (-obj.unknownwordcount, -obj.dpcount, -obj.dhyphencount, obj.goodcatcount,
+def scorefunction(obj: Alternative) -> Tuple15int:
+    return (-obj.unknownwordcount, -obj.dpcount, -obj.dhyphencount, obj.goodcatcount,
                                 -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount, obj.dimcount, obj.compcount, obj.supcount,
                                 obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount, -obj.penalty)
 
 
-class Alternative():
-    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount,
-                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, goodcatcount,
-                 hyphencount, basicreplaceecount, ambigcount):
-        self.stree = stree
-        self.altid = altid
-        self.altsent = altsent
-        self.penalty = int(penalty)
-        self.dpcount = int(dpcount)
-        self.dhyphencount = int(dhyphencount)
-        self.dimcount = int(dimcount)
-        self.compcount = int(compcount)
-        self.supcount = int(supcount)
-        self.compoundcount = int(compoundcount)
-        self.unknownwordcount = int(unknownwordcount)
-        self.sucount = int(sucount)
-        self.svaok = int(svaok)
-        self.deplusneutcount = int(deplusneutcount)
-        self.goodcatcount = int(goodcatcount)
-        self.hyphencount = int(hyphencount)
-        self.basicreplaceecount = int(basicreplaceecount)
-        self.ambigcount = int(ambigcount)
-
-    def alt2row(self, uttid, base, user1='', user2='', user3='', bestaltids=[], selected=None, origsent=None):
-        scores = ['BEST'] if self.altid in bestaltids else []
-        if self.altid == selected:
-            scores.append('SELECTED')
-        else:
-            scores.append('NOTSELECTED')
-        if self.altsent == origsent:
-            scores.append('IDENTICAL')
-        score = ampersand.join(scores)
-        therow = [base, user1, user2, user3] + \
-                 ['Alternative', uttid] + 2 * [''] +\
-                 [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount,
-                  self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount, self.sucount,
-                  self.svaok, self.deplusneutcount, self.goodcatcount, self.hyphencount, self.basicreplaceecount]
-        return therow
-
-    def betterscorethan(self, alt):
-        score = {}
-        for name, obj in [('self', self), ('alt', alt)]:
-            score[name] = scorefunction(obj)
-        result = score['self'] > score['alt']
-        return result
-
-    def equalscoreas(self, alt):
-        score = {}
-        for name, obj in [('self', self), ('alt', alt)]:
-            score[name] = scorefunction(obj)
-        result = score['self'] == score['alt']
-        return result
 
 
-class Original():
-    def __init__(self, uttid, stree):
-        self.uttid = uttid
-        self.stree = stree
-
-    def original2row(self, base, user1='', user2='', user3=''):
-        origutt = getorigutt(self.stree)
-        origtokenlist = getyield(self.stree)
-        origsent = space.join(origtokenlist)
-        therow = [base, user1, user2, user3] + \
-                 ['Original', self.uttid, origutt, origsent]
-        return therow
 
 
-class OrigandAlts():
-    def __init__(self, orig, alts, selected=None):
-        self.orig = orig
-        self.alts = alts  # a dictionary with altid as key
-        self.selected = selected
-
-    def OrigandAlts2rows(self, base, user1='', user2='', user3=''):
-        origrow = self.orig.original2row(base, user1, user2, user3)
-        origsent = origrow[-1]
-        bestaltids = getbestaltids(self.alts)
-        altsrows = [self.alts[altid].alt2row(self.orig.uttid, base, user1, user2, user3, bestaltids, self.selected, origsent) for altid in self.alts]
-        laltsrows = len(altsrows)
-        selectedrow = [base, user1, user2, user3] + \
-                      ['Selected', self.orig.uttid, '', self.alts[self.selected].altsent, self.selected]
-        if laltsrows > 1:
-            rows = [origrow] + altsrows + [selectedrow]
-        else:
-            rows = []
-        return rows
-
-
-def getbestaltids(alts):
-    results = []
+def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
+    results: List[AltId] = []
     for altid in alts:
         if results == []:
             results = [altid]
@@ -682,7 +703,7 @@ def getbestaltids(alts):
     return results
 
 
-def getsvaokcount(nt):
+def getsvaokcount(nt: SynTree) -> int:
     subjects = nt.xpath('.//node[@rel="su"]')
     counter = 0
     for subject in subjects:
@@ -692,7 +713,7 @@ def getsvaokcount(nt):
     return counter
 
 
-def getdeplusneutcount(nt):
+def getdeplusneutcount(nt: SynTree) -> int:
     theyield = getnodeyield(nt)
     ltheyield = len(theyield)
     counter = 0
@@ -713,30 +734,32 @@ validwords = {"z'n"}
 punctuationsymbols = """.,?!:;"'"""
 
 
-def isvalidword(w):
+def isvalidword(w: str) -> bool:
     if known_word(w):
         return True
     elif w in punctuationsymbols:
         return True
     elif w in validwords:
         return True
+    else:
+        return False
 
 
-def countambigwords(stree):
+def countambigwords(stree: SynTree) -> int:
     leaves = getnodeyield(stree)
     ambignodes = [leave for leave in leaves if getattval(leave, 'word').lower() in disambiguationdict]
     result = len(ambignodes)
     return result
 
-def selectcorrection(stree, ptmds, corr):
+def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode) -> Tuple[ParsedCorrection, OrigandAlts]:
     # to be implemented@@
     # it is presupposed that ptmds is not []
 
     uttid = getuttid(stree)
     orig = Original(uttid, stree)
 
-    altid = 0
-    alts = {}
+    altid: AltId = 0
+    alts: Dict[AltId, Alternative] = {}
     for cw, nt, md in ptmds:
         altsent = space.join(cw)
         penalty = compute_penalty(md)
@@ -772,7 +795,7 @@ def selectcorrection(stree, ptmds, corr):
     return result, orandalts
 
 
-def compute_penalty(md):
+def compute_penalty(md: List[Meta]) -> Penalty:
     totalpenalty = 0
     for meta in md:
         totalpenalty += meta.penalty

@@ -14,6 +14,12 @@ from stringfunctions import allconsonants
 import lexicon as lex
 from config import PARSE_FUNC
 
+from sastatoken import Token
+from metadata import Meta
+from typing import Any, AnyStr, Callable, Dict, List, Match, Optional, Tuple
+
+from sastatypes import FileName, OptPhiTriple, PhiTriple, Position, PositionMap, PositionStr, Span, SynTree, UttId
+
 
 class Metadata:
     '''
@@ -92,31 +98,31 @@ countattvalxpathtemplate = 'count(.//node[@{att}="{val}"])'
 countcompoundxpath = 'count(.//node[contains(@lemma, "_")])'
 
 
-def countav(stree, att, val):
+def countav(stree: SynTree, att: str, val: str) -> int:
     countattvalxpath = countattvalxpathtemplate.format(att=att, val=val)
     result = stree.xpath(countattvalxpath)
     return result
 
 
-def modalinv(node):
+def modalinv(node: SynTree) -> bool:
     infl = getattval(node, 'infl')
     result = infl == 'modal_inv'
     return result
 
 
-def getcompoundcount(stree):
+def getcompoundcount(stree: SynTree) -> int:
     result = stree.xpath(countcompoundxpath)
     return result
 
 
-def copymodifynode(node, dct):
+def copymodifynode(node: SynTree, dct: Dict[str, Any]):
     newnode = copy(node)
     for att in dct:
         newnode.attrib[att] = dct[att]
     return newnode
 
 
-def myfind(tree, query):
+def myfind(tree: SynTree, query: str) -> Optional[SynTree]:
     list = tree.xpath(query)
     if list == []:
         return None
@@ -124,14 +130,13 @@ def myfind(tree, query):
         return list[0]
 
 
-def getmeta(syntree, attname, treebank=True):
+def getmeta(syntree: SynTree, attname: str, treebank: bool = True) -> Optional[str]:
     prefix = "." if treebank else ""
     thequery = prefix + metaquerytemplate.format(attname)
     result = getqueryresult(syntree, xpathquery=thequery)
     return result
 
-
-def normalizedword(stree):
+def normalizedword(stree: SynTree) -> Optional[str]:
     if stree is None:
         result = None
     elif 'pt' in stree.attrib:
@@ -151,12 +156,12 @@ def normalizedword(stree):
     return result
 
 
-def mkproper(astring):
+def mkproper(astring: str) -> str:
     result = astring.rjust(4, '0')
     return result
 
 
-def getproperuttid(syntree):
+def getproperuttid(syntree: SynTree) -> str:
     global uniquecounter
     result1 = getmeta(syntree, 'uttid')
     if result1 is not None:
@@ -172,7 +177,7 @@ def getproperuttid(syntree):
     return result
 
 
-def ismainclausenode(node):
+def ismainclausenode(node: SynTree) -> bool:
     nodecat = getattval(node, 'cat')
     catok = nodecat in mainclausecats
     if nodecat == 'sv1':
@@ -185,13 +190,13 @@ def ismainclausenode(node):
     return result
 
 
-def getnodeendmap(stree):
+def getnodeendmap(stree: SynTree) -> Dict[PositionStr, Position]:
     leaves = getnodeyield(stree)
     result = {getattval(leave, 'end'): i + 1 for i, leave in enumerate(leaves)}
     return result
 
 
-def getxselseuttid(syntree):
+def getxselseuttid(syntree: SynTree) -> UttId:
     result = getmeta(syntree, 'xsid')
     if result is None:
         result = getmeta(syntree, 'uttid')
@@ -202,7 +207,7 @@ def getxselseuttid(syntree):
     return result
 
 
-def getuttid(syntree):
+def getuttid(syntree: SynTree) -> UttId:
     result = getmeta(syntree, 'uttid')
     if result is None:
         result = getsentid(syntree)
@@ -211,14 +216,14 @@ def getuttid(syntree):
     return result
 
 
-def getuttno(syntree):
+def getuttno(syntree: SynTree) -> UttId:
     result = getmeta(syntree, 'uttno')
     if result is None:
         result = '0'
     return result
 
 
-def getuttidorno(syntree):
+def getuttidorno(syntree: SynTree) -> UttId:
     result = getmeta(syntree, 'xsid')
     if result is None:
         result = getmeta(syntree, 'uttno')
@@ -227,19 +232,19 @@ def getuttidorno(syntree):
     return result
 
 
-def getxsid(syntree):
+def getxsid(syntree: SynTree) -> UttId:
     result = getmeta(syntree, 'xsid')
     if result is None:
         result = '0'
     return result
 
 
-def getaltid(syntree):
+def getaltid(syntree: SynTree) -> Optional[str]:
     result = getmeta(syntree, 'alt')
     return result
 
 
-def noxpathsentid(syntree):
+def noxpathsentid(syntree: SynTree) -> List[UttId]:
     results = []
     if syntree is not None:
         for child in syntree:
@@ -248,13 +253,13 @@ def noxpathsentid(syntree):
                     results = [child.attrib['sentid']]
     return results
 
+#put the next one in comments, see below for a different definition
+# def getsentid(syntree: SynTree) -> Optional[UttId]:
+#     result = getqueryresult(syntree, noxpathquery=noxpathsentid)
+#     return result
 
-def getsentid(syntree):
-    result = getqueryresult(syntree, noxpathquery=noxpathsentid)
-    return result
 
-
-def lastconstituentof(stree):
+def lastconstituentof(stree: SynTree) -> SynTree:
     curlastend = 0
     topnodes = stree.xpath('.//node[@cat="top"]')
     topnode = topnodes[0]
@@ -267,14 +272,14 @@ def lastconstituentof(stree):
     return result
 
 
-def getsentence(syntree, treebank=True):
+def getsentence(syntree: SynTree, treebank: bool =True) -> Optional[str]:
     prefix = "." if treebank else ""
     thequery = prefix + sentencexpathquery
     result = getqueryresult(syntree, xpathquery=thequery)
     return result
 
 
-def lastmainclauseof(stree):
+def lastmainclauseof(stree: SynTree) -> SynTree:
     topnodes = stree.xpath('.//node[@cat="top"]')
     curlastmainclause = None
     if topnodes != []:
@@ -284,7 +289,7 @@ def lastmainclauseof(stree):
     return curlastmainclause
 
 
-def reclastmainclauseof(node, current):
+def reclastmainclauseof(node: SynTree, current: SynTree) -> SynTree:
     if node is None:
         result = current
     elif ismainclausenode(node):
@@ -301,7 +306,7 @@ def reclastmainclauseof(node, current):
     return result
 
 
-def getrelchildof(node, rel):
+def getrelchildof(node: SynTree, rel: str) -> SynTree:
     '''
     gets the first child node with rel=rel under a node.
     It should always return a word node (so should have a pt attribute; it does not deal properly with conjunction
@@ -316,19 +321,19 @@ def getrelchildof(node, rel):
     return None
 
 
-def getheadof(node):
+def getheadof(node: SynTree) -> SynTree:
     return getrelchildof(node, 'hd')
 
 
-def getdetof(node):
+def getdetof(node: SynTree) -> SynTree:
     return getrelchildof(node, 'det')
 
 
-def getfirstconjunctof(node):
+def getfirstconjunctof(node: SynTree) -> SynTree:
     return getrelchildof(node, 'cnj')
 
 
-def getextendedheadof(node):
+def getextendedheadof(node: SynTree) -> SynTree:
     result1 = getheadof(node)
     if result1 is None:
         result2 = getfirstconjunctof(node)
@@ -351,7 +356,7 @@ numbers = ['getal', 'ev', 'mv']
 genders = ['genus', 'onz', 'zijd', 'fem', 'masc']
 
 
-def valmerge(v1, v2, vallist):
+def valmerge(v1: str, v2: str, vallist: List[str]) -> str:
     '''
     presupposes that v1 and v2 occur in the vallist
     :param v1:
@@ -366,7 +371,7 @@ def valmerge(v1, v2, vallist):
     return result
 
 
-def phimax(v1, v2):
+def phimax(v1: str, v2: str) -> str:
     if v1 in persons and v2 in persons:
         result = valmerge(v1, v2, persons)
     elif v1 in numbers and v2 in numbers:
@@ -379,28 +384,32 @@ def phimax(v1, v2):
     return result
 
 
-def merge(phi1, phi2):
-    (p1, n1, g1) = phi1
-    (p2, n2, g2) = phi2
-    result = (phimax(p1, p2), phimax(n1, n2), phimax(g1, g2))
-    return result
+def merge(phi1: OptPhiTriple, phi2: OptPhiTriple) -> OptPhiTriple:
+    if phi1 is None or phi2 is None:
+        return None
+    else:
+        (p1, n1, g1) = phi1
+        (p2, n2, g2) = phi2
+        result = (phimax(p1, p2), phimax(n1, n2), phimax(g1, g2))
+        return result
 
 
-def getconjphi(node):
+def getconjphi(node: SynTree) -> OptPhiTriple:
     crd = tuple(node.xpath('node[@rel="crd"]'))
     conjs = node.xpath('node[@rel="cnj"]')
     conjphis = [getphi(conj) for conj in conjs]
     startphi = ('3', 'getal', 'genus')
-    curphi = startphi
+    curphi:  OptPhiTriple = startphi
     for conjphi in conjphis:
         curphi = merge(curphi, conjphi)
-    if crd in pluralcrds:
-        (p, n, g) = curphi
-        curphi = (p, 'mv', g)
+    if curphi is not None:
+        if crd in pluralcrds:
+            (p, n, g) = curphi
+            curphi = (p, 'mv', g)
     return curphi
 
 
-def getlemma(node):
+def getlemma(node: SynTree) -> str:
     if node is None:
         result = ''
     elif 'cat' in node.attrib:
@@ -419,7 +428,7 @@ def getlemma(node):
     return result
 
 
-def getphi(node):
+def getphi(node: SynTree) -> Optional[PhiTriple]:
     if node is None:
         return None
     elif 'cat' in node.attrib:
@@ -449,13 +458,16 @@ def getphi(node):
             gender = 'genus'
         result = (person, number, gender)
         return result
+    else:
+        return None
 
 
-def inverted(thesubj, thepv):
+def inverted(thesubj: SynTree, thepv: SynTree) -> bool:
     subjphi = getphi(thesubj)
     if subjphi is None:
         return False
-    (subjperson, subjnumber, subjgender) = getphi(thesubj)
+    else:
+        (subjperson, subjnumber, subjgender) = subjphi
     tense = getattval(thepv, 'pvtijd')
     subjbegin = getattval(thesubj, 'begin')
     subjlemma = getattval(thesubj, 'lemma')
@@ -466,7 +478,7 @@ def inverted(thesubj, thepv):
     return inversion
 
 
-def getattval(node, att):
+def getattval(node: SynTree, att: str) -> str:
     if node is None:
         result = ''
     elif att in node.attrib:
@@ -476,7 +488,7 @@ def getattval(node, att):
     return result
 
 
-def is_number(s):
+def is_number(s: str) -> bool:
     try:
         float(s)
         return True
@@ -484,7 +496,7 @@ def is_number(s):
         return False
 
 
-def number2intstring(numberstr):
+def number2intstring(numberstr: str) -> str:
     if is_number(numberstr):
         result = str(int(numberstr))
     else:
@@ -492,7 +504,8 @@ def number2intstring(numberstr):
     return result
 
 
-def getqueryresult(syntree, xpathquery=None, noxpathquery=None):
+def getqueryresult(syntree: SynTree, xpathquery: Optional[str] =None, \
+                   noxpathquery: Callable[[SynTree], List[str]] =None) -> Optional[str]:
     if syntree is None:
         result = None
     else:
@@ -511,10 +524,12 @@ def getqueryresult(syntree, xpathquery=None, noxpathquery=None):
         elif len(results) == 1:
             result1 = results[0]
             result = number2intstring(result1)
+        else:
+            result = None
     return result
 
 
-def getnodeyield(syntree):
+def getnodeyield(syntree: SynTree) -> List[SynTree]:
     resultlist = []
     if syntree is None:
         return []
@@ -526,7 +541,7 @@ def getnodeyield(syntree):
         return sortedresultlist
 
 
-def getyield(syntree):  # deze herformuleren in termen van getnodeyield na testen
+def getyield(syntree: SynTree) -> List[str]:  # deze herformuleren in termen van getnodeyield na testen
     resultlist = []
     if syntree is None:
         theyield = []
@@ -548,7 +563,7 @@ def getyield(syntree):  # deze herformuleren in termen van getnodeyield na teste
     return theyield
 
 
-def parent(node):
+def parent(node: SynTree) -> Optional[SynTree]:
     pnodes = node.xpath('parent::node')
     if pnodes == []:
         result = None
@@ -557,7 +572,7 @@ def parent(node):
     return result
 
 
-def is_left_sibling(node1, node2):
+def is_left_sibling(node1: SynTree, node2: SynTree) -> bool:
     sameparent = parent(node1) == parent(node2)
     node1_end = getattval(node1, 'end')
     node2_end = getattval(node2, 'end')
@@ -565,13 +580,13 @@ def is_left_sibling(node1, node2):
     return result
 
 
-def get_left_siblings(node):
+def get_left_siblings(node: SynTree) -> List[SynTree]:
     thesiblings = node.xpath('../node')
     theleftsiblings = [s for s in thesiblings if is_left_sibling(s, node)]
     return theleftsiblings
 
 
-def getmarkedutt(m, syntree):
+def getmarkedutt(m: SynTree, syntree: SynTree) -> str:
     thewordlist = getyield(syntree)
     thepositions = getwordpositions(m, syntree)
     themarkedyield = getmarkedyield(thewordlist, thepositions)
@@ -579,12 +594,12 @@ def getmarkedutt(m, syntree):
     return yieldstr
 
 
-def mark(str):
+def mark(str: str) -> str:
     result = '*' + str + '*'
     return result
 
 
-def getwordpositions(matchtree, syntree):
+def getwordpositions(matchtree: SynTree, syntree: SynTree) -> List[Position]:
     # nothing special needs to be done for index nodes since they also have begin and end
     positions = []
     for node in matchtree.iter():
@@ -594,7 +609,7 @@ def getwordpositions(matchtree, syntree):
     return result
 
 
-def getmarkedyield(wordlist, positions):
+def getmarkedyield(wordlist: List[str], positions: List[Position]) -> List[str]:
     pos = 1
     resultlist = []
     for w in wordlist:
@@ -606,7 +621,7 @@ def getmarkedyield(wordlist, positions):
     return resultlist
 
 
-def addmetadata(stree, meta):
+def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
     '''
     adds  meta of class Metadata to stree
     :param stree:
@@ -630,12 +645,12 @@ def addmetadata(stree, meta):
     return result
 
 
-def iswordnode(thenode):
+def iswordnode(thenode: SynTree) -> bool:
     result = 'pt' in thenode.attrib or 'pos' in thenode.attrib
     return result
 
 
-def istrueclausalnode(thenode):
+def istrueclausalnode(thenode: SynTree) -> bool:
     thenodecat = getattval(thenode, 'cat')
     result1 = thenodecat in trueclausecats
     if result1:
@@ -650,32 +665,32 @@ def istrueclausalnode(thenode):
     return result
 
 
-def iscompound(node):
+def iscompound(node: SynTree) -> bool:
     lemma = getattval(node, 'lemma')
     result = compoundsep in lemma
     return result
 
 
-def isdiminutive(node):
+def isdiminutive(node: SynTree) -> bool:
     graad = getattval(node, 'graad')
     result = graad == 'dim'
     return result
 
 
-def issubstantivised_verb(node):
+def issubstantivised_verb(node: SynTree) -> bool:
     nodept = getattval(node, 'pt')
     nodepositie = getattval(node, 'positie')
     result = nodept == 'ww' and nodepositie == 'nom'
     return result
 
 
-def getsiblings(node):
+def getsiblings(node: SynTree) -> List[SynTree]:
     parent = node.getparent()
     siblings = [n for n in parent if n != node]
     return siblings
 
 
-def showtn(tokennode):
+def showtn(tokennode: SynTree) -> str:
     '''requires the node to be a node for a token (word)'''
     if tokennode is None:
         result = ''
@@ -686,25 +701,24 @@ def showtn(tokennode):
     return result
 
 
-def showtns(tokennodelist):
+def showtns(tokennodelist: List[SynTree]) -> str:
     result = space.join([showtn(tn) for tn in tokennodelist])
     return result
 
 
-def all_lower_consonantsnode(node):
+def all_lower_consonantsnode(node: SynTree) -> bool:
     word = getattval(node, 'word')
     result = all([c.islower() for c in word])
     result = result and allconsonants(word)
     return result
 
 
-def sasta_long(node):
+def sasta_long(node: SynTree) -> bool:
     word = getattval(node, 'word')
     result = len(word) >= min_sasta_length
     return result
 
-
-def spec_noun(node):
+def spec_noun(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
     pos = getattval(node, 'pos')
     frame = getattval(node, 'frame')
@@ -714,7 +728,7 @@ def spec_noun(node):
     return result
 
 
-def is_duplicate_spec_noun(node):
+def is_duplicate_spec_noun(node: SynTree) -> bool:
     siblings = getsiblings(node)
     result = True
     word = getattval(node, 'word')
@@ -726,12 +740,12 @@ def is_duplicate_spec_noun(node):
     return result
 
 
-def onbvnwdet(node):
+def onbvnwdet(node: SynTree) -> bool:
     result = getattval(node, 'lemma') in potentialdet_onbvnws
     return result
 
 
-def asta_recognised_lexnode(node):
+def asta_recognised_lexnode(node: SynTree) -> bool:
     if issubstantivised_verb(node):
         result = False
     else:
@@ -739,7 +753,7 @@ def asta_recognised_lexnode(node):
     return result
 
 
-def asta_recognised_nounnode(node):
+def asta_recognised_nounnode(node: SynTree) -> bool:
     if issubstantivised_verb(node):
         pos = 'ww'
     else:
@@ -755,7 +769,7 @@ def asta_recognised_nounnode(node):
     return result
 
 
-def asta_recognised_wordnode(node):
+def asta_recognised_wordnode(node: SynTree) -> bool:
     result = sasta_pseudonym(node)
     result = result or spec_noun(node)
     result = result or is_duplicate_spec_noun(node)
@@ -768,18 +782,19 @@ def asta_recognised_wordnode(node):
     return result
 
 
-def isnumber(node):
+def isnumber(node: SynTree) -> bool:
     word = getattval(node, 'word')
-    result = numberre.match(word)
+    thematch = numberre.match(word)
+    result = thematch is not None
     return result
 
 
-def sasta_short(inval):
+def sasta_short(inval: str) -> bool:
     result = len(inval) <= sasta_short_length
     return result
 
 
-def short_nucl_n(node):
+def short_nucl_n(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
     rel = getattval(node, 'rel')
     word = getattval(node, 'word')
@@ -794,14 +809,14 @@ pseudonym_pattern = vertbar.join(pseudonym_patternlist)
 pseudonymre = re.compile(pseudonym_pattern)
 
 
-def sasta_pseudonym(node):
+def sasta_pseudonym(node: SynTree) -> bool:
     word = getattval(node, 'word')
     match = pseudonymre.match(word)
     result = match is not None
     return result
 
 
-def recognised_wordnodepos(node, pos):
+def recognised_wordnodepos(node: SynTree, pos: str) -> bool:
     word = getattval(node, 'word')
     lcword = word.lower()
     result = lex.informlexiconpos(word, pos) or lex.informlexiconpos(lcword, pos) or \
@@ -809,7 +824,7 @@ def recognised_wordnodepos(node, pos):
     return result
 
 
-def recognised_wordnode(node):
+def recognised_wordnode(node: SynTree) -> bool:
     word = getattval(node, 'word')
     lcword = word.lower()
     result = lex.informlexicon(word) or lex.informlexicon(lcword) or iscompound(node) or isdiminutive(
@@ -817,13 +832,13 @@ def recognised_wordnode(node):
     return result
 
 
-def recognised_lemmanode(node):
+def recognised_lemmanode(node: SynTree) -> bool:
     lemma = getattval(node, 'lemma')
     result = lex.informlexicon(lemma)
     return result
 
 
-def recognised_lemmanodepos(node, pos):
+def recognised_lemmanodepos(node: SynTree, pos: str) -> bool:
     lemma = getattval(node, 'lemma')
     result = lex.informlexiconpos(lemma, pos)
     return result
@@ -832,14 +847,15 @@ def recognised_lemmanodepos(node, pos):
 nodeformat = '{}/{}{}'
 nodeformatplus = nodeformat + '['
 
+##@@need to add a variant that returns a string
 
-def simpleshow(stree, showchildren=True, newline=True):
+def simpleshow(stree: SynTree, showchildren: bool = True, newline: bool = True) -> None:
     simpleshow2(stree, showchildren)
     if newline:
         print()
 
 
-def simpleshow2(stree, showchildren=True):
+def simpleshow2(stree: SynTree, showchildren: bool = True) -> None:
     rel = getattval(stree, 'rel')
     cat = getattval(stree, 'cat')
     index = getattval(stree, 'index')
@@ -870,7 +886,7 @@ def simpleshow2(stree, showchildren=True):
             # print(']', end=' ')
 
 
-def showflatxml(elem):
+def showflatxml(elem: SynTree) -> str:
     '''
 
     :param elem: xml element
@@ -884,7 +900,7 @@ def showflatxml(elem):
     return result
 
 
-def uniquenodes(nodelist):
+def uniquenodes(nodelist: List[SynTree]) -> List[SynTree]:
     '''
 
     :param nodelist: list of nodes all from a single syntactic structure
@@ -902,7 +918,7 @@ def uniquenodes(nodelist):
     return resultlist
 
 
-def getindexednodesmap(stree):
+def getindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
     indexednodes = {}
     if stree is not None:
         for node in stree.iter():
@@ -912,7 +928,7 @@ def getindexednodesmap(stree):
     return indexednodes
 
 
-def nodecopy(node):
+def nodecopy(node: SynTree) -> SynTree:
     '''
     copies a node without its children
     :param node: node, an lxml.etree Element
@@ -927,19 +943,19 @@ def nodecopy(node):
         return newnode
 
 
-def bareindexnode(node):
+def bareindexnode(node: SynTree) -> bool:
     result = terminal(
         node) and 'index' in node.attrib and 'postag' not in node.attrib and 'cat' not in node.attrib and 'pt' not in node.attrib and 'pos' not in node.attrib
     # print(props2str(get_node_props(node)), result, file=sys.stderr)
     return (result)
 
-
-def terminal(node):
+##herdefinieren want met UD hebben terminale nodes wel children (maar geen children met tag=node)
+def terminal(node: SynTree) -> bool:
     result = isinstance(node, etree._Element) and node is not None and len(node) == 0
-    return (result)
+    return result
 
 
-def indextransform(stree):
+def indextransform(stree: SynTree) -> SynTree:
     '''
     produces a new stree in which all index nodes are replaced by their antecedent nodes
     :param stree: input stree
@@ -952,7 +968,9 @@ def indextransform(stree):
     return result
 
 
-def indextransform2(stree, indexednodesmap):
+##deze robuust maken tegen andere nodes dan node (metadata, alpino_ds etc)
+## waarschijnlijk is node.tag == 'node'in baseindexnode voldoende
+def indextransform2(stree: SynTree, indexednodesmap: Dict[str, SynTree]) -> SynTree:
     if stree is None:
         return None
     else:
@@ -978,7 +996,7 @@ def indextransform2(stree, indexednodesmap):
         return newstree
 
 
-def getstree(fullname):
+def getstree(fullname: FileName) -> SynTree:
     try:
         thefile = open(fullname, 'r', encoding='utf8')
     except FileNotFoundError as e:
@@ -1141,14 +1159,14 @@ for el in streestrings:
     strees[el] = etree.fromstring(streestrings[el])
 
 
-def test():
+def test() -> None:
     for el in strees:
         stree = strees[el]
         lmc = lastmainclauseof(stree)
         print(getmarkedutt(lmc, stree))
 
 
-def getsentid(stree):
+def getsentid(stree: SynTree) -> UttId:
     sentidlist = stree.xpath(sentidxpath)
     if sentidlist == []:
         SDLOGGER.error('Missing sentid')
@@ -1158,7 +1176,7 @@ def getsentid(stree):
     return result
 
 
-def testindextransform():
+def testindextransform() -> None:
     for el in strees:
         stree = strees[el]
         print(el)
@@ -1167,7 +1185,7 @@ def testindextransform():
         simpleshow(newstree)
 
 
-def adaptsentence(stree):
+def adaptsentence(stree: SynTree) -> SynTree:
     # adapt the sentence
     # find the sentence element's parent and its index
     sentid = getsentid(stree)
@@ -1188,14 +1206,14 @@ def adaptsentence(stree):
     return stree
 
 
-def transplant_node(node1, node2, stree):
+def transplant_node(node1: SynTree, node2: SynTree, stree: SynTree) -> SynTree:
     '''
     replace node1 by node2 in stree
     Only do so if node1 and node2 have no children and if their spans are identical
     :param node1: node to be replaced in stree
     :param node2: node to replace node1 in stree
     :param stree: tree in which the replacement takes place
-    :return: None, the stree input parameter is modified
+    :return: the stree in which the input parameter is modified
     '''
     # find the parent of node1
     # determine the index of node1
@@ -1229,7 +1247,7 @@ def transplant_node(node1, node2, stree):
     return stree
 
 
-def get_parentandindex(node, stree):
+def get_parentandindex(node: SynTree, stree: SynTree) -> Optional[Tuple[SynTree, int]]:
     '''
 
     :param node: node to find the parent of
@@ -1251,28 +1269,28 @@ def get_parentandindex(node, stree):
     return None
 
 
-def getspan(node):
+def getspan(node: SynTree) -> Span:
     nodebegin = getattval(node, 'begin')
     nodeend = getattval(node, 'end')
     nodespan = (nodebegin, nodeend)
     return nodespan
 
 
-def lbrother(node, tree):
+def lbrother(node: SynTree, tree: SynTree) -> SynTree:
     nodebegin = getattval(node, 'begin')
     condition = lambda n: getattval(n, 'end') == nodebegin
     result = findfirstnode(tree, condition)
     return result
 
 
-def rbrother(node, tree):
+def rbrother(node: SynTree, tree: SynTree) -> SynTree:
     nodeend = getattval(node, 'end')
     condition = lambda n: getattval(n, 'begin') == nodeend
     result = findfirstnode(tree, condition)
     return result
 
 
-def findfirstnode(tree, condition):
+def findfirstnode(tree: SynTree, condition: Callable[[SynTree], bool]) -> SynTree:
     if condition(tree):
         return tree
     else:
@@ -1283,11 +1301,11 @@ def findfirstnode(tree, condition):
     return None
 
 
-def nominal(node):
+def nominal(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
     cat = getattval(node, 'cat')
     if cat != '':
-        result = cat = 'np'
+        result = cat == 'np'
     elif pt != '':
         result = pt in ['n', 'vnw']
     else:
@@ -1295,7 +1313,7 @@ def nominal(node):
     return result
 
 
-def decomposetree(tree):
+def decomposetree(tree: SynTree) -> Tuple[SynTree, SynTree, SynTree, SynTree, SynTree]:
     metadata, sentence, comments, nod, parser = None, None, None, None, None
     for child in tree:
         if child.tag == 'metadata':
@@ -1316,21 +1334,21 @@ def decomposetree(tree):
 comma = ','
 
 
-def str2list(liststr, sep=comma):
+def str2list(liststr: str, sep: str = comma) -> List[str]:
     bareliststr = liststr[1:-1]
     rawlist = bareliststr.split(sep)
     cleanlist = [x.strip() for x in rawlist]
     return cleanlist
 
 
-def strliststr2list(liststr, sep=comma):
+def strliststr2list(liststr: str, sep: str = comma) -> List[str]:
     bareliststr = liststr[1:-1]
     rawlist = bareliststr.split(sep)
     cleanlist = [x.strip()[1:-1] for x in rawlist]
     return cleanlist
 
 
-def find1(tree, xpathquery):
+def find1(tree: SynTree, xpathquery: str) -> SynTree:
     if tree is None:
         return None
     results = tree.xpath(xpathquery)
@@ -1341,7 +1359,7 @@ def find1(tree, xpathquery):
     return result
 
 
-def getxmetatreepositions(tree, xmetaname, poslistname='annotationposlist'):
+def getxmetatreepositions(tree: SynTree, xmetaname: str, poslistname: str ='annotationposlist') -> List[PositionStr]:
     query = ".//xmeta[@name='{}']".format(xmetaname)
     xmeta = find1(tree, query)
     if xmeta is None:
@@ -1361,7 +1379,7 @@ def getxmetatreepositions(tree, xmetaname, poslistname='annotationposlist'):
 wordnodemodel = './/node[(@pt or (not(@pt) and not(@cat) and @index)) and @begin="{}"]'
 
 
-def gettokposlist(tree):
+def gettokposlist(tree: SynTree) -> List[PositionStr]:
     cleantok = find1(tree, './/xmeta[@name="cleanedtokenpositions"]')
     if cleantok is None:
         return []
@@ -1371,16 +1389,16 @@ def gettokposlist(tree):
     return result
 
 
-def gettreepos(origpos, reverseindex):  # origuttpos2treepos
+def gettreepos(origpos: PositionStr, reverseindex: List[PositionStr]) -> PositionStr:  # origuttpos2treepos
     if origpos in reverseindex:
         result = str(reverseindex.index(origpos))
     else:
         SDLOGGER.error('origpos {} not in reverseindex: {}'.format(origpos, reverseindex))
-        result = 0
+        result = str(0)
     return result
 
 
-def deletewordnode(tree, begin):
+def deletewordnode(tree: SynTree, begin: Position) -> SynTree:
     newtree = deepcopy(tree)
     if newtree is None:
         return newtree
@@ -1401,7 +1419,7 @@ def deletewordnode(tree, begin):
         return newtree
 
 
-def showtree(tree, text=None):
+def showtree(tree: SynTree, text: Optional[str] = None) -> None:
     if text is not None:
         print(text)
     if tree is not None:
@@ -1410,14 +1428,19 @@ def showtree(tree, text=None):
         print('None')
 
 
-def deletechildlessparent(thenode):
+def deletechildlessparent(thenode: SynTree) -> None:
+    '''
+    deletes thenode if it has no children, and if its parent is childless after that, applies itself to the parent
+    :param thenode:
+    :return:
+    '''
     if list(thenode) == []:
         theparent = thenode.getparent()
         theparent.remove(thenode)
         deletechildlessparent(theparent)
 
 
-def olddeletewordnodes(tree, begins):
+def olddeletewordnodes(tree: SynTree, begins: List[Position]) -> SynTree:
     # print('tree:')
     # etree.dump(tree, pretty_print=True)
     newtree = deepcopy(tree)
@@ -1453,18 +1476,19 @@ def olddeletewordnodes(tree, begins):
 
         return newtree
 
-def childless(node):
+##redefine: no children with tag == 'node'  (because of UD extensions )
+def childless(node: SynTree):
     children = [ch for ch in node]
     result = children == []
     return result
 
-def deletewordnodes(tree, begins):
+def deletewordnodes(tree: SynTree, begins: List[Position]) -> SynTree:
     newtree = deepcopy(tree)
     newtree = deletewordnodes2(newtree, begins)
     newtree = adaptsentence(newtree)
     return newtree
 
-def deletewordnodes2(tree, begins):
+def deletewordnodes2(tree: SynTree, begins: List[Position]) -> SynTree:
     if tree is None:
         return tree
     for child in tree:
@@ -1490,7 +1514,7 @@ def deletewordnodes2(tree, begins):
     return tree
 
 
-def olddeletewordnodes2(tree, begins):
+def olddeletewordnodes2(tree: SynTree, begins: List[Position]):
     if tree is None:
         return tree
     else:
@@ -1514,7 +1538,7 @@ def olddeletewordnodes2(tree, begins):
         return tree
 
 
-def treeinflate(stree, start=10, inc=10):
+def treeinflate(stree: SynTree, start: int = 10, inc: int = 10) -> None:
     # fatstree = deepcopy(stree)
     if stree is None:
         pass
@@ -1538,12 +1562,12 @@ def treeinflate(stree, start=10, inc=10):
                 stree.attrib['end'] = str((ie * 10) + 1)
 
 
-def isidentitymap(dct):
+def isidentitymap(dct: Dict[Any, Any]) -> bool:
     result = all([key == value for key, value in dct.items()])
     return result
 
 
-def updatetokenpos(stree, tokenposdict):
+def updatetokenpos(stree: SynTree, tokenposdict: PositionMap) -> SynTree:
     if stree is None:
         return stree
     if isidentitymap(tokenposdict):
@@ -1554,7 +1578,7 @@ def updatetokenpos(stree, tokenposdict):
 
     return finaltree
 
-def updatetokenpos2(node, tokenposdict):
+def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
     if node is None:
         return node
     for child in node:
@@ -1587,7 +1611,7 @@ def updatetokenpos2(node, tokenposdict):
 
 
 
-def updateindexnodes(stree):
+def updateindexnodes(stree: SynTree) -> SynTree:
     #presupposes that the non bareindex nodes have been adapted already
     indexednodesmap = getindexednodesmap(stree)
     newstree = deepcopy(stree)
@@ -1601,7 +1625,7 @@ def updateindexnodes(stree):
                 node.attrib['end'] = newend
     return newstree
 
-def treewithtokenpos(thetree, tokenlist):
+def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     resulttree = deepcopy(thetree)
     thetreeleaves = getnodeyield(thetree)
     intbegins = [int(getattval(n, 'begin')) for n in thetreeleaves]
@@ -1618,7 +1642,7 @@ def treewithtokenpos(thetree, tokenlist):
     return resulttree
 
 
-def fatparse(utterance, tokenlist):
+def fatparse(utterance: str, tokenlist: List[Token]) -> SynTree:
     stree = PARSE_FUNC(utterance)
     fatstree = deepcopy(stree)
     treeinflate(fatstree, start=10, inc=10)
@@ -1632,7 +1656,7 @@ def fatparse(utterance, tokenlist):
     return fatstree
 
 
-def update_cleantokenisation(stree, begin):
+def update_cleantokenisation(stree: SynTree, begin: PositionStr) -> SynTree:
     '''
     updates the tokenisation info of the cleaned utterance
     :param stree: tree, will be modified
@@ -1668,7 +1692,7 @@ def update_cleantokenisation(stree, begin):
     return stree
 
 
-def getbeginend(nodelist):
+def getbeginend(nodelist: List[SynTree]) -> Span:
     minbegin = 1000
     maxend = 0
     for node in nodelist:
@@ -1684,7 +1708,7 @@ def getbeginend(nodelist):
     return result
 
 
-def normalisebeginend(stree):
+def normalisebeginend(stree: SynTree) -> None:
     '''
     :param stree: syntactic structure
     :return: stree with the values of begin and end attributes normalised
@@ -1696,7 +1720,7 @@ def normalisebeginend(stree):
     normalisebeginend2(stree, sortedbegins)
 
 
-def normalisebeginend2(stree, sortedbegins):
+def normalisebeginend2(stree: SynTree, sortedbegins: List[PositionStr]) -> None:
     '''
 
     :param stree: syntactic structure
@@ -1721,7 +1745,7 @@ def normalisebeginend2(stree, sortedbegins):
             stree.attrib['end'] = maxend
 
 
-def updatebeginend(stree, begin):  # do not use this anymore
+def updatebeginend(stree: SynTree, begin: PositionStr) -> None:  # do not use this anymore
     '''
     updates the begin and end values of nodes in a tree in which a word node with begin=begin has been removed
     :param stree: Element_tree, input tree, which is modified
@@ -1748,7 +1772,7 @@ def updatebeginend(stree, begin):  # do not use this anymore
             stree.attrib['end'] = maxend
 
 
-def add_metadata(intree, metalist):
+def add_metadata(intree: SynTree, metalist: List[Meta]) -> SynTree:
     tree = deepcopy(intree)
     metadata = tree.find('.//metadata')
     if metadata is None:

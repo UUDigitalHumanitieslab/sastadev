@@ -1,4 +1,13 @@
-import xlrd
+'''
+This module defines the function read_method to read in a method:
+
+* read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
+'''
+
+from typing import List, Dict, Tuple
+from sastatypes import FileName, AltCodeDict, QueryDict, Item_Level, QId, Item_Level2QIdDict
+
+import xlrd  # type: ignore
 
 from config import SDLOGGER
 from query import Query, form_process, post_process
@@ -10,7 +19,7 @@ implies_sep = comma
 itemseppattern = r'[,-;\s]'
 
 
-def getboolean(str):
+def getboolean(str: str) -> bool:
     if str is None:
         result = False
     elif str == '':
@@ -24,7 +33,7 @@ def getboolean(str):
     return result
 
 
-def getint(fase):
+def getint(fase: str) -> int:
     try:
         result = int(fase)
     except:
@@ -32,24 +41,24 @@ def getint(fase):
     return result
 
 
-def get_pages(val):
+def get_pages(val: str) -> str:
     #pages = val.split(pagesep)
     #result = pages
     result = val
     return result
 
 
-def getaltitems(str):
+def getaltitems(str: str) -> List[str]:
     result = getlistofitems(str, altitemsep)
     return result
 
 
-def getimplies(str):
+def getimplies(str: str) -> List[str]:
     result = getlistofitems(str, implies_sep)
     return result
 
 
-def getlistofitems(str, sep):
+def getlistofitems(str: str, sep: str) -> List[str]:
     rawresult = str.split(sep)
     cleanresult = [w.strip().lower() for w in rawresult]
     if cleanresult == ['']:
@@ -57,7 +66,7 @@ def getlistofitems(str, sep):
     return cleanresult
 
 
-def read_method(methodfilename):
+def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
     # To open Workbook
     wb = xlrd.open_workbook(methodfilename)
     sheet = wb.sheet_by_index(0)
@@ -68,30 +77,30 @@ def read_method(methodfilename):
 
     headerrow = 0
 
-    queries = {}
-    item2idmap = {}
-    altcodes = {}
+    queries: QueryDict = {}
+    item2idmap: Item_Level2QIdDict = {}
+    altcodes: AltCodeDict = {}
 
-    postquerylist = []
+    postquerylist: List[QId] = []
     for rowctr in range(sheet.nrows):
         if rowctr != headerrow:
-            id = sheet.cell_value(rowctr, idcol).strip()
-            cat = sheet.cell_value(rowctr, catcol).strip()
-            subcat = sheet.cell_value(rowctr, subcatcol).strip()
-            level = sheet.cell_value(rowctr, levelcol).strip()
-            item = sheet.cell_value(rowctr, itemcol).strip()
-            altitems = getaltitems(sheet.cell_value(rowctr, altcol))
-            implies = getimplies(sheet.cell_value(rowctr, impliescol))
-            original = getboolean(sheet.cell_value(rowctr, originalcol))
-            pages = get_pages(sheet.cell_value(rowctr, pagescol))
-            fase = getint(sheet.cell_value(rowctr, fasecol))
-            query = sheet.cell_value(rowctr, querycol)
-            inform = sheet.cell_value(rowctr, informcol)
-            screening = sheet.cell_value(rowctr, screeningcol)
-            process = sheet.cell_value(rowctr, processcol).strip()
-            special1 = sheet.cell_value(rowctr, special1col).strip()
-            special2 = sheet.cell_value(rowctr, special2col).strip()
-            comments = sheet.cell_value(rowctr, commentscol)
+            id : QId = sheet.cell_value(rowctr, idcol).strip()
+            cat: str = sheet.cell_value(rowctr, catcol).strip()
+            subcat: str = sheet.cell_value(rowctr, subcatcol).strip()
+            level: str = sheet.cell_value(rowctr, levelcol).strip()
+            item: str = sheet.cell_value(rowctr, itemcol).strip()
+            altitems: List[str] = getaltitems(sheet.cell_value(rowctr, altcol))
+            implies: List[str] = getimplies(sheet.cell_value(rowctr, impliescol))
+            original: bool = getboolean(sheet.cell_value(rowctr, originalcol))
+            pages: str = get_pages(sheet.cell_value(rowctr, pagescol))
+            fase: int = getint(sheet.cell_value(rowctr, fasecol))
+            query: str = sheet.cell_value(rowctr, querycol)
+            inform: str = sheet.cell_value(rowctr, informcol)
+            screening: str  = sheet.cell_value(rowctr, screeningcol)
+            process: str = sheet.cell_value(rowctr, processcol).strip()
+            special1: str = sheet.cell_value(rowctr, special1col).strip()
+            special2: str = sheet.cell_value(rowctr, special2col).strip()
+            comments: str = sheet.cell_value(rowctr, commentscol)
 
             queries[id] = Query(id, cat, subcat, level, item, altitems, implies, original, pages, fase, query, inform, screening, process,
                                 special1, special2, comments)
@@ -109,4 +118,4 @@ def read_method(methodfilename):
                 altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 
         rowctr += 1
-    return(queries, item2idmap, altcodes, postquerylist)
+    return (queries, item2idmap, altcodes, postquerylist)

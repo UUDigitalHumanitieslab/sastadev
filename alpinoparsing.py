@@ -2,11 +2,12 @@ import re
 import urllib.parse
 import urllib.request
 
-from lxml import etree
+from lxml import etree  # type: ignore
 from memoize import memoize
 
 import logging
 #from config import SDLOGGER
+#from sastatypes import SynTree, URL
 
 alpino_special_symbols_pattern = r'[\[\]]'
 alpino_special_symbols_re = re.compile(alpino_special_symbols_pattern)
@@ -24,7 +25,7 @@ def isempty(sent):
 
 
 @memoize
-def parse(origsent, escape=True):
+def parse(origsent: str, escape: bool = True):
     if isempty(origsent):
         return None
     if escape:
@@ -52,7 +53,7 @@ def parse(origsent, escape=True):
             return None
 
 
-def previewurl(stree):
+def previewurl(stree) :
     sents = stree.xpath('.//sentence')
     if sents != []:
         sent = etree.tostring(sents[0])
@@ -65,7 +66,7 @@ def previewurl(stree):
     return fullurl
 
 
-def escape_alpino_input(instr):
+def escape_alpino_input(instr: str) -> str:
     result = ''
     for c in instr:
         if c == '[':
@@ -78,7 +79,7 @@ def escape_alpino_input(instr):
     return result
 
 
-def test():
+def test() -> None:
     while True:
         sent = input('sentence (ENTER to stop): ')
         if sent != '':
@@ -89,8 +90,8 @@ def test():
             exit(0)
 
 
-def test1():
-    sent1 = 'Teil mee voor de kinderen'
+def test1() -> None:
+    sent1 = 'Het slechte weer heeft al schade aangericht'
     stree = parse(sent1)
     thepreviewurl = previewurl(stree)
     with open('previewurl.txt', 'w', encoding='utf8') as outfile:

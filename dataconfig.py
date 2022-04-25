@@ -10,4 +10,6 @@ if user == 'Odijk101':
 #add other users here
 else:
     dataroot = '.'
+
 intreebanksfolder = 'intreebanks'
+formsfolder = 'forms'

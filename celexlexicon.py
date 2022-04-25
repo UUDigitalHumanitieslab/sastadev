@@ -1,3 +1,28 @@
+'''
+The CELEX lexicon consists of 3 backslash-separated value files:
+
+* DMW (dmwcdok.txt): word forms and their properties
+* DML (dmlcd.txt): lemmas and their morphological properties
+* DSL (dslcd.txt): lemmas and their syntactic properties
+
+These files can be found in the folder celexlexicon/dutch in the code folder.
+
+We store these in the celexlexicon module in python dictionaries:
+
+* dmwkeydict: key = word identifier, value = whole record for this identifier
+* dmldict: key = lemma identifier, value = whole record for this identifier
+* dsldict: key = lemma identifier, value = whole dsl record for this identifier
+
+We define the following indexes (as python dictionaries) for quick lookup in this module:
+
+* dmwlemmakeyinflindex: key = (lemma identifier, infl), value = List of word form identifiers
+* dmwdict: key = word form, value = list of word identifiers
+
+This module also contains functions to map CELEX inflection codes to DCOI inflection codes, and the other way around,
+as well as functions to generate inflected forms for a given lemma, pos-code and inflectional properties.
+
+'''
+
 import csv
 import os
 import re
@@ -6,6 +31,8 @@ from collections import defaultdict
 
 import treebankfunctions
 from config import SD_DIR
+from typing import Dict, List, Optional, Tuple
+from sastatypes import CELEX_INFL, SynTree, WordInfo
 
 backslash = '\\'
 celexsep = backslash
@@ -13,10 +40,13 @@ celexsep = backslash
 pospattern = r'^.*\[(?P<pos>.)\]$'
 posre = re.compile(pospattern)
 
+
+
 # dml columns
 IdNum, Head, Inl, MorphStatus, MorphCnt, DerComp, Comp, Def, Imm, \
     ImmSubCat, ImmAllo, ImmSubst, StrucLab, StrucAllo, StrucSubst, Sepa = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 
+# verbs that do not necessarily have a t suffix  in present tense singular
 no_t_verbs = {'mogen', 'kunnen', 'zullen', 'willen'}
 
 logfile = sys.stderr
@@ -27,8 +57,8 @@ inputfolder = os.path.join(SD_DIR, 'celexlexicon', 'dutch')
 
 dmwfilename = 'DMWCDOK.txt'
 dmwfullname = os.path.join(inputfolder, dmwfilename)
-dmwdict = {}
-dmwlemmakeyinflindex = defaultdict(list)
+dmwdict: Dict[str, List[str]] = {}
+dmwlemmakeyinflindex: Dict[Tuple[str, str], List[str]] = defaultdict(list)
 dmwkeydict = {}
 
 # dmw columns: recid, form, lemmakey, pos, infl
@@ -49,7 +79,7 @@ with open(dmwfullname, mode='r') as infile:
 
 dmlfilename = 'DMLCD.txt'
 dmlfullname = os.path.join(inputfolder, dmlfilename)
-dmldict = {}
+dmldict: Dict[str, List[str]] = {}
 
 with open(dmlfullname, mode='r') as infile:
     myreader = csv.reader(infile, delimiter=celexsep)
@@ -70,8 +100,8 @@ pos2posnum = {posnum2pos[key]: key for key in posnum2pos}
 
 dslfilename = 'DSLCD.txt'
 dslfullname = os.path.join(inputfolder, dslfilename)
-dsldict = {}
-dsllemmaposindex = defaultdict(list)
+dsldict: Dict[str, List[str]] = {}
+dsllemmaposindex: Dict[Tuple[str, str], List[str]] = defaultdict(list)
 
 
 with open(dslfullname, mode='r') as infile:
@@ -85,7 +115,7 @@ with open(dslfullname, mode='r') as infile:
         dsllemmaposindex[lemmaposkey].append(thekey)
 
 
-def dcoiphi2celexpv(thesubj, thepv, inversion):
+def dcoiphi2celexpv(thesubj: SynTree, thepv: SynTree, inversion: bool) -> str:
     '''
     :param thesubj: subject node
     :param thepv: finite verb node
@@ -120,7 +150,8 @@ def dcoiphi2celexpv(thesubj, thepv, inversion):
     return result
 
 
-celex2dcoimap = {'te1': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
+celex2dcoimap: Dict[str, Dict[str, str]] =\
+                {'te1': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
                  'te2': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
                  'te2t': {'pvtijd': 'tgw', 'pvagr': 'met-t', 'wvorm': 'pv'},
                  'te3': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
@@ -137,10 +168,10 @@ celex2dcoimap = {'te1': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
                  }
 
 
-def celexpv2dcoi(word, infl, lemma):
-    results = []
+def celexpv2dcoi(word: str, infl: str, lemma: str) -> Dict[str, str]:
+    results: Dict[str, str] = {}
     if infl not in celex2dcoimap:
-        results = []
+        results = {}
     elif infl in {'te2', 'te3'}:
         if lemma[-3] == 't':
             results = celex2dcoimap[infl]
@@ -153,19 +184,25 @@ def celexpv2dcoi(word, infl, lemma):
     return results
 
 
-def incelexdmw(str):
+def incelexdmw(str: str) -> bool:
     result = str in dmwdict
     return result
 
 
-def incelexdmwpos(word, pos):
+def incelexdmwpos(word: str, pos: str) -> bool:
     result = incelexdmw(word)
     poslist = getposlist(word)
     result = result and pos in poslist
     return result
 
 
-def getlemmas(word):
+def getlemmas(word: str) -> List[str]:
+    '''
+    yields a list of lemmas for the input string word
+    :param word:
+    :return:
+    '''
+
     lemmas = []
     lemmakeys = getlemmakeys(word)
     for lemmakey in lemmakeys:
@@ -180,7 +217,12 @@ def getlemmas(word):
     return lemmas
 
 
-def getlemmakeys(word):
+def getlemmakeys(word: str) -> List[str]:
+    '''
+    yields a list of lemma identifiers for the input string word
+    :param word:
+    :return:
+    '''
     lemmakeys = []
     if word in dmwdict:
         for key in dmwdict[word]:
@@ -192,7 +234,12 @@ def getlemmakeys(word):
     return lemmakeys
 
 
-def getdehet(lemmakey):
+def getdehet(lemmakey: str) -> Optional[str]:
+    '''
+    yields the dehet property of the lemma identifier lemmakey
+    :param lemmakey:
+    :return: retrunnvalues are lexicon.de, lexicon.het, 'n/a' or None
+    '''
     if lemmakey in dsldict:
         dehet = dsldict[lemmakey][dslDeHetNum]
     else:
@@ -202,7 +249,7 @@ def getdehet(lemmakey):
     return dehet
 
 
-def oldgetpos(lemmakey):
+def oldgetpos(lemmakey: str) -> Optional[str]:
     if lemmakey in dmldict:
         wordstructure = dmldict[lemmakey][StrucLab]
         m = posre.match(wordstructure)
@@ -215,7 +262,12 @@ def oldgetpos(lemmakey):
     return pos
 
 
-def getpos(lemmakey):
+def getpos(lemmakey: str) -> Optional[str]:
+    '''
+    returns the DCOI pt Part of Speech code for the lemma identifier lemmakey, or None
+    :param lemmakey:
+    :return:
+    '''
     if lemmakey in dsldict:
         features = dsldict[lemmakey]
         posnum = features[dslClassNum]
@@ -226,7 +278,12 @@ def getpos(lemmakey):
     return pos
 
 
-def getposlist(word):
+def getposlist(word: str) -> List[str]:
+    '''
+    returns a list of pt Part of speech codes for the input string word
+    :param word:
+    :return:
+    '''
     poslist = []
     lemmakeys = getlemmakeys(word)
     for lemmakey in lemmakeys:
@@ -235,7 +292,12 @@ def getposlist(word):
     return poslist
 
 
-def getinfls(word):
+def getinfls(word: str) -> List[CELEX_INFL]:
+    '''
+    returns a list of CELEX inflection codes for the input strin gword
+    :param word:
+    :return:
+    '''
     infls = []
     if word in dmwdict:
         for key in dmwdict[word]:
@@ -245,14 +307,25 @@ def getinfls(word):
     return infls
 
 
-def getwordposinfo(word, pos):
+def getwordposinfo(word: str, pos: str) -> List[WordInfo]:
+    '''
+    returns a list of WordInfo for the input string word with part of speech code pos
+    :param word:
+    :param pos:
+    :return:
+    '''
     cands = getwordinfo(word)
-    results = [(pt, dehet, infl, lemma) for (pt, dehet, infl, lemma) in cands if pt == pos]
+    results: List[WordInfo] = [(pt, dehet, infl, lemma) for (pt, dehet, infl, lemma) in cands if pt == pos]
     return results
 
 
-def getwordinfo(word):
-    pos_infl_lemmas = []
+def getwordinfo(word: str) -> List[WordInfo]:
+    '''
+    returns a lis of WordInfo for the input string word
+    :param word:
+    :return:
+    '''
+    pos_infl_lemmas: List[WordInfo] = []
     if word in dmwdict:
         for key in dmwdict[word]:
             featurelist = dmwkeydict[key]
@@ -265,7 +338,15 @@ def getwordinfo(word):
     return pos_infl_lemmas
 
 
-def getinflforms(lemma, numClass, infl):
+def getinflforms(lemma: str, numClass: str, infl: str) -> List[str]:
+    '''
+    returns alist of inflected word forms for the input string lemma with CELEX part of speech code numClass
+    and the CELEX inflectional properties infl
+    :param lemma:
+    :param numClass:
+    :param infl:
+    :return:
+    '''
     results = []
     lemmakeys = dsllemmaposindex[(lemma, numClass)]
     for lemmakey in lemmakeys:

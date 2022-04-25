@@ -1,6 +1,27 @@
+'''
+The generatemacros module provides the function generatemacros of type None -> Dict[str, str], which generates a macrodictionary
+for systematically constructed macro definitions.
 
-tarsp_wvzexceptions = {('hebben', 'van'),  # hebben can occur with pc/van but only in fixed expressions: last hebben van, spijt hebben van
-                       ('slaan', 'op'),  # of course correct but not used in this sense wiyth very young children
+In particular, the module generatemacros.py generates macros for a list of pairs (verb, adposition),
+e.g. (*slaan*, *op*) in which Alpino analyzes the adposition as the head of an prepositional complement (pc),
+but where it should be considered the head of a modifier. These cases should also count as such if the
+adposition is written together with *er*, *hier* or *daar* (e.g. *erop*, *hierop*, *daarop*),
+which are considered unanalysable adverbs by Alpino.
+So we need a macro which characterizes these exceptions for each (verb, adposition) pair and, for each pair,
+for the combinations of the adposition with *er*, *hier* en *daar* when written together with the adposition.
+
+The generatemacros function generates this macro on the basis of a list of  (verb, adposition) pairs contained in this module.
+[These should probably better be moved to an exceptionslexicon module.]
+
+Running the module standalone outputs the macrodefinitions to stdout
+'''
+
+from typing import Dict, Set, Tuple, List
+
+StrPair = Tuple[str, str]
+
+tarsp_wvzexceptions : Set[StrPair] = {('hebben', 'van'),  # hebben can occur with pc/van but only in fixed expressions: last hebben van, spijt hebben van
+                       ('slaan', 'op'),  # of course correct but not used in this sense with very young children
                        ('lukken', 'in'), \
                        ('passen', 'bij'), \
                        ('vallen', 'vanaf'),
@@ -59,9 +80,9 @@ tarsp_wvzexceptions = {('hebben', 'van'),  # hebben can occur with pc/van but on
 
 # also do erin erbij etc
 
-Rlemma = """( @lemma="er{vz}" or @lemma="daar{vz}" or @lemma="hier{vz}" ) """
+Rlemma : str = """( @lemma="er{vz}" or @lemma="daar{vz}" or @lemma="hier{vz}" ) """
 
-Tarsp_WVz_exception_basemodel = """(@pt="ww"  and @rel ="hd" and @lemma="{ww}" and
+Tarsp_WVz_exception_basemodel : str = """(@pt="ww"  and @rel ="hd" and @lemma="{ww}" and
      ../node[@rel="pc" and
             ( (node[@rel="hd" and @lemma="{vz}"]) or
                 ( @lemma="er{rvz}" or @lemma="daar{rvz}" or @lemma="hier{rvz}" )
@@ -69,14 +90,14 @@ Tarsp_WVz_exception_basemodel = """(@pt="ww"  and @rel ="hd" and @lemma="{ww}" a
             ]
  )"""
 
-pc_vc_exception_basemodel = """( @rel="pc" and node[@rel = "hd" and @lemma="{vz}"] and ../node[@rel="hd" and @pt="ww" and @lemma="{ww}"] )"""
+pc_vc_exception_basemodel : str = """( @rel="pc" and node[@rel = "hd" and @lemma="{vz}"] and ../node[@rel="hd" and @pt="ww" and @lemma="{ww}"] )"""
 
-macrodef_model = '{name} = """{exp}"""\n'
+macrodef_model : str = '{name} = """{exp}"""\n'
 
 
-def generatemacros():
-    newmacros = {}
-    newparts = []
+def generatemacros() -> Dict[str, str]:
+    newmacros : Dict[str, str] = {}
+    newparts : List[str] = []
     for (ww, vz) in tarsp_wvzexceptions:
         if vz == 'tot':
             rvz = 'toe'
@@ -94,7 +115,7 @@ def generatemacros():
     newmacro = "( {} )".format(partsor)
     newmacros['Tarsp_WVz_exception'] = newmacro
 
-    newparts = []
+    newparts  = []
     for (ww, vz) in tarsp_wvzexceptions:
         newpart = pc_vc_exception_basemodel.format(ww=ww, vz=vz)
         newparts.append(newpart)

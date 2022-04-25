@@ -1,17 +1,24 @@
+from typing import List, Dict, Any, Counter, Callable, Union
+#import sastatypes
+from sastatypes import ResultsCounter, ExactResultsDict, FileName, SynTree, MatchesDict, QId, UttWordDict
+
+
+
+
 
 class AllResults:
     def __init__(self, uttcount, coreresults, exactresults, postresults, allmatches, filename, analysedtrees, allutts, annotationinput=False):
-        self.uttcount = uttcount
-        self.coreresults = coreresults
-        self.exactresults = exactresults
-        self.postresults = postresults
-        self.allmatches = allmatches
-        self.filename = filename
-        self.analysedtrees = analysedtrees
-        self.allutts = allutts
-        self.annotationinput = annotationinput
+        self.uttcount: int = uttcount
+        self.coreresults: Dict[QId, ResultsCounter] = coreresults
+        self.exactresults: ExactResultsDict = exactresults
+        self.postresults: Dict[QId, Any] = postresults
+        self.allmatches: MatchesDict = allmatches
+        self.filename: FileName = filename
+        self.analysedtrees: List[SynTree] = analysedtrees
+        self.allutts: UttWordDict = allutts
+        self.annotationinput: bool = annotationinput
 
-def scores2counts(scores):
+def scores2counts(scores: Dict[QId, Counter]) -> Dict[QId, int]:
     '''
     input is a dictionary of Counter()s
     output is a dictionary of ints
@@ -21,3 +28,7 @@ def scores2counts(scores):
         countval = len(scores[el])
         counts[el] = countval
     return counts
+
+CoreQueryFunction = Callable[[SynTree], List[SynTree]]
+PostQueryFunction = Callable[[AllResults, SynTree], List[SynTree]]
+QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
