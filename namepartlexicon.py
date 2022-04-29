@@ -52,5 +52,5 @@ with open(namepartfilename, 'r', encoding='utf8') as namepartfile:
     csvreader = csv.reader(namepartfile, delimiter=tab)
     for row in csvreader:
         namepart = row[0]
-        frq = row[1]
+        frq = int(row[1])
         namepartlexicon[namepart] = frq

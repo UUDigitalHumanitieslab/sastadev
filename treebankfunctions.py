@@ -1539,6 +1539,23 @@ def olddeletewordnodes2(tree: SynTree, begins: List[Position]):
 
 
 def treeinflate(stree: SynTree, start: int = 10, inc: int = 10) -> None:
+    '''
+    The function *treeinflate* adapts the input tree *stree* in such a way that:
+
+    * for word nodes: the int value of the *begin* attribute o (ib) is changed to str(newib =(ib + 1) * inc),
+    and the value of the *end* attribute to str(newib + 1)
+    * for phrasal nodes: new values for *begin* and *end* are computed by the function *getbeginend*
+    * for other nodes: the same as  for word nodes
+
+    The parameters of this function are:
+
+    * stree: input syntactic structure, which is modified
+    * start: not used yet and probably not necessary (default value = 10)
+    * inc: increment, by default set to 10 (not used yet)
+
+    and it returns *None*.
+
+    '''
     # fatstree = deepcopy(stree)
     if stree is None:
         pass

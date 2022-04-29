@@ -16,6 +16,7 @@ ContinentName = str
 CELEXPosCode = str
 FirstName = str
 LocationName = str
+DCOIPt = str
 DeHet = str
 CELEX_INFL =str
 DCOITuple = Tuple

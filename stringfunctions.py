@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from typing import Any, Callable, List, Match, Optional, Sequence, Set
 
 vertbar = '|'
 space = ' '
@@ -33,19 +34,22 @@ dutch_y_tetraphthongs = ['y' + d for d in dutch_base_triphthongs]
 dutch_triphthongs = dutch_base_triphthongs + dutch_y_triphthongs
 dutch_tetraphthongs = dutch_y_tetraphthongs
 
-hyphenprefixes = ['ex']
+hyphenprefixes = ['anti', 'contra', 'ex']
 
 singlehyphenpat = r'(^[^-]+)-([^-]+)$'
 singlehyphenre = re.compile(singlehyphenpat)
 
-duppattern = r'(.)\1{2,}'
+duppattern = r'(.)\1+'
 dupre = re.compile(duppattern)
 
 purechatxxxcodes = {'xxx', 'yyy', 'www'}
 chatxxxcodes = purechatxxxcodes | {'xx'}
 
 
-def pad(wrd, i, c=space):
+def pad(wrd: str, i: int, c: str = space) -> str:
+    '''
+    returns a right-justified string lengthened to length i and padded  with c
+    '''
     if len(wrd) > i:
         result = wrd
     else:
@@ -53,11 +57,19 @@ def pad(wrd, i, c=space):
     return result
 
 
-def star(str):
+def star(str: str) -> str:
+    '''
+    The function *star* takes a string str and returns it preceded by ( and followed by )*. Used to create
+    regular expressions.
+    '''
     return '({})*'.format(str)
 
 
-def alt(strlist, grouped=True):
+def alt(strlist: Sequence[str], grouped: bool = True) -> str:
+    '''
+    The function alt takes as input a string or a list of strings and joins them into  a string separated by |.
+    If grouped is True the resulting string is surrounded by round brackets, else not. Used to create regular expressions
+    '''
     alts = '|'.join(strlist)
     if grouped:
         result = '({})'.format(alts)
@@ -66,7 +78,10 @@ def alt(strlist, grouped=True):
     return result
 
 
-def charrange(string):
+def charrange(string: str) -> str:
+    '''
+    The function charrange take string str and surrounds it with square bracketys []. used to create regular expressions.
+    '''
     return '[{}]'.format(string)
 
 
@@ -79,13 +94,34 @@ monosyllabicpat = r'^' + consonants_star + syllableheadspat + consonants_star + 
 monosyllabicre = re.compile(monosyllabicpat)
 
 
-def barededup(word):
+def barededup(word: str) -> str:
+    '''
+    The function barededup takes as input a string and
+    returns a string in which  sequences of the same character are reduced to a single instance of this character
+    and other characters are left unchanged. Example: 'vver' -> 'ver'
+    '''
     result = dupre.sub(r'\1', word)
     return result
 
 
-def deduplicate(word, inlexicon, exceptions=[]):
-    newwords = []
+def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str] = []) -> List[str]:
+    '''
+    The function deduplicate takes as input a string word:
+
+    * if it contains a sequence of duplicate characters, and
+    * if it is not just a sequence of interpunction symbols, and
+    * if it is not contained in the set of exceptions
+
+    then
+
+    * it checks whether the string with  the character sequence reduced to one character is a word
+    according to the function *inlexicon*, and if so,  it adds this string to the result variable *newwords*
+    * it checks whether the string with  the character sequence reduced to two characters is a word
+    according to the function *inlexicon*, and if so,  it adds this string to the result variable *newwords*
+
+    and then it returns the value of the result variable *newwords*
+    '''
+    newwords: List[str] = []
     if word in exceptions:
         newwords = []
     elif wre.match(word):  # we want to exclude tokens consisting of interpunction symbols only e.g  ---, --
@@ -98,7 +134,36 @@ def deduplicate(word, inlexicon, exceptions=[]):
     return newwords
 
 
-def fullworddehyphenate(word, inlexicon):
+def fullworddehyphenate(word: str, inlexicon: Callable[[str], bool]) -> List[str]:
+    '''
+    The function fullworddehyphenate takes as input a string *word*:
+
+    Its purpose is to remove unnecessary hyphens from this word.
+
+    * the hyphen can be a part of the word (*sergeant-majoor*), in which case it should not be removed.
+    * it can also have been added to an existing word without hyphens (zie-ken-huis), in which case, it should be
+    removed
+    * it can also separate a possibly mispronounced prefix repetition of the prefix of word (e.g., ver-verkoopt or
+    vver-verkoopt), in which case the hyphen and the prefix should be removed.
+
+
+    To that end,
+
+    * it applies the function *dehyphenate* to *word*. If this yields a result that is an existing word according to
+    the function *inlexicon*, then this result is added to the result variable *newtokens*
+    * if newtokens is still the empty list after this, it applies the function *delhyphenprefix* to word.  If this
+    yields a result that is an existing word according to the function *inlexicon*, then this result is added to the
+    result variable *newtokens*.
+
+    and then it returns the result variable newtokens.
+
+    The functions *dehyphenate* and *delhyphenprefix* are described here:
+
+    * .. autofunction:: stringfunctions::dehyphenate
+    * .. autofunction:: stringfunctions::delhyphenprefix
+
+
+    '''
     newtokens = []
     newwords = dehyphenate(word)
     newwordset = set(newwords)
@@ -113,14 +178,26 @@ def fullworddehyphenate(word, inlexicon):
     return newtokens
 
 
-def delhyphenprefix(word, inlexicon):
+def delhyphenprefix(word: str, inlexicon: Callable[[str], bool]) -> List[str]:
+    '''
+    The function *delphyphenprefix* takes as input a string *word*, splits it into a prefix and a mainword
+    based on the first occurring hyphen, and  then:
+
+    * if the prefix is a prefix that normally occurs with a hyphen and the mainword is an existing word according to the function *inlexicon* (e.g. *ex-vrouw*), the result variable is set to the empty list;
+    * if the mainwords starts with the prefix and the main word is an existing word according to the function *inlexicon* (e.g. *ver-verkoop*),  then the result variable is set to [mainword];
+    * if the prefix and the mainword are both existing words, the result variable is set to [];
+    * if the mainwords starts with barededeup(prefix) and the main word is an existing word according to the function *inlexicon* (e.g. *vver-verkoop*),  then the result variable is set to [mainword]
+
+     and then it returns the value of the result variable *result*.
+
+    '''
     m = singlehyphenre.match(word)
     if m is not None:
         prefix = m.group(1)
         mainword = m.group(2)
         mwinlex = inlexicon(mainword)
         pfinlex = inlexicon(prefix)
-        deduppf = barededup(word)
+        deduppf = barededup(prefix)
         if prefix in hyphenprefixes and mwinlex:  # the word starts wit ha known prefix that uses hyphen such as ex (ex-vrouw)
             result = []
         elif mainword.startswith(prefix) and mwinlex:  # this is the core case  e.g. ver-verkoop
@@ -136,12 +213,25 @@ def delhyphenprefix(word, inlexicon):
     return result
 
 
-def allhyphens(word):
+def allhyphens(word: str) -> Optional[Match]:
+    '''
+    The fucntion allhyphens checks whether the strin gword consist completely of hyphens
+    '''
     result = allhyphensre.match(word)
     return result
 
 
-def dehyphenate(word):
+def dehyphenate(word: str) -> List[str]:
+    '''
+    The function dehyphenate takes as input a string and returns  a list of strings with all possible ways
+    of removing hyphens in this string
+    Examples:
+
+    * dehyphenate('zie-ken-huis') = ['zie-ken-huis', 'zieken-huis', 'zie-kenhuis', 'ziekenhuis']
+    * dehyphenate('ziekenhuis') = ['ziekenhuis']
+    * dehyphenate('---') = ['---']  (a string consisting only of hyphens remains unchanged
+
+    '''
     results = []
     if len(word) == 0:
         results = ['']
@@ -167,7 +257,10 @@ def dehyphenate(word):
     return results
 
 
-def isconsonant(char):
+def isconsonant(char: str) -> bool:
+    '''
+    The function isconsonant checks whether the input string char is a consonant.
+    '''
     if len(char) != 1:
         result = False
     elif char.lower() in consonants:
@@ -177,7 +270,10 @@ def isconsonant(char):
     return result
 
 
-def isvowel(char):
+def isvowel(char: str) -> bool:
+    '''
+    The function isvowel checks whether the input string char is a vowel.
+    '''
     if len(char) != 1:
         result = False
     elif char.lower() in vowels:
@@ -187,7 +283,10 @@ def isvowel(char):
     return result
 
 
-def endsinschwa(word):
+def endsinschwa(word: str) -> bool:
+    '''
+    The function endinschwa checks whether the string word ends in schwa.
+    '''
     # Ce of Vie of ije or ë
     if word[-3:] == 'ije':
         result = True
@@ -202,35 +301,58 @@ def endsinschwa(word):
     return result
 
 
-def isdiphthong(d):
+def isdiphthong(d: str) -> bool:
+    '''
+    The function isdiphthong checks whether the string d is a diphtong in Dutch.
+    '''
     result = d in dutch_diphthongs
     return result
 
 
-def istriphthong(d):
+def istriphthong(d: str) -> bool:
+    '''
+    The function istriphthong checks whether the string d is a triphtong in Dutch.
+    '''
     result = d in dutch_triphthongs
     return result
 
 
-def monosyllabic(word):
+def monosyllabic(word: str) -> bool:
+    '''
+    The function monosyllabic checks whether the string word cosnist of one syllable.
+    '''
     result = monosyllabicre.match(word)
     return result
 
 
-def accentaigu(word):
+def accentaigu(word: str) -> List[str]:
+    '''
+    The function accentaigu turns all vowels of a word into their varinats with an accent aigu, in all possible combinations.
+    Example: accentaigu('aap') == ['aap', 'aáp', 'áap', 'ááp']
+    '''
     if len(word) == 0:
-        results = []
+        results = ['']
     elif isvowel(word[0]):
         restresults = accentaigu(word[1:])
         results1 = [word[0] + wrest for wrest in restresults]
         results2 = [aigu(word[0]) + wrest for wrest in restresults]
         results = results1 + results2
+    else:
+        restresults = accentaigu(word[1:])
+        results = [word[0] + wrest for wrest in restresults]
     return results
 
 
-def aigu(c):
+def aigu(c: str) -> str:
+    '''
+    The function aigu turns the string c into a variant with an accent aigu.
+    Only useful for single character strings taht are contained in barevowels
+    :param c:
+    :return:
+    '''
     theindex = barevowels.find(c)
     result = aiguvowels[theindex]
+    return result
 
 
 def testcondition(condition, word):
@@ -262,31 +384,48 @@ def test():
         print('')
 
 
-def nono(inval):
+def nono(inval: Any) -> bool:
     result = (inval is None) or (inval == 0) or (inval == []) or (inval == '')
     return result
 
 
-def nonnull(inval):
+def nonnull(inval: Any) -> bool:
     result = not (nono(inval))
     return result
 
 
-def allconsonants(inval):
+def allconsonants(inval: str) -> bool:
+    '''
+    The function allconsonants checks whether all characters in the string inval are consonants
+    '''
     result = all([isconsonant(c) for c in inval])
     return result
 
 
-def string2list(liststr):
-    if liststr is None or len(liststr) == 1:
+def string2list(liststr: str) -> List[str]:
+    '''
+    The function string2list turns a string surrounded by [ ] into a list by splitting it on a comma
+    Examples:
+    * "[1,2,3]" becomes ['1', '2', '3']
+    * "[]" becomes []
+    * "[ ]" becomes [" "]
+
+    '''
+    if liststr is None or len(liststr) == 2:
         return []
     elif liststr[0] == '[' and liststr[-1] == ']':
         core = liststr[1:-1]
         parts = core.split(comma)
         return parts
+    else:
+        return []
 
 
-def realwordstring(w):
+def realwordstring(w: str) -> bool:
+    '''
+    The function realwordstrin gcheck whether the string w @@ to be extended@@
+
+    '''
     if len(w) != 1:
         result = True
     else:

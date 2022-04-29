@@ -949,6 +949,10 @@ def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) ->
 
 
 def gaatie(word: str) -> List[str]:
+    '''
+    The function *gaatie* replaces  a word that matches with the gaatiepattern by a sequence of two words where
+    the first word equals word[:-2] and the second word equals word[-2:]
+    '''
     results = []
     if gaatiere.match(word):
         if informlexicon(word[:-2]):  # and if it is a verb this is essential because now tie is also split into t ie
