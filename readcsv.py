@@ -31,7 +31,7 @@ def readheadedcsv(filename, sep=mysep, quotechar='"', encoding='utf8'):
     try:
         infile = open(filename, 'r', encoding=encoding, newline='')
     except FileNotFoundError as e:
-        SDLOGGER.error(e)
+        SDLOGGER.warning(e)
         return header, result
     myreader = csv.reader(infile, delimiter=sep, quotechar=quotechar)
     # read the header

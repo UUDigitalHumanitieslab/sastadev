@@ -187,7 +187,8 @@ stap = 'stap'
 asta = 'asta'
 gramat = 'gramat'
 
-codepath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
+#codepath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
+codepath = os.path.dirname(os.path.abspath(__file__))
 methodspath = os.path.join(codepath, 'methods')
 
 supported_methods = {}
