@@ -9,7 +9,6 @@ from config import SD_DIR
 from counterfunctions import counter2liststr
 from forms import getformfilename
 
-#tarspmethodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
 
 
 ordA = ord('A')

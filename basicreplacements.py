@@ -29,6 +29,8 @@ phonrepl = '/{wrong}/ instead of /{correct}/'
 wronginfl = 'Incorrect inflection'
 morph = 'Morphology'
 overgen = 'Overgeneralisation'
+typo = 'Typo'
+typorepl = '{wrong} instead of {correct}'
 
 Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden', 'benevens', 'bij', 'binnen',
            'binnenuit', 'boven', 'bovenaan', 'bovenin', 'bovenop', 'buiten', 'dichtbij', 'door', 'doorheen', 'heen',
@@ -63,9 +65,10 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                         ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der')),
                         ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di')),
                         ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron)),
-                        ('maggen', 'mogen', morph, wronginfl, overgen)
+                        ('maggen', 'mogen', morph, wronginfl, overgen),
+                        ('aleen', 'alleen', orth, typo, typorepl.format(wrong='alleen', correct='alleen'))
                         ] + ervzvariants
-# ('inne', 'in', pron, infpron, addschwa) # put off because it b;ock inne -> in de
+# ('inne', 'in', pron, infpron, addschwa) # put off because it blocks inne -> in de
 
 
 basicreplacements: Dict[str, List[Tuple[List[str], str, str, str]]] = defaultdict(list)

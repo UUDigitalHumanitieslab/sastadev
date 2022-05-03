@@ -11,5 +11,12 @@ if user == 'Odijk101':
 else:
     dataroot = '.'
 
-intreebanksfolder = 'intreebanks'
+bronzefolder = 'bronze'
 formsfolder = 'forms'
+indatafolder = 'indata'
+intreebanksfolder = 'intreebanks'
+loggingfolder = 'logging'
+outtreebanksfolder = 'outtreebanks'
+resultsfolder = 'results'
+silverfolder = 'silver'
+silverpermfolder = 'silverperm'

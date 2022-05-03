@@ -174,7 +174,9 @@ from rpf1 import getscores, getevalscores, sumfreq
 from targets import get_mustbedone, get_targets
 from correcttreebank import correcttreebank, corr0, corr1, corrn, validcorroptions, errorwbheader
 from methods import Method, defaultfilters
-from dataconfig import intreebanksfolder
+from dataconfig import bronzefolder, formsfolder, intreebanksfolder, loggingfolder, outtreebanksfolder, \
+    resultsfolder, silverfolder, silverpermfolder
+
 
 listDir = False
 if listDir:
@@ -187,7 +189,6 @@ stap = 'stap'
 asta = 'asta'
 gramat = 'gramat'
 
-#codepath = r'D:\jodijk\Dropbox\jodijk\myprograms\python\sastacode\sastadev'
 codepath = os.path.dirname(os.path.abspath(__file__))
 methodspath = os.path.join(codepath, 'methods')
 
@@ -203,7 +204,7 @@ platinumeditedsuffix = '.platinum-edited.tsv'
 bronzesuffix = '_bronze'
 silversuffix = '_silver'
 
-path2permfolder = 'silverperm'
+path2permfolder = silverpermfolder
 
 
 # target_intarget, target_xsid, target_all = 0, 1, 2
@@ -696,13 +697,13 @@ def main():
     if lastfolder == intreebanksfolder:
         intreebankinput = True
         analysespath = os.path.join(corepath,'analyses')
-        bronzepath = os.path.join(corepath, 'bronze')
-        silverpath = os.path.join(corepath, 'silver')
-        outtreebankspath = os.path.join(corepath, 'outtreebanks')
-        resultspath = os.path.join(corepath, 'results')
-        silverpermpath = os.path.join(corepath, path2permfolder)
-        loggingpath = os.path.join(corepath, 'logging')
-        formspath = os.path.join(corepath, 'forms')
+        bronzepath = os.path.join(corepath, bronzefolder)
+        silverpath = os.path.join(corepath, silverfolder)
+        outtreebankspath = os.path.join(corepath, outtreebanksfolder)
+        resultspath = os.path.join(corepath, resultsfolder)
+        silverpermpath = os.path.join(corepath, silverpermfolder)
+        loggingpath = os.path.join(corepath, loggingfolder)
+        formspath = os.path.join(corepath, formsfolder)
 
         outpaths = [analysespath, outtreebankspath, resultspath, silverpermpath, loggingpath, formspath, silverpath]
 
@@ -781,8 +782,6 @@ def main():
     themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
                        options.methodfilename, defaultfilter)
 
-    # annotationfilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned Current_out.tsv"
-    # annotationfilename = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AurisdataAligned TagsCleaned Current_out.tsv"
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
 
