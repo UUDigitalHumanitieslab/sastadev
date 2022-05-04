@@ -1,6 +1,6 @@
 '''
 The module *iedims* deals with diminutive forms ending in *-ie*. Alpino cannot deal with such diminutives,
-but the function getjeforms finds for a given word ending in *-ie* what the corresponding diminutives ending in
+but the function *getjeforms* finds for a given word ending in *-ie* what the corresponding diminutives ending in
 *-je* are.
 There can be many, e.g. *kassie* can correspond to *kasje* but also to *kastje*.
 
@@ -13,10 +13,9 @@ several alternative ways of writing these forms, e.g.
 * feest: fesie, feesie, or feessie?: we require *feessie* or *feesie*
 * dag: daggie, or dachie? : we require *daggie*
 * truc: trucie, truuccie, truukkie, or  trukie?: we cannot deal with any at this moment
-* maag: magie or maaggie, maachie?: we requie *magie*
-* vaas: vasie or vaassie?: all three are allowed
+* maag: magie or maaggie, maachie?: we allow *magie* or *maaggie*
+* vaas: vasie or vaassie?: both are allowed
 
-We cover most of these forms but not all (not fesie, maachie, dachie, Kesie, cluppie
 
 The module has been tested against a gold reference of all words ending in ie(s) from OpenSonaR.
 The module to use for a renewed test is tests.iedims_test.py, the file is tests.iediminutives.iedimsgold2.csv
@@ -126,7 +125,7 @@ vvsiereplacet = r'\1\2\3tje\4'
 
 
 #: * **Pattern** CVCiCiie : ending in consonant (C), single vowel (V), two identical consonants (CiCi) and *ie(s)*
-#: * **Replacement** VCije: degemintate the consonants and replace *ie* by *je*
+#: * **Replacement** VCije: degeminate the consonants and replace *ie* by *je*
 #: * **Examples**: bakkie -> bakje ukkie -> ukje
 #:
 cvcicipattern = begin + bcallorwb + bvowel + bc1 + v4 + ie + s + end
@@ -239,7 +238,7 @@ vmpjereplace = r'\1\2\3m'
 #: * **Pattern** nkjepattern: words ending in *nkje(s)
 #: * **Replacement**: replace *nkje* by *ng* and drop *s*
 #: * **Examples**: ('koninkje','koning'), ('koninkjes','koning')
-#:"
+#:
 nkjepattern = begin + r'nkje' + s + end   # koninkje
 nkjere = re.compile(nkjepattern, re.IGNORECASE)
 nkjereplace = r'\1ng'
@@ -319,7 +318,17 @@ def getbase(dim: str) -> List[str]:
     '''
     The function *getbase* computes a list of candidate lemmas for the input diminutive form (ending in *je*) *dim*.
 
-    It makes use of various patterns and replacements documented elsewhere.
+    It makes use of various patterns and replacements:
+
+    * .. autodata:: ngetjepattern
+    * .. autodata:: cicietjepattern
+    * .. autodata:: cmpjepattern
+    * .. autodata:: vmpjepattern
+    * .. autodata:: nkjepattern
+    * .. autodata:: vivitjepattern
+    * .. autodata:: vivjtjepattern
+    * .. autodata:: jepattern
+
     '''
     results = []
     if ngetjere.match(dim):
@@ -354,9 +363,10 @@ def getjeforms(ieform: str) -> List[str]:
     The function *getjeforms* when applied to a string  returns a list of strings that are diminutives ending in
     *-je* of which the lemma occurs in the lexicon. If no such string is found, it returns the empty list.
 
-    It crucially makes use of the function *getjeformsnolex*
+    It crucially makes use of the functions *getjeformsnolex* and *getbase*
 
     .. autofunction:: iedims::getjeformsnolex
+    .. autofunction:: iedims::getbase
 
     '''
     results1 = getjeformsnolex(ieform)
@@ -377,7 +387,7 @@ def getjeforms(ieform: str) -> List[str]:
 def getjeformsnolex(ieform: str) -> List[str]:
     '''
     The function getjeformsnolex when applied to a string *ieform* returns a list of candidate
-    diminutives strings ending in *-je* corresponding to  *ieform*. If no such candidates are found, it returns the
+    diminutive strings ending in *-je* corresponding to  *ieform*. If no such candidates are found, it returns the
     empty list.
 
     The function applies a range of relevant regular expressions for *ie*-diminutives, and, if a match is found,
@@ -391,9 +401,8 @@ def getjeformsnolex(ieform: str) -> List[str]:
     .. autodata:: vvssiepattern
     .. autodata:: vciepattern
     .. autodata:: chiepattern
-    .. autodata::cic1jiepattern
+    .. autodata:: cic1jiepattern
 
-    which have been described elsewhere.
     For all patterns except for the last two mentioned also a voiced replacement is carried out.
 
 

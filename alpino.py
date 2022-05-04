@@ -2,9 +2,15 @@ import lexicon
 import treebankfunctions
 
 from config import PARSE_FUNC
+from sastatypes import WordInfo
+from typing import List, Tuple
 
+def getalpinowordinfo(word: str) -> List[WordInfo]:
+    '''
+    The function *getalpinowordinfo* parses the input word in isolation, extracts its properties and returns some of
+    the properties as a list of WordInfo objects.
 
-def getalpinowordinfo(word):
+    '''
     tree = PARSE_FUNC(word)
     relevantnode = treebankfunctions.find1(tree, '//node[parent::node[@cat="top"]]')
     if relevantnode is None:
@@ -24,7 +30,15 @@ def getalpinowordinfo(word):
             return []
 
 
-def getdehetwordinfo(wrd):
+def getdehetwordinfo(wrd: str) -> Tuple[List[WordInfo], str]:
+    '''
+    The function *getdehetwordinfo*  determines the properties of the input string *word* by first looking in the
+    lexicon. It only includes properties if the word is a noun.
+    If not found in the lexicon, it tries to find the properties from Alpino by means of the function
+    *getalpinowordinfo*.
+    It returns a tuple consisting of a list of WordInfo objects and a string indicating the source where the properties
+    have been found.
+    '''
 
     wordinfos = lexicon.getwordinfo(wrd)
 
