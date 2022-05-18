@@ -2,7 +2,7 @@ import csv
 import re
 import os
 from typing import Dict, List, Tuple
-from .config import SD_DIR
+from config import SD_DIR
 
 tab = '\t'
 plussym = '+'
