@@ -46,6 +46,7 @@ MetaCondition = Callable[[Meta], bool]
 
 SASTA = 'SASTA'
 
+hyphen = '-'
 repetition = 'Repetition'
 
 replacepattern = '{} [: {} ]'
@@ -421,6 +422,7 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
     wordlist = tokenlist2stringlist(rawtokens)
     utt = space.join(wordlist)
     origutt = utt
+    #print(utt)
 
     # check whether the tree has the same yield
     origtree = tree
@@ -808,7 +810,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         name='Character Case', value='Lower case', cat='Orthography')
 
     # dehyphenate
-    if not known_word(token.word):
+    if not known_word(token.word) and hyphen in token.word:
         newwords = fullworddehyphenate(token.word, known_word)
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Dehyphenation', value='Dehyphenation', cat='Pronunciation',

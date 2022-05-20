@@ -104,7 +104,7 @@ def barededup(word: str) -> str:
     return result
 
 
-def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str] = []) -> List[str]:
+def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str] = set()) -> List[str]:
     '''
     The function deduplicate takes as input a string word:
 
@@ -143,18 +143,14 @@ def fullworddehyphenate(word: str, inlexicon: Callable[[str], bool]) -> List[str
     * the hyphen can be a part of the word (*sergeant-majoor*), in which case it should not be removed.
     * it can also have been added to an existing word without hyphens (zie-ken-huis), in which case, it should be removed
 
-    * it can also separate a possibly mispronounced prefix repetition of the prefix of word (e.g., ver-verkoopt or
-    vver-verkoopt), in which case the hyphen and the prefix should be removed.
+    * it can also separate a possibly mispronounced prefix repetition of the prefix of word (e.g., ver-verkoopt or vver-verkoopt), in which case the hyphen and the prefix should be removed.
 
 
     To that end,
 
-    * it applies the function *dehyphenate* to *word*. If this yields a result that is an existing word according to
-    the function *inlexicon*, then this result is added to the result variable *newtokens*
+    * it applies the function *dehyphenate* to *word*. If this yields a result that is an existing word according to the function *inlexicon*, then this result is added to the result variable *newtokens*
 
-    * if newtokens is still the empty list after this, it applies the function *delhyphenprefix* to word.  If this
-    yields a result that is an existing word according to the function *inlexicon*, then this result is added to the
-    result variable *newtokens*.
+    * if newtokens is still the empty list after this, it applies the function *delhyphenprefix* to word.  If this yields a result that is an existing word according to the function *inlexicon*, then this result is added to the result variable *newtokens*.
 
     and then it returns the result variable newtokens.
 
@@ -322,7 +318,7 @@ def monosyllabic(word: str) -> bool:
     '''
     The function monosyllabic checks whether the string word cosnist of one syllable.
     '''
-    result = monosyllabicre.match(word)
+    result = monosyllabicre.match(word) is not None
     return result
 
 

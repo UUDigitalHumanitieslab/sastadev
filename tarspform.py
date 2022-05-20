@@ -3,7 +3,8 @@ import re
 from collections import Counter
 from io import BytesIO
 
-import xlrd
+import xlsx
+#import xlrd
 import xlsxwriter
 from config import SD_DIR
 from counterfunctions import counter2liststr
@@ -34,20 +35,30 @@ def getshortloc(colctr, rowctr):
     return result
 
 
+# def oldreadbaseform(infilename):
+#     basesheet = {}
+#     wb = xlrd.open_workbook(infilename)
+#     sheet = wb.sheet_by_index(0)
+#     startrow = 0
+#     startcol = 0
+#     lastrow = sheet.nrows
+#     lastcol = sheet.ncols
+#     for rowctr in range(startrow, lastrow):
+#         for colctr in range(startcol, lastcol):
+#             curval = sheet.cell_value(rowctr, colctr)
+#             if curval is not None and curval != '':
+#                 basesheet[(rowctr, colctr)] = curval
+#     return basesheet
+
 def readbaseform(infilename):
     basesheet = {}
-    wb = xlrd.open_workbook(infilename)
-    sheet = wb.sheet_by_index(0)
-    startrow = 0
-    startcol = 0
-    lastrow = sheet.nrows
-    lastcol = sheet.ncols
-    for rowctr in range(startrow, lastrow):
-        for colctr in range(startcol, lastcol):
-            curval = sheet.cell_value(rowctr, colctr)
+    header, data = xlsx.getxlsxdata(infilename)
+    for rowctr, row in enumerate(data):
+        for colctr, curval in enumerate(row):
             if curval is not None and curval != '':
                 basesheet[(rowctr, colctr)] = curval
     return basesheet
+
 
 
 def is_id(word):

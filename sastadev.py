@@ -139,7 +139,7 @@ from sastatypes import QId, UttId, Position, SynTree, GoldTuple, Match, Matches,
     ExactResults, ExactResultsDict, QueryDict, QIdCount, MethodName, FileName, ResultsCounter, ResultsDict, AltCodeDict
 
 
-import xlrd
+#import xlrd
 from lxml import etree
 import os
 import sys
@@ -250,6 +250,7 @@ allmatches : MatchesDict = {}
 altcodes: AltCodeDict = {}
 
 emptycounter: Counter = Counter()
+invalidqueries: Dict[QId, Exception] = {}
 
 
 def checkplatinum(goldscores, platinumscores, queries):
@@ -410,6 +411,7 @@ def isxpathquery(query: str) -> bool:
 
 
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict, criterion: Callable[[Query], bool]):
+    global invalidqueries
     uttid = getuttid(syntree)
     # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
@@ -774,7 +776,6 @@ def main():
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
-    invalidqueries: Dict[QId, Exception] = {}
 
     # @@adapt this so that the method is read in directly as a Method object
     (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodfilename)
@@ -903,7 +904,7 @@ def main():
         analysedtrees = []
         for syntree in treebank:
             uttcount += 1
-            # SDLOGGER.error('uttcount={}'.format(uttcount))
+            #SDLOGGER.error('uttcount={}'.format(uttcount))
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
                 analysedtrees.append(syntree)

@@ -145,7 +145,7 @@ apBBt = """ (@cat="ap" and @rel="mod" and node[@rel="hd" and %tempadj%] )
 adjBBt = """ (@pt="adj" and @rel="mod" and %notinNP% and %tempadj%)
 """
 
-tempadj = """ (@special="tmp" or @frame="adjective(er(tmpadv))" or @frame="adjective(tmpadv)" or @lemma="gauw")
+tempadj = """ (@special="tmp" or @frame="adjective(er(tmpadv))" or @frame="adjective(tmpadv)" or @frame="adjective(no_e(tmpadv))" or @lemma="gauw")
 """
 
 notinNP = """ ( parent::node[@cat!="np"] )

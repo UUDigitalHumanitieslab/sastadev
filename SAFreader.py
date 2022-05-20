@@ -11,8 +11,10 @@ and the function read_annotations() to obtain a score dictionary with queryid as
 # =codes written without spaces?
 
 from typing import Any, Dict, List, Match, Optional, Pattern, Tuple
+
+import xlsx
 from sastatypes import FileName, Item, Item2LevelsDict, Level, Position, QueryDict, QId, UttId, UttWordDict
-import xlrd  # type: ignore
+#import xlrd  # type: ignore
 from collections import defaultdict
 from collections import Counter
 import re
@@ -47,7 +49,7 @@ stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
 
 
-def nested_dict(n:int, type: type):  # I do not know hpw to characterize the result type Dict n times deep endin gwith values of type type
+def nested_dict(n:int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
         return defaultdict(type)
     else:
@@ -118,90 +120,189 @@ def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, patter
     return results
 
 
-def oldget_annotations(infilename, patterns):
-    '''
-    Reads the file with name filename in SASTA Annotation Format
-    :param infilename:
-    :param patterns
-    :return: a dictionary  with as  key a tuple (level, item) and as value a Counter  with key uttid and value its count
-    '''
-
-    thedata = defaultdict(list)
-    exactdata = defaultdict(list)
-    cdata = {}
-
-    # To open Workbook
-    wb = xlrd.open_workbook(infilename)
-    sheet = wb.sheet_by_index(0)
-
-    startrow = 0
-    startcol = 0
-    headerrow = 0
-    headers = {}
-    lastrow = sheet.nrows
-    lastcol = sheet.ncols
-    #    firstwordcol = 2
-    #    lastwordcol = lastcol - 4
-    levelcol = 1
-    uttidcol = 0
-    stagescol = -1
-    commentscol = -1
-
-    uttlevel = 'utt'
-
-    for rowctr in range(startrow, lastrow):
-        if rowctr == headerrow:
-            for colctr in range(startcol, lastcol):
-                headers[colctr] = sheet.cell_value(rowctr, colctr)
-                if iswordcolumn(headers[colctr]):
-                    lastwordcol = colctr
-                    if isfirstwordcolumn(headers[colctr]):
-                        firstwordcol = colctr
-                elif clean(headers[colctr]) in speakerheaders:
-                    spkcol = colctr
-                elif clean(headers[colctr]) in uttidheaders:
-                    uttidcol = colctr
-                elif clean(headers[colctr]) in levelheaders:
-                    levelcol = colctr
-                elif clean(headers[colctr]) in stagesheaders:
-                    stagescol = colctr
-                elif clean(headers[colctr]) in commentsheaders:
-                    commentscol = colctr
-        else:
-            if sheet.cell_value(rowctr, uttidcol) != "":
-                uttid = str(int(sheet.cell_value(rowctr, uttidcol)))
-            thelevel = sheet.cell_value(rowctr, levelcol)
-            thelevel = clean(thelevel)
-            all_levels.add(thelevel)
-            for colctr in range(firstwordcol, sheet.ncols):
-                if thelevel in literallevels and colctr != stagescol and colctr != commentscol:
-                    thelabel = sheet.cell_value(rowctr, colctr)
-                    if colctr > lastwordcol:
-                        tokenposition = 0
-                    else:
-                        tokenposition = colctr - firstwordcol + 1
-                    thedata[(thelevel, thelabel)].append(uttid)
-                    exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-                elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
-                    thelabelstr = sheet.cell_value(rowctr, colctr)
-                    thelevel = sheet.cell_value(rowctr, levelcol)
-                    if lastwordcol + 1 <= colctr < sheet.ncols:
-                        # prefix = headers[colctr] aangepast om het simpeler te houden
-                        prefix = ""
-                    else:
-                        prefix = ""
-                    cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
-                    if colctr > lastwordcol:
-                        tokenposition = 0
-                    else:
-                        tokenposition = colctr - firstwordcol + 1
-                    for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
-                        thedata[(cleanlevel, cleanlabel)].append(uttid)
-                        exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-    # wb.close() there is no way to close the workbook
-    for atuple in thedata:
-        cdata[atuple] = Counter(thedata[atuple])
-    return cdata
+# def oldget_annotations(infilename, patterns):
+#     '''
+#     Reads the file with name filename in SASTA Annotation Format
+#     :param infilename:
+#     :param patterns
+#     :return: a dictionary  with as  key a tuple (level, item) and as value a Counter  with key uttid and value its count
+#     '''
+#
+#     thedata = defaultdict(list)
+#     exactdata = defaultdict(list)
+#     cdata = {}
+#
+#     # To open Workbook
+#     wb = xlrd.open_workbook(infilename)
+#     sheet = wb.sheet_by_index(0)
+#
+#     startrow = 0
+#     startcol = 0
+#     headerrow = 0
+#     headers = {}
+#     lastrow = sheet.nrows
+#     lastcol = sheet.ncols
+#     #    firstwordcol = 2
+#     #    lastwordcol = lastcol - 4
+#     levelcol = 1
+#     uttidcol = 0
+#     stagescol = -1
+#     commentscol = -1
+#
+#     uttlevel = 'utt'
+#
+#     for rowctr in range(startrow, lastrow):
+#         if rowctr == headerrow:
+#             for colctr in range(startcol, lastcol):
+#                 headers[colctr] = sheet.cell_value(rowctr, colctr)
+#                 if iswordcolumn(headers[colctr]):
+#                     lastwordcol = colctr
+#                     if isfirstwordcolumn(headers[colctr]):
+#                         firstwordcol = colctr
+#                 elif clean(headers[colctr]) in speakerheaders:
+#                     spkcol = colctr
+#                 elif clean(headers[colctr]) in uttidheaders:
+#                     uttidcol = colctr
+#                 elif clean(headers[colctr]) in levelheaders:
+#                     levelcol = colctr
+#                 elif clean(headers[colctr]) in stagesheaders:
+#                     stagescol = colctr
+#                 elif clean(headers[colctr]) in commentsheaders:
+#                     commentscol = colctr
+#         else:
+#             if sheet.cell_value(rowctr, uttidcol) != "":
+#                 uttid = str(int(sheet.cell_value(rowctr, uttidcol)))
+#             thelevel = sheet.cell_value(rowctr, levelcol)
+#             thelevel = clean(thelevel)
+#             all_levels.add(thelevel)
+#             for colctr in range(firstwordcol, sheet.ncols):
+#                 if thelevel in literallevels and colctr != stagescol and colctr != commentscol:
+#                     thelabel = sheet.cell_value(rowctr, colctr)
+#                     if colctr > lastwordcol:
+#                         tokenposition = 0
+#                     else:
+#                         tokenposition = colctr - firstwordcol + 1
+#                     thedata[(thelevel, thelabel)].append(uttid)
+#                     exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+#                 elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+#                     thelabelstr = sheet.cell_value(rowctr, colctr)
+#                     thelevel = sheet.cell_value(rowctr, levelcol)
+#                     if lastwordcol + 1 <= colctr < sheet.ncols:
+#                         # prefix = headers[colctr] aangepast om het simpeler te houden
+#                         prefix = ""
+#                     else:
+#                         prefix = ""
+#                     cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
+#                     if colctr > lastwordcol:
+#                         tokenposition = 0
+#                     else:
+#                         tokenposition = colctr - firstwordcol + 1
+#                     for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
+#                         thedata[(cleanlevel, cleanlabel)].append(uttid)
+#                         exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+#     # wb.close() there is no way to close the workbook
+#     for atuple in thedata:
+#         cdata[atuple] = Counter(thedata[atuple])
+#     return cdata
+#
+#
+# def old2get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
+#         -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
+#     '''
+#     Reads the file with name filename in SASTA Annotation Format
+#     :param infilename:
+#     :param patterns
+#     :return: a dictionary  with as  key a tuple (level, item) and as value a list of (uttid, tokenposition) pairs
+#     '''
+#
+#     thedata = defaultdict(list)
+#     #cdata = {}
+#
+#     allutts = {}
+#
+#     # To open Workbook
+#     wb = xlrd.open_workbook(infilename)
+#     sheet = wb.sheet_by_index(0)
+#
+#     startrow = 0
+#     startcol = 0
+#     headerrow = 0
+#     headers = {}
+#     lastrow = sheet.nrows
+#     lastcol = sheet.ncols
+#     #    firstwordcol = 2
+#     #    lastwordcol = lastcol - 4
+#     levelcol = 1
+#     uttidcol = 0
+#     stagescol = -1
+#     commentscol = -1
+#
+#     uttlevel = 'utt'
+#
+#     uttcount = 0
+#
+#     for rowctr in range(startrow, lastrow):
+#         if rowctr == headerrow:
+#             for colctr in range(startcol, lastcol):
+#                 headers[colctr] = sheet.cell_value(rowctr, colctr)
+#                 if iswordcolumn(headers[colctr]):
+#                     lastwordcol = colctr
+#                     if isfirstwordcolumn(headers[colctr]):
+#                         firstwordcol = colctr
+#                 elif clean(headers[colctr]) in speakerheaders:
+#                     spkcol = colctr
+#                 elif clean(headers[colctr]) in uttidheaders:
+#                     uttidcol = colctr
+#                 elif clean(headers[colctr]) in levelheaders:
+#                     levelcol = colctr
+#                 elif clean(headers[colctr]) in stagesheaders:
+#                     stagescol = colctr
+#                 elif clean(headers[colctr]) in commentsheaders:
+#                     commentscol = colctr
+#         else:
+#             if sheet.cell_value(rowctr, uttidcol) != "":
+#                 uttid = str(int(sheet.cell_value(rowctr, uttidcol)))
+#             thelevel = sheet.cell_value(rowctr, levelcol)
+#             thelevel = clean(thelevel)
+#             all_levels.add(thelevel)
+#             # if thelevel == uttlevel:
+#             #    uttcount += 1
+#             curuttwlist = []
+#             for colctr in range(firstwordcol, sheet.ncols):
+#                 if thelevel == uttlevel:
+#                     curcellval = sheet.cell_value(rowctr, colctr)
+#                     if curcellval != '':
+#                         curuttwlist.append(curcellval)
+#                 elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
+#                     thelabel = sheet.cell_value(rowctr, colctr)
+#                     if colctr > lastwordcol:
+#                         tokenposition = 0
+#                     else:
+#                         tokenposition = colctr - firstwordcol + 1
+#                     # thedata[(thelevel, thelabel)].append(uttid)
+#                     cleanlevel = thelevel
+#                     cleanlabel = thelabel
+#                     if cleanlabel != '':
+#                         thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+#                 elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+#                     thelabelstr = sheet.cell_value(rowctr, colctr)
+#                     thelevel = sheet.cell_value(rowctr, levelcol)
+#                     if lastwordcol + 1 <= colctr < sheet.ncols:
+#                         # prefix = headers[colctr] aangepast om het simpeler te houden
+#                         prefix = ""
+#                     else:
+#                         prefix = ""
+#                     cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
+#                     if colctr > lastwordcol:
+#                         tokenposition = 0
+#                     else:
+#                         tokenposition = colctr - firstwordcol + 1
+#                     for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
+#                         thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+#             if curuttwlist != []:
+#                 allutts[uttid] = curuttwlist
+#     # wb.close() there is no way to close the workbook
+#     return allutts, thedata
 
 
 def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
@@ -214,22 +315,12 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
     '''
 
     thedata = defaultdict(list)
-    #cdata = {}
 
     allutts = {}
 
     # To open Workbook
-    wb = xlrd.open_workbook(infilename)
-    sheet = wb.sheet_by_index(0)
+    header, data = xlsx.getxlsxdata(infilename)
 
-    startrow = 0
-    startcol = 0
-    headerrow = 0
-    headers = {}
-    lastrow = sheet.nrows
-    lastcol = sheet.ncols
-    #    firstwordcol = 2
-    #    lastwordcol = lastcol - 4
     levelcol = 1
     uttidcol = 0
     stagescol = -1
@@ -239,68 +330,67 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
 
     uttcount = 0
 
-    for rowctr in range(startrow, lastrow):
-        if rowctr == headerrow:
-            for colctr in range(startcol, lastcol):
-                headers[colctr] = sheet.cell_value(rowctr, colctr)
-                if iswordcolumn(headers[colctr]):
-                    lastwordcol = colctr
-                    if isfirstwordcolumn(headers[colctr]):
-                        firstwordcol = colctr
-                elif clean(headers[colctr]) in speakerheaders:
-                    spkcol = colctr
-                elif clean(headers[colctr]) in uttidheaders:
-                    uttidcol = colctr
-                elif clean(headers[colctr]) in levelheaders:
-                    levelcol = colctr
-                elif clean(headers[colctr]) in stagesheaders:
-                    stagescol = colctr
-                elif clean(headers[colctr]) in commentsheaders:
-                    commentscol = colctr
+    for col, val in enumerate(header):
+        if iswordcolumn(val):
+            lastwordcol = col
+            if isfirstwordcolumn(val):
+                firstwordcol = col
+        elif clean(val) in speakerheaders:
+            spkcol = col
+        elif clean(val) in uttidheaders:
+            uttidcol = col
+        elif clean(val) in levelheaders:
+            levelcol = col
+        elif clean(val) in stagesheaders:
+            stagescol = col
+        elif clean(val) in commentsheaders:
+            commentscol = col
         else:
-            if sheet.cell_value(rowctr, uttidcol) != "":
-                uttid = str(int(sheet.cell_value(rowctr, uttidcol)))
-            thelevel = sheet.cell_value(rowctr, levelcol)
-            thelevel = clean(thelevel)
-            all_levels.add(thelevel)
-            # if thelevel == uttlevel:
-            #    uttcount += 1
-            curuttwlist = []
-            for colctr in range(firstwordcol, sheet.ncols):
-                if thelevel == uttlevel:
-                    curcellval = sheet.cell_value(rowctr, colctr)
-                    if curcellval != '':
-                        curuttwlist.append(curcellval)
-                elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
-                    thelabel = sheet.cell_value(rowctr, colctr)
-                    if colctr > lastwordcol:
-                        tokenposition = 0
-                    else:
-                        tokenposition = colctr - firstwordcol + 1
-                    # thedata[(thelevel, thelabel)].append(uttid)
-                    cleanlevel = thelevel
-                    cleanlabel = thelabel
-                    if cleanlabel != '':
-                        thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-                elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
-                    thelabelstr = sheet.cell_value(rowctr, colctr)
-                    thelevel = sheet.cell_value(rowctr, levelcol)
-                    if lastwordcol + 1 <= colctr < sheet.ncols:
-                        # prefix = headers[colctr] aangepast om het simpeler te houden
-                        prefix = ""
-                    else:
-                        prefix = ""
-                    cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
-                    if colctr > lastwordcol:
-                        tokenposition = 0
-                    else:
-                        tokenposition = colctr - firstwordcol + 1
-                    for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
-                        thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-            if curuttwlist != []:
-                allutts[uttid] = curuttwlist
-    # wb.close() there is no way to close the workbook
+            pass # maybe warn here that an unknow column header has been encountered?
+
+    for row in data:
+        if row[uttidcol] != "":
+            uttid = str(int(row[uttidcol]))
+        thelevel = row[levelcol]
+        thelevel = clean(thelevel)
+        all_levels.add(thelevel)
+        # if thelevel == uttlevel:
+        #    uttcount += 1
+        curuttwlist = []
+        for colctr in range(firstwordcol, len(row)):
+            if thelevel == uttlevel:
+                curcellval = row[colctr]
+                if curcellval != '':
+                    curuttwlist.append(curcellval)
+            elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
+                thelabel = row[colctr]
+                if colctr > lastwordcol:
+                    tokenposition = 0
+                else:
+                    tokenposition = colctr - firstwordcol + 1
+                cleanlevel = thelevel
+                cleanlabel = thelabel
+                if cleanlabel != '':
+                    thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+            elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+                thelabelstr = row[colctr]
+                thelevel = row[levelcol]
+                if lastwordcol + 1 <= colctr < len(row):
+                    # prefix = headers[colctr] aangepast om het simpeler te houden
+                    prefix = ""
+                else:
+                    prefix = ""
+                cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
+                if colctr > lastwordcol:
+                    tokenposition = 0
+                else:
+                    tokenposition = colctr - firstwordcol + 1
+                for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
+                    thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+        if curuttwlist != []:
+            allutts[uttid] = curuttwlist
     return allutts, thedata
+
 
 
 def update(thedict: Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]], qid: QId,

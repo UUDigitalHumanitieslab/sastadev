@@ -200,9 +200,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
     * treebank: the treebank of the sample, parsed as is.
     * targets: a specification of the utterances that have to be analysed
     * method: the method to be used. Some corrections are method-specific
-    * corr: to indicate how the corrections should be done: no corrections at all, all corrections but the last one
-    (usually the one with most adaptations) is selected; all  corrections but the best one according to the
-    evaluation  criterion is selected.
+    * corr: to indicate how the corrections should be done: no corrections at all, all corrections but the last one (usually the one with most adaptations) is selected; all  corrections but the best one according to the evaluation  criterion is selected.
 
 
     It returns a triple consisting of

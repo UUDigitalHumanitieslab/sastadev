@@ -7,6 +7,9 @@ asta = 'asta'
 stap = 'stap'
 tarsp = 'tarsp'
 
+def validmethod(method: str) -> bool:
+    result = method.lower in [asta, stap, tarsp]
+    return result
 
 def allok(query: Query, xs: ExactResultsDict, x: ExactResult) -> bool:
     return True

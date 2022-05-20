@@ -6,7 +6,7 @@ import os
 
 user = os.getlogin()
 if user == 'Odijk101':
-    dataroot = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\SASTADATA'
+    dataroot = r'C:\Users\Odijk101\Dropbox\jodijk\Utrecht\Projects\SASTADATA'
 #add other users here
 else:
     dataroot = '.'

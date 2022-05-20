@@ -33,7 +33,7 @@ def isempty(sent: str) -> bool:
     '''
     The function *isempty* checke whether the input string *sent* is the null strin or consists of white space only.
     '''
-    result = emptyre.match(sent)
+    result = emptyre.match(sent) is not None
     return result
 
 

@@ -1,2 +1,2 @@
-set githubtoken=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
+set githubtoken=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
 git remote set-url origin https://%githubtoken%@github.com/UUDigitalHumanitieslab/sastadev.git

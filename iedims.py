@@ -53,7 +53,7 @@ def drop(pattern: str, chars: str) -> str:
     return newpattern
 
 
-def regexor(stringlist: str) -> str:
+def regexor(stringlist: List[str]) -> str:
     '''
     The function *regexor* joins a list of strings by means of a vertical bar
     '''
@@ -235,7 +235,7 @@ vmpjereplace = r'\1\2\3m'
 # localtest(vmpjere, [vmpjereplace], testlist)
 
 
-#: * **Pattern** nkjepattern: words ending in *nkje(s)
+#: * **Pattern** nkjepattern: words ending in *nkje(s)*
 #: * **Replacement**: replace *nkje* by *ng* and drop *s*
 #: * **Examples**: ('koninkje','koning'), ('koninkjes','koning')
 #:
@@ -423,7 +423,7 @@ def getjeformsnolex(ieform: str) -> List[str]:
         result = dciere.sub(dciereplace, ieform)
         results.append(result)
         bdg = voicing(m.group(3))
-        result = cvcicire.sub(r'\1\2' + bdg + r'je\4', ieform)   # Huipie -> Huibje
+        result = dciere.sub(r'\1\2' + bdg + r'je\4', ieform)   # Huipie -> Huibje
         results.append(result)
     elif vvssiere.match(ieform):
         m = vvssiere.match(ieform)
