@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>top3000 &#8212; SASTA  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SASTA  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">top3000</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for top3000</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;&#39;</span>
+<span class="sd">The module top3000.py creates 3 dictionaries on the basis of the input file Woordenlijsten Current.xlsx in the</span>
+<span class="sd">subfolder *top3000*:</span>
+
+<span class="sd">* semlexicon: Dict[Tuple[str, DCOIPt], List[str]] stores the semantic properties of a (lemma, pt) tuple</span>
+<span class="sd">* trlexicon: Dict[Tuple[str, DCOIPt], List[str]] stores the transitivity properties of a (lemma, pt) tuple</span>
+<span class="sd">* genlexicon: Dict[Tuple[str, DCOIPt], List[str]] stores whether  (lemma, pt) tuple has a genitive form (List of yes|no)</span>
+
+<span class="sd">It provides functions to determine these properties for a node:</span>
+
+<span class="sd">* .. autofunction:: ishuman</span>
+<span class="sd">* .. autofunction:: isanimate</span>
+<span class="sd">* .. autofunction:: transitive</span>
+<span class="sd">* .. autofunction:: intransitive</span>
+<span class="sd">* .. autofunction:: pseudotr</span>
+
+<span class="sd">The top3000 lexicon file has been derived from words as listed in various resources relate to N-CDI,</span>
+<span class="sd">in particular a top 3000 words by Schlichting. It has the following columns:</span>
+
+<span class="sd">* **OrigWord** original word as it occurs in the documents</span>
+<span class="sd">* **Word** cleaned word</span>
+<span class="sd">* **check** check whether word is found in Origword</span>
+<span class="sd">* **Collocate**: word or words that cooccur with the word</span>
+<span class="sd">* **Context**: contyext as specified in the original files</span>
+<span class="sd">* **POS**: DCOI pt or cat code</span>
+<span class="sd">* **semtype**: semantic type, partially from the original files, so far only human, animate are used</span>
+<span class="sd">* **Regio**: to indicated BElgium-specific words</span>
+<span class="sd">* **trans**: transitivity: tr, intr or tr/intr, tr/intr. Alpino does not retain the valence of a verb but adpats it to the context.</span>
+<span class="sd">* **hasgen**: has a genitive form, for nouns only: yes or no</span>
+<span class="sd">* **Top1000**: belongs to the Top 1000 words according to Schlichting (yes, no)</span>
+<span class="sd">* **Top3000**	N-CDI jong kk: (also) occurs in the N-CDI file for jonge kinderen (yes, no)</span>
+
+<span class="sd">The information needs extension and there are more files with relevant data.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">xlsx</span> <span class="k">import</span> <span class="n">getxlsxdata</span>
+<span class="kn">from</span> <span class="nn">treebankfunctions</span> <span class="k">import</span> <span class="n">getattval</span>
+<span class="kn">from</span> <span class="nn">namepartlexicon</span> <span class="k">import</span> <span class="n">namepart_isa_namepart</span>
+<span class="kn">from</span> <span class="nn">config</span> <span class="k">import</span> <span class="n">SD_DIR</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">sastatypes</span> <span class="k">import</span> <span class="n">SynTree</span><span class="p">,</span> <span class="n">DCOIPt</span>
+
+<div class="viewcode-block" id="ishuman"><a class="viewcode-back" href="../lexicons.html#top3000.ishuman">[docs]</a><span class="k">def</span> <span class="nf">ishuman</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">SynTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function ishuman determines whether the node node is human</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lemma</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;lemma&#39;</span><span class="p">)</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">)</span>
+    <span class="n">vwtype</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;vwtype&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">semlexicon</span> <span class="ow">and</span> <span class="s1">&#39;human&#39;</span> <span class="ow">in</span> <span class="n">semlexicon</span><span class="p">[(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span><span class="p">)]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="ow">or</span> <span class="n">vwtype</span> <span class="o">==</span> <span class="s1">&#39;pers&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="ow">or</span> <span class="n">namepart_isa_namepart</span><span class="p">(</span><span class="n">lemma</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="isanimate"><a class="viewcode-back" href="../lexicons.html#top3000.isanimate">[docs]</a><span class="k">def</span> <span class="nf">isanimate</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">SynTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function isanimate determines whether the nde node is animate</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">lemma</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;lemma&#39;</span><span class="p">)</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">semlexicon</span> <span class="ow">and</span> <span class="s1">&#39;animate&#39;</span> <span class="ow">in</span> <span class="n">semlexicon</span><span class="p">[(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="k">def</span> <span class="nf">transitivity</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">SynTree</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function transitivity determines whether the string tr occurs in trlexicon for (lemma, pt) of the node</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lemma</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;lemma&#39;</span><span class="p">)</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">getattval</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">semlexicon</span> <span class="ow">and</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">trlexicon</span><span class="p">[(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="transitive"><a class="viewcode-back" href="../lexicons.html#top3000.transitive">[docs]</a><span class="k">def</span> <span class="nf">transitive</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">SynTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function transitive determines whether node is transitive</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">transitivity</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;tr&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="pseudotr"><a class="viewcode-back" href="../lexicons.html#top3000.pseudotr">[docs]</a><span class="k">def</span> <span class="nf">pseudotr</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">SynTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function pseudotr determines whether node is pseudotransitive</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">transitivity</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;tr/intr&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="intransitive"><a class="viewcode-back" href="../lexicons.html#top3000.intransitive">[docs]</a><span class="k">def</span> <span class="nf">intransitive</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">SynTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function intransitve determines whether node is intransitive</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">transitivity</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;intr&#39;</span><span class="p">)</span></div>
+
+<span class="n">semicolon</span> <span class="o">=</span> <span class="s1">&#39;;&#39;</span>
+
+<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SD_DIR</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;top3000\Woordenlijsten Current.xlsx&#39;</span><span class="p">)</span>
+
+
+<span class="n">lexiconheader</span><span class="p">,</span> <span class="n">lexicondata</span> <span class="o">=</span> <span class="n">getxlsxdata</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="n">semlexicon</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DCOIPt</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">trlexicon</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DCOIPt</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">genlexicon</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DCOIPt</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">lexicondata</span><span class="p">:</span>
+    <span class="n">lemma</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">rawsems</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">semicolon</span><span class="p">)</span>
+    <span class="n">sems</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">rawsems</span><span class="p">]</span>
+    <span class="n">semlexicon</span><span class="p">[(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span><span class="p">)]</span> <span class="o">=</span> <span class="n">sems</span>
+
+    <span class="n">rawtrs</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">semicolon</span><span class="p">)</span>
+    <span class="n">trs</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">rawtrs</span><span class="p">]</span>
+    <span class="n">trlexicon</span><span class="p">[(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span><span class="p">)]</span> <span class="o">=</span> <span class="n">trs</span>
+
+    <span class="n">rawgens</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">semicolon</span><span class="p">)</span>
+    <span class="n">gens</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">rawgens</span><span class="p">]</span>
+    <span class="n">genlexicon</span><span class="p">[(</span><span class="n">lemma</span><span class="p">,</span> <span class="n">pt</span><span class="p">)]</span> <span class="o">=</span> <span class="n">gens</span>
+
+<span class="c1">#next statement for debugging purposes</span>
+<span class="n">junk</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SASTA  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">top3000</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>

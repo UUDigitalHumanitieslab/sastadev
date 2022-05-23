@@ -23,7 +23,7 @@ from queryfunctions import xneg_x, xneg_neg, VzN
 from dedup import mlux, samplesize, neologisme, onvolledig, correct
 from STAPpostfunctions import BB_totaal, GLVU, GL5LVU
 from ASTApostfunctions import wordcountperutt, countwordsandcutoff, KMcount, finietheidsindex, getnounlemmas,\
-    getlexlemmas, getalllemmas
+    getlexlemmas, getalllemmas,  sempar, phonpar, neologisme
 from astaforms import astaform
 from tarspform import mktarspform
 from stapforms import makestapform
@@ -69,7 +69,7 @@ thestapfunctions = [BB_totaal, GLVU, GL5LVU, makestapform]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
-                    asta_bijzin, asta_lex, asta_delpv, allok]
+                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, neologisme]
 
 thefunctions = thetarspfunctions + thestapfunctions + theastafunctions
 

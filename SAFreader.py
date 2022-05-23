@@ -47,6 +47,7 @@ uttidheaders = ['id', 'utt', 'uttid']
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
+unalignedheaders = ['unaligned']
 
 
 def nested_dict(n:int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
@@ -325,6 +326,7 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
     uttidcol = 0
     stagescol = -1
     commentscol = -1
+    unalignedcol = -1
 
     uttlevel = 'utt'
 
@@ -345,6 +347,8 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
             stagescol = col
         elif clean(val) in commentsheaders:
             commentscol = col
+        elif clean(val) in unalignedheaders:
+            unalignedcol = col
         else:
             pass # maybe warn here that an unknow column header has been encountered?
 
@@ -375,13 +379,15 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
             elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
                 thelabelstr = row[colctr]
                 thelevel = row[levelcol]
+                if colctr == unalignedcol:
+                    prefix = ''
                 if lastwordcol + 1 <= colctr < len(row):
                     # prefix = headers[colctr] aangepast om het simpeler te houden
                     prefix = ""
                 else:
                     prefix = ""
                 cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
-                if colctr > lastwordcol:
+                if colctr > lastwordcol or colctr == unalignedcol:
                     tokenposition = 0
                 else:
                     tokenposition = colctr - firstwordcol + 1
@@ -467,7 +473,10 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
 #            mappingitem = varitem
 #        else:
 #            mappingitem = theitem
-        if (theitem, thelevel) in mapping:
+        if thelevel in literallevels:
+            #we still have to determine how to deal with this
+            pass
+        elif (theitem, thelevel) in mapping:
             qid = mapping[(theitem, thelevel)]
             update(results, qid, (thelevel, theitem, thecounter))
             if includeimplies:

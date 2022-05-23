@@ -612,6 +612,8 @@ def getwordpositions(matchtree: SynTree, syntree: SynTree) -> List[Position]:
 def getmarkedyield(wordlist: List[str], positions: List[Position]) -> List[str]:
     pos = 1
     resultlist = []
+    if 0 in positions:
+        resultlist.append(mark(''))
     for w in wordlist:
         if pos in positions:
             resultlist.append(mark(w))

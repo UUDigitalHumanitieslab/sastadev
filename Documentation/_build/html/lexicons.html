@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lexicons &#8212; SASTA  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Deviant Language" href="deviantlanguage.html" />
+    <link rel="prev" title="STAP Language Measures" href="stap.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="deviantlanguage.html" title="Deviant Language"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stap.html" title="STAP Language Measures"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SASTA  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Lexicons</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="lexicons">
+<h1>Lexicons<a class="headerlink" href="#lexicons" title="Permalink to this headline">¶</a></h1>
+<p>SASTA uses a range of lexicons. We will briefly describe these here.</p>
+<div class="section" id="alpinolexicon">
+<h2>Alpinolexicon<a class="headerlink" href="#alpinolexicon" title="Permalink to this headline">¶</a></h2>
+<p>The Alpinolexicon is used inside Alpino. This lexicon is not just a list of words with their properties but has a more complex structure and also contains rules to deal with systematic cases, programmed in Prolog. This makes it less usable outside of Alpino.</p>
+<p>The predicate ‘is contained in the Alpino-lexicon’ is also not easy to define. One can only do this by parsing the relevant word. But Alpino will come back with a word analysed as a compound if it can analyse it as a compound, even if it is not listed as such in the Alpino lexicon, and the difference cannot be seen. The properties that a word will get in the parse are also in part dependent on the context in which it occurs. For example, a verb may have many frame options but will have only one left in a particular utterance.</p>
+<p>Gertjan van Noord wrote to me about this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">als</span> <span class="n">je</span> <span class="n">Alpino</span> <span class="n">hebt</span><span class="p">,</span> <span class="n">gaat</span> <span class="n">het</span> <span class="n">zo</span>
+
+<span class="n">Alpino</span>
+<span class="n">p</span> <span class="n">lex_all</span>
+
+<span class="n">en</span> <span class="n">nu</span> <span class="n">kun</span> <span class="n">je</span> <span class="n">per</span> <span class="n">regel</span> <span class="n">een</span> <span class="n">zin</span> <span class="p">(</span><span class="n">of</span> <span class="n">een</span> <span class="n">woord</span><span class="p">)</span> <span class="n">ingeven</span><span class="o">.</span> <span class="n">Alpino</span> <span class="n">toont</span> <span class="n">vervolgens</span> <span class="n">alle</span> <span class="n">categorieën</span> <span class="n">die</span> <span class="n">het</span> <span class="n">woord</span> <span class="n">heeft</span> <span class="n">gekregen</span><span class="o">.</span> <span class="n">Vb</span><span class="p">:</span>
+
+<span class="mi">1</span> <span class="o">|</span><span class="p">:</span> <span class="n">p</span> <span class="n">lex_all</span>
+<span class="mi">1</span> <span class="o">|</span><span class="p">:</span> <span class="n">de</span> <span class="n">autootje</span>
+<span class="p">[</span><span class="o">...</span> <span class="n">debug</span> <span class="n">info</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">TAG</span><span class="c1">#0|1|de|determiner(de)|normal(normal)|de|0.0</span>
+<span class="n">TAG</span><span class="c1">#1|2|autootje|noun(het,count,sg)|diminutive|auto_DIM|0.6931471805599453</span>
+<span class="n">TAG</span><span class="c1">#1|2|autootje|noun(het,count,sg)|normal(normal)|auto_DIM|0.6931471805599453</span>
+
+<span class="n">de</span> <span class="n">regels</span> <span class="n">die</span> <span class="n">met</span> <span class="n">TAG</span> <span class="n">beginnen</span> <span class="n">zijn</span> <span class="n">relevant</span><span class="o">.</span> <span class="n">En</span> <span class="n">die</span> <span class="n">hebben</span> <span class="n">velden</span><span class="p">,</span> <span class="n">gescheiden</span> <span class="n">door</span> <span class="o">|</span> <span class="n">veld</span> <span class="mi">4</span> <span class="ow">is</span> <span class="n">de</span> <span class="n">woordsoort</span><span class="p">,</span> <span class="n">veld</span> <span class="mi">5</span> <span class="ow">is</span> <span class="n">de</span> <span class="n">naam</span> <span class="n">van</span> <span class="n">de</span> <span class="n">heuristiek</span> <span class="n">die</span> <span class="ow">is</span> <span class="n">gebruikt</span><span class="o">.</span> <span class="n">Als</span> <span class="n">die</span> <span class="n">naam</span> <span class="n">met</span> <span class="s1">&#39;normal(&#39;</span> <span class="n">begint</span><span class="p">,</span> <span class="n">zou</span> <span class="n">je</span> <span class="n">kunnen</span> <span class="n">zeggen</span> <span class="n">dat</span> <span class="n">het</span> <span class="n">woord</span> <span class="n">gewoon</span> <span class="ow">in</span> <span class="n">het</span> <span class="n">woordenboek</span> <span class="n">staat</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="celex">
+<h2>CELEX<a class="headerlink" href="#celex" title="Permalink to this headline">¶</a></h2>
+<p>The lexicon that we use most is CELEX. There is a module lexicon.py which provides the interface to the lexion actually used:</p>
+<span class="target" id="module-lexicon"></span><p>The lexicon module is the interface to the lexicon.
+It is intended to abstract from the concrete lexicon used.</p>
+<p>Currently we especially use the CELEX lexicon.
+This module also contains some special word lists. Perhaps we should set up a special Exception List module
+for this purpose.</p>
+<p>But in it the actual lexicon used is the CELEX lexicon, taken care of by the celexlexicon module:</p>
+<span class="target" id="module-celexlexicon"></span><p>The CELEX lexicon consists of 3 backslash-separated value files:</p>
+<ul class="simple">
+<li><p>DMW (dmwcdok.txt): word forms and their properties</p></li>
+<li><p>DML (dmlcd.txt): lemmas and their morphological properties</p></li>
+<li><p>DSL (dslcd.txt): lemmas and their syntactic properties</p></li>
+</ul>
+<p>These files can be found in the folder celexlexicon/dutch in the code folder.</p>
+<p>We store these in the celexlexicon module in python dictionaries:</p>
+<ul class="simple">
+<li><p>dmwkeydict: key = word identifier, value = whole record for this identifier</p></li>
+<li><p>dmldict: key = lemma identifier, value = whole record for this identifier</p></li>
+<li><p>dsldict: key = lemma identifier, value = whole dsl record for this identifier</p></li>
+</ul>
+<p>We define the following indexes (as python dictionaries) for quick lookup in this module:</p>
+<ul class="simple">
+<li><p>dmwlemmakeyinflindex: key = (lemma identifier, infl), value = List of word form identifiers</p></li>
+<li><p>dmwdict: key = word form, value = list of word identifiers</p></li>
+</ul>
+<p>This module also contains functions to map CELEX inflection codes to DCOI inflection codes, and the other way around,
+as well as functions to generate inflected forms for a given lemma, pos-code and inflectional properties.</p>
+</div>
+<div class="section" id="module-top3000">
+<span id="top3000"></span><h2>Top3000<a class="headerlink" href="#module-top3000" title="Permalink to this headline">¶</a></h2>
+<p>‘
+The module top3000.py creates 3 dictionaries on the basis of the input file Woordenlijsten Current.xlsx in the
+subfolder <em>top3000</em>:</p>
+<ul class="simple">
+<li><p>semlexicon: Dict[Tuple[str, DCOIPt], List[str]] stores the semantic properties of a (lemma, pt) tuple</p></li>
+<li><p>trlexicon: Dict[Tuple[str, DCOIPt], List[str]] stores the transitivity properties of a (lemma, pt) tuple</p></li>
+<li><p>genlexicon: Dict[Tuple[str, DCOIPt], List[str]] stores whether  (lemma, pt) tuple has a genitive form (List of yes|no)</p></li>
+</ul>
+<p>It provides functions to determine these properties for a node:</p>
+<ul>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="top3000.ishuman">
+<span class="sig-prename descclassname"><span class="pre">top3000.</span></span><span class="sig-name descname"><span class="pre">ishuman</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lxml.etree.Element</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/top3000.html#ishuman"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#top3000.ishuman" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function ishuman determines whether the node node is human</p>
+</dd></dl>
+
+</li>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="top3000.isanimate">
+<span class="sig-prename descclassname"><span class="pre">top3000.</span></span><span class="sig-name descname"><span class="pre">isanimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lxml.etree.Element</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/top3000.html#isanimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#top3000.isanimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function isanimate determines whether the nde node is animate</p>
+</dd></dl>
+
+</li>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="top3000.transitive">
+<span class="sig-prename descclassname"><span class="pre">top3000.</span></span><span class="sig-name descname"><span class="pre">transitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lxml.etree.Element</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/top3000.html#transitive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#top3000.transitive" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function transitive determines whether node is transitive</p>
+</dd></dl>
+
+</li>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="top3000.intransitive">
+<span class="sig-prename descclassname"><span class="pre">top3000.</span></span><span class="sig-name descname"><span class="pre">intransitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lxml.etree.Element</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/top3000.html#intransitive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#top3000.intransitive" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function intransitve determines whether node is intransitive</p>
+</dd></dl>
+
+</li>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="top3000.pseudotr">
+<span class="sig-prename descclassname"><span class="pre">top3000.</span></span><span class="sig-name descname"><span class="pre">pseudotr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lxml.etree.Element</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/top3000.html#pseudotr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#top3000.pseudotr" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function pseudotr determines whether node is pseudotransitive</p>
+</dd></dl>
+
+</li>
+</ul>
+<p>The top3000 lexicon file has been derived from words as listed in various resources relate to N-CDI,
+in particular a top 3000 words by Schlichting. It has the following columns:</p>
+<ul class="simple">
+<li><p><strong>OrigWord</strong> original word as it occurs in the documents</p></li>
+<li><p><strong>Word</strong> cleaned word</p></li>
+<li><p><strong>check</strong> check whether word is found in Origword</p></li>
+<li><p><strong>Collocate</strong>: word or words that cooccur with the word</p></li>
+<li><p><strong>Context</strong>: contyext as specified in the original files</p></li>
+<li><p><strong>POS</strong>: DCOI pt or cat code</p></li>
+<li><p><strong>semtype</strong>: semantic type, partially from the original files, so far only human, animate are used</p></li>
+<li><p><strong>Regio</strong>: to indicated BElgium-specific words</p></li>
+<li><p><strong>trans</strong>: transitivity: tr, intr or tr/intr, tr/intr. Alpino does not retain the valence of a verb but adpats it to the context.</p></li>
+<li><p><strong>hasgen</strong>: has a genitive form, for nouns only: yes or no</p></li>
+<li><p><strong>Top1000</strong>: belongs to the Top 1000 words according to Schlichting (yes, no)</p></li>
+<li><p><strong>Top3000</strong>   N-CDI jong kk: (also) occurs in the N-CDI file for jonge kinderen (yes, no)</p></li>
+</ul>
+<p>The information needs extension and there are more files with relevant data.</p>
+</div>
+<div class="section" id="name-lexicons">
+<span id="namelexicons"></span><h2>Name lexicons<a class="headerlink" href="#name-lexicons" title="Permalink to this headline">¶</a></h2>
+<p>Names very often consist of multiple words.
+For individual words it is therefore important to check whether they can be a part of a (possibly multiword) name.
+The relevant module is the namepartlexicon module.</p>
+<span class="target" id="module-namepartlexicon"></span><p>The namepartlexicon module:</p>
+<ul class="simple">
+<li><p>reads in the data from the file names/nameparts/namepartslexicon.csv</p></li>
+<li><p>stores it in the namepartlexicon  dictionary (Dict[str, int]) with its frequency</p></li>
+<li><p>provides  functions for checking membership of the namepartlexicon:</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="namepartlexicon.namepart_isa_namepart">
+<span class="sig-prename descclassname"><span class="pre">namepartlexicon.</span></span><span class="sig-name descname"><span class="pre">namepart_isa_namepart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/namepartlexicon.html#namepart_isa_namepart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#namepartlexicon.namepart_isa_namepart" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function namepart_isa_namepart checks whether the string <em>word</em> occurs in the namepartlexicon dictionary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="namepartlexicon.namepart_isa_namepart_uc">
+<span class="sig-prename descclassname"><span class="pre">namepartlexicon.</span></span><span class="sig-name descname"><span class="pre">namepart_isa_namepart_uc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/namepartlexicon.html#namepart_isa_namepart_uc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#namepartlexicon.namepart_isa_namepart_uc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function namepart_isa_namepart_uc checks whether the string <em>word</em> with its initial character in upper case
+occurs in the namepartlexicon dictionary.</p>
+</dd></dl>
+
+<p>The dictionary with nameparts has been derived by the SASTA script getnamepartslexicon:</p>
+<span class="target" id="module-getnamepartslexicon"></span><p>The getnamepartslexicon is a script that generates the file names/nameparts/namepartlexicon.csv  in the code folder
+on the basis of the list of dictionaries called all_name_lexicons imported from the namelexicons module.</p>
+<span class="target" id="module-namelexicons"></span><p>The namelexicons module creates a list of name lexicons named all_name_lexicons. 
+Each lexicon is a python dictionary. The list contains:</p>
+<ul class="simple">
+<li><p>firstnamedict: Dict[FirstName, List[Gender]]: lexicon of first names</p></li>
+<li><p>locationsdict: Dict[LocationName, int]: lexicon  of location names</p></li>
+<li><p>capitaldict: Dict[CapitalName, List[CountryName]]: lexicon of names of capital cities</p></li>
+<li><p>countrydict: Dict[CountryName, ContinentName]: lexicon of country names</p></li>
+<li><p>continentdict: Dict[ContinentName, int]: lexicon of continent names</p></li>
+</ul>
+<p>Note that each name can consist of multiple words.</p>
+<p>The dictionaries are derived from files in the names subfolder in the code folder:</p>
+<ul class="simple">
+<li><p>voornamentop10000.xml</p></li>
+<li><p>woonplaatsen/83958NED_UntypedDataSet_19062020_173456.csv</p></li>
+<li><p>hoofdsteden/wikipedia_hoofsteden.csv</p></li>
+</ul>
+<p>Used standalone, this module performs some tests.</p>
+</div>
+<div class="section" id="filled-pauses-lexicon">
+<h2>Filled pauses lexicon<a class="headerlink" href="#filled-pauses-lexicon" title="Permalink to this headline">¶</a></h2>
+<p>The filledpauseslexicon is a set created in the module dedup on the basis of the file filledpauseslexicon/filledpauseslexicon.txt in the code folder.</p>
+<p>This file has been created by searching for strings marked with &amp; in the Dutch CHILDES corpora (with the script getchildes.py), and manual filtering.</p>
+</div>
+<div class="section" id="module-compounds">
+<span id="compounds"></span><h2>Compounds<a class="headerlink" href="#module-compounds" title="Permalink to this headline">¶</a></h2>
+<p>The module <em>compounds</em>:</p>
+<ul>
+<li><p>initialisez the compound dictionary <em>compounds</em>, which is a multidimensional Python dictionary
+Dict[str, Dict[int, str]], which maps a string (for a lemma in CELEX orthography HeadDiaNew)
+and a column number to the value of the cell with this column number in the CSV file from which it is derived:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>e.g., compounds[“aalbes”][0] == “NN”</p></li>
+<li><p>e.g., compounds[“aalbes”][2] == “N”</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<blockquote>
+<div><p>The file from which it is derived is the CSV file (with backslash as separator) <em>Ncompounds-attempt2.txt</em>
+in subfolder compoundfiles in the code folder. It contains a header and three fields in each row:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FlatClass: the part of speech codes for the parts (lexical parts and affixes) e.g. NN for <em>aalbes</em></p></li>
+<li><p>HeadDiaNew: the orthography of the lemma, e.g. <em>aalbes</em></p></li>
+<li><p>Class: the part of speech code for the whole word, e.g. N for <em>aalbes</em></p></li>
+</ul>
+<p>The file has been derived from the CELEX database.</p>
+</div></blockquote>
+</div></blockquote>
+<ul>
+<li><dl>
+<dt>provides the functions getcompounds and iscompounds:</dt><dd><ul>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="compounds.getcompounds">
+<span class="sig-prename descclassname"><span class="pre">compounds.</span></span><span class="sig-name descname"><span class="pre">getcompounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">syntree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lxml.etree.Element</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">lxml.etree.Element</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/compounds.html#getcompounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compounds.getcompounds" title="Permalink to this definition">¶</a></dt>
+<dd><p id="getcompounds-label">The function getcompounds takes a syntactic structure as input and returns a list of syntactic structures
+(nodes for words) that are compounds. It implements TARSP language measure T086 (SamZn). A node is considered
+to be a compound if its <em>pt</em> attribute has the value <em>n</em> (is a noun) and its lemma meets the
+condition iscompound(lemma).</p>
+</dd></dl>
+
+</li>
+<li><dl class="py function">
+<dt class="sig sig-object py" id="compounds.iscompound">
+<span class="sig-prename descclassname"><span class="pre">compounds.</span></span><span class="sig-name descname"><span class="pre">iscompound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/compounds.html#iscompound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compounds.iscompound" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function iscompound checks whether the input string str is a compound.
+That is the case if</p>
+<ul class="simple">
+<li><p>either it contains an underscore (lemmas of  strings recognised as a compound by Alpino contain an underscore),</p></li>
+<li><p>or it is contained in the compound dictionary <em>compounds</em>.</p></li>
+</ul>
+</dd></dl>
+
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="exception-lists">
+<h2>Exception Lists<a class="headerlink" href="#exception-lists" title="Permalink to this headline">¶</a></h2>
+<p>There are several  lists of words in SASTA for a variety of reasons.
+At the moment they are distributed over multiple files. But it would be a good idea to put them all together in  a single module.
+We will call this module (that does not exist yet) exceptionlists.py.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Lexicons</a><ul>
+<li><a class="reference internal" href="#alpinolexicon">Alpinolexicon</a></li>
+<li><a class="reference internal" href="#celex">CELEX</a></li>
+<li><a class="reference internal" href="#module-top3000">Top3000</a></li>
+<li><a class="reference internal" href="#name-lexicons">Name lexicons</a></li>
+<li><a class="reference internal" href="#filled-pauses-lexicon">Filled pauses lexicon</a></li>
+<li><a class="reference internal" href="#module-compounds">Compounds</a></li>
+<li><a class="reference internal" href="#exception-lists">Exception Lists</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="stap.html"
+                          title="previous chapter">STAP Language Measures</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="deviantlanguage.html"
+                          title="next chapter">Deviant Language</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/lexicons.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="deviantlanguage.html" title="Deviant Language"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stap.html" title="STAP Language Measures"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SASTA  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Lexicons</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>

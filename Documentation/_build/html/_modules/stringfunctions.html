@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stringfunctions &#8212; SASTA  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SASTA  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">stringfunctions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for stringfunctions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">unicodedata</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Match</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span>
+
+<span class="n">vertbar</span> <span class="o">=</span> <span class="s1">&#39;|&#39;</span>
+<span class="n">space</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span>
+<span class="n">hyphen</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+<span class="n">slash</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+<span class="n">tab</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span>
+<span class="n">comma</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span>
+
+<span class="n">wpat</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^.*\w.*$&#39;</span>
+<span class="n">wre</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">wpat</span><span class="p">)</span>
+<span class="n">allhyphenspat</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^-+$&#39;</span>
+<span class="n">allhyphensre</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">allhyphenspat</span><span class="p">)</span>
+
+<span class="n">barevowels</span> <span class="o">=</span> <span class="s1">&#39;aeiouy&#39;</span>
+<span class="n">aiguvowels</span> <span class="o">=</span> <span class="s1">&#39;áéíóúý&#39;</span>
+<span class="n">gravevowels</span> <span class="o">=</span> <span class="s1">&#39;àèìòù</span><span class="se">\u00FD</span><span class="s1">&#39;</span>
+<span class="n">tremavowels</span> <span class="o">=</span> <span class="s1">&#39;äëïöüÿ&#39;</span>
+<span class="n">circumflexvowels</span> <span class="o">=</span> <span class="s1">&#39;âêîôû</span><span class="se">\u0177</span><span class="s1">&#39;</span>
+
+<span class="n">consonants</span> <span class="o">=</span> <span class="s1">&#39;bcdfghjklmnpqrstvwxz</span><span class="se">\u00E7</span><span class="s1">&#39;</span>  <span class="c1"># \u00E7 is c cedilla</span>
+<span class="n">dutch_base_vowels</span> <span class="o">=</span> <span class="n">barevowels</span> <span class="o">+</span> <span class="n">aiguvowels</span> <span class="o">+</span> <span class="n">gravevowels</span> <span class="o">+</span> <span class="n">tremavowels</span> <span class="o">+</span> <span class="n">circumflexvowels</span>
+<span class="n">vowels</span> <span class="o">=</span> <span class="n">dutch_base_vowels</span>
+<span class="n">dutch_base_diphthongs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;ee&#39;</span><span class="p">,</span> <span class="s1">&#39;ie&#39;</span><span class="p">,</span> <span class="s1">&#39;oo&#39;</span><span class="p">,</span> <span class="s1">&#39;uu&#39;</span><span class="p">,</span> <span class="s1">&#39;ij&#39;</span><span class="p">,</span> <span class="s1">&#39;ei&#39;</span><span class="p">,</span> <span class="s1">&#39;au&#39;</span><span class="p">,</span> <span class="s1">&#39;ou&#39;</span><span class="p">,</span> <span class="s1">&#39;ui&#39;</span><span class="p">,</span> <span class="s1">&#39;eu&#39;</span><span class="p">,</span> <span class="s1">&#39;oe&#39;</span><span class="p">]</span>
+<span class="n">dutch_y_diphthongs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span> <span class="o">+</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dutch_base_vowels</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">d</span> <span class="o">+</span> <span class="s1">&#39;y&#39;</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>
+                                                             <span class="n">dutch_base_vowels</span><span class="p">]</span>  <span class="c1"># ryen gaat nog fout ye alleen samen nemen aan begin van woord</span>
+<span class="n">dutch_y_triphthongs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span> <span class="o">+</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dutch_base_diphthongs</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">d</span> <span class="o">+</span> <span class="s1">&#39;y&#39;</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dutch_base_diphthongs</span><span class="p">]</span>
+<span class="n">dutch_trema_diphthongs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;äa&#39;</span><span class="p">,</span> <span class="s2">&quot;ëe&quot;</span><span class="p">,</span> <span class="s1">&#39;ïe&#39;</span><span class="p">,</span> <span class="s1">&#39;öo&#39;</span><span class="p">,</span> <span class="s1">&#39;üu&#39;</span><span class="p">,</span> <span class="s1">&#39;ëi&#39;</span><span class="p">]</span>
+<span class="n">dutch_diphthongs</span> <span class="o">=</span> <span class="n">dutch_base_diphthongs</span> <span class="o">+</span> <span class="n">dutch_y_diphthongs</span> <span class="o">+</span> <span class="n">dutch_trema_diphthongs</span>
+<span class="n">dutch_base_triphthongs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aai&#39;</span><span class="p">,</span> <span class="s1">&#39;eeu&#39;</span><span class="p">,</span> <span class="s1">&#39;ooi&#39;</span><span class="p">,</span> <span class="s1">&#39;oei&#39;</span><span class="p">]</span>
+<span class="n">dutch_y_tetraphthongs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span> <span class="o">+</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dutch_base_triphthongs</span><span class="p">]</span>
+<span class="n">dutch_triphthongs</span> <span class="o">=</span> <span class="n">dutch_base_triphthongs</span> <span class="o">+</span> <span class="n">dutch_y_triphthongs</span>
+<span class="n">dutch_tetraphthongs</span> <span class="o">=</span> <span class="n">dutch_y_tetraphthongs</span>
+
+<span class="n">hyphenprefixes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;anti&#39;</span><span class="p">,</span> <span class="s1">&#39;contra&#39;</span><span class="p">,</span> <span class="s1">&#39;ex&#39;</span><span class="p">]</span>
+
+<span class="n">singlehyphenpat</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;(^[^-]+)-([^-]+)$&#39;</span>
+<span class="n">singlehyphenre</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">singlehyphenpat</span><span class="p">)</span>
+
+<span class="n">duppattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;(.)\1+&#39;</span>
+<span class="n">dupre</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">duppattern</span><span class="p">)</span>
+
+<span class="n">purechatxxxcodes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xxx&#39;</span><span class="p">,</span> <span class="s1">&#39;yyy&#39;</span><span class="p">,</span> <span class="s1">&#39;www&#39;</span><span class="p">}</span>
+<span class="n">chatxxxcodes</span> <span class="o">=</span> <span class="n">purechatxxxcodes</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;xx&#39;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">pad</span><span class="p">(</span><span class="n">wrd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">space</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    returns a right-justified string lengthened to length i and padded  with c</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wrd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">wrd</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">wrd</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">star</span><span class="p">(</span><span class="nb">str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function *star* takes a string str and returns it preceded by ( and followed by )*. Used to create</span>
+<span class="sd">    regular expressions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;(</span><span class="si">{}</span><span class="s1">)*&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">alt</span><span class="p">(</span><span class="n">strlist</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">grouped</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function alt takes as input a string or a list of strings and joins them into  a string separated by |.</span>
+<span class="sd">    If grouped is True the resulting string is surrounded by round brackets, else not. Used to create regular expressions</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">alts</span> <span class="o">=</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strlist</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">grouped</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alts</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">charrange</span><span class="p">(</span><span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function charrange take string str and surrounds it with square bracketys []. used to create regular expressions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+
+
+<span class="n">consonants_star</span> <span class="o">=</span> <span class="n">star</span><span class="p">(</span><span class="n">charrange</span><span class="p">(</span><span class="n">consonants</span><span class="p">))</span>
+
+<span class="n">syllableheadspat</span> <span class="o">=</span> <span class="n">alt</span><span class="p">([</span><span class="n">alt</span><span class="p">(</span><span class="n">dutch_tetraphthongs</span><span class="p">),</span> <span class="n">alt</span><span class="p">(</span><span class="n">dutch_triphthongs</span><span class="p">),</span> <span class="n">alt</span><span class="p">(</span><span class="n">dutch_diphthongs</span><span class="p">),</span> <span class="n">alt</span><span class="p">(</span><span class="n">vowels</span><span class="p">)])</span>
+<span class="n">syllableheadsre</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">syllableheadspat</span><span class="p">)</span>
+
+<span class="n">monosyllabicpat</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^&#39;</span> <span class="o">+</span> <span class="n">consonants_star</span> <span class="o">+</span> <span class="n">syllableheadspat</span> <span class="o">+</span> <span class="n">consonants_star</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;$&#39;</span>
+<span class="n">monosyllabicre</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">monosyllabicpat</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">barededup</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function barededup takes as input a string and</span>
+<span class="sd">    returns a string in which  sequences of the same character are reduced to a single instance of this character</span>
+<span class="sd">    and other characters are left unchanged. Example: &#39;vver&#39; -&gt; &#39;ver&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">dupre</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">deduplicate</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlexicon</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span> <span class="n">exceptions</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function deduplicate takes as input a string word:</span>
+
+<span class="sd">    * if it contains a sequence of duplicate characters, and</span>
+<span class="sd">    * if it is not just a sequence of interpunction symbols, and</span>
+<span class="sd">    * if it is not contained in the set of exceptions</span>
+
+<span class="sd">    then</span>
+
+<span class="sd">    * it checks whether the string with  the character sequence reduced to one character is a word</span>
+<span class="sd">    according to the function *inlexicon*, and if so,  it adds this string to the result variable *newwords*</span>
+<span class="sd">    * it checks whether the string with  the character sequence reduced to two characters is a word</span>
+<span class="sd">    according to the function *inlexicon*, and if so,  it adds this string to the result variable *newwords*</span>
+
+<span class="sd">    and then it returns the value of the result variable *newwords*</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">newwords</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="p">:</span>
+        <span class="n">newwords</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">elif</span> <span class="n">wre</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>  <span class="c1"># we want to exclude tokens consisting of interpunction symbols only e.g  ---, --</span>
+        <span class="n">newword</span> <span class="o">=</span> <span class="n">dupre</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inlexicon</span><span class="p">(</span><span class="n">newword</span><span class="p">):</span>
+            <span class="n">newwords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newword</span><span class="p">)</span>
+        <span class="n">newword</span> <span class="o">=</span> <span class="n">dupre</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1\1&#39;</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inlexicon</span><span class="p">(</span><span class="n">newword</span><span class="p">):</span>
+            <span class="n">newwords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newword</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">newwords</span>
+
+
+<div class="viewcode-block" id="fullworddehyphenate"><a class="viewcode-back" href="../deviantlanguage.html#stringfunctions.fullworddehyphenate">[docs]</a><span class="k">def</span> <span class="nf">fullworddehyphenate</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlexicon</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function fullworddehyphenate takes as input a string *word*:</span>
+
+<span class="sd">    Its purpose is to remove unnecessary hyphens from this word.</span>
+
+<span class="sd">    * the hyphen can be a part of the word (*sergeant-majoor*), in which case it should not be removed.</span>
+<span class="sd">    * it can also have been added to an existing word without hyphens (zie-ken-huis), in which case, it should be removed</span>
+
+<span class="sd">    * it can also separate a possibly mispronounced prefix repetition of the prefix of word (e.g., ver-verkoopt or vver-verkoopt), in which case the hyphen and the prefix should be removed.</span>
+
+
+<span class="sd">    To that end,</span>
+
+<span class="sd">    * it applies the function *dehyphenate* to *word*. If this yields a result that is an existing word according to the function *inlexicon*, then this result is added to the result variable *newtokens*</span>
+
+<span class="sd">    * if newtokens is still the empty list after this, it applies the function *delhyphenprefix* to word.  If this yields a result that is an existing word according to the function *inlexicon*, then this result is added to the result variable *newtokens*.</span>
+
+<span class="sd">    and then it returns the result variable newtokens.</span>
+
+<span class="sd">    The functions *dehyphenate* and *delhyphenprefix* are described here:</span>
+
+<span class="sd">    * .. autofunction:: stringfunctions::dehyphenate</span>
+<span class="sd">    * .. autofunction:: stringfunctions::delhyphenprefix</span>
+
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">newtokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">newwords</span> <span class="o">=</span> <span class="n">dehyphenate</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+    <span class="n">newwordset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">newwords</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">newword</span> <span class="ow">in</span> <span class="n">newwordset</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inlexicon</span><span class="p">(</span><span class="n">newword</span><span class="p">):</span>
+            <span class="n">newtokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newword</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">newtokens</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">newwords</span> <span class="o">=</span> <span class="n">delhyphenprefix</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">inlexicon</span><span class="p">)</span>
+        <span class="n">newwordset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">newwords</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">newword</span> <span class="ow">in</span> <span class="n">newwordset</span><span class="p">:</span>
+            <span class="n">newtokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newword</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">newtokens</span></div>
+
+
+<div class="viewcode-block" id="delhyphenprefix"><a class="viewcode-back" href="../deviantlanguage.html#stringfunctions.delhyphenprefix">[docs]</a><span class="k">def</span> <span class="nf">delhyphenprefix</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlexicon</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function *delphyphenprefix* takes as input a string *word*, splits it into a prefix and a mainword</span>
+<span class="sd">    based on the first occurring hyphen, and  then:</span>
+
+<span class="sd">    * if the prefix is a prefix that normally occurs with a hyphen and the mainword is an existing word according to the function *inlexicon* (e.g. *ex-vrouw*), the result variable is set to the empty list;</span>
+<span class="sd">    * if the mainwords starts with the prefix and the main word is an existing word according to the function *inlexicon* (e.g. *ver-verkoop*),  then the result variable is set to [mainword];</span>
+<span class="sd">    * if the prefix and the mainword are both existing words, the result variable is set to [];</span>
+<span class="sd">    * if the mainwords starts with barededeup(prefix) and the main word is an existing word according to the function *inlexicon* (e.g. *vver-verkoop*),  then the result variable is set to [mainword]</span>
+
+<span class="sd">     and then it returns the value of the result variable *result*.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">singlehyphenre</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">mainword</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">mwinlex</span> <span class="o">=</span> <span class="n">inlexicon</span><span class="p">(</span><span class="n">mainword</span><span class="p">)</span>
+        <span class="n">pfinlex</span> <span class="o">=</span> <span class="n">inlexicon</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="n">deduppf</span> <span class="o">=</span> <span class="n">barededup</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">hyphenprefixes</span> <span class="ow">and</span> <span class="n">mwinlex</span><span class="p">:</span>  <span class="c1"># the word starts wit ha known prefix that uses hyphen such as ex (ex-vrouw)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="n">mainword</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mwinlex</span><span class="p">:</span>  <span class="c1"># this is the core case  e.g. ver-verkoop</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">mainword</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">pfinlex</span> <span class="ow">and</span> <span class="n">mwinlex</span><span class="p">:</span>  <span class="c1"># for compounds with a hyphen: kat-oorbellen, generaal-majoor and for tennis-baan(?)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="n">mainword</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">deduppf</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mwinlex</span><span class="p">:</span>  <span class="c1"># vver-verkoop</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">mainword</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="k">def</span> <span class="nf">allhyphens</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Match</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The fucntion allhyphens checks whether the strin gword consist completely of hyphens</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">allhyphensre</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="dehyphenate"><a class="viewcode-back" href="../deviantlanguage.html#stringfunctions.dehyphenate">[docs]</a><span class="k">def</span> <span class="nf">dehyphenate</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function dehyphenate takes as input a string and returns  a list of strings with all possible ways</span>
+<span class="sd">    of removing hyphens in this string</span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    * dehyphenate(&#39;zie-ken-huis&#39;) = [&#39;zie-ken-huis&#39;, &#39;zieken-huis&#39;, &#39;zie-kenhuis&#39;, &#39;ziekenhuis&#39;]</span>
+<span class="sd">    * dehyphenate(&#39;ziekenhuis&#39;) = [&#39;ziekenhuis&#39;]</span>
+<span class="sd">    * dehyphenate(&#39;---&#39;) = [&#39;---&#39;]  (a string consisting only of hyphens remains unchanged</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">allhyphens</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">tail</span> <span class="o">=</span> <span class="n">word</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">head</span> <span class="o">==</span> <span class="n">hyphen</span><span class="p">:</span>
+            <span class="c1"># newresult = head + tail</span>
+            <span class="c1"># results.append(newresult)</span>
+            <span class="n">rightresults</span> <span class="o">=</span> <span class="n">dehyphenate</span><span class="p">(</span><span class="n">tail</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">rightresult</span> <span class="ow">in</span> <span class="n">rightresults</span><span class="p">:</span>
+                <span class="n">newresult</span> <span class="o">=</span> <span class="n">head</span> <span class="o">+</span> <span class="n">rightresult</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newresult</span><span class="p">)</span>
+                <span class="n">newresult</span> <span class="o">=</span> <span class="n">rightresult</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newresult</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tailresults</span> <span class="o">=</span> <span class="n">dehyphenate</span><span class="p">(</span><span class="n">tail</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">tailresult</span> <span class="ow">in</span> <span class="n">tailresults</span><span class="p">:</span>
+                <span class="n">newresult</span> <span class="o">=</span> <span class="n">head</span> <span class="o">+</span> <span class="n">tailresult</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newresult</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">isconsonant</span><span class="p">(</span><span class="n">char</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function isconsonant checks whether the input string char is a consonant.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">char</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">consonants</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">isvowel</span><span class="p">(</span><span class="n">char</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function isvowel checks whether the input string char is a vowel.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">char</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">vowels</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">endsinschwa</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function endinschwa checks whether the string word ends in schwa.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Ce of Vie of ije or ë</span>
+    <span class="k">if</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;ije&#39;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;ie&#39;</span> <span class="ow">and</span> <span class="n">isvowel</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;ë&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;e&#39;</span> <span class="ow">and</span> <span class="n">isconsonant</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">isdiphthong</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function isdiphthong checks whether the string d is a diphtong in Dutch.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dutch_diphthongs</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">istriphthong</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function istriphthong checks whether the string d is a triphtong in Dutch.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dutch_triphthongs</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">monosyllabic</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function monosyllabic checks whether the string word cosnist of one syllable.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">monosyllabicre</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">accentaigu</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function accentaigu turns all vowels of a word into their varinats with an accent aigu, in all possible combinations.</span>
+<span class="sd">    Example: accentaigu(&#39;aap&#39;) == [&#39;aap&#39;, &#39;aáp&#39;, &#39;áap&#39;, &#39;ááp&#39;]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">isvowel</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">restresults</span> <span class="o">=</span> <span class="n">accentaigu</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">results1</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">wrest</span> <span class="k">for</span> <span class="n">wrest</span> <span class="ow">in</span> <span class="n">restresults</span><span class="p">]</span>
+        <span class="n">results2</span> <span class="o">=</span> <span class="p">[</span><span class="n">aigu</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">wrest</span> <span class="k">for</span> <span class="n">wrest</span> <span class="ow">in</span> <span class="n">restresults</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">results1</span> <span class="o">+</span> <span class="n">results2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">restresults</span> <span class="o">=</span> <span class="n">accentaigu</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">wrest</span> <span class="k">for</span> <span class="n">wrest</span> <span class="ow">in</span> <span class="n">restresults</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span> <span class="nf">aigu</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function aigu turns the string c into a variant with an accent aigu.</span>
+<span class="sd">    Only useful for single character strings taht are contained in barevowels</span>
+<span class="sd">    :param c:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">theindex</span> <span class="o">=</span> <span class="n">barevowels</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">aiguvowels</span><span class="p">[</span><span class="n">theindex</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">testcondition</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">condition</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;OK:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;NO:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="n">monosyllabicwords</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;baai&#39;</span><span class="p">,</span> <span class="s1">&#39;eeuw&#39;</span><span class="p">,</span> <span class="s1">&#39;mooi&#39;</span><span class="p">,</span> <span class="s1">&#39;aap&#39;</span><span class="p">,</span> <span class="s1">&#39;deed&#39;</span><span class="p">,</span> <span class="s1">&#39;Piet&#39;</span><span class="p">,</span> <span class="s1">&#39;noot&#39;</span><span class="p">,</span> <span class="s1">&#39;duut&#39;</span><span class="p">,</span> <span class="s1">&#39;rijd&#39;</span><span class="p">,</span> <span class="s1">&#39;meid&#39;</span><span class="p">,</span> <span class="s1">&#39;rauw&#39;</span><span class="p">,</span> <span class="s1">&#39;koud&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;buit&#39;</span><span class="p">,</span> <span class="s1">&#39;reuk&#39;</span><span class="p">,</span> <span class="s1">&#39;boer&#39;</span><span class="p">,</span> <span class="s1">&#39;la&#39;</span><span class="p">,</span> <span class="s1">&#39;de&#39;</span><span class="p">,</span> <span class="s1">&#39;hik&#39;</span><span class="p">,</span> <span class="s1">&#39;dop&#39;</span><span class="p">,</span> <span class="s1">&#39;dut&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;yell&#39;</span><span class="p">,</span> <span class="s1">&#39;ry&#39;</span><span class="p">,</span> <span class="s1">&#39;Händl&#39;</span><span class="p">,</span> <span class="s1">&#39;Pëtr&#39;</span><span class="p">,</span> <span class="s1">&#39;bït&#39;</span><span class="p">,</span> <span class="s1">&#39;Köln&#39;</span><span class="p">,</span> <span class="s1">&#39;Kür&#39;</span><span class="p">,</span> <span class="s1">&#39;Tÿd&#39;</span><span class="p">]</span>
+    <span class="n">disyllabicwords</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;baaien&#39;</span><span class="p">,</span> <span class="s1">&#39;eeuwen&#39;</span><span class="p">,</span> <span class="s1">&#39;mooie&#39;</span><span class="p">,</span> <span class="s1">&#39;aapje&#39;</span><span class="p">,</span> <span class="s1">&#39;deden&#39;</span><span class="p">,</span> <span class="s1">&#39;Pietje&#39;</span><span class="p">,</span> <span class="s1">&#39;noten&#39;</span><span class="p">,</span> <span class="s1">&#39;dut&#39;</span><span class="p">,</span> <span class="s1">&#39;rijden&#39;</span><span class="p">,</span> <span class="s1">&#39;meiden&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;rauwe&#39;</span><span class="p">,</span> <span class="s1">&#39;koude&#39;</span><span class="p">,</span> <span class="s1">&#39;buitje&#39;</span><span class="p">,</span> <span class="s1">&#39;reuken&#39;</span><span class="p">,</span> <span class="s1">&#39;boeren&#39;</span><span class="p">,</span> <span class="s1">&#39;laden&#39;</span><span class="p">,</span> <span class="s1">&#39;dender&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;hikken&#39;</span><span class="p">,</span> <span class="s1">&#39;doppen&#39;</span><span class="p">,</span> <span class="s1">&#39;dutten&#39;</span><span class="p">,</span> <span class="s1">&#39;yellen&#39;</span><span class="p">,</span> <span class="s1">&#39;ryen&#39;</span><span class="p">,</span> <span class="s1">&#39;Händler&#39;</span><span class="p">,</span> <span class="s1">&#39;Pëtri&#39;</span><span class="p">,</span> <span class="s1">&#39;bïty&#39;</span><span class="p">,</span> <span class="s1">&#39;Kölner&#39;</span><span class="p">,</span> <span class="s1">&#39;Kürer&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;Tÿding&#39;</span><span class="p">,</span> <span class="s1">&#39;naäap&#39;</span><span class="p">,</span> <span class="s1">&#39;meeëten&#39;</span><span class="p">,</span> <span class="s1">&#39;ciën&#39;</span><span class="p">,</span> <span class="s1">&#39;coöp&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">monosyllabicwords</span><span class="p">:</span>
+        <span class="n">testcondition</span><span class="p">(</span><span class="n">monosyllabic</span><span class="p">,</span> <span class="n">word</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">disyllabicwords</span><span class="p">:</span>
+        <span class="n">testcondition</span><span class="p">(</span><span class="n">monosyllabic</span><span class="p">,</span> <span class="n">word</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">monosyllabicwords</span> <span class="o">+</span> <span class="n">disyllabicwords</span><span class="p">:</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">syllableheadsre</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; -- &#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">ms</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">nono</span><span class="p">(</span><span class="n">inval</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">inval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inval</span> <span class="o">==</span> <span class="p">[])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inval</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">nonnull</span><span class="p">(</span><span class="n">inval</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">nono</span><span class="p">(</span><span class="n">inval</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">allconsonants</span><span class="p">(</span><span class="n">inval</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function allconsonants checks whether all characters in the string inval are consonants</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="n">isconsonant</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">inval</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">string2list</span><span class="p">(</span><span class="n">liststr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function string2list turns a string surrounded by [ ] into a list by splitting it on a comma</span>
+<span class="sd">    Examples:</span>
+<span class="sd">    * &quot;[1,2,3]&quot; becomes [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;]</span>
+<span class="sd">    * &quot;[]&quot; becomes []</span>
+<span class="sd">    * &quot;[ ]&quot; becomes [&quot; &quot;]</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">liststr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">liststr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">elif</span> <span class="n">liststr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;[&#39;</span> <span class="ow">and</span> <span class="n">liststr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;]&#39;</span><span class="p">:</span>
+        <span class="n">core</span> <span class="o">=</span> <span class="n">liststr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">comma</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parts</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">realwordstring</span><span class="p">(</span><span class="n">w</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The function realwordstrin gcheck whether the string w @@ to be extended@@</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">category</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SASTA  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">stringfunctions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>

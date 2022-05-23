@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHAT-annotations &#8212; SASTA  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Alpino parser" href="alpinoparser.html" />
+    <link rel="prev" title="Methods" href="methods.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="alpinoparser.html" title="Alpino parser"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="methods.html" title="Methods"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SASTA  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CHAT-annotations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="chat-annotations">
+<h1>CHAT-annotations<a class="headerlink" href="#chat-annotations" title="Permalink to this headline">¶</a></h1>
+<p>SASTA supports input in the CHAT format and it can deal with the CHAT annotations in utterances.</p>
+<p>The CHAT format in general and in particular its metadata are dealt with by the chamd module, which is part of the DH Lab github repository <a class="reference external" href="https://github.com/UUDigitalHumanitieslab/chamd">chamd</a>.</p>
+<p>The CHAT annotations have changed slightly over time, and the CHILDES website only contains the latest version of the documentation. Two versions of the CHAT manual are available in the <a class="reference external" href="https://drive.google.com/drive/folders/1N0uz92GkyOdZMc-d3dVKQG9kBh53uTPf?usp=sharing">SASTA Documentation Google Drive</a>: chat.pdf is the 2015 version of the CHAT manual, chat2020-06-19.pdf is the version of 2020-06-19.</p>
+<p>SASTA actually uses two different modules to deal with CHAT annotations. The first one was developed outside of SASTA in the context of the AnnCor project, and is also used in GrETEL.
+This module is based on the 2015 version of the CHAT manual. <a class="footnote-reference brackets" href="#fn4" id="id1">1</a> It is included in the DH Lab GitHub  repository chamd, as the module cleanCHILDESMD.py. It deals with the CHAT annotations by removing them or applying them, in accordance with the conventions for generating MOR and GRA tiers. <a class="footnote-reference brackets" href="#fn5" id="id2">2</a> The relevant function is cleantext:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cleantext</span> <span class="p">(</span><span class="n">utt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">repkeep</span><span class="p">:</span><span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+</div>
+<p>Where utt is the parameter for the input string, and the boolean parameter repkeep is for an alternative option of cleaning but it must always be False in the SASTA context.
+This module generates output that is compatible with PaQu Enhanced Plain (<a class="reference external" href="https://paqu.let.rug.nl:8068/info.html#cormeta">PEP</a>) text format, which is used in PaQu and GrETEL for uploading corpora with metadata.  The name PEP-text is not a standard name but was invented by Jan Odijk for this format.</p>
+<p>The second module has been developed in SASTA, and it has the same functionality as cleanCHILDESMD.py, but it translates the annotations into metadata, so that queries on CHILDES annotations can be done using Xpath. In addition, the output can be either a string or a list of tokens. The output is therefore a Tuple of  cleaned text and metadata. The relevant module is cleanCHILDEStokens.py, and the relevant function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cleantext</span><span class="p">(</span><span class="n">utt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">repkeep</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">tokenoutput</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span>  <span class="n">Tuple</span><span class="p">[</span><span class="n">CleanedText</span><span class="p">,</span> <span class="n">Metadata</span><span class="p">]:</span>
+</pre></div>
+</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p>CleanedText = Union[List[Token], str], where Token is defined in the module sastatoken.py</p></li>
+<li><p>Metadata = List[Meta], where Meta is defined in the module metadata.py</p></li>
+</ul>
+<p>The second module is used in the modules to correct the syntactic structures, and it yields output that is not compatible with PEP text format, because the PEP text format is too simple for this.</p>
+<p>In the future we must consult with Gertjan van Noord to extend the PEP text format somewhat so that it can accommodate these metadata and then GrETEL and PaQu should be updated accordingly.</p>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="fn4"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>However, the code for lengthened syllables (‘:’) was not dealt with because it was rarely used in Dutch CHILDES corpora, and it caused many problems for the use of ‘:’ as a regular interpunction sign.</p>
+</dd>
+<dt class="label" id="fn5"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>With some alternative options, e.g., false starts (retracings with correction) can be removed or kept.</p>
+</dd>
+</dl>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="methods.html"
+                          title="previous chapter">Methods</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="alpinoparser.html"
+                          title="next chapter">Alpino parser</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chatannotations.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="alpinoparser.html" title="Alpino parser"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="methods.html" title="Methods"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SASTA  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CHAT-annotations</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    </div>
+  </body>
+</html>
