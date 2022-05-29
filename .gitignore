@@ -30,3 +30,4 @@ venv.bak/
 # additional files
 .idea/
 sastalog.txt
+.DS_Store
