@@ -46,15 +46,298 @@
             
   <div class="section" id="tarsp-language-measures">
 <h1>TARSP Language Measures<a class="headerlink" href="#tarsp-language-measures" title="Permalink to this headline">¶</a></h1>
-<p>We will describe here all Tarsp language measures, in the order of the identifiers assigned to them. However, a few language measures are special in that they are very often used in other language measures, as described in <span class="xref std std-ref">TarspAnnotation</span>. This concerns in particular the following language measures:</p>
+<p>We will describe here all Tarsp language measures, in the order of the identifiers assigned to them. However, a few language measures are special in that they systematically composed out of recurring macros. See  <span class="xref std std-ref">TarspAnnotation</span> for more on these language measures, which we will call <em>composed language measures</em>. We will discuss the most important macros that are used in the queries for such language measures first, in section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a>.</p>
+<div class="section" id="macros-for-composed-language-measures">
+<span id="composedmeasures"></span><h2>Macros for Composed Language Measures<a class="headerlink" href="#macros-for-composed-language-measures" title="Permalink to this headline">¶</a></h2>
+<p>Composed language measures often consist of:</p>
 <ul class="simple">
-<li><p>T007: B</p></li>
-<li><p>Ond</p></li>
-<li><p>VC</p></li>
-<li><p>W</p></li>
+<li><p>a macro for the mood of the clause (declarative, question, imperative)</p></li>
+<li><p>macros for ‘zinsdelen’</p></li>
+<li><p>macros for counts of complements and modifiers</p></li>
 </ul>
+<p>We will discuss each of these.</p>
+<div class="section" id="macros-for-clause-mood">
+<h3>Macros for clause mood<a class="headerlink" href="#macros-for-clause-mood" title="Permalink to this headline">¶</a></h3>
+<p>The <em>mood</em> of a clause is determined on the basis of a lot of different clues. Interpunctuation symbols also play a role: we especially do not allow interpunctuation symbols that contradict a mood (e.g. an imperative followed by a question mark). We therefore use several macros for interpunctions symbols:</p>
+<ul class="simple">
+<li><p><strong>topcontainsquestionsmark</strong></p></li>
+<li><p><strong>topcontainsperiodmark</strong></p></li>
+<li><p><strong>topcontainsexclamationmark</strong></p></li>
+</ul>
+<p>We give the definition of <strong>topcontainsquestionmark</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">topcontainsquestionmark</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(ancestor::node[@cat=&quot;top&quot; and node[%questionmark%]])&quot;&quot;&quot;</span>
+<span class="n">questionmark</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@pt=&quot;let&quot; and @word=&quot;?&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The other two are defined analogously.</p>
+<p>The most problematic clausal category is <em>sv1</em>, since it can head declaratives, questions and imperatives (see <a class="reference internal" href="alpinoparser.html#alpinoclauses"><span class="std std-ref">Clauses in Alpino</span></a>). Distinguishing these correctly is no trivial matter, and the queries we made are certainly not perfect.</p>
+<div class="section" id="declaratives">
+<span id="id1"></span><h4>Declaratives<a class="headerlink" href="#declaratives" title="Permalink to this headline">¶</a></h4>
+<p>Declarative clauses are identified by the macro <strong>declarative</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">declarative</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;smain&quot; or</span>
+<span class="s2">                 (@cat=&quot;ssub&quot; and not(%partofwhquestion%)) or</span>
+<span class="s2">                 (@cat=&quot;sv1&quot; and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation:</p>
+<ul class="simple">
+<li><p><em>smain</em> clauses are always declarative</p></li>
+<li><p><em>ssub</em> clauses are declarative if they are not the body of a (subordinate) wh-question: not (%partofwhquestion%)</p></li>
+<li><p><em>sv1</em> clauses are declarative if they are neither imperatives (not(%basicimperative%)), nor yes-no-questions (not(%ynquery%)), nor the body of (main) wh-question (not(%partofwhquestion%))</p></li>
+</ul>
+<p>For the definition of the macro <strong>basicimperative</strong>, see <a class="reference internal" href="#imperatives"><span class="std std-ref">Imperatives</span></a>, for the macro <strong>ynquery</strong> see <a class="reference internal" href="#questions"><span class="std std-ref">Questions</span></a>.</p>
+<p>The macro <strong>partofwhquestion</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">partofwhquestion</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@cat=&quot;sv1&quot; or @cat=&quot;ssub&quot;) and</span>
+<span class="s2">                       @rel=&quot;body&quot; and</span>
+<span class="s2">                       parent::node[@cat=&quot;whq&quot; or @cat=&quot;whsub&quot; ]) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="questions">
+<span id="id2"></span><h4>Questions<a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h4>
+<p>Yes-no questions are identified by the macro <strong>ynquery</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ynquery</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;@cat=&quot;sv1&quot; and</span>
+<span class="s2">          (@rel=&quot;--&quot; or @rel=&quot;dp&quot;) and</span>
+<span class="s2">          not(%topcontainsperiodmark%) and</span>
+<span class="s2">           not(%topcontainsexclamationmark%) and</span>
+<span class="s2">          node[@rel=&quot;hd&quot; and @pt=&quot;ww&quot; and @pvtijd !=&quot;conj&quot; and</span>
+<span class="s2">               (@stype=&quot;ynquestion&quot; or %topcontainsquestionmark% ) ] and</span>
+<span class="s2">          (node[@rel=&quot;su&quot;] or %topcontainsquestionmark%)    and</span>
+<span class="s2">          (not(</span><span class="si">%i</span><span class="s2">mpmodfound%) or %topcontainsquestionmark% )</span>
+<span class="s2">         &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation:</p>
+<ul class="simple">
+<li><p>Tarsp does not mark subordinate yes-no question (introduced by the subordinate conjunction <em>of</em>) in any special way, so we only deal with main clauses</p></li>
+<li><p>The category must be <em>sv1</em> and it must have one of the relations <em>–</em> or <em>dp</em>, so that it indeed is a main clause</p></li>
+<li><p>There must not be an period or an exclamation mark at the end of the utterance</p></li>
+<li><p>There must be a verb, but not in conjunctive form, and either Alpino has marked the utterance as a yes-no-question (via the attribute <em>stype</em> on the verb), or there is a question mark at the end of the sentence.</p></li>
+<li><p>There must be a subject or a question mark. Yes-no questions normally contain a subject. Imperatives most often do  not. So absence of a subject is seen as a  indication for an imperative unless there is a question mark</p></li>
+<li><p>Certain adverbs are often used with imperatives. Such adverbs should therefore not be present (not(%impmodfound%)), or there must be question mark.</p></li>
+</ul>
+<p><em>Wh</em>-questions are defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_whq</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@cat=&quot;whq&quot; and @rel=&quot;--&quot;) or (@cat=&quot;whsub&quot;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>covering both main clauses (<em>whq</em>) and subordinate clauses (<em>whsub</em>).</p>
+</div>
+<div class="section" id="imperatives">
+<span id="id3"></span><h4>Imperatives<a class="headerlink" href="#imperatives" title="Permalink to this headline">¶</a></h4>
+<p>Imperatives are identified by the macro <strong>basicimperative</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">basicimperative</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%normalimp</span><span class="si">% o</span><span class="s2">r %bareverbimp% )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Here the macro <strong>normalimp</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">normalimp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;sv1&quot; and</span>
+<span class="s2">                not(%topcontainsquestionmark%) and</span>
+<span class="s2">                (not(%topcontainsperiodmark%) or </span><span class="si">%i</span><span class="s2">mpmodfound%) and</span>
+<span class="s2">                </span><span class="si">%i</span><span class="s2">mprelok% and</span>
+<span class="s2">                </span><span class="si">%i</span><span class="s2">mpsubjectok% and</span>
+<span class="s2">                node[%wwimpok%]</span>
+<span class="s2">            )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation:</p>
+<ul>
+<li><p>The category must be <em>sv1</em></p></li>
+<li><p>the utterance must not contain a question mark</p></li>
+<li><p>it does not contain a period unless an adverbial modifier typical for imperatives is present. The latter is checked by the macro <strong>impmodfound</strong>. Such an adverbial modifier can occur in the main clause but also in a subordinate nonfinite clause (macro <strong>nonfinvc</strong>). The adverbs typical for imperatives are <em>maar</em> and <em>eens</em> (macro <strong>basicimpmod</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">impmodfound</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimpmod</span><span class="si">% o</span><span class="s2">r node[%nonfinvc% and %basicimpmod%])&quot;&quot;&quot;</span>
+<span class="n">basicimpmod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(node[@rel=&quot;mod&quot; and (@lemma=&quot;maar&quot; or @lemma=&quot;eens&quot;)])&quot;&quot;&quot;</span>
+<span class="n">nonfinvc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;vc&quot; and %nonfincat%) &quot;&quot;&quot;</span>
+<span class="n">nonfincat</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;inf&quot; or @cat=&quot;ppart&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>the relation of the  node must be typical for imperative clauses: <strong>imprelok</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">imprelok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;--&quot; or @rel=&quot;nucl&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>There are restrictions on subjects in imperative clauses, expressed by the macro <strong>impsubjectok</strong>:</p></li>
+<li><p>there are restrictions on the verb in an imperative clause, expressed by the macro <strong>wwimpok</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wwimpok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;( %wwimpfeatok% and</span>
+<span class="s2">               not(%modalframe%) and</span>
+<span class="s2">               %zijnimpok%       and</span>
+<span class="s2">               %potentialimpverb%</span>
+<span class="s2">          )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>These restrictions concern:</p>
+<blockquote>
+<div><ul>
+<li><p>conditions on the verbal properties (<strong>wwimpfeatok</strong>). The verb must be a finite present tense singular form (<strong>wwimpfin</strong>), or an infinitive (<strong>wwimpinf</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wwimpfeatok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%wwimpfin</span><span class="si">% o</span><span class="s2">r %wwimpinf%)&quot;&quot;&quot;</span>
+<span class="n">wwimpfin</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;hd&quot; and @pt=&quot;ww&quot; and @pvtijd=&quot;tgw&quot; and @pvagr=&quot;ev&quot; and @wvorm=&quot;pv&quot;) &quot;&quot;&quot;</span>
+<span class="n">wwimpinf</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;hd&quot; and @pt=&quot;ww&quot; and @wvorm=&quot;inf&quot;) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>the verb must not be a modal verb (<strong>not(%modalframe%)</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">modalframe</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(contains(@frame,&quot;modal&quot;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>if the lemma of the verb is <em>zijn</em>, the form must be <em>wees</em> or <em>weest</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zijnimpok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(not(@lemma=&quot;zijn&quot;) or @word=&quot;wees&quot; or @word=&quot;weest&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>the verb must be able to form an imperative. This is defined by the macro <strong>potentialimpverb</strong>, which basically excludes a list of verbs that have no imperative:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">potentialimpverb</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(not(contains(@lemma,&quot;moeten&quot;) or contains(@lemma,&quot;hoeven&quot;) or</span>
+<span class="s2">              contains(@lemma,&quot;zullen&quot;) or contains(@lemma,&quot;kunnen&quot;) or</span>
+<span class="s2">              contains(@lemma,&quot;mogen&quot;) or @lemma=&quot;hebben&quot; or contains(@lemma, &quot;_hebben&quot;) or contains(@lemma, &quot;weten&quot;)</span>
+<span class="s2">             )</span>
+<span class="s2">         )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>The macro <strong>bareverbimp</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bareverbimp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%wwimpok% and</span>
+<span class="s2">                  </span><span class="si">%i</span><span class="s2">mprelok%  and</span>
+<span class="s2">                  parent::node[@cat=&quot;top&quot;] and</span>
+<span class="s2">                  not(%topcontainsquestionmark%) and</span>
+<span class="s2">                  not(%topcontainsperiodmark%)) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>It is intended for single verb utterances:</p>
+<ul>
+<li><p>the verb must be compatible with imperative mood (<strong>wwimpok</strong>)</p></li>
+<li><p>the relation that the verb bears must be compatible with imperatives (<strong>imprelok</strong>)</p></li>
+<li><p>the parent nod must have <em>cat</em> equal to <em>top</em></p></li>
+<li><p>there must not be a question mark in the utterance</p></li>
+<li><p>there must be no period in the utterance.</p></li>
+<li><p><strong>Remark</strong> We must find a way to exclude <em>kijk</em> and <em>kijk eens</em> as an imperative in most cases, since it should be analysed as a V.U.</p></li>
+<li><p><strong>Schlichting</strong> (p. 62)</p>
+<p>“De kenmerken van de Gebiedende Wijs zijn in het kader van TARSP:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>de zin moet altijd beginnen met een werkwoord; dat werkwoord staat meestal in de vorm van de stam van het werkwoord, een enekel maal vinden we stam +t of de infinitief. (covered except stam +t)</p></li>
+<li><p>Er is altijd een niet-vragende intonatie (covered by disallowing a question mark)</p></li>
+<li><p>Er is vaak een tweed of derde woord in de zin, bijvoorbeeld ‘maar’, ‘even’, ‘eens’. Covered</p></li>
+<li><p>Een gebideden wijs begint nooit met een modaal werkwoord, behalve met ‘laten’ (covered)</p></li>
+</ol>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="macros-for-zinsdelen">
+<span id="zinsdelen"></span><h3>Macros for ‘Zinsdelen’<a class="headerlink" href="#macros-for-zinsdelen" title="Permalink to this headline">¶</a></h3>
+<p>The ‘zinsdelen’are <em>B</em>, <em>Ond</em>, <em>VC</em> and <em>W</em> and they correspond to some extent to  the following language measures, for ‘zinsdelen’:</p>
+<ul class="simple">
+<li><p>T007: B,  adverbial modifier (see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>)</p></li>
+<li><p>T063: Ond, subject   (see <a class="reference internal" href="#t063-ond"><span class="std std-ref">T063: Ond</span></a>)</p></li>
+<li><p>T097: VC, verbal complement (see <a class="reference internal" href="#t097-vc"><span class="std std-ref">T097: VC</span></a>)</p></li>
+<li><p>T120: W, verb</p></li>
+</ul>
+<p>But the correspondenc is only perfect for <em>B</em>. For <em>Ond</em> the definitions are different, but it is not clear whether that cannot be avoided. For <em>VC</em> the definitions are also different but perhaps they should be identical.
+For <em>W</em> there is no correspondence.
+Out of these language measures, only T120/W occurs in the form (‘profielkaart’), but it has a different interpretation than <em>W</em> in the composed language measures. <em>W</em> in the composed language measures means <em>predicate</em>, but language measure T120 with code <em>W</em> means <em>verb</em>. For example, in the sentence <em>Hij heeft gezwommen</em> there are two verbs (<em>heeft</em>, en <em>gezwommen</em>) but only one predicate (i.e <em>heeft gezwommen</em>).</p>
+<p>Language measures such as <em>WBVC</em>, <em>OndVC</em>, <em>OndW</em>, <em>OndWB</em>, <em>OndWBVC</em>, and several others are defined  by combinations of the definitions of recurring macros for ‘zinsdelen’(and some others conditions). For such language measures, special macros of for Ond, VC and W have been defined:</p>
+<ul>
+<li><p><strong>Ond</strong>: has a simple definition:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ond</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;node[</span><span class="si">%s</span><span class="s2">ubject%]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>where:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subject</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;su&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>It differs from the definition of <a class="reference internal" href="#t063-ond"><span class="std std-ref">T063: Ond</span></a> because T063 has to exclude subjects of nonfinite nodes (which is covered in the composed language measures by the conditions on mood) and to cover an additional case (existential <em>er</em> as a subject (though maybe that should be included here as well)</p>
+<ul>
+<li><p><strong>Tarsp_B</strong>: see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a></p></li>
+<li><p><strong>Tarsp_VC</strong>: is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@rel=&quot;obj1&quot; or (@rel=&quot;pc&quot; and not(%Tarsp_pc_vc_exception%)) or</span>
+<span class="s2">                @rel=&quot;predc&quot; or @rel=&quot;ld&quot; or @rel=&quot;obj2&quot; or %Tarsp_finvc</span><span class="si">% o</span><span class="s2">r</span>
+<span class="s2">                %Tarsp_vcvnw</span><span class="si">% o</span><span class="s2">r (@rel=&quot;svp&quot; and @pt!=&quot;vz&quot;)) and</span>
+<span class="s2">               not(%Tarsp_B%) )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>So, it covers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>direct objects (<em>obj1</em>)</p></li>
+<li><p>prepositional complements that are not <strong>Tarsp_pc_vc_exception</strong> (<em>pc</em>)</p></li>
+<li><p>predicative complements (<em>predc</em>)</p></li>
+<li><p>locative/directional complements (<em>ld</em>)</p></li>
+<li><p>indirect objects (<em>obj2</em>)</p></li>
+<li><p>finite verbal complement (macro <strong>Tarsp_finvc</strong>)</p></li>
+<li><p>pronouns with relation <em>vc</em>, this is for sluiced subordinate clauses as in <em>ik weet</em> <strong>wat</strong>, <em>effe kijken</em> <strong>waar</strong></p></li>
+<li><p>separable particles of a verb that are not adpositions (<em>svp</em>)</p></li>
+</ul>
+<p>and we exclude all cases that can be analysed as an adverbial modifier (<strong>Tarsp_B</strong>, see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>)</p>
+<p>The macro <strong>Tarsp_pc_vc_exception</strong> is generated in the <em>generatemacros</em> module on the basis of a list of  pairs (verb, adposition), e.g. (<em>slaan</em>, <em>op</em>) in which Alpino analyzes the adposition as the head of an prepositional complement (pc), but where it should be considered the head of a modifier. See <a class="reference internal" href="methodimplementation.html#generatemacros"><span class="std std-ref">Generation of macros</span></a> for more details.</p>
+</div></blockquote>
+</li>
+<li><p><strong>Tarsp_W</strong>: It is defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_W</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;node[@rel=&quot;hd&quot; and @pt=&quot;ww&quot;]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Nonfinite verbs are not excluded by this definition but they are excluded by the mood conditions.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="macros-for-counts-of-zinsdelen">
+<h3>Macros for Counts of ‘zinsdelen’<a class="headerlink" href="#macros-for-counts-of-zinsdelen" title="Permalink to this headline">¶</a></h3>
+<p>Many composed language measures differ only in the number of complements or adverbial modifiers required. For example <em>Tarsp_OndWB</em> and <em>Tarsp_OndWBB</em> differ only in the number of adverbial modifiers that should be present (one, resp, two).
+This requires conditions on the number of such complements or modifiers.
+Note that one cannot simply include two expressions joined by <em>and</em> in an Xpath query (e.g. <em>%Tarsp_B% and %Tarsp_B%</em>) to cover the <em>BB</em> part of the language measure <em>Tarsp_OndWBB</em>. The reason is that in XPath such a query will then still match with  a structure containing a single adverbial modifier. We therefore use the predicate <em>count</em> in composed language measures.</p>
+<p>Adverbial modifiers and complements can occur not only under the node where the subject and verb occur but also inside a nonfinite verbal complement, so we gather both in a node set, union these nodesets and count the number of elements in the union. This leads to the following formulations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_B_X_count</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;count(node[%Tarsp_B%] | node[%nonfinvc%]/node[%Tarsp_B%]) &quot;&quot;&quot;</span>
+<span class="n">Tarsp_VC_X_count</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;count(node[%Tarsp_VC%] | node[%nonfinvc%]/node[%Tarsp_VC%]) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Definitions for <em>Tarsp_B</em> and <em>Tarsp_VC</em> were provided above.</p>
+<p>We must also have counts for the overall number of “zinsdelen” in the clause. This is taken care of by the macro <em>realcomplormodnodecount</em>. It counts occurrences of <em>realcomplormodnode</em> in the current node or in a nonfinite complement:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">realcomplormodnodecount</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;count(</span><span class="si">%r</span><span class="s2">ealcomplormodnode% | node[%nonfinvc%]/</span><span class="si">%r</span><span class="s2">ealcomplormodnode%)&quot;&quot;&quot;</span>
+<span class="n">realcomplormodnode</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;node[</span><span class="si">%r</span><span class="s2">ealcomplormod%]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The macro <strong>realcomplormod</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">realcomplormod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(not(%particlesvp%) and not(</span><span class="si">%i</span><span class="s2">ndexnode%) and not(%nonfinvc%) and not(@rel=&quot;hd&quot;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Here we exclude:</p>
+<ul>
+<li><p>adpositional separable verb particles (<strong>particlesvp</strong>). These are considered to be part of the verb:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">particlesvp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;svp&quot; and @pt=&quot;vz&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>index nodes  (<strong>indexnode</strong>). We do not want to include nodes that do not cover lexical material:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">indexnode</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@index and not (@cat or @pt or @pos))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>nonfinite verbal complements, using the macro <strong>nonfinvc</strong> defined above</p></li>
+<li><p>the head verb (<em>not(&#64;rel=”hd”)</em>). We exclude this because there can be multiple verbs in a clause but they should always count as one ‘zinsdeel’, viz. predicate. The value that   <strong>realcomplormodnodecount</strong> is compared with is therefore always one lower than one would expect, because the predicate is assumed to be always present, and is not counted by <strong>realcomplormodnodecount</strong> . For example, for <em>OndWBB</em>, with 4 ‘zinsdelen’, the value that <strong>realcomplormodnodecount</strong> must have is equal to <strong>3</strong>, not <strong>4</strong>.</p></li>
+</ul>
+</div>
+<div class="section" id="concrete-example-tarsp-ondwbb">
+<h3>Concrete Example: <strong>Tarsp_OndWBB</strong><a class="headerlink" href="#concrete-example-tarsp-ondwbb" title="Permalink to this headline">¶</a></h3>
+<p>Given all of the above, it should be clear why the definition of <strong>Tarsp_OndWBB</strong> is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                  %Ond% and</span>
+<span class="s2">                  %Tarsp_W% and</span>
+<span class="s2">                  %Tarsp_B_X_count% = 2 and</span>
+<span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="language-measures">
+<h2>Language Measures<a class="headerlink" href="#language-measures" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="t001-vr-wond">
-<h2>T001: (Vr)WOnd+<a class="headerlink" href="#t001-vr-wond" title="Permalink to this headline">¶</a></h2>
+<h3>T001: (Vr)WOnd+<a class="headerlink" href="#t001-vr-wond" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: (Vr)WOnd+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -65,10 +348,11 @@
 <li><p><strong>Page</strong>: 60</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: “Vraagwoordzin waarbij het vraagwoord is weggelaten. Het werkwoord +, meestal, het Onderwerp zijn gerealiseerd. Daarna kunnen nog één of meer Zinsdelen volgen.”</p></li>
 </ul>
 </div>
 <div class="section" id="t003-6">
-<h2>T003: 6+<a class="headerlink" href="#t003-6" title="Permalink to this headline">¶</a></h2>
+<h3>T003: 6+<a class="headerlink" href="#t003-6" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: 6+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -84,9 +368,13 @@
 </div>
 </li>
 </ul>
+<p>&#64;&#64;todo&#64;&#64;</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “6 Zinsdelen of meer in een zin”</p></li>
+</ul>
 </div>
 <div class="section" id="t004-aan-uit">
-<h2>T004: Aan/uit<a class="headerlink" href="#t004-aan-uit" title="Permalink to this headline">¶</a></h2>
+<h3>T004: Aan/uit<a class="headerlink" href="#t004-aan-uit" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Aan/uit.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -97,10 +385,11 @@
 <li><p><strong>Page</strong>: 57;58</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: “Soms wordt een zinsdeel aan het begin of aan het einde van de zin met andere woorden herhaald. Die herhaling noemen we ‘Aanloop’ aan het begin van een zin en ‘Uitloop’ aan het einde van de zin.”</p></li>
 </ul>
 </div>
 <div class="section" id="t005-als">
-<h2>T005: als<a class="headerlink" href="#t005-als" title="Permalink to this headline">¶</a></h2>
+<h3>T005: als<a class="headerlink" href="#t005-als" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: als.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -119,11 +408,11 @@
 <p>Straightforward Xpath expression for the conjunction <em>als</em>.</p>
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “‘als’ is het eerste verbindingswoord van de ondergeschikte zin. ‘als’ wordt hier ook gescoord wanneer de onderschikkende zonder hoofdzin gebruikt wordt.</p></li>
+<li><p><strong>Remark</strong>: Fully covered but it is unclear whether <em>als</em> as used in comparisons also should be included. All Schlichting’s examples concern conditional <em>als</em>. So maybe this query should be restricted somewhat.</p></li>
 </ul>
-<p>Fully covered but it is unclear whether <em>als</em> as used in comparisons also should be included. All Schlichting’s examples concern conditional <em>als</em>. So maybe this query should be restricted somewhat.</p>
 </div>
 <div class="section" id="t006-avn">
-<h2>T006: Avn<a class="headerlink" href="#t006-avn" title="Permalink to this headline">¶</a></h2>
+<h3>T006: Avn<a class="headerlink" href="#t006-avn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Avn. (Aanwijzend Voornaamwoord als nomen)</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -135,7 +424,7 @@
 <li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span>  <span class="ow">and</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;aanw&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;hier&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;daar&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;er&quot;</span> <span class="ow">and</span>
-    <span class="nd">@rel</span><span class="o">!=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@positie</span><span class="p">)</span> <span class="ow">or</span> <span class="nd">@positie</span><span class="o">!=</span><span class="s2">&quot;prenom&quot;</span><span class="p">)</span> <span class="p">]</span>
+<span class="nd">@rel</span><span class="o">!=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@positie</span><span class="p">)</span> <span class="ow">or</span> <span class="nd">@positie</span><span class="o">!=</span><span class="s2">&quot;prenom&quot;</span><span class="p">)</span> <span class="p">]</span>
 </pre></div>
 </div>
 </li>
@@ -147,7 +436,7 @@
 </ul>
 </div>
 <div class="section" id="t007-b">
-<h2>T007: B<a class="headerlink" href="#t007-b" title="Permalink to this headline">¶</a></h2>
+<span id="id4"></span><h3>T007: B<a class="headerlink" href="#t007-b" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: B. (Bijwoordelijke Bepaling)</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -163,22 +452,95 @@
 </div>
 </li>
 </ul>
-<p>&#64;&#64;</p>
+<p>The definition of this macro is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_B</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span>
+<span class="s2">              ((((@rel=&quot;mod&quot; or @rel=&quot;ld&quot; or @rel=&quot;predm&quot;) and</span>
+<span class="s2">                 (not(@cat) or @cat!=&quot;conj&quot;) and</span>
+<span class="s2">                 (not(@pt) or @pt!=&quot;tsw&quot;)</span>
+<span class="s2">                )or</span>
+<span class="s2">                (%predcB%)</span>
+<span class="s2">               ) and</span>
+<span class="s2">               (../node[@pt=&quot;ww&quot; and @rel=&quot;hd&quot;])</span>
+<span class="s2">              ) or</span>
+<span class="s2">              ((@pt=&quot;vz&quot; or @pt=&quot;bw&quot; or %Rpronoun%) and (@rel=&quot;dp&quot; or @rel=&quot;--&quot; or @rel=&quot;nucl&quot; or @rel=&quot;body&quot;) and %notonlyrealnode%) or</span>
+<span class="s2">              (@cat=&quot;pp&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;) and %notonlyrealnode%) or</span>
+<span class="s2">              (@rel=&quot;pc&quot; and ../node[@rel=&quot;hd&quot; and </span><span class="si">%lo</span><span class="s2">cverb%]) or</span>
+<span class="s2">              (@rel=&quot;cnj&quot; and parent::node[@rel=&quot;mod&quot; or @rel=&quot;ld&quot; or @rel=&quot;predm&quot;]) or</span>
+<span class="s2">              (@rel=&quot;mod&quot; and @pt=&quot;bw&quot; and parent::node[@cat=&quot;np&quot;] ) or</span>
+<span class="s2">              %Tarsp_nonmodadvcp</span><span class="si">% o</span><span class="s2">r</span>
+<span class="s2">              %Tarsp_pc_vc_exception%</span>
+<span class="s2">             )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation: Adverbial modifiers are:</p>
+<ul>
+<li><p>Case 1:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>Nodes with grammatical relation  <em>mod</em>, <em>ld</em> or <em>predm</em></dt><dd><ul>
+<li><p>but if the node is a phrase, it should not have the value <em>conj</em> for the attribute <em>cat</em>. In a conjunction the whole conjuction is not considered an adverbial modifier. The individual conjuncts are, see below.</p></li>
+<li><p>if the node is a word, it should not be an interjection</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Nodes that meet the conditions of the macro <strong>predcB</strong>. This macro is defined below.</p></li>
+</ul>
+</div></blockquote>
+<p>but only if they modify a verb</p>
+</li>
+<li><p>Case 2: adpositions, adverbs and R-pronouns that bear one of the relations <em>dp</em>, <em>–</em>, <em>nucl</em> or <em>body</em>, if they are not the only real node in the structure. The macro <strong>notonlyrealnode</strong> is defined below.</p></li>
+<li><p>Case 3: adpositional phrases with grammatical relation <em>dp</em> or <em>–</em> if they are not the only realnode</p></li>
+<li><p>Case 4: adpositional complements to a verbs that meets the requirements of the macro <strong>locverb</strong>. Verbs that have a locative interpretation often also have use where they are combined with a particular adposition (e.g. <em>staan + op</em>). This often leads to asn ambiguity, and Alpino very often selects the <em>pc</em> analysis. However, very young children do not know these uses yet, but almost always intend the locative use. This part of the query corrects for Alpino’s strategy.</p></li>
+<li><p>Case 5: A conjunct if its parent node has a grammatical relation from <em>mod</em>, <em>ld</em> or <em>predm</em></p></li>
+<li><p>Case 6: adverbs that are a modifier inside an NP. Probably because Alpino analyses ambiguous cases by including the adverb in the NP.</p></li>
+<li><p>Case 7: nodes that meet the requirements of the macro <strong>Tarsp_nonmodadvcp</strong>.</p></li>
+<li><p>Case 8: nodes that meet the conditions of the macro <strong>tarsp_pc_vc_exception</strong>. See section <a class="reference internal" href="methodimplementation.html#generatemacros"><span class="std std-ref">Generation of macros</span></a></p></li>
+</ul>
+<p>The macro <strong>predcB</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predcB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;predc&quot; and</span>
+<span class="s2">             (@pt=&quot;adj&quot; or @pt=&quot;bw&quot; or @cat=&quot;ap&quot; or @cat=&quot;advp&quot;) and</span>
+<span class="s2">             ../node[@rel=&quot;obj1&quot;]</span>
+<span class="s2">            )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The idea is that <em>predc</em> nodes that do not occur with a copula are covered here.</p>
+<p>The macro <strong>notonlyrealnode</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">notonlyrealnode</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(parent::node[count(node[</span><span class="si">%r</span><span class="s2">ealnode%])&gt;1])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>where <strong>realnode</strong> excludes interpunction signs, interjections, or nodes without any pos or category label:</p>
+<blockquote>
+<div><p>realnode = “”“((not(&#64;pt) or (&#64;pt!=”let” and &#64;pt!=”tsw”)) and (not(&#64;postag) or &#64;postag!=”NA()”))”“”</p>
+</div></blockquote>
+<p>The macro <strong>locverb</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">locverb</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@lemma=&quot;staan&quot; or @lemma=&quot;zitten&quot; or @lemma=&quot;rijden&quot; or</span>
+<span class="s2">              @lemma=&quot;vallen&quot; or @lemma=&quot;doen&quot; or @lemma=&quot;gaan&quot; or</span>
+<span class="s2">              @lemma=&quot;komen&quot; or @lemma=&quot;zijn&quot;  or </span><span class="si">%lo</span><span class="s2">cmodalverb% )&quot;&quot;&quot;</span>
+<span class="n">locmodalverb</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@lemma=&quot;kunnen&quot; or @lemma=&quot;moeten&quot; or</span>
+<span class="s2">                    @lemma=&quot;hoeven&quot; or @lemma=&quot;willen&quot; or</span>
+<span class="s2">                    @lemma=&quot;mogen&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
 <ul class="simple">
-<li><p><strong>Schlichting</strong>: “De bijwoordelijke bepaling zegt iets over de hele inhoud van de zin of iets over het werkwoord, een bijwoord of een bijvoeglijk naamwoord. Een zin kan meer dan één bijwoordelijke bepaling hebben.</p></li>
+<li><p><strong>Schlichting</strong>: “De bijwoordelijke bepaling zegt iets over de hele inhoud van de zin of iets over het werkwoord, een bijwoord of een bijvoeglijk naamwoord. Een zin kan meer dan één bijwoordelijke bepaling hebben.”Basically covered.</p></li>
+<li><p><strong>Remark</strong> The <strong>locverb</strong> macro very probably has overlap with or is subsumed by the generated macro <strong>Tarsp_pc_vc_exception</strong></p></li>
+<li><p><strong>Remark</strong> Case 5 does not cover conjuncts under a node <em>conj</em> that meets the requirements of <strong>predcB</strong>, e.g <em>ik vind haar</em> <strong>mooi en aardig</strong></p></li>
+<li><p><strong>Remark</strong> The macro <strong>predcB</strong> does not cover cases where the object is absent due to topic drop (e.g. <em>vind ik</em> <strong>mooi</strong>). We could include a condition which includes cases where surely non-copular verbs (such as <em>vinden</em>) are listed, as was done in ASTA.</p></li>
 </ul>
 </div>
 <div class="section" id="t010-bbbv">
-<h2>T010: BBBv<a class="headerlink" href="#t010-bbbv" title="Permalink to this headline">¶</a></h2>
+<h3>T010: BBBv<a class="headerlink" href="#t010-bbbv" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p><strong>Name</strong>: BBBv. (Bijwoord + Bijwoord + Bijvoeglijk woord)</p></li>
+<li><p><strong>Name</strong>: BBBv. (Bijwoord + Bijwoord + Bijvoeglijk woord, adverb + adverb + adjective</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
 <li><p><strong>Subcat</strong>: Ov</p></li>
 <li><p><strong>Level</strong>: Wg</p></li>
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: no</p></li>
 <li><p><strong>Page</strong>: 70</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;ap&quot;</span> <span class="ow">and</span>
 <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;ap&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;advp&quot;</span><span class="p">)</span> <span class="ow">and</span>
@@ -188,28 +550,32 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Bijwoord + Bijwoord + Bijvoeglijk Woord. Deze constructie heeft een Bijvoeglijk woord als kern. Het is eigenlijk een BBv/B voorafgegaan door een bijwoord.</p></li>
 </ul>
+<p>The first adverb is analysed as a modifier or measure expression of the second adverb. Together they form a phrase of category <em>ap</em> or <em>advp</em> that cooccurs with a head <em>adj</em>. Both phrases mentioned can contain only two nodes as children. This analysis contradicts the analysis by Schlichting, which suggest that the first adverb modifies the combination of the second adverb with the adjective. But an analysis that matches with the query given seems the most plausible analysis for the second example (<em>hij is veel te hoog</em>). As for the first example (<em>een kindje is nog te klein voor</em>), a more plausible analysis has <em>nog</em> as a sentential modifier, and that is how Alpino analyses it.</p>
 </div>
 <div class="section" id="t011-bbijzin">
-<h2>T011: Bbijzin<a class="headerlink" href="#t011-bbijzin" title="Permalink to this headline">¶</a></h2>
+<h3>T011: Bbijzin<a class="headerlink" href="#t011-bbijzin" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p><strong>Name</strong>: Bbijzin.</p></li>
+<li><p><strong>Name</strong>: Bbijzin. Bijwoordelijke Bijzin (adverbial subordinate clause)</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
 <li><p><strong>Subcat</strong>: Mededelende Zin</p></li>
 <li><p><strong>Level</strong>: Sz</p></li>
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 57</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span><span class="ow">and</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;cp&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;body&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;ww&quot;</span> <span class="ow">and</span> <span class="nd">@pvagr</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]]]</span>
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Bijwoordelijke bijzin met verbindingswoord. Dit is dus een ondergeschikte zin die in de hoofdzin de functie van bijwoordelijke bepaling heeft. Het verbindingswoord is in deze fase meestal <em>als</em>”,.</p></li>
 </ul>
+<p>A straightforward query for a cp (“complementizer phrase”) with grammatical relation <em>mod</em>. The condition that the <em>body</em> must contain a finite verb is necessary because a <em>cp</em> can als have other phrases (e.g. <em>np</em>) as complement.</p>
 </div>
 <div class="section" id="t012-bbv-b">
-<h2>T012: BBv/B<a class="headerlink" href="#t012-bbv-b" title="Permalink to this headline">¶</a></h2>
+<h3>T012: BBv/B<a class="headerlink" href="#t012-bbv-b" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BBv/B.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -227,9 +593,17 @@
 </div>
 </li>
 </ul>
+<p>This query is straightforward implementation of an adverb modifying an adjective or adverb functioning as a head. It makes use of the macro <em>adjoradv</em> (twice), which is defined as follows:</p>
+<ul class="simple">
+<li><p>adjoradv = “”“(&#64;pt=”bw” or &#64;pt=”adj” or (&#64;pt=”vnw” and (&#64;pos=”adj” or &#64;pos=”adv”)))”“”</p></li>
+</ul>
+<p>The macro covers not only words with the value <em>adj</em> or <em>bw</em> for <em>pt</em> but also words with <em>pt=vnw</em> where the Alpino <em>pos</em> attribute has the value <em>adj</em> or <em>adv</em>. The latter is needed for a word such <em>veel</em> and for R-words such as <em>daar</em>.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Bijwoord + Bijvoeglijk woord of Bijwoord. De eerste B is vaak een bijwoord van graad, of zegt in ieder geval iets van het tweede woord in deze woordgroep. Het tweede woord is meestal cde kern van de woordgroep.”</p></li>
+</ul>
 </div>
 <div class="section" id="t013-bbvzn">
-<h2>T013: BBvZn<a class="headerlink" href="#t013-bbvzn" title="Permalink to this headline">¶</a></h2>
+<h3>T013: BBvZn<a class="headerlink" href="#t013-bbvzn" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: BBvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -240,10 +614,11 @@
 <li><p><strong>Page</strong>: 70</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: “Bijwoord + Bijvoeglijk woord + Zelfstandig naamwoord”</p></li>
 </ul>
 </div>
 <div class="section" id="t014-bbx">
-<h2>T014: BBX<a class="headerlink" href="#t014-bbx" title="Permalink to this headline">¶</a></h2>
+<h3>T014: BBX<a class="headerlink" href="#t014-bbx" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BBX.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -259,9 +634,13 @@
 </div>
 </li>
 </ul>
+<p>&#64;&#64;todo&#64;&#64;</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Bijwoordelijke bepaling + Bijwoordelijke bepaling + een ander zinsdeel (Ond of W of VC of B)”</p></li>
+</ul>
 </div>
 <div class="section" id="t015-bepbvzn">
-<h2>T015: BepBvZn<a class="headerlink" href="#t015-bepbvzn" title="Permalink to this headline">¶</a></h2>
+<h3>T015: BepBvZn<a class="headerlink" href="#t015-bepbvzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BepBvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -270,7 +649,7 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 71</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
 <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="p">]</span> <span class="ow">and</span>
@@ -280,9 +659,15 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation of noun phrase with a determiner, a modifying adjective and a head noun</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Bepaler + Bijvoeglijk woord + Zelfstandig naamwoord”</p></li>
+<li><p><strong>Remark</strong>: does not cover numerals, which also fall under “bijvoeglijk”. Probably best to make a macro for “bijvoeglijk woord”</p></li>
+<li><p><strong>Remark</strong>: restrict this to exactly 3 nodes under NP.</p></li>
+</ul>
 </div>
 <div class="section" id="t016-bepznbv">
-<h2>T016: BepZnBv<a class="headerlink" href="#t016-bepznbv" title="Permalink to this headline">¶</a></h2>
+<h3>T016: BepZnBv<a class="headerlink" href="#t016-bepznbv" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BepZnBv.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -291,16 +676,24 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: no</p></li>
 <li><p><strong>Page</strong>: 70</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;ap&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;advp&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">or</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;me&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">]]</span>
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Bepaler + Zelfstandig naamwoord + Bijvoeglijk woord. Soms vindt men een Zn op de plaats van de Bv: <em>een heleboel water</em>”</p></li>
+</ul>
+<blockquote>
+<div><p>The current query covers both adjectives and adverbs. Unclear whether that is necessary or desired.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>Remark</strong>: The  example <strong>een heleboel water</strong> is not covered by this query</p></li>
+<li><p><strong>Remark</strong>: Currently any NP is allowed, this should be restrcted to an NP with only two nodes (determiner or modifier + head)</p></li>
 </ul>
 </div>
 <div class="section" id="t017-bezzn">
-<h2>T017: BezZn<a class="headerlink" href="#t017-bezzn" title="Permalink to this headline">¶</a></h2>
+<h3>T017: BezZn<a class="headerlink" href="#t017-bezzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BezZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -309,7 +702,7 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 68</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
 <span class="n">node</span><span class="p">[</span><span class="nd">@pdtype</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="nd">@positie</span><span class="o">=</span><span class="s2">&quot;prenom&quot;</span>  <span class="ow">and</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;bez&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="p">]</span> <span class="ow">and</span>
@@ -318,9 +711,14 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation. Also covers substantivised adjectives as a head.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Bezittelijke voornaamwoord + Zelfstandig naamwoord”</p></li>
+<li><p><strong>Remark</strong>: according to the query, the  NP can consist of more than just the possessive pronoun and the noun. This should be restricted</p></li>
+</ul>
 </div>
 <div class="section" id="t018-bijvoeglijke-bijzin">
-<h2>T018: Bijvoeglijke Bijzin<a class="headerlink" href="#t018-bijvoeglijke-bijzin" title="Permalink to this headline">¶</a></h2>
+<h3>T018: Bijvoeglijke Bijzin<a class="headerlink" href="#t018-bijvoeglijke-bijzin" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Bijvoeglijke Bijzin.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -329,16 +727,21 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: no</p></li>
 <li><p><strong>Page</strong>:</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span><span class="ow">and</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;rel&quot;</span> <span class="ow">and</span> <span class="n">parent</span><span class="p">::</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]]]</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<p>We have assumed that this involves relative clauses.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: Though “bijvoeglijke bijzin” is mentioned with T020 (p. 53-54) there is to our knowledge no separate description of them.</p></li>
+<li><p><strong>Remark</strong>: Should <em>whrel</em> be included here as well, perhaps with a condition that there is also a noun or subtantivised adjective as antecedent?</p></li>
+</ul>
 </div>
 <div class="section" id="t019-bijwoordelijke-bepalingwoordgroep">
-<h2>T019: Bijwoordelijke bepalingwoordgroep<a class="headerlink" href="#t019-bijwoordelijke-bepalingwoordgroep" title="Permalink to this headline">¶</a></h2>
+<h3>T019: Bijwoordelijke bepalingwoordgroep<a class="headerlink" href="#t019-bijwoordelijke-bepalingwoordgroep" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Bijwoordelijke bepalingwoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -349,10 +752,11 @@
 <li><p><strong>Page</strong>: 75</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: “Bijwoordelijke bepalingwoordgroep”</p></li>
 </ul>
 </div>
 <div class="section" id="t020-bijzin-z-verb">
-<h2>T020: Bijzin z Verb<a class="headerlink" href="#t020-bijzin-z-verb" title="Permalink to this headline">¶</a></h2>
+<h3>T020: Bijzin z Verb<a class="headerlink" href="#t020-bijzin-z-verb" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Bijzin z Verb.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -363,10 +767,11 @@
 <li><p><strong>Page</strong>: 53;54</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: “Bijzin zonder verbindingswoord. De bijzinnen kunnen Bijwoordelijke bijzinnen zijn, VC bijzinnen of Bijvoeglijke bijzinnen.”</p></li>
 </ul>
 </div>
 <div class="section" id="t023-bv-b">
-<h2>T023: Bv/B<a class="headerlink" href="#t023-bv-b" title="Permalink to this headline">¶</a></h2>
+<h3>T023: Bv/B<a class="headerlink" href="#t023-bv-b" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Bv/B.</p></li>
 <li><p><strong>Category</strong>: Eenwoordzin</p></li>
@@ -383,9 +788,19 @@
 </div>
 </li>
 </ul>
+<p>These are single word utterances consisting of an adjective or an adverb, and based on the examples that Schlichting gives (such as <em>uit</em>, <em>op</em>) adpositions should be included as well. (<em>uit</em> is parsed as an adverb by Alpino, but <em>op</em> as a adposition).</p>
+<p>The condition to restruct it to single word utterances use the macro <em>realnode</em>, which is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">realnode</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((not(@pt) or (@pt!=&quot;let&quot; and @pt!=&quot;tsw&quot;)) and (not(@postag) or @postag!=&quot;NA()&quot;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>It excludes interpunction symbols, interjections and words not classified for DCOI part of speech by Alpino (i.e., where <em>pos=NA()</em>),</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Bijvoeglijke naamwoorden en Bijwoorden”</p></li>
+<li><p><strong>Remark</strong>: R-pronouns (such as <em>daar</em>, explictly mentioned by Schlichting) are not covered yet. Perhaps use the macro <em>adjoradv</em> here.</p></li>
+</ul>
 </div>
 <div class="section" id="t024-bv-z-e">
-<h2>T024: Bv z e<a class="headerlink" href="#t024-bv-z-e" title="Permalink to this headline">¶</a></h2>
+<h3>T024: Bv z e<a class="headerlink" href="#t024-bv-z-e" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Bv z e.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -394,12 +809,22 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 87;88</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+</ul>
+<p>It is not clear whether predicative adjectives should be covered by this as well. We assume not. Schlichting only discusses attributive uses and only gives examples of attributive uses. A query could be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;adj&quot;</span> <span class="ow">and</span> <span class="nd">@buiging</span><span class="o">=</span><span class="s2">&quot;zonder&quot;</span> <span class="ow">and</span>
+       <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span>
+       <span class="n">parent</span><span class="p">::</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">or</span><span class="p">(</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;adj&quot;</span> <span class="ow">and</span> <span class="nd">@positie</span><span class="o">=</span><span class="s2">&quot;nom&quot;</span><span class="p">))]])]</span>
+</pre></div>
+</div>
+<p>covering attributive adjectives modifying a noun or a substantivised adjective.     The phenomenon  occurs only once in the VKLTarsp dataset (sample 6, utterance 25) but it has not been annotated as such. It does not occur in [Schlichting 2017].</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Bijvoeglijk naamwoord zonder ‘e’-uitgang”</p></li>
 </ul>
 </div>
 <div class="section" id="t025-bvbepzn">
-<h2>T025: BvBepZn<a class="headerlink" href="#t025-bvbepzn" title="Permalink to this headline">¶</a></h2>
+<h3>T025: BvBepZn<a class="headerlink" href="#t025-bvbepzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BvBepZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -408,16 +833,26 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 69</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;bw&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@special</span><span class="p">)</span> <span class="ow">or</span> <span class="nd">@special</span><span class="o">!=</span><span class="s2">&quot;er&quot;</span><span class="p">)]</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span><span class="p">]</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;bw&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@special</span><span class="p">)</span> <span class="ow">or</span> <span class="nd">@special</span><span class="o">!=</span><span class="s2">&quot;er&quot;</span><span class="p">)]</span> <span class="ow">and</span>
+       <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<p>Straightforward implementation, some remarks:</p>
+<ul class="simple">
+<li><p>the conditions on the <em>special</em> attribute are intended to exclude adverbial pronouns</p></li>
+<li><p>there is no condition on the head. Perhaps a condition allowing only nouns and substantivised adjectives should be added (or should substantivised infinitives be included as well?)</p></li>
+<li><p>there is no specific condition on the adverb (e.g. no mention of <em>nog</em>), Schlichting’s criterion “als het gevolgd kan worden door een telwoord” is difficult to implement.</p></li>
+<li><p><strong>Schlichting</strong>: “Bijvoeglijk woord + bepaler + Zelfstandig naamwoord. Het bijvoeglijk woord is meestal ‘nog’. We beschouwen ‘nog’ alleen als bijvoeglijk woord als het gevolgd kan worden door een telwoord.”</p></li>
+</ul>
 </div>
 <div class="section" id="t027-bvzn">
-<h2>T027: BvZn<a class="headerlink" href="#t027-bvzn" title="Permalink to this headline">¶</a></h2>
+<h3>T027: BvZn<a class="headerlink" href="#t027-bvzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -432,10 +867,51 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Bijvoeglijk woord + Zelfstandig naamwoord. Onder een Bijvoeglijk woord (nota bene niet een ‘bijvoeglijk naamwoord’) verstaan we woorden die een eigenschap of een hoeveelheid aangeven:</p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>Bijvoeglijke naamwoordem, bijv. ‘grote’, ‘andere’</p></li>
+<li><p>Telwoorden, bijvoeglijk gebruikt, bijv. ‘twee’, ‘eerste’</p></li>
+<li><p>Bijvoeglijke woorden die een hoeveelheid aangeven, bijvoorbeeld ‘meer’, ‘veel’. Ook ‘nog’ wordt tot deze groep van bijvoeglijke woorden gerekend, namelijk dan wanneer het gevolgd kan worden door een telwoord: ‘nog auto’ is dus BvZn”</p></li>
+</ol>
+<p>The query is defined using the macro <em>BvZn</em>, which is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BvZn</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (count(node)=2 and</span>
+<span class="s2">            (  (</span><span class="si">%he</span><span class="s2">adn% and (</span><span class="si">%c</span><span class="s2">oreadjmod</span><span class="si">% o</span><span class="s2">r </span><span class="si">%c</span><span class="s2">orevnwmod</span><span class="si">% o</span><span class="s2">r </span><span class="si">%c</span><span class="s2">orebwmod%))</span>
+
+<span class="s2">            )</span>
+<span class="s2">           )</span>
+<span class="s2">       &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>in which four other macros are used:</p>
+<ul>
+<li><p><strong>headn</strong>: simple head noun:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">headn</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; ( node[@rel=&quot;hd&quot; and @pt=&quot;n&quot;] )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>coreadjmod</strong>: adjective or numerals as modifier (note that ordinal numerals are analysed as adjectives by Alpino):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coreadjmod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (node[@rel=&quot;mod&quot; and ( @pt=&quot;adj&quot; or @pt=&quot;tw&quot;)] and not(node[@rel=&quot;det&quot;])) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>corevnwmod</strong>: indefinite pronouns acting as determiner, excluding genitives such as <em>iemands</em>, and  <em>geen</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">corevnwmod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (node[@rel=&quot;det&quot; and</span>
+<span class="s2">                 (@pt=&quot;tw&quot; or (@pt=&quot;vnw&quot; and @vwtype=&quot;onbep&quot; and @naamval!=&quot;gen&quot; and @lemma!=&quot;geen&quot;))] )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>corbwmod</strong>: basically any modifying adverb that is quantificational in nature (by the macro <strong>qbwlemma</strong> (so far only <em>nog</em>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">corebwmod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (node[@rel=&quot;mod&quot; and @pt=&quot;bw&quot; and %qbwlemma%]) &quot;&quot;&quot;</span>
+
+<span class="n">qbwlemma</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@lemma=&quot;nog&quot; ) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
 </ul>
 </div>
 <div class="section" id="t029-bwondbb">
-<h2>T029: BWondBB<a class="headerlink" href="#t029-bwondbb" title="Permalink to this headline">¶</a></h2>
+<h3>T029: BWondBB<a class="headerlink" href="#t029-bwondbb" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BWondBB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -450,10 +926,20 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Onderwerp + Werkwoord + drie Bijwoordelijke bepalingen.”</p></li>
 </ul>
+<blockquote>
+<div><p>Straigthforward implementation using of the macro <strong>Tarsp_BWOndBB</strong>, which is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_BWOndBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and %Ond% and</span>
+<span class="s2">                   %Tarsp_W% and %Tarsp_B_X_count% = 3 and</span>
+<span class="s2">                   </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t030-bx">
-<h2>T030: BX<a class="headerlink" href="#t030-bx" title="Permalink to this headline">¶</a></h2>
+<h3>T030: BX<a class="headerlink" href="#t030-bx" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BX.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -467,19 +953,73 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;top&quot;</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="o">.//</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">pv</span><span class="o">%</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="o">.//</span><span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;niet&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="o">.//</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;dlink&quot;</span><span class="p">])</span> <span class="ow">and</span>
    <span class="p">(</span>
    <span class="p">(</span><span class="n">count</span><span class="p">(</span><span class="o">.//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;du&quot;</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">realnode</span><span class="o">%</span><span class="p">])</span><span class="o">=</span><span class="mi">2</span>  <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">singlewordbw</span><span class="o">%</span><span class="p">]</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[(</span><span class="nd">@pt</span> <span class="ow">or</span> <span class="o">%</span><span class="n">corephrase</span><span class="o">%</span><span class="p">)</span> <span class="p">]])</span><span class="o">=</span><span class="mi">1</span> <span class="p">)</span> <span class="ow">or</span>
-       <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp1</span><span class="o">%</span><span class="p">])</span> <span class="ow">or</span>
-       <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;du&quot;</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">realnode</span><span class="o">%</span><span class="p">])</span><span class="o">=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp1</span><span class="o">%</span><span class="p">]])</span> <span class="ow">or</span>
-       <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp2</span><span class="o">%</span><span class="p">])</span> <span class="ow">or</span>
-       <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;du&quot;</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">realnode</span><span class="o">%</span><span class="p">])</span><span class="o">=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp2</span><span class="o">%</span><span class="p">]])</span>
+   <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp1</span><span class="o">%</span><span class="p">])</span> <span class="ow">or</span>
+   <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;du&quot;</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">realnode</span><span class="o">%</span><span class="p">])</span><span class="o">=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp1</span><span class="o">%</span><span class="p">]])</span> <span class="ow">or</span>
+   <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp2</span><span class="o">%</span><span class="p">])</span> <span class="ow">or</span>
+   <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;du&quot;</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">realnode</span><span class="o">%</span><span class="p">])</span><span class="o">=</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">bxnp2</span><span class="o">%</span><span class="p">]])</span>
    <span class="p">))</span> <span class="ow">or</span> <span class="o">%</span><span class="n">Tarsp_bnonfin</span><span class="o">%</span>
-      <span class="p">]</span>
+  <span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<p>Explanation: Alpino cannot deal very well with such structures. If there are additional interjections or interpunction signs, Alpino often creates additional structure (with nodes with category <em>du</em>), which makes formulating the query not easy. Furthermore, the X-part of BX can be a full constituent consisting of multiple words, so simple conditions on the number of words will not work here. Two cases are distinguished:</p>
+<ul>
+<li><p>Case 1: a match is found with a node with <em>cat</em> = <em>top</em> that does not contain a finite verb (<strong>pv</strong>) nor the word <em>niet</em> (<em>niet</em> is covered by a different language measure), and that does not contain at any depth a node with relation <em>dlink</em>: if such a node is present a full phrase or clause is present as well. If these conditions are met, several subcases are distinguished one of which must evaluate to True:</p>
+<blockquote>
+<div><ul>
+<li><p>there must be exactly one  node anywhere in the structure with <em>cat</em> = <em>du</em>, containing exactly 2 realnodes (macro <strong>realnode</strong>), one of which is a single adverb (macro <strong>singlewordbw</strong>, see below)* and the other is a single word or a <strong>corephrase</strong>.  (example: <em>daar auto</em>), The macro <strong>corephrase</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">corephrase</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;np&quot; or @cat=&quot;pp&quot; or @cat=&quot;advp&quot; or @cat=&quot;ap&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>there is a child node that meets the requirements of the macro <strong>bxnp1</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bxnp1</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;np&quot; and count(node)=2 and</span>
+<span class="s2">            node[@rel=&quot;hd&quot; and @pt=&quot;ww&quot;] and</span>
+<span class="s2">            node[@rel=&quot;mod&quot; and @pt])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>i.e. a NP that contains a verb as a head and a word that modifies it, and nothing else (example: <em>even pakken .</em>).</p>
+</li>
+<li><p>there is  node with <em>cat</em> = <em>du</em> that contains exactly one  <strong>realnode</strong> that meets the requirements of the macro <strong>bxnp1</strong></p></li>
+<li><p>there is a child node that meets the requirements of the macro <strong>bxnp2</strong>, i.e. a noun phrase consisting of a head and a single word  modifier, and nothing else (example: <em>die hier</em>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bxnp2</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;np&quot; and count(node)=2 and node[@rel=&quot;hd&quot;] and node[@rel=&quot;mod&quot; and </span><span class="si">%s</span><span class="s2">inglewordbw%])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>there is  node with <em>cat</em> = <em>du</em> that contains exactly one  <strong>realnode</strong> that meets the requirements of the macro <strong>bxnp2</strong></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Case 2: the node meets the requirements of the macro <strong>Tarsp_bnonfin</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_bnonfin</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@cat=&quot;inf&quot; or @cat=&quot;ppart&quot;) and</span>
+<span class="s2">                    @rel=&quot;vc&quot; and</span>
+<span class="s2">                    parent::node[@cat=&quot;smain&quot; and count(node)=1] and</span>
+<span class="s2">                    node[%Tarsp_B%] and node[@pt=&quot;ww&quot; and @rel=&quot;hd&quot;] and</span>
+<span class="s2">                    count(node[</span><span class="si">%r</span><span class="s2">ealcomplormod%])=1 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This covers cases where a nonfinite verbal complement is the only child of an <em>smain</em> category and contains only a head verb and an adverbial modifier (defined by macro <strong>Tarsp_B</strong>, see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>). Such structures can only arise after correction throgh the <em>smallclauses</em> module. (See :ref: <cite>smallclauses</cite>).</p>
+</li>
+</ul>
+<p>The macro <strong>singlewordbw</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singlewordbw</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@pt=&quot;bw&quot; or %Rpronoun</span><span class="si">% o</span><span class="s2">r %adjadv%)&quot;&quot;&quot;</span>
+<span class="n">adjadv</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@pt=&#39;adj&#39; and (@lemma=&#39;wel&#39;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The macro <strong>Rpronoun</strong> simply lists all R-pronouns in a disjunction, and the <strong>adjadv</strong> macro is intended for words that are adverbs but analysed by Alpino (in some cases) as an adjective. So far, we only encountered this for <em>wel</em> (or was the <strong>adjoradv</strong> macro intended here?.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Schlichting</strong>: “Bijwoordelijke bepaling + een ander Zinsdeel. Dit andere Zinsdeel kan zijn een W, een VC of een B. BW, BVC en BB staan namelijk niet apart op de profielkaart. In de praktijk worden hier ook zinnen gescoord met een B en een ander zinsdeel waarvan men niet weet of het een onderwerp of een VC is. De zin ‘die ook’ bijvoorbeeld, kan betekenen ‘die moet ook’ of ‘die moet je ook daar doen’. Zulke twijfelgevallen kunenn we hier dus ook scoren.”</dt><dd><ul>
+<li><p>Basically covered. if noun or pronoun precedes the adverb SASTA analyses the utterance as a <em>OndB</em>, not as a <em>BX</em>. That corresponded best to the actual practice in the annotated data received.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
 </div>
 <div class="section" id="t031-c">
-<h2>T031: C<a class="headerlink" href="#t031-c" title="Permalink to this headline">¶</a></h2>
+<h3>T031: C<a class="headerlink" href="#t031-c" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: C .</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -490,10 +1030,17 @@
 <li><p><strong>Page</strong>: 43;44</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: “Complement. Een aanvulling van het gezegde. Het Complement kan zijn:</p></li>
 </ul>
+<ol class="arabic simple">
+<li><p>Naamwoordelijk deel van het gezegde. Het naamwoordelijk gezegde bestaat uit een koppelwerkwoord en (meestal) een zelfstandig naamwoord of bijvoeglijk naamwoord. Voorbeelden Zij is <em>mijn zusje</em>, Ben je <em>moe</em>, Dat is <em>van hem</em></p></li>
+<li><p>Bepaling van gesteldheid. Deze zegt iets van het werkwoord en van het lijdend voorwerp of het onderwerp. De bepaling van gesteldheid wordt ook wel ‘dubbelverbonden bepaling’ genoemd. Voorbeelden: Die ga ik <em>groen</em> kleuren, Dat vind ik <em>lekker</em>, hij heeft het <em>kapot</em> gemaakt, ik kan dat <em>alleen</em></p></li>
+</ol>
+<p>Bij de analyse worden Voorwerpen en Complementen alle twee ‘VC’ genoemd.
+“</p>
 </div>
 <div class="section" id="t032-de">
-<h2>T032: de<a class="headerlink" href="#t032-de" title="Permalink to this headline">¶</a></h2>
+<h3>T032: de<a class="headerlink" href="#t032-de" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: de.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -508,10 +1055,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Bepaald lidwoord + enkelvoudig mannelijk of vrouwelijk Zelfstandig naamwoord of meervoudig Zelfstandig naamwoord. De constructies ‘in de mand’ en ‘naar het ziekenhuis’ worden gescoord bij VzBepZn èn bij ‘de’.” Covered.</p></li>
 </ul>
 </div>
 <div class="section" id="t033-die-dezezn">
-<h2>T033: die/dezeZn<a class="headerlink" href="#t033-die-dezezn" title="Permalink to this headline">¶</a></h2>
+<h3>T033: die/dezeZn<a class="headerlink" href="#t033-die-dezezn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: die/dezeZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -527,9 +1075,13 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Aanwijzend Voornaamwoord + Zelfstandig naamwoord in enkelvoud of meervoud”. Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t034-dit-datzn">
-<h2>T034: dit/datZn<a class="headerlink" href="#t034-dit-datzn" title="Permalink to this headline">¶</a></h2>
+<h3>T034: dit/datZn<a class="headerlink" href="#t034-dit-datzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: dit/datZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -545,9 +1097,13 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Aanwijzend Voornaamwoord + onzijdig Zelfstandig naamwoord. Ook onjuist gebruik mag gescoord worden.” Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t035-een">
-<h2>T035: een<a class="headerlink" href="#t035-een" title="Permalink to this headline">¶</a></h2>
+<h3>T035: een<a class="headerlink" href="#t035-een" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: een.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -563,9 +1119,14 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Onbepaald lidwoord + Zelfstandig naamwoord. Ook het onbepaalde lidwoord + Bijvoeglijke woord, gebruikt als Zelfstandig naamwoord, wordt hier gescoord, bijvoorbeeld ‘een andere’.”</p></li>
+</ul>
+<p><strong>Remark</strong> Substantivised adjectives are not covered yet.</p>
 </div>
 <div class="section" id="t036-en">
-<h2>T036: en<a class="headerlink" href="#t036-en" title="Permalink to this headline">¶</a></h2>
+<h3>T036: en<a class="headerlink" href="#t036-en" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: en.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -576,14 +1137,18 @@
 <li><p><strong>Page</strong>: 77</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vg&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;en&quot;</span> <span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vg&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;en&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;dlink&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<p>This query is self-explanatory. The condition on <em>rel</em> excluded <em>en</em> en conjunctions.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Het verbindingswoord ‘en’ wordt in deze fase gebruik om een zinsdeel of een zin te introduceren. In fase VI wordt ‘en’ gebruikt om twee hoofdzinnen met elkaar te verbinden.”</p></li>
+</ul>
 </div>
 <div class="section" id="t037-er">
-<h2>T037: er<a class="headerlink" href="#t037-er" title="Permalink to this headline">¶</a></h2>
+<h3>T037: er<a class="headerlink" href="#t037-er" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: er.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -599,9 +1164,13 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory. Note that the condition formulated in terms of the atribute <em>lemma</em> ensures that also variants of <em>er</em> such as <em>Er</em>, <em>d’r</em> and even <em>der</em> can be dealt with.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Dit ‘er’ heeft slechts in enkele gevallen het karakter van een voornaamwoord. Het kan als zinsdeel de functie hebben van een bijwoordelijke bepaling: ‘zij komt er wel’, ‘ik heb er nog drie’, of van een onderwerp, bv. In : ‘er stond een plant voor het raam’. Zo’n zin kan dan twee onderwerpen hebben (‘er’ is dan een zgn. plaatsonderwerp, het andere onderwerp is dan het getalsonderwerp, dat wil zeggen dat dat onderwerp in het meervoud kan komen te staan: ‘er staat een kind’, ‘er staan twee kinderen’”</p></li>
+</ul>
 </div>
 <div class="section" id="t038-geen-x">
-<h2>T038: geen X<a class="headerlink" href="#t038-geen-x" title="Permalink to this headline">¶</a></h2>
+<h3>T038: geen X<a class="headerlink" href="#t038-geen-x" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: geen X.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -619,9 +1188,14 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “‘geen’ meestal gevolgd door een zelfstandig naamwoord”</p></li>
+<li><p><strong>remark</strong> perhaps the number of nodes should be restricted to 2? Though <em>geen N meer</em> should also be accepted</p></li>
+</ul>
 </div>
 <div class="section" id="t039-he">
-<h2>T039: hè<a class="headerlink" href="#t039-he" title="Permalink to this headline">¶</a></h2>
+<h3>T039: hè<a class="headerlink" href="#t039-he" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hè.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -637,9 +1211,13 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory, but it is perhaps too broad. Also occurrences of <em>hè</em> at the beginning of an utterance will also be scored now.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “de naklank ‘hè’ in de betekenis van ‘vind je niet?’ of ‘dat vind je toch ook?’ maakt de voorafgaande uiting vragend.”</p></li>
+</ul>
 </div>
 <div class="section" id="t040-hem">
-<h2>T040: hem<a class="headerlink" href="#t040-hem" title="Permalink to this headline">¶</a></h2>
+<h3>T040: hem<a class="headerlink" href="#t040-hem" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hem.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -650,14 +1228,18 @@
 <li><p><strong>Page</strong>: 82</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@word</span><span class="o">=</span><span class="s2">&quot;hem&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;hem&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory. It is crucial that the formulation is in terms of <em>lemma</em> (and not <em>word</em>), otherwise we will miss cases where the word is written with an initial capital (<em>Hem</em>) and reduced forms (<em>‘m</em>).</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Het persoonlijk voornaamwoord ‘hem’, gebruikt als voorwerp.”. Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t041-het">
-<h2>T041: het<a class="headerlink" href="#t041-het" title="Permalink to this headline">¶</a></h2>
+<h3>T041: het<a class="headerlink" href="#t041-het" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: het .</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -673,9 +1255,13 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory. The condition that the <em>pt</em> is equal to <em>vnw</em> excludes occurrences of <em>het</em> as an article (because then <em>pt</em> = <em>lid</em>). The check on the lemma form allows also reduced forms (<em>‘t) and occurerences where the word conatins capital characters (e.g. *Het</em>).</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” Persoonlijk voornaamwoord ‘het, onder andere als lijdend voorwerp en als onderwerp.” Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t042-hetzn">
-<h2>T042: hetZn<a class="headerlink" href="#t042-hetzn" title="Permalink to this headline">¶</a></h2>
+<h3>T042: hetZn<a class="headerlink" href="#t042-hetzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hetZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -692,10 +1278,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Bepaald lidwoord + onzijdig Zelfstandig naamwoord. Ook onjuist gebruik mag gescoord worden. De constructie ‘naar het strand’ wordt gescoord bij VzbepZn èn bij hetZn.”</p></li>
 </ul>
 </div>
 <div class="section" id="t043-hij">
-<h2>T043: hij<a class="headerlink" href="#t043-hij" title="Permalink to this headline">¶</a></h2>
+<h3>T043: hij<a class="headerlink" href="#t043-hij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -711,9 +1298,13 @@
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory. The condition formulated in ters of <em>lemma</em> allows reduced forms (<em>ie</em>, even <em>tie</em> and <em>-ie</em>) and occurrences with capital letters (<em>Hij</em>)</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “‘hij’ en ‘ie’ worden op de profielkaart beide bij ‘hij’ gescoord. ‘ie’ komt vaker voor dan ‘hij’ in deze fase.”</p></li>
+</ul>
 </div>
 <div class="section" id="t044-hww-i">
-<h2>T044: Hww i<a class="headerlink" href="#t044-hww-i" title="Permalink to this headline">¶</a></h2>
+<h3>T044: Hww i<a class="headerlink" href="#t044-hww-i" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Hww i.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -729,9 +1320,49 @@
 </div>
 </li>
 </ul>
+<p>The macro <strong>Tarsp_Hwwi</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Hwwi</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(( @pt=&quot;ww&quot; and @rel=&quot;hd&quot; and @wvorm=&quot;pv&quot; and</span>
+<span class="s2">                   %Tarsp_hww% and</span>
+<span class="s2">                   ((parent::node[node[@cat=&quot;inf&quot;and @rel=&quot;vc&quot;]]) or</span>
+<span class="s2">                    (parent::node[node[@pt=&quot;ww&quot; and @rel=&quot;vc&quot; and @wvorm=&quot;inf&quot;]])</span>
+<span class="s2">                   )</span>
+<span class="s2">                  ) or</span>
+<span class="s2">                  </span><span class="si">%r</span><span class="s2">obusthwwi%</span>
+<span class="s2">                )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation:</p>
+<p>The core case can be described as follows:</p>
+<ul class="simple">
+<li><p>We look for a finite verb acting as a head</p></li>
+<li><p>that is a auxiliary verb (macro <strong>Tarsp_hww</strong>)</p></li>
+<li><p>and cooccurs with a verbal complement (<em>rel</em> = <em>vc</em>) that is either an infinitval phrase (<em>cat = *inf</em>) or a bare infinitive (<em>wvorm</em> = <em>inf</em>)</p></li>
+</ul>
+<p>There is also a second case, for robustness (i.e. if Alpino misanalysed), with the macro <strong>robusthwwi</strong>, defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robusthwwi</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;top&quot; and</span>
+<span class="s2">                  .//node[@pt=&quot;ww&quot; and %Tarsp_hww% and @wvorm=&quot;pv&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)] and</span>
+<span class="s2">                  .//node[@pt=&quot;ww&quot; and @wvorm=&quot;inf&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)]</span>
+<span class="s2">                 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This macro searches for a misanalysed (<em>rel</em> equal to <em>–</em> or <em>dp</em>) finite auxiliary verb anywhere in the structure, in combination with a misanalysed infinitive verb anywhere in the structure.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Hulpwerkwoord gevolgd door een infinitief oftewel het hele werkwoord. De volgende werkwoorden rekenen we tot de hulpwerkwoorden; enkele worden verschillende malen genoemd:</p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>Hebben, zijn, zullen (hulpww van tijd|)</p></li>
+<li><p>Gaan, komen, zijn, blijven, zitten, liggen lopen, staan (aspect)</p></li>
+<li><p>Worden, zijn (lijdende vorm)</p></li>
+<li><p>Kunnen, zullen, mogen, moeten, willen, laten, hoeven, (be)horen (modaliteit)</p></li>
+<li><p>Doen en laten (causaliteit)</p></li>
+<li><p>Doen (omschrijving)</p></li>
+</ol>
+<p>De hulpwerkwoorden die gevolgd worden door een infinitief worden niet gescoord bij HwwZ, Stam of Stam+t”</p>
+<p><strong>Remark</strong>: the auxiliary verbs that take <em>te</em> plus infinitive are not covered yet
+<strong>Remark</strong>: should we count <em>zitten</em>, <em>staan</em>, <em>liggen</em>, etc.  as HwwZ when not followed by infinitive or <em>te</em> + infinitive?</p>
 </div>
 <div class="section" id="t045-hww-vd">
-<h2>T045: Hww Vd<a class="headerlink" href="#t045-hww-vd" title="Permalink to this headline">¶</a></h2>
+<h3>T045: Hww Vd<a class="headerlink" href="#t045-hww-vd" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Hww Vd.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -749,10 +1380,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: “Hulpwerkwoord gevolgd door het Voltooid deelwoord. Hulpwerkwoord + Voltooid deelwoord komt voor bij de voltooide toijd (‘jij hebt gemaakt’). het Voltooid deelwoord wordt apart bij de Woordstructuur gescoord. ook voltooid verleden tijd (‘jij had gemaakt’) kan hier gescoord worden. dan wordt eveneens bij Verleden tijd en bij Voltooid deelwoord gescoord. het hulpwerkwoord wordt niet gescoord bij Woordstructuur.”</p></li>
 </ul>
 </div>
 <div class="section" id="t046-hwwz">
-<h2>T046: HwwZ<a class="headerlink" href="#t046-hwwz" title="Permalink to this headline">¶</a></h2>
+<h3>T046: HwwZ<a class="headerlink" href="#t046-hwwz" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: HwwZ.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -767,10 +1399,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t047-ik">
-<h2>T047: ik<a class="headerlink" href="#t047-ik" title="Permalink to this headline">¶</a></h2>
+<h3>T047: ik<a class="headerlink" href="#t047-ik" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: ik.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -785,10 +1418,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t048-into">
-<h2>T048: Into<a class="headerlink" href="#t048-into" title="Permalink to this headline">¶</a></h2>
+<h3>T048: Into<a class="headerlink" href="#t048-into" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Into.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -799,10 +1433,11 @@
 <li><p><strong>Page</strong>: 59</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t049-inv">
-<h2>T049: Inv<a class="headerlink" href="#t049-inv" title="Permalink to this headline">¶</a></h2>
+<h3>T049: Inv<a class="headerlink" href="#t049-inv" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Inv.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -821,10 +1456,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t050-jij">
-<h2>T050: jij<a class="headerlink" href="#t050-jij" title="Permalink to this headline">¶</a></h2>
+<h3>T050: jij<a class="headerlink" href="#t050-jij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: jij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -839,10 +1475,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t051-jou">
-<h2>T051: jou<a class="headerlink" href="#t051-jou" title="Permalink to this headline">¶</a></h2>
+<h3>T051: jou<a class="headerlink" href="#t051-jou" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: jou.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -857,10 +1494,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t052-kop">
-<h2>T052: Kop<a class="headerlink" href="#t052-kop" title="Permalink to this headline">¶</a></h2>
+<h3>T052: Kop<a class="headerlink" href="#t052-kop" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Kop.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -875,10 +1513,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t053-maar">
-<h2>T053: maar<a class="headerlink" href="#t053-maar" title="Permalink to this headline">¶</a></h2>
+<h3>T053: maar<a class="headerlink" href="#t053-maar" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: maar.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -896,10 +1535,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t054-sv1">
-<h2>T054: Sv1<a class="headerlink" href="#t054-sv1" title="Permalink to this headline">¶</a></h2>
+<h3>T054: Sv1<a class="headerlink" href="#t054-sv1" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Sv1.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -914,10 +1554,11 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t055-mededelende-zin">
-<h2>T055: Mededelende Zin<a class="headerlink" href="#t055-mededelende-zin" title="Permalink to this headline">¶</a></h2>
+<h3>T055: Mededelende Zin<a class="headerlink" href="#t055-mededelende-zin" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Mededelende Zin.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -931,7 +1572,7 @@
 </ul>
 </div>
 <div class="section" id="t056-mij">
-<h2>T056: mij<a class="headerlink" href="#t056-mij" title="Permalink to this headline">¶</a></h2>
+<h3>T056: mij<a class="headerlink" href="#t056-mij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: mij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -949,7 +1590,7 @@
 </ul>
 </div>
 <div class="section" id="t057-mvtt">
-<h2>T057: MvTT<a class="headerlink" href="#t057-mvtt" title="Permalink to this headline">¶</a></h2>
+<h3>T057: MvTT<a class="headerlink" href="#t057-mvtt" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: MvTT.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -967,7 +1608,7 @@
 </ul>
 </div>
 <div class="section" id="t058-mvzn">
-<h2>T058: MvZn<a class="headerlink" href="#t058-mvzn" title="Permalink to this headline">¶</a></h2>
+<h3>T058: MvZn<a class="headerlink" href="#t058-mvzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: MvZn.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -985,7 +1626,7 @@
 </ul>
 </div>
 <div class="section" id="t059-nabep">
-<h2>T059: Nabep<a class="headerlink" href="#t059-nabep" title="Permalink to this headline">¶</a></h2>
+<h3>T059: Nabep<a class="headerlink" href="#t059-nabep" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Nabep.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1003,7 +1644,7 @@
 </ul>
 </div>
 <div class="section" id="t060-nevens">
-<h2>T060: Nevens<a class="headerlink" href="#t060-nevens" title="Permalink to this headline">¶</a></h2>
+<h3>T060: Nevens<a class="headerlink" href="#t060-nevens" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Nevens.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1021,7 +1662,7 @@
 </ul>
 </div>
 <div class="section" id="t061-nevenschikkende">
-<h2>T061: Nevenschikkende<a class="headerlink" href="#t061-nevenschikkende" title="Permalink to this headline">¶</a></h2>
+<h3>T061: Nevenschikkende<a class="headerlink" href="#t061-nevenschikkende" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Nevenschikkende.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1035,7 +1676,7 @@
 </ul>
 </div>
 <div class="section" id="t062-ombep">
-<h2>T062: Ombep<a class="headerlink" href="#t062-ombep" title="Permalink to this headline">¶</a></h2>
+<h3>T062: Ombep<a class="headerlink" href="#t062-ombep" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Ombep.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1049,7 +1690,7 @@
 </ul>
 </div>
 <div class="section" id="t063-ond">
-<h2>T063: Ond<a class="headerlink" href="#t063-ond" title="Permalink to this headline">¶</a></h2>
+<span id="id5"></span><h3>T063: Ond<a class="headerlink" href="#t063-ond" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ond.</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1060,17 +1701,33 @@
 <li><p><strong>Page</strong>: 41</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@pt</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="p">)</span> <span class="ow">or</span>
-   <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;er&quot;</span> <span class="ow">and</span> <span class="o">../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="ow">and</span> <span class="nd">@begin</span><span class="o">&gt;=../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;er&quot;</span><span class="p">]</span><span class="o">/</span><span class="nd">@end</span><span class="p">])</span> <span class="ow">or</span>
-   <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;er&quot;</span> <span class="ow">and</span> <span class="o">../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="nd">@pt</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="nd">@cat</span><span class="p">)])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">FullOnd</span><span class="o">%</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p>]</p>
+<p>Here, <strong>FullOnd</strong> is defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;((%subject% and (@pt or @cat) ) or %erx%)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>where <strong>subject</strong> and <strong>erx</strong> are defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">subject</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;su&quot;)&quot;&quot;&quot;</span>
+<span class="n">erx</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@rel=&quot;mod&quot; and @lemma=&quot;er&quot; and ../node[@rel=&quot;su&quot; and @begin&gt;=../node[@rel=&quot;mod&quot; and @lemma=&quot;er&quot;]/@end]) or</span>
+<span class="s2">          (@rel=&quot;mod&quot; and @lemma=&quot;er&quot; and ../node[@rel=&quot;su&quot; and not(@pt) and not(@cat)])</span>
+<span class="s2">         )</span>
+<span class="s2">      &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The condition on the presence of <em>pt</em> or <em>cat</em> is present to exclude (empty) subject of infinitives and participle clauses, e.g. in <em>Hij heeft gezwommen</em> <em>hij</em> is an antecedent of an (empty) node acting as the subejct of the past participle <em>gezwommen</em>, and we do not want to include that.</p>
+<p>The <strong>erx</strong> macro is to ensure that so-called <em>expletive er</em> also counts a subject. We implemented this in the following manner. *  <em>er</em> is considered (also) expletive (and thus must count as a subject):</p>
+<ul class="simple">
+<li><p>if it precedes the subject  (as in <strong>er</strong> <em>kwam iemand binnen</em>, or</p></li>
+<li><p>if there is an empty subject, to cover cases such as <em>wie zwom</em> <strong>er</strong>. Note that in <em>wie heeft</em> <strong>er</strong> gezwommen* this <em>er</em> is considered a subject beacuse of the empty subject of the participial clause, which is perhaps not what we want.</p></li>
+</ul>
+<p><strong>Remark</strong>: The condition on the presence of <em>pt</em> or <em>cat</em> incorrectly excludes <em>wie</em> in <em>wie doet dat</em>, <em>wie heeft dat gedaan</em>: <em>wie</em> is a <em>whd</em> an an antecedent to  an index node with grammatical relation <em>su</em> (see e.g. VKLTarsp, sampl 3, utterance 25 <em>weet ik niet</em> <strong>wie</strong> daarin zit. It has no consequences for the scores because <em>Ond</em> is not in the form and because in language measures such as OndWB etc a different definition of subject is used. It probably is better to replace the condition on <em>pt</em> and <em>cat</em> by a condition on the parent node, viz. that it must have as value for the <em>cat</em> attribute one of the values from <em>smain</em>, <em>sv1</em>, or <em>ssub</em> (categories for finite clauses or finite clause bodies).</p>
 </div>
 <div class="section" id="t064-ondb">
-<h2>T064: OndB<a class="headerlink" href="#t064-ondb" title="Permalink to this headline">¶</a></h2>
+<h3>T064: OndB<a class="headerlink" href="#t064-ondb" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1086,9 +1743,16 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond% and</span>
+<span class="s2">                 node[%Tarsp_Basic_B%]  and</span>
+<span class="s2">                 count(node) = 2)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See <span class="xref std std-ref">smallclauses</span> for details.</p>
 </div>
 <div class="section" id="t065-ondbvc">
-<h2>T065: OndBVC<a class="headerlink" href="#t065-ondbvc" title="Permalink to this headline">¶</a></h2>
+<h3>T065: OndBVC<a class="headerlink" href="#t065-ondbvc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndBVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1104,9 +1768,17 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond% and</span>
+<span class="s2">                   node[%Tarsp_Basic_B%]  and</span>
+<span class="s2">                   node[%Tarsp_Basic_VC%]  and</span>
+<span class="s2">                   count(node) = 3) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See <span class="xref std std-ref">smallclauses</span> for details.</p>
 </div>
 <div class="section" id="t066-onderbr">
-<h2>T066: Onderbr<a class="headerlink" href="#t066-onderbr" title="Permalink to this headline">¶</a></h2>
+<h3>T066: Onderbr<a class="headerlink" href="#t066-onderbr" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Onderbr.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1120,7 +1792,7 @@
 </ul>
 </div>
 <div class="section" id="t067-onderschikkend-b">
-<h2>T067: Onderschikkend: B<a class="headerlink" href="#t067-onderschikkend-b" title="Permalink to this headline">¶</a></h2>
+<h3>T067: Onderschikkend: B<a class="headerlink" href="#t067-onderschikkend-b" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderschikkend: B.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1138,7 +1810,7 @@
 </ul>
 </div>
 <div class="section" id="t068-onderschikkend-vc">
-<h2>T068: Onderschikkend: VC<a class="headerlink" href="#t068-onderschikkend-vc" title="Permalink to this headline">¶</a></h2>
+<h3>T068: Onderschikkend: VC<a class="headerlink" href="#t068-onderschikkend-vc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderschikkend: VC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1156,7 +1828,7 @@
 </ul>
 </div>
 <div class="section" id="t069-onderschikkende">
-<h2>T069: Onderschikkende<a class="headerlink" href="#t069-onderschikkende" title="Permalink to this headline">¶</a></h2>
+<h3>T069: Onderschikkende<a class="headerlink" href="#t069-onderschikkende" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderschikkende.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1174,7 +1846,7 @@
 </ul>
 </div>
 <div class="section" id="t070-onderwerpswoordgroep">
-<h2>T070: Onderwerpswoordgroep<a class="headerlink" href="#t070-onderwerpswoordgroep" title="Permalink to this headline">¶</a></h2>
+<h3>T070: Onderwerpswoordgroep<a class="headerlink" href="#t070-onderwerpswoordgroep" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderwerpswoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -1192,7 +1864,7 @@
 </ul>
 </div>
 <div class="section" id="t071-ondvc">
-<h2>T071: OndVC<a class="headerlink" href="#t071-ondvc" title="Permalink to this headline">¶</a></h2>
+<h3>T071: OndVC<a class="headerlink" href="#t071-ondvc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1208,9 +1880,22 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond% and</span>
+<span class="s2">                   node[%Tarsp_Basic_VC%]  and</span>
+<span class="s2">                   count(node) = 2) &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>where:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_BasicVCW</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(node[@pt=&quot;ww&quot; and @rel=&quot;hd&quot;] and</span>
+<span class="s2">                     node[%Tarsp_Basic_VC%] and</span>
+<span class="s2">                     count(</span><span class="si">%f</span><span class="s2">illednode%)=2)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <span class="xref std std-ref">smallclauses</span> for details.</p>
 </div>
 <div class="section" id="t072-ondw">
-<h2>T072: OndW<a class="headerlink" href="#t072-ondw" title="Permalink to this headline">¶</a></h2>
+<h3>T072: OndW<a class="headerlink" href="#t072-ondw" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndW.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1226,9 +1911,22 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndW</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                %Ond% and</span>
+<span class="s2">                (%Tarsp_W</span><span class="si">%  o</span><span class="s2">r node[%Tarsp_onlyWinVC%]) and</span>
+<span class="s2">                </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 0 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<p>The only special part here is the macro <strong>Tarsp_onlyWinVC</strong>, defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_onlyWinVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;vc&quot; and node[@rel=&quot;hd&quot; and @pt=&quot;ww&quot; and </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 0])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This covers cases in which the predicate is a nonfite verb. See <span class="xref std std-ref">smallclauses</span> for clarification.</p>
 </div>
 <div class="section" id="t073-ondwb">
-<h2>T073: OndWB<a class="headerlink" href="#t073-ondwb" title="Permalink to this headline">¶</a></h2>
+<h3>T073: OndWB<a class="headerlink" href="#t073-ondwb" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1244,9 +1942,18 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                  %Ond% and</span>
+<span class="s2">                  %Tarsp_W% and</span>
+<span class="s2">                  %Tarsp_B_X%  and</span>
+<span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t074-ondwbb">
-<h2>T074: OndWBB<a class="headerlink" href="#t074-ondwbb" title="Permalink to this headline">¶</a></h2>
+<h3>T074: OndWBB<a class="headerlink" href="#t074-ondwbb" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWBB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1262,9 +1969,18 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                   %Ond% and</span>
+<span class="s2">                   %Tarsp_W% and</span>
+<span class="s2">                   %Tarsp_B_X_count% = 2 and</span>
+<span class="s2">                   </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t075-ondwbvc">
-<h2>T075: OndWBVC<a class="headerlink" href="#t075-ondwbvc" title="Permalink to this headline">¶</a></h2>
+<h3>T075: OndWBVC<a class="headerlink" href="#t075-ondwbvc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWBVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1280,9 +1996,19 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                    %Ond% and</span>
+<span class="s2">                    %Tarsp_W% and</span>
+<span class="s2">                    %Tarsp_B_X% and</span>
+<span class="s2">                    %Tarsp_VC_X% and</span>
+<span class="s2">                    </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t076-ondwvc">
-<h2>T076: OndWVC<a class="headerlink" href="#t076-ondwvc" title="Permalink to this headline">¶</a></h2>
+<h3>T076: OndWVC<a class="headerlink" href="#t076-ondwvc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1298,9 +2024,19 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                   %Ond% and</span>
+<span class="s2">                   %Tarsp_W%  and</span>
+<span class="s2">                   %Tarsp_VC_X% and</span>
+<span class="s2">                   </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2 )</span>
+</pre></div>
+</div>
+<p>“”“</p>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t077-ondwvcvc-x">
-<h2>T077: OndWVCVC(X)<a class="headerlink" href="#t077-ondwvcvc-x" title="Permalink to this headline">¶</a></h2>
+<h3>T077: OndWVCVC(X)<a class="headerlink" href="#t077-ondwvcvc-x" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWVCVC(X).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1316,9 +2052,18 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWVCVCX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                      %Ond% and</span>
+<span class="s2">                      %Tarsp_W% and</span>
+<span class="s2">                      %Tarsp_VC_X_count% = 2  and</span>
+<span class="s2">                      </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &lt;= 4 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t078-ov2">
-<h2>T078: Ov2<a class="headerlink" href="#t078-ov2" title="Permalink to this headline">¶</a></h2>
+<h3>T078: Ov2<a class="headerlink" href="#t078-ov2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Ov2.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1332,7 +2077,7 @@
 </ul>
 </div>
 <div class="section" id="t079-ov3">
-<h2>T079: Ov3<a class="headerlink" href="#t079-ov3" title="Permalink to this headline">¶</a></h2>
+<h3>T079: Ov3<a class="headerlink" href="#t079-ov3" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ov3.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1350,7 +2095,7 @@
 </ul>
 </div>
 <div class="section" id="t080-ov7">
-<h2>T080: Ov7<a class="headerlink" href="#t080-ov7" title="Permalink to this headline">¶</a></h2>
+<h3>T080: Ov7<a class="headerlink" href="#t080-ov7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Ov7.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1364,7 +2109,7 @@
 </ul>
 </div>
 <div class="section" id="t081-ovwg7">
-<h2>T081: OvWg7<a class="headerlink" href="#t081-ovwg7" title="Permalink to this headline">¶</a></h2>
+<h3>T081: OvWg7<a class="headerlink" href="#t081-ovwg7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: OvWg7.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1378,7 +2123,7 @@
 </ul>
 </div>
 <div class="section" id="t082-ovverb6">
-<h2>T082: OvVerb6<a class="headerlink" href="#t082-ovverb6" title="Permalink to this headline">¶</a></h2>
+<h3>T082: OvVerb6<a class="headerlink" href="#t082-ovverb6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: OvVerb6.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -1392,7 +2137,7 @@
 </ul>
 </div>
 <div class="section" id="t083-ov4">
-<h2>T083: Ov4<a class="headerlink" href="#t083-ov4" title="Permalink to this headline">¶</a></h2>
+<h3>T083: Ov4<a class="headerlink" href="#t083-ov4" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ov4.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1410,7 +2155,7 @@
 </ul>
 </div>
 <div class="section" id="t084-ov5">
-<h2>T084: Ov5<a class="headerlink" href="#t084-ov5" title="Permalink to this headline">¶</a></h2>
+<h3>T084: Ov5<a class="headerlink" href="#t084-ov5" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ov5.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1428,7 +2173,7 @@
 </ul>
 </div>
 <div class="section" id="t085-overige">
-<h2>T085: Overige<a class="headerlink" href="#t085-overige" title="Permalink to this headline">¶</a></h2>
+<h3>T085: Overige<a class="headerlink" href="#t085-overige" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Overige.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1446,7 +2191,7 @@
 </ul>
 </div>
 <div class="section" id="t086-samzn">
-<h2>T086: SamZn<a class="headerlink" href="#t086-samzn" title="Permalink to this headline">¶</a></h2>
+<h3>T086: SamZn<a class="headerlink" href="#t086-samzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: SamZn.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1495,7 +2240,7 @@
 <p>The language measure T086 has been implemented by the Python function getcompounds from the compounds module, which has been described <a class="reference internal" href="lexicons.html#getcompounds-label"><span class="std std-ref">here</span></a>.</p>
 </div>
 <div class="section" id="t087-stam">
-<h2>T087: Stam<a class="headerlink" href="#t087-stam" title="Permalink to this headline">¶</a></h2>
+<h3>T087: Stam<a class="headerlink" href="#t087-stam" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Stam.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1520,7 +2265,7 @@
 </ul>
 </div>
 <div class="section" id="t088-stam-t">
-<h2>T088: Stam+t<a class="headerlink" href="#t088-stam-t" title="Permalink to this headline">¶</a></h2>
+<h3>T088: Stam+t<a class="headerlink" href="#t088-stam-t" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Stam+t.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1542,7 +2287,7 @@
 </ul>
 </div>
 <div class="section" id="t089-sz2">
-<h2>T089: Sz2+<a class="headerlink" href="#t089-sz2" title="Permalink to this headline">¶</a></h2>
+<h3>T089: Sz2+<a class="headerlink" href="#t089-sz2" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Sz2+.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -1563,7 +2308,7 @@
 </ul>
 </div>
 <div class="section" id="t090-sz3">
-<h2>T090: Sz3+<a class="headerlink" href="#t090-sz3" title="Permalink to this headline">¶</a></h2>
+<h3>T090: Sz3+<a class="headerlink" href="#t090-sz3" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Sz3+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1584,7 +2329,7 @@
 </ul>
 </div>
 <div class="section" id="t091-v-lijdend">
-<h2>T091: V (lijdend)<a class="headerlink" href="#t091-v-lijdend" title="Permalink to this headline">¶</a></h2>
+<h3>T091: V (lijdend)<a class="headerlink" href="#t091-v-lijdend" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V (lijdend).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1598,7 +2343,7 @@
 </ul>
 </div>
 <div class="section" id="t092-v-meewerkend">
-<h2>T092: V (meewerkend)<a class="headerlink" href="#t092-v-meewerkend" title="Permalink to this headline">¶</a></h2>
+<h3>T092: V (meewerkend)<a class="headerlink" href="#t092-v-meewerkend" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V (meewerkend).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1612,7 +2357,7 @@
 </ul>
 </div>
 <div class="section" id="t093-v-voorzetsel">
-<h2>T093: V (voorzetsel)<a class="headerlink" href="#t093-v-voorzetsel" title="Permalink to this headline">¶</a></h2>
+<h3>T093: V (voorzetsel)<a class="headerlink" href="#t093-v-voorzetsel" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V (voorzetsel).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1626,7 +2371,7 @@
 </ul>
 </div>
 <div class="section" id="t094-v-u-divers">
-<h2>T094: V.U. Divers<a class="headerlink" href="#t094-v-u-divers" title="Permalink to this headline">¶</a></h2>
+<h3>T094: V.U. Divers<a class="headerlink" href="#t094-v-u-divers" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Divers.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -1642,7 +2387,7 @@
     <span class="p">(</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;tsw&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;hè&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span> <span class="ow">and</span> <span class="n">number</span><span class="p">(</span><span class="nd">@end</span><span class="p">)</span><span class="o">&lt;=</span><span class="n">number</span><span class="p">(</span><span class="o">../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;nucl&quot;</span><span class="p">]</span><span class="o">/</span><span class="nd">@begin</span><span class="p">))</span> <span class="ow">or</span>
     <span class="p">((</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;au&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;hoepla&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;dag&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;kijk&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;hap&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;aai&quot;</span> <span class="p">)</span> <span class="ow">and</span>
      <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;--&quot;</span> <span class="ow">or</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;sat&quot;</span> <span class="ow">or</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">))</span>
-             <span class="p">)</span> <span class="p">)</span>    <span class="ow">or</span>  <span class="o">%</span><span class="n">Tarsp_kijkVU</span><span class="o">%</span>       <span class="ow">or</span> <span class="o">%</span><span class="n">Tarsp_hehe</span><span class="o">%</span>
+     <span class="p">)</span> <span class="p">)</span>    <span class="ow">or</span>  <span class="o">%</span><span class="n">Tarsp_kijkVU</span><span class="o">%</span>     <span class="ow">or</span> <span class="o">%</span><span class="n">Tarsp_hehe</span><span class="o">%</span>
       <span class="p">]</span>
 </pre></div>
 </div>
@@ -1650,7 +2395,7 @@
 </ul>
 </div>
 <div class="section" id="t095-v-u-soc-aangp">
-<h2>T095: V.U. Soc. AangP<a class="headerlink" href="#t095-v-u-soc-aangp" title="Permalink to this headline">¶</a></h2>
+<h3>T095: V.U. Soc. AangP<a class="headerlink" href="#t095-v-u-soc-aangp" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Soc. AangP.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -1668,7 +2413,7 @@
 </ul>
 </div>
 <div class="section" id="t096-v-u-ster">
-<h2>T096: V.U. Ster<a class="headerlink" href="#t096-v-u-ster" title="Permalink to this headline">¶</a></h2>
+<h3>T096: V.U. Ster<a class="headerlink" href="#t096-v-u-ster" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V.U. Ster.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -1682,7 +2427,7 @@
 </ul>
 </div>
 <div class="section" id="t150-v-u-nee-ja">
-<h2>T150: V.U. Nee/ja<a class="headerlink" href="#t150-v-u-nee-ja" title="Permalink to this headline">¶</a></h2>
+<h3>T150: V.U. Nee/ja<a class="headerlink" href="#t150-v-u-nee-ja" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Nee/ja.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -1700,7 +2445,7 @@
 </ul>
 </div>
 <div class="section" id="t097-vc">
-<h2>T097: VC<a class="headerlink" href="#t097-vc" title="Permalink to this headline">¶</a></h2>
+<span id="id6"></span><h3>T097: VC<a class="headerlink" href="#t097-vc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VC.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -1708,7 +2453,7 @@
 <li><p><strong>Level</strong>: Zc</p></li>
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: no</p></li>
-<li><p><strong>Page</strong>:</p></li>
+<li><p><strong>Page</strong>: 42-44</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">complement</span><span class="o">%</span> <span class="ow">and</span> <span class="n">parent</span><span class="p">::</span><span class="n">node</span><span class="p">[(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;smain&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;sv1&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;ssub&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;inf&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;ppart&quot;</span><span class="p">)</span> <span class="p">]]</span>
@@ -1716,9 +2461,69 @@
 </div>
 </li>
 </ul>
+<p>Here the macro <strong>complement</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">complement</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@rel=&quot;obj1&quot; or @rel=&quot;obj2&quot;) or</span>
+<span class="s2">                 (@rel=&quot;predc&quot; and not(%predcB%)) or</span>
+<span class="s2">                 (@rel=&quot;pobj1&quot; and not(%pobj1B%) ) or</span>
+<span class="s2">                 %verbalcomplement%</span>
+<span class="s2">                )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>So, it covers:</p>
+<ul class="simple">
+<li><p>direct objects (<em>obj1</em>)</p></li>
+<li><p>indirect objects (<em>obj2</em>)</p></li>
+<li><p>predicative complements (<em>predc</em>), at least if they are not predicates that are considered adverbial modifiers in Tarsp (<em>predcB</em>)</p></li>
+<li><p>prepositional complements (<em>pc</em>) if they are not considere adverbial complements in Tarsp(<em>pobj1B</em>)</p></li>
+<li><p>and verbals complements (<strong>verbal complement</strong>).</p></li>
+</ul>
+<p>The latter is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">verbalcomplement</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;vc&quot; and (@cat=&quot;cp&quot; or @cat=&quot;whq&quot; or @cat=&quot;whsub&quot;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>So it excludes nonfinite verbal complements such as <em>inf</em>, <em>teinf</em>, <em>ppart</em>, etc.</p>
+<p>Predicates that cooccur with a transitive verb are considered modifiers in Tarsp. We exclude them by checking for the presenece of direct object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predcB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;predc&quot; and</span>
+<span class="s2">           (@pt=&quot;adj&quot; or @pt=&quot;bw&quot; or @cat=&quot;ap&quot; or @cat=&quot;advp&quot;) and</span>
+<span class="s2">           ../node[@rel=&quot;obj1&quot;]</span>
+<span class="s2">         )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Remark</strong> that fails if the direct object is left out (e.g. by topic drop).</p></li>
+</ul>
+<p>Prepositional complements should be considered modifiers if they cooccur with a verb that can also take locative or directional complements. This has been implemented by <strong>pob1B</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pobj1B</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;pc&quot; and ../node[@rel=&quot;hd&quot; and </span><span class="si">%lo</span><span class="s2">cverb%])&quot;&quot;&quot;</span>
+<span class="n">locverb</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@lemma=&quot;staan&quot; or @lemma=&quot;zitten&quot; or @lemma=&quot;rijden&quot; or @lemma=&quot;vallen&quot; or @lemma=&quot;doen&quot; or @lemma=&quot;gaan&quot; or @lemma=&quot;komen&quot; or @lemma=&quot;zijn&quot;  or </span><span class="si">%lo</span><span class="s2">cmodalverb% )&quot;&quot;&quot;</span>
+
+<span class="n">locmodalverb</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@lemma=&quot;kunnen&quot; or @lemma=&quot;moeten&quot; or @lemma=&quot;hoeven&quot; or @lemma=&quot;willen&quot; or @lemma=&quot;mogen&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Remark</strong> This language measure is not in the form and has not been kept up to date. In particular, it should be investogated to what extent it differs from the macro <strong>Tarsp_VC</strong> used in the composed language measures. See <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a>.</p></li>
+<li><p><strong>Schlichting</strong> discusses several cases “Voorwerpen” and “Complementen” separately:</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>“<strong>Lijdend Voorwerp</strong>. Het lijdend voorwerp kan meestal gevonden worden door een vraag te stellen met ‘wat’ betreffende het onderwerp en het werkwoord van de zin. […] Het lijdend voorwerp van bedrijvende vorm wordt het onderwerp van dezelfde zin in de lijdende vorm.” Covered</p></li>
+<li><p>“<strong>Meewerkend Voorwerp</strong>. Het meewerrkend voorwerp kan bijna altijd voorafgegaan worden door ‘aan’of ‘voor’. Dit ‘voor’ kan altijd vervangen worden door ‘ten behoeve van’. Het meewerkend voorwerp komt niet zo veel voor. het wordt gebruikt bij werkwoorden als ‘geven’ en ‘kopen’, en ‘schrijven’of ‘mededelen’. Covered</p></li>
+<li><p>“<strong>Voorzetselvoorwerp</strong>. Wanneer een werkwoord gebruikt wordt met een vast voorzetselis het zinsdeel dat begin met dat voorzetsel het voorzetselvoorwerp. ook een werkwoordelijke uitdrukking kan gebruikt worden met een voorzetselvoorwerp (<em>een hekel hebben aan</em>).” Covered.</p></li>
+<li><dl class="simple">
+<dt>“<strong>Complement</strong>. Een aanvulling van het gezegde. het complement kan  zijn:</dt><dd><ol class="arabic simple">
+<li><p>naamwoordelijk del van het gezegde. Het naamwoordelijk gezegde bestaat uit een koppelwerkwoord en (meestal) een zelfstandig naamwoord of bijvoeglijk naamwooord.” (maar ook een voorbeeld met een PP wordt gegeven). Covered</p></li>
+<li><p>Bepaling van gesteldheid. Deze zegt iets van het werkword en van het onderwerp of lijdend voorwerp. de bepaling van gesteldheid wordt ook wel ‘sdubbelverbonden bepaling’genoemd.” This covers primary predicates (which Alpino consideres <em>predc</em>) but also <em>secondary predicates</em> (in Alpino: <em>predm</em>, e.g in <em>ik kan dat</em> <strong>alleen</strong>). Mostly covered.</p></li>
+</ol>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>Remark</strong> we do not treat secondary predicates  such as <em>ik kan dat</em> <strong>alleen</strong> as complements, but as adverbial modifiers.</p></li>
+</ul>
 </div>
 <div class="section" id="t098-vcbijzin">
-<h2>T098: Vcbijzin<a class="headerlink" href="#t098-vcbijzin" title="Permalink to this headline">¶</a></h2>
+<h3>T098: Vcbijzin<a class="headerlink" href="#t098-vcbijzin" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vcbijzin.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1736,7 +2541,7 @@
 </ul>
 </div>
 <div class="section" id="t099-vcw">
-<h2>T099: VCW<a class="headerlink" href="#t099-vcw" title="Permalink to this headline">¶</a></h2>
+<h3>T099: VCW<a class="headerlink" href="#t099-vcw" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: VCW.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1750,7 +2555,7 @@
 </ul>
 </div>
 <div class="section" id="t100-vcwondbb">
-<h2>T100: VCWOndBB<a class="headerlink" href="#t100-vcwondbb" title="Permalink to this headline">¶</a></h2>
+<h3>T100: VCWOndBB<a class="headerlink" href="#t100-vcwondbb" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VCWOndBB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1766,9 +2571,18 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VCWOndBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
+<span class="s2">                     %Ond% and</span>
+<span class="s2">                     %Tarsp_W% and</span>
+<span class="s2">                     %Tarsp_B_X_count% = 2 and</span>
+<span class="s2">                     %Tarsp_VC_X% and</span>
+<span class="s2">                     </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="t101-vcwoordgroep">
-<h2>T101: VCWoordgroep<a class="headerlink" href="#t101-vcwoordgroep" title="Permalink to this headline">¶</a></h2>
+<h3>T101: VCWoordgroep<a class="headerlink" href="#t101-vcwoordgroep" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VCWoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -1786,7 +2600,7 @@
 </ul>
 </div>
 <div class="section" id="t102-verb-ov">
-<h2>T102: Verb Ov<a class="headerlink" href="#t102-verb-ov" title="Permalink to this headline">¶</a></h2>
+<h3>T102: Verb Ov<a class="headerlink" href="#t102-verb-ov" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Verb Ov.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -1809,7 +2623,7 @@
 </ul>
 </div>
 <div class="section" id="t103-vergr-trap">
-<h2>T103: Vergr trap<a class="headerlink" href="#t103-vergr-trap" title="Permalink to this headline">¶</a></h2>
+<h3>T103: Vergr trap<a class="headerlink" href="#t103-vergr-trap" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Vergr trap.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1819,11 +2633,16 @@
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 88</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
-<li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong>, but it could be //node[&#64;graad=”comp”]</p></li>
+</ul>
+<p>In the VKLTarsp dataset this only occurs with <em>meer</em>, mostly  in a combination with a negative word (<em>niet meer</em>, <em>nergens meer</em>, <em>geen  … meer</em>), but also  in <em>nog meer kindjes</em>. Should these be included?
+No annotations for this measure occur in the Auris TD and DTD data. The language meausre is absent in [Schlichting 2017].</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Vergrotende trap van het bijvoeglijk naamwoord.”</p></li>
 </ul>
 </div>
 <div class="section" id="t104-verkl">
-<h2>T104: Verkl<a class="headerlink" href="#t104-verkl" title="Permalink to this headline">¶</a></h2>
+<h3>T104: Verkl<a class="headerlink" href="#t104-verkl" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Verkl.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1841,7 +2660,7 @@
 </ul>
 </div>
 <div class="section" id="t105-verl-tijd">
-<h2>T105: Verl Tijd<a class="headerlink" href="#t105-verl-tijd" title="Permalink to this headline">¶</a></h2>
+<h3>T105: Verl Tijd<a class="headerlink" href="#t105-verl-tijd" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Verl Tijd.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1859,7 +2678,7 @@
 </ul>
 </div>
 <div class="section" id="t106-vo-bij">
-<h2>T106: Vo/bij<a class="headerlink" href="#t106-vo-bij" title="Permalink to this headline">¶</a></h2>
+<h3>T106: Vo/bij<a class="headerlink" href="#t106-vo-bij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vo/bij.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1881,7 +2700,7 @@
 </ul>
 </div>
 <div class="section" id="t107-vobij">
-<h2>T107: Vobij<a class="headerlink" href="#t107-vobij" title="Permalink to this headline">¶</a></h2>
+<h3>T107: Vobij<a class="headerlink" href="#t107-vobij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vobij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1899,7 +2718,7 @@
 </ul>
 </div>
 <div class="section" id="t108-volt-dw">
-<h2>T108: Volt dw<a class="headerlink" href="#t108-volt-dw" title="Permalink to this headline">¶</a></h2>
+<h3>T108: Volt dw<a class="headerlink" href="#t108-volt-dw" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Volt dw.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1917,7 +2736,7 @@
 </ul>
 </div>
 <div class="section" id="t109-voltd-fg">
-<h2>T109: Voltd fg<a class="headerlink" href="#t109-voltd-fg" title="Permalink to this headline">¶</a></h2>
+<h3>T109: Voltd fg<a class="headerlink" href="#t109-voltd-fg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Voltd fg.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1931,7 +2750,7 @@
 </ul>
 </div>
 <div class="section" id="t110-vr">
-<h2>T110: Vr<a class="headerlink" href="#t110-vr" title="Permalink to this headline">¶</a></h2>
+<h3>T110: Vr<a class="headerlink" href="#t110-vr" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -1940,16 +2759,17 @@
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: no</p></li>
 <li><p><strong>Page</strong>:</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;whq&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
+<p>This language measure actually does not exist. It has been included and implemented because the code <em>Vr</em> occurs in the Schlichting appendix  (example 20, p. 91, and example 22, p. 92). Example 20 should have been annotated as <em>Vr(XY)</em>, and example 22 as <em>Vr4</em>.</p>
 </div>
 <div class="section" id="t111-vr-xy">
-<h2>T111: Vr(XY)<a class="headerlink" href="#t111-vr-xy" title="Permalink to this headline">¶</a></h2>
+<h3>T111: Vr(XY)<a class="headerlink" href="#t111-vr-xy" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr(XY).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1965,9 +2785,30 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VrXY</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq% and</span>
+<span class="s2">                 node[@rel=&quot;whd&quot;] and</span>
+<span class="s2">                 node[@cat=&quot;sv1&quot; and</span>
+<span class="s2">                      @rel=&quot;body&quot;  and</span>
+<span class="s2">                      </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 1</span>
+<span class="s2">                     ])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul>
+<li><p><strong>Schlichting</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“Vraagwoord (+ een of twee Zinsdelen).”Covered</p></li>
+<li><p>Het Vraagwoord zonder meer, of gevolgd door één Zinsdeel komt niet vaak voor. We vinden meestal Vr + X + Y.” <strong>Not currently covered</strong></p></li>
+<li><p>“‘Wat is dat?’is bij sommige kinderen als Vaste Uitdrukking geleerd. We scoren deze dan bij Stereotiepe Uitdrukkingen”. <strong>Not covered</strong></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
 </div>
 <div class="section" id="t112-vr4">
-<h2>T112: Vr4<a class="headerlink" href="#t112-vr4" title="Permalink to this headline">¶</a></h2>
+<h3>T112: Vr4<a class="headerlink" href="#t112-vr4" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr4.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1982,10 +2823,21 @@
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong> “Vraagwoord + drie Zinsdelen.” Covered.</p></li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Vr4</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq% and</span>
+<span class="s2">                node[@rel=&quot;whd&quot;] and</span>
+<span class="s2">                node[@cat=&quot;sv1&quot; and</span>
+<span class="s2">                     @rel=&quot;body&quot;  and</span>
+<span class="s2">                     </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2</span>
+<span class="s2">                    ])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 </div>
 <div class="section" id="t113-vr5">
-<h2>T113: Vr5+<a class="headerlink" href="#t113-vr5" title="Permalink to this headline">¶</a></h2>
+<h3>T113: Vr5+<a class="headerlink" href="#t113-vr5" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr5+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2001,9 +2853,22 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Vr5plus</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq% and</span>
+<span class="s2">                    node[@rel=&quot;whd&quot;] and</span>
+<span class="s2">                    node[@cat=&quot;sv1&quot; and</span>
+<span class="s2">                         @rel=&quot;body&quot;  and</span>
+<span class="s2">                         </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &gt; 2</span>
+<span class="s2">                        ])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Vraagzinnen die beginnen met een vraagwoord en behalve dat Vraagwoord nog vier of meer Zinsdelen hebben.” Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t114-vzb">
-<h2>T114: VzB<a class="headerlink" href="#t114-vzb" title="Permalink to this headline">¶</a></h2>
+<h3>T114: VzB<a class="headerlink" href="#t114-vzb" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VzB.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2024,7 +2889,7 @@
 </ul>
 </div>
 <div class="section" id="t115-vzbepbvzn">
-<h2>T115: VzBepBvZn<a class="headerlink" href="#t115-vzbepbvzn" title="Permalink to this headline">¶</a></h2>
+<h3>T115: VzBepBvZn<a class="headerlink" href="#t115-vzbepbvzn" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: VzBepBvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2038,7 +2903,7 @@
 </ul>
 </div>
 <div class="section" id="t116-vzbepzn">
-<h2>T116: VzBepZn<a class="headerlink" href="#t116-vzbepzn" title="Permalink to this headline">¶</a></h2>
+<h3>T116: VzBepZn<a class="headerlink" href="#t116-vzbepzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VzBepZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2056,7 +2921,7 @@
 </ul>
 </div>
 <div class="section" id="t117-vzn">
-<h2>T117: VzN<a class="headerlink" href="#t117-vzn" title="Permalink to this headline">¶</a></h2>
+<h3>T117: VzN<a class="headerlink" href="#t117-vzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VzN.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2074,7 +2939,7 @@
 </ul>
 </div>
 <div class="section" id="t118-vzznaz">
-<h2>T118: VzZnAz<a class="headerlink" href="#t118-vzznaz" title="Permalink to this headline">¶</a></h2>
+<h3>T118: VzZnAz<a class="headerlink" href="#t118-vzznaz" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: VzZnAz.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2088,7 +2953,7 @@
 </ul>
 </div>
 <div class="section" id="t119-s1w">
-<h2>T119: S1W<a class="headerlink" href="#t119-s1w" title="Permalink to this headline">¶</a></h2>
+<h3>T119: S1W<a class="headerlink" href="#t119-s1w" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: S1W.</p></li>
 <li><p><strong>Category</strong>: Eenwoordzin</p></li>
@@ -2106,7 +2971,7 @@
 </ul>
 </div>
 <div class="section" id="t120-w">
-<h2>T120: W<a class="headerlink" href="#t120-w" title="Permalink to this headline">¶</a></h2>
+<h3>T120: W<a class="headerlink" href="#t120-w" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: W.</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -2124,7 +2989,7 @@
 </ul>
 </div>
 <div class="section" id="t121-w-x">
-<h2>T121: W(X)<a class="headerlink" href="#t121-w-x" title="Permalink to this headline">¶</a></h2>
+<h3>T121: W(X)<a class="headerlink" href="#t121-w-x" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: W(X).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2140,9 +3005,22 @@
 </div>
 </li>
 </ul>
+<p>It has been implemented by means of a Python function <strong>wx</strong>.
+&#64;&#64;add description&#64;&#64;</p>
+<p>In a later stage  a query with macros was defined for it, but  the Python function has not been replaced yet.</p>
+<p>The query has a straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wx</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<span class="s2">         </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &lt;= 1)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Remark</strong> Experiment with replaceing the wx function by the query with macros</p></li>
+<li><p><strong>Schlichting</strong> “de Gebiedende Wijszinnen bestaan in deze fase uit één of twee zinsdelen.” Covered</p></li>
+</ul>
 </div>
 <div class="section" id="t122-pv-loos">
-<h2>T122: PV-loos<a class="headerlink" href="#t122-pv-loos" title="Permalink to this headline">¶</a></h2>
+<h3>T122: PV-loos<a class="headerlink" href="#t122-pv-loos" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PV-loos.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -2160,7 +3038,7 @@
 </ul>
 </div>
 <div class="section" id="t123-waarschijnlijk-fout-geanalyseerde-nevenschikking">
-<h2>T123: waarschijnlijk fout geanalyseerde nevenschikking<a class="headerlink" href="#t123-waarschijnlijk-fout-geanalyseerde-nevenschikking" title="Permalink to this headline">¶</a></h2>
+<h3>T123: waarschijnlijk fout geanalyseerde nevenschikking<a class="headerlink" href="#t123-waarschijnlijk-fout-geanalyseerde-nevenschikking" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: waarschijnlijk fout geanalyseerde nevenschikking.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -2174,7 +3052,7 @@
 </ul>
 </div>
 <div class="section" id="t124-want">
-<h2>T124: want<a class="headerlink" href="#t124-want" title="Permalink to this headline">¶</a></h2>
+<h3>T124: want<a class="headerlink" href="#t124-want" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: want.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -2192,7 +3070,7 @@
 </ul>
 </div>
 <div class="section" id="t125-wbvc">
-<h2>T125: WBVC<a class="headerlink" href="#t125-wbvc" title="Permalink to this headline">¶</a></h2>
+<h3>T125: WBVC<a class="headerlink" href="#t125-wbvc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WBVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2208,9 +3086,21 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative%  and</span>
+<span class="s2">                 %Tarsp_W% and</span>
+<span class="s2">                 %Tarsp_B_X% and</span>
+<span class="s2">                 %Tarsp_VC_X% and</span>
+<span class="s2">                 </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2 )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Werkwoord + Bijwoordelijke bepaling + Voorwerp of Complement.” Covered</p></li>
+</ul>
 </div>
 <div class="section" id="t126-wdeel">
-<h2>T126: Wdeel<a class="headerlink" href="#t126-wdeel" title="Permalink to this headline">¶</a></h2>
+<h3>T126: Wdeel<a class="headerlink" href="#t126-wdeel" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Wdeel.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2228,7 +3118,7 @@
 </ul>
 </div>
 <div class="section" id="t127-werkwoordswoordgroep">
-<h2>T127: Werkwoordswoordgroep<a class="headerlink" href="#t127-werkwoordswoordgroep" title="Permalink to this headline">¶</a></h2>
+<h3>T127: Werkwoordswoordgroep<a class="headerlink" href="#t127-werkwoordswoordgroep" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Werkwoordswoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -2246,7 +3136,7 @@
 </ul>
 </div>
 <div class="section" id="t128-wij">
-<h2>T128: wij<a class="headerlink" href="#t128-wij" title="Permalink to this headline">¶</a></h2>
+<h3>T128: wij<a class="headerlink" href="#t128-wij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: wij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -2264,7 +3154,7 @@
 </ul>
 </div>
 <div class="section" id="t129-wond-x">
-<h2>T129: Wond(X)<a class="headerlink" href="#t129-wond-x" title="Permalink to this headline">¶</a></h2>
+<h3>T129: Wond(X)<a class="headerlink" href="#t129-wond-x" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Wond(X).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2280,9 +3170,22 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOndX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery% and</span>
+<span class="s2">                  not(%basicimperative%) and</span>
+<span class="s2">                  %topcontainsquestionmark% and</span>
+<span class="s2">                  %Tarsp_W% and</span>
+<span class="s2">                  %Ond% and</span>
+<span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &lt;= 2)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Werkwoord + Onderwerp, meestal gevolgd door een derde zinsdeel.” Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t130-wond4">
-<h2>T130: WOnd4<a class="headerlink" href="#t130-wond4" title="Permalink to this headline">¶</a></h2>
+<h3>T130: WOnd4<a class="headerlink" href="#t130-wond4" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WOnd4.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2298,9 +3201,22 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOnd4</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery% and</span>
+<span class="s2">                  not(%basicimperative%) and</span>
+<span class="s2">                  %topcontainsquestionmark% and</span>
+<span class="s2">                  %Tarsp_W% and</span>
+<span class="s2">                  %Ond% and</span>
+<span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Werkwoord + Onderwerp + twee Zinsdelen.” Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t131-wond5">
-<h2>T131: WOnd5+<a class="headerlink" href="#t131-wond5" title="Permalink to this headline">¶</a></h2>
+<h3>T131: WOnd5+<a class="headerlink" href="#t131-wond5" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WOnd5+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2316,9 +3232,22 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOnd5plus</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery% and</span>
+<span class="s2">                      not(%basicimperative%) and</span>
+<span class="s2">                      %topcontainsquestionmark% and</span>
+<span class="s2">                      %Tarsp_W% and</span>
+<span class="s2">                      %Ond% and</span>
+<span class="s2">                      </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% =4)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Vraagzinnen die beginnen met een Werkwoord en een Onderwerp en daarbij nog drie of meer Zinsdelen hebben.” Covered.</p></li>
+</ul>
 </div>
 <div class="section" id="t132-woordgroep-onderstrepen">
-<h2>T132: woordgroep(onderstrepen)<a class="headerlink" href="#t132-woordgroep-onderstrepen" title="Permalink to this headline">¶</a></h2>
+<h3>T132: woordgroep(onderstrepen)<a class="headerlink" href="#t132-woordgroep-onderstrepen" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: woordgroep(onderstrepen).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -2337,7 +3266,7 @@
 </ul>
 </div>
 <div class="section" id="t133-wvz">
-<h2>T133: WVz<a class="headerlink" href="#t133-wvz" title="Permalink to this headline">¶</a></h2>
+<h3>T133: WVz<a class="headerlink" href="#t133-wvz" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WVz.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2355,7 +3284,7 @@
 </ul>
 </div>
 <div class="section" id="t134-ww">
-<h2>T134: WW<a class="headerlink" href="#t134-ww" title="Permalink to this headline">¶</a></h2>
+<h3>T134: WW<a class="headerlink" href="#t134-ww" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: WW.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2369,7 +3298,7 @@
 </ul>
 </div>
 <div class="section" id="t135-wxy">
-<h2>T135: WXY<a class="headerlink" href="#t135-wxy" title="Permalink to this headline">¶</a></h2>
+<h3>T135: WXY<a class="headerlink" href="#t135-wxy" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WXY.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2385,9 +3314,18 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxy</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<span class="s2">          </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Werkwoord + twee Zinsdelen”. Covered</p></li>
+</ul>
 </div>
 <div class="section" id="t136-wxyz">
-<h2>T136: WXYZ<a class="headerlink" href="#t136-wxyz" title="Permalink to this headline">¶</a></h2>
+<h3>T136: WXYZ<a class="headerlink" href="#t136-wxyz" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WXYZ.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2403,9 +3341,18 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxyz</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<span class="s2">           </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong> “Werkwoord + drie Zinsdelen”. Covered</p></li>
+</ul>
 </div>
 <div class="section" id="t137-wxyz5">
-<h2>T137: WXYZ5*<a class="headerlink" href="#t137-wxyz5" title="Permalink to this headline">¶</a></h2>
+<h3>T137: WXYZ5*<a class="headerlink" href="#t137-wxyz5" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WXYZ5*.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2421,9 +3368,19 @@
 </div>
 </li>
 </ul>
+<p>Straightforward implementation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxyz5</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<span class="s2">            </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Remark</strong> The label should be chaned to <em>WXY5</em>, the varinat with the asterisk should be an alternative.</p></li>
+<li><p><strong>Schlichting</strong> “Werkwoord + vier Zinsdelen”. Covered</p></li>
+</ul>
 </div>
 <div class="section" id="t138-x-en-x-en-x">
-<h2>T138: X en X (en X)<a class="headerlink" href="#t138-x-en-x-en-x" title="Permalink to this headline">¶</a></h2>
+<h3>T138: X en X (en X)<a class="headerlink" href="#t138-x-en-x-en-x" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: X en X (en X).</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2441,7 +3398,7 @@
 </ul>
 </div>
 <div class="section" id="t139-x-w-deel">
-<h2>T139: X(W)deel<a class="headerlink" href="#t139-x-w-deel" title="Permalink to this headline">¶</a></h2>
+<h3>T139: X(W)deel<a class="headerlink" href="#t139-x-w-deel" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: X(W)deel.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2455,7 +3412,7 @@
 </ul>
 </div>
 <div class="section" id="t140-xneg">
-<h2>T140: Xneg<a class="headerlink" href="#t140-xneg" title="Permalink to this headline">¶</a></h2>
+<h3>T140: Xneg<a class="headerlink" href="#t140-xneg" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Xneg.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2468,16 +3425,16 @@
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@rel</span><span class="o">=</span><span class="s1">&#39;--&#39;</span> <span class="ow">or</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;nucl&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span> <span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;niet&quot;</span><span class="p">]</span> <span class="ow">and</span>
    <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;niet&quot;</span> <span class="p">]</span> <span class="ow">or</span>
-        <span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;advp&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;niet&quot;</span><span class="p">]</span> <span class="p">]</span>
-       <span class="p">)</span>
-      <span class="p">]</span>
+    <span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;advp&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;niet&quot;</span><span class="p">]</span> <span class="p">]</span>
+   <span class="p">)</span>
+  <span class="p">]</span>
 </pre></div>
 </div>
 </li>
 </ul>
 </div>
 <div class="section" id="t141-xy-w-deel">
-<h2>T141: XY(W)deel<a class="headerlink" href="#t141-xy-w-deel" title="Permalink to this headline">¶</a></h2>
+<h3>T141: XY(W)deel<a class="headerlink" href="#t141-xy-w-deel" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: XY(W)deel.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2491,7 +3448,7 @@
 </ul>
 </div>
 <div class="section" id="t142-ze">
-<h2>T142: ze<a class="headerlink" href="#t142-ze" title="Permalink to this headline">¶</a></h2>
+<h3>T142: ze<a class="headerlink" href="#t142-ze" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: ze.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -2509,7 +3466,7 @@
 </ul>
 </div>
 <div class="section" id="t143-zelf">
-<h2>T143: zelf<a class="headerlink" href="#t143-zelf" title="Permalink to this headline">¶</a></h2>
+<h3>T143: zelf<a class="headerlink" href="#t143-zelf" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: zelf.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -2523,7 +3480,7 @@
 </ul>
 </div>
 <div class="section" id="t144-zij">
-<h2>T144: zij<a class="headerlink" href="#t144-zij" title="Permalink to this headline">¶</a></h2>
+<h3>T144: zij<a class="headerlink" href="#t144-zij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: zij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -2541,7 +3498,7 @@
 </ul>
 </div>
 <div class="section" id="t145-zn">
-<h2>T145: Zn<a class="headerlink" href="#t145-zn" title="Permalink to this headline">¶</a></h2>
+<h3>T145: Zn<a class="headerlink" href="#t145-zn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Zn.</p></li>
 <li><p><strong>Category</strong>: Eenwoordzin</p></li>
@@ -2562,7 +3519,7 @@
 </ul>
 </div>
 <div class="section" id="t147-znzn">
-<h2>T147: ZnZn<a class="headerlink" href="#t147-znzn" title="Permalink to this headline">¶</a></h2>
+<h3>T147: ZnZn<a class="headerlink" href="#t147-znzn" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: ZnZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2582,7 +3539,7 @@
 </ul>
 </div>
 <div class="section" id="t148-znx">
-<h2>T148: Znx<a class="headerlink" href="#t148-znx" title="Permalink to this headline">¶</a></h2>
+<h3>T148: Znx<a class="headerlink" href="#t148-znx" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Znx.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2596,7 +3553,7 @@
 </ul>
 </div>
 <div class="section" id="t151-v-u-totaal">
-<h2>T151: V.U. Totaal<a class="headerlink" href="#t151-v-u-totaal" title="Permalink to this headline">¶</a></h2>
+<h3>T151: V.U. Totaal<a class="headerlink" href="#t151-v-u-totaal" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Totaal.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2614,7 +3571,7 @@
 </ul>
 </div>
 <div class="section" id="t152-g-totaal">
-<h2>T152: G Totaal<a class="headerlink" href="#t152-g-totaal" title="Permalink to this headline">¶</a></h2>
+<h3>T152: G Totaal<a class="headerlink" href="#t152-g-totaal" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: G Totaal.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2632,7 +3589,7 @@
 </ul>
 </div>
 <div class="section" id="t153-g-o-fase">
-<h2>T153: G.O Fase<a class="headerlink" href="#t153-g-o-fase" title="Permalink to this headline">¶</a></h2>
+<h3>T153: G.O Fase<a class="headerlink" href="#t153-g-o-fase" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: G.O Fase.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2650,7 +3607,7 @@
 </ul>
 </div>
 <div class="section" id="t154-pfii">
-<h2>T154: PFII<a class="headerlink" href="#t154-pfii" title="Permalink to this headline">¶</a></h2>
+<h3>T154: PFII<a class="headerlink" href="#t154-pfii" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFII.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2668,7 +3625,7 @@
 </ul>
 </div>
 <div class="section" id="t155-pfiii">
-<h2>T155: PFIII<a class="headerlink" href="#t155-pfiii" title="Permalink to this headline">¶</a></h2>
+<h3>T155: PFIII<a class="headerlink" href="#t155-pfiii" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFIII.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2686,7 +3643,7 @@
 </ul>
 </div>
 <div class="section" id="t156-ovznbv4">
-<h2>T156: OvZnBv4<a class="headerlink" href="#t156-ovznbv4" title="Permalink to this headline">¶</a></h2>
+<h3>T156: OvZnBv4<a class="headerlink" href="#t156-ovznbv4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: OvZnBv4.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2700,7 +3657,7 @@
 </ul>
 </div>
 <div class="section" id="t157-screening">
-<h2>T157: Screening<a class="headerlink" href="#t157-screening" title="Permalink to this headline">¶</a></h2>
+<h3>T157: Screening<a class="headerlink" href="#t157-screening" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Screening.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2718,7 +3675,7 @@
 </ul>
 </div>
 <div class="section" id="t158-pfiv">
-<h2>T158: PFIV<a class="headerlink" href="#t158-pfiv" title="Permalink to this headline">¶</a></h2>
+<h3>T158: PFIV<a class="headerlink" href="#t158-pfiv" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFIV.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2736,7 +3693,7 @@
 </ul>
 </div>
 <div class="section" id="t159-pfv">
-<h2>T159: PFV<a class="headerlink" href="#t159-pfv" title="Permalink to this headline">¶</a></h2>
+<h3>T159: PFV<a class="headerlink" href="#t159-pfv" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFV.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2754,7 +3711,7 @@
 </ul>
 </div>
 <div class="section" id="t160-pfvi">
-<h2>T160: PFVI<a class="headerlink" href="#t160-pfvi" title="Permalink to this headline">¶</a></h2>
+<h3>T160: PFVI<a class="headerlink" href="#t160-pfvi" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFVI.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2772,7 +3729,7 @@
 </ul>
 </div>
 <div class="section" id="t161-pfvii">
-<h2>T161: PFVII<a class="headerlink" href="#t161-pfvii" title="Permalink to this headline">¶</a></h2>
+<h3>T161: PFVII<a class="headerlink" href="#t161-pfvii" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFVII.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2790,7 +3747,7 @@
 </ul>
 </div>
 <div class="section" id="t162-pf">
-<h2>T162: PF<a class="headerlink" href="#t162-pf" title="Permalink to this headline">¶</a></h2>
+<h3>T162: PF<a class="headerlink" href="#t162-pf" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PF.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -2808,7 +3765,7 @@
 </ul>
 </div>
 <div class="section" id="t165-formulier">
-<h2>T165: Formulier<a class="headerlink" href="#t165-formulier" title="Permalink to this headline">¶</a></h2>
+<h3>T165: Formulier<a class="headerlink" href="#t165-formulier" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Formulier.</p></li>
 <li><p><strong>Category</strong>: Forms</p></li>
@@ -2826,6 +3783,7 @@
 </ul>
 </div>
 </div>
+</div>
 
 
             <div class="clearer"></div>
@@ -2838,6 +3796,19 @@
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">TARSP Language Measures</a><ul>
+<li><a class="reference internal" href="#macros-for-composed-language-measures">Macros for Composed Language Measures</a><ul>
+<li><a class="reference internal" href="#macros-for-clause-mood">Macros for clause mood</a><ul>
+<li><a class="reference internal" href="#declaratives">Declaratives</a></li>
+<li><a class="reference internal" href="#questions">Questions</a></li>
+<li><a class="reference internal" href="#imperatives">Imperatives</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#macros-for-zinsdelen">Macros for ‘Zinsdelen’</a></li>
+<li><a class="reference internal" href="#macros-for-counts-of-zinsdelen">Macros for Counts of ‘zinsdelen’</a></li>
+<li><a class="reference internal" href="#concrete-example-tarsp-ondwbb">Concrete Example: <strong>Tarsp_OndWBB</strong></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#language-measures">Language Measures</a><ul>
 <li><a class="reference internal" href="#t001-vr-wond">T001: (Vr)WOnd+</a></li>
 <li><a class="reference internal" href="#t003-6">T003: 6+</a></li>
 <li><a class="reference internal" href="#t004-aan-uit">T004: Aan/uit</a></li>
@@ -2992,6 +3963,8 @@
 <li><a class="reference internal" href="#t161-pfvii">T161: PFVII</a></li>
 <li><a class="reference internal" href="#t162-pf">T162: PF</a></li>
 <li><a class="reference internal" href="#t165-formulier">T165: Formulier</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

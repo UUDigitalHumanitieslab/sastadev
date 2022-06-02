@@ -185,7 +185,7 @@ If one looks in the macro files, one quickly sees that many macros are defined i
 </pre></div>
 </div>
 <div class="section" id="generation-of-macros">
-<h4>Generation of macros<a class="headerlink" href="#generation-of-macros" title="Permalink to this headline">¶</a></h4>
+<span id="generatemacros"></span><h4>Generation of macros<a class="headerlink" href="#generation-of-macros" title="Permalink to this headline">¶</a></h4>
 <p>Macros make writing queries much simpler and makes it easier to maintain them. But in some cases macros are not enough, e.g. if a macro expansion is very large but built up in a regular way. One such case is dealt with by the module generatemacros.py:</p>
 <span class="target" id="module-generatemacros"></span><p>The generatemacros module provides the function generatemacros of type None -&gt; Dict[str, str], which generates a macrodictionary
 for systematically constructed macro definitions.</p>

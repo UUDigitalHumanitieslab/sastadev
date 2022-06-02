@@ -110,16 +110,40 @@
 </ul>
 </div></blockquote>
 </li>
+<li><p><strong>Adverbs</strong>: Words that are traditionally classified as adverbs are either adjectives or (<em>adj</em>) or adverbs (<em>bw</em>) in Alpino. The main rule is that an adverb that is also an adjective is treated as an <em>adj</em>, other adverbs are treated as <em>bw</em>. Adverbial pronouns (<em>ervan</em>, <em>hierover</em>, etc) are also considered adverbs, and treated as  single word in the grammar (and not as two words which happen to be written together). There is no special property for R-words. R-words can function as an adverb or as pronoun. R-words are always treated as pronouns (<em>vnw</em>).</p></li>
 </ul>
+<div class="section" id="grammatical-properties">
+<h2>Grammatical Properties<a class="headerlink" href="#grammatical-properties" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="d-coi-properties">
+<h3>D-COI properties<a class="headerlink" href="#d-coi-properties" title="Permalink to this headline">¶</a></h3>
+<p>Most nodes for words have next to the attribute <em>pt</em> other attributes. The core attributes are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>postag</strong> its value is the DCOI-tag [Van Eynde 2005] Examples: VZ(init), VNW(aanw,det,stan,prenom,zonder,rest), WW(pv,tgw,ev)</p></li>
+<li><p><strong>pt</strong> is the value for the simple postag. It is identical (ignoring case) to the code befife the left bracket of the <em>postag</em> attributec, e..g <em>vz</em>, <em>vnw</em>, <em>ww</em></p></li>
+<li><p>a range of attributes that encode the parts between the round brackets () of the postag in separate attribute-value pairs.</p></li>
+<li><p>&#64;&#64;extend&#64;&#64;</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="phrase-properties">
+<h3>Phrase properties<a class="headerlink" href="#phrase-properties" title="Permalink to this headline">¶</a></h3>
+<p>&#64;&#64;extend&#64;&#64;</p>
+</div>
+<div class="section" id="alpino-properties">
+<h3>Alpino properties<a class="headerlink" href="#alpino-properties" title="Permalink to this headline">¶</a></h3>
+<p>&#64;&#64;extend&#64;&#64;</p>
 <p>Not all these characteristics are due to Alpino. Alpino itself often yields slightly different structures, but the Alpino-structures are adapted to conform to the conventions agreed upon in the consortia that created the Spoken Dutch Corpus and the Lassy treebanks. Alpino syntactic structures have often kept information about the original Alpino structure. For example, in Alpino structures,  single word phrases do have a phrasal node in the structure. The category of this node is indicated in the structures in the attribute <em>lcat</em>. The <em>pt</em> attribute conforms to the part of speech tagging conventions for Dutch treebanks, but the <em>pos</em> attribute contains the value of the part of speech code the Alpino parser uses internally itself.</p>
+</div>
+</div>
 <div class="section" id="clauses-in-alpino">
-<h2>Clauses in Alpino<a class="headerlink" href="#clauses-in-alpino" title="Permalink to this headline">¶</a></h2>
+<span id="alpinoclauses"></span><h2>Clauses in Alpino<a class="headerlink" href="#clauses-in-alpino" title="Permalink to this headline">¶</a></h2>
 <p>Finite clauses can have any of the following values for the attribute <em>cat</em>:</p>
 <ul class="simple">
 <li><p><strong>smain</strong>: for main declarative clauses where the finite verb is not initial. e.g. <strong>ik weet dat niet</strong>. Main clauses with topicalised phrases (e.g. <strong>dat weet ik niet</strong>) also have the category <em>smain</em>, and do not differ from clauses that have no topicalised phrases except by the order of the words (indicated by means of the <em>begin</em> and <em>end</em> attributes).</p></li>
 <li><p><strong>whq</strong>: for main clause wh-questions, e.g. <strong>hoe doe je dat dan</strong>. The whq node contains a wh-phrase or word with relation <em>whd</em> (<em>hoe</em>) and a <em>sv1</em> node with relation <em>body</em> (<em>doe je dat dan</em>)</p></li>
 <li><p><strong>whsub</strong>: for subordinate wh-questions, e.g. <em>(weet jij)</em> <strong>waar dat was</strong>. The whsub node contains a wh-phrase or word with relation <em>whd</em> (<em>waar</em>) and a <em>ssub</em> node with relation <em>body</em> (<em>dat was</em>)</p></li>
-<li><p><strong>sv1</strong>: for finite clauses with an initial finite verb. Sv1 clause can be of many diferent types:</p>
+<li><p><strong>sv1</strong>: for finite clauses with an initial finite verb. <em>sv1</em> clauses can be of many different types:</p>
 <ul>
 <li><p>main clause yes-no question, e.g., <strong>heb je geen telefoon bij je?</strong></p></li>
 <li><p>main clause imperative, e.g., <strong>kom hier</strong></p></li>
@@ -162,6 +186,12 @@
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Alpino parser</a><ul>
+<li><a class="reference internal" href="#grammatical-properties">Grammatical Properties</a><ul>
+<li><a class="reference internal" href="#d-coi-properties">D-COI properties</a></li>
+<li><a class="reference internal" href="#phrase-properties">Phrase properties</a></li>
+<li><a class="reference internal" href="#alpino-properties">Alpino properties</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#clauses-in-alpino">Clauses in Alpino</a></li>
 </ul>
 </li>

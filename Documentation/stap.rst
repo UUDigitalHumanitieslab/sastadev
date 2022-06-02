@@ -327,7 +327,11 @@ More specifically on "Bijwoordelijke bepalingen van plaats". It includes:
   
 * "de vet gedrukte opeenvolgende woorden passen semantisch bij elkaar: één Bijwoordelijke bepaling van plaats.": covered
 
-.. _BBT
+* **Remark**: we do not exclude the frequent adverbs mentioned under "niet gescoord", though a macro for this exists: **STAP_geen_BB**
+* **Remark**: we do not include R-pronouns with relation *mod* 
+
+.. _BBT:
+
 S011: BB t
 ----------
 
@@ -435,14 +439,19 @@ The *Handleiding* states: "De Overige bijwoordelijke bepalingen omvatten:"
 * Examples:
 
    * *en nu is ie weg* **met de vuilnisauto**: covered
-   * *en* **als het dan mooi weer is**, dan gaan we **met Dennis** *buiten voetballen* (not covered, Alpiono parses *met Dennis* as a *pc*, not as a *mod*). Maybe we should include pc/PPs with *met* as head as well.
+   * *en* **als het dan mooi weer is**, dan gaan we **met Dennis** *buiten voetballen* (not covered, Alpino parses *met Dennis* as a *pc*, not as a *mod*). Maybe we should include pc/PPs with *met* as head as well.
 
 * *Bepalingen van gesteldheid*:
 
-  * *en dat vind ik* **zo leuk**: covered, but currently all *ap* ord *adj* nodes with relation equal to *predc* are covered, also the ones after copulas, which is wrong and should be corrected. This can be done easily by adapting the macro **pred** to require presence of a direct object if the relation is *predc*.
+  * *en dat vind ik* **zo leuk**: covered, but currently all *ap* or *adj* nodes with relation equal to *predc* are covered, also the ones after copulas, which is wrong and should be corrected. This can be done easily by adapting the macro **pred** to require presence of a direct object if the relation is *predc*.
 
 
+.. _STAP-form:
 
+S019:  Form
+-----------
+
+@@to add@@
 
 
 

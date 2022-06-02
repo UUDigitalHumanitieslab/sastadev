@@ -9,6 +9,14 @@ topcontainsexclamationmark = """ (ancestor::node[@cat="top" and node[%exclamatio
 topcontainsperiodmark = """ (ancestor::node[@cat="top" and node[%periodmark%]])"""
 
 Ond = """node[%subject%]"""
+FullOnd = """((%subject% and (@pt or @cat) ) or %erx%)"""
+
+
+
+erx = """((@rel="mod" and @lemma="er" and ../node[@rel="su" and @begin>=../node[@rel="mod" and @lemma="er"]/@end]) or
+          (@rel="mod" and @lemma="er" and ../node[@rel="su" and not(@pt) and not(@cat)])
+         )
+      """
 
 impsubjectok = """(not(%Ond%) or (node[%subject% and %impsubject%] and (%impmodfound%  or %topcontainsexclamationmark%)))"""
 impsubject = """(@rel="su" and (@word="jij" or @word="u"))"""

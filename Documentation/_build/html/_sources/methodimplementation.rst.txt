@@ -137,6 +137,8 @@ If one looks in the macro files, one quickly sees that many macros are defined i
 	(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 3 )
 	"""
 
+.. _generatemacros:
+
 Generation of macros
 """"""""""""""""""""
 

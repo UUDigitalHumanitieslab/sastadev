@@ -117,7 +117,7 @@
 <li><p>“Bij deze variabele worden VU waarbij het kind minder of meer dan één persoonsvorm gebruikt, gescoord.”</p></li>
 <li><p>“Bij de scoring wordt uitgegaan van 50 persoonsvormen. De VU met -1 moeten van 50 worden afgetrokken en de persoonsvormen die aangegeven zijn met +1, +2, etc. moeten weer bij dit getal worden opgeteld.”</p></li>
 </ul>
-<p>The results of the query for S003 are used in the computation of the relevant cells in the STAP form. See <span class="xref std std-ref">STAP-form</span></p>
+<p>The results of the query for S003 are used in the computation of the relevant cells in the STAP form. See <a class="reference internal" href="#stap-form"><span class="std std-ref">S019:  Form</span></a></p>
 </div>
 <div class="section" id="s004-sgg">
 <h2>S004: SGG<a class="headerlink" href="#s004-sgg" title="Permalink to this headline">¶</a></h2>
@@ -346,7 +346,7 @@
 <li><p><strong>predclocap</strong>: for predicative aps with a locative adjective as head, e.g., <em>mag ik</em> <strong>veel hoger</strong> <em>zitten?</em></p></li>
 <li><p><strong>svp_bw</strong>: for adverbs that function as an <em>svp</em>, e.g. <em>tasje doen we</em> <strong>weg</strong>, <em>kom je dan</em> <strong>terug</strong>. <strong>Remark</strong>: we should exclude <em>samen</em>, and <em>genoeg</em>.</p></li>
 <li><p><strong>loc_vzBB</strong>: for locative adpositions functioning as an adverbial modifier. This is mainly for locative adpositions that could not be integrated into the structure, as e.g., in <strong>op</strong> <em>mijn eigen</em></p></li>
-<li><p><strong>new_STAP_BB_t</strong>: it should not be a temporal adverbial modifier. See section <span class="xref std std-ref">BBT</span></p></li>
+<li><p><strong>new_STAP_BB_t</strong>: it should not be a temporal adverbial modifier. See section <a class="reference internal" href="#bbt"><span class="std std-ref">S011: BB t</span></a></p></li>
 </ul>
 <p>The <em>Handleiding</em> states:</p>
 <ul class="simple">
@@ -383,10 +383,12 @@
 </div></blockquote>
 <ul class="simple">
 <li><p>“de vet gedrukte opeenvolgende woorden passen semantisch bij elkaar: één Bijwoordelijke bepaling van plaats.”: covered</p></li>
+<li><p><strong>Remark</strong>: we do not exclude the frequent adverbs mentioned under “niet gescoord”, though a macro for this exists: <strong>STAP_geen_BB</strong></p></li>
+<li><p><strong>Remark</strong>: we do not include R-pronouns with relation <em>mod</em></p></li>
 </ul>
 </div>
 <div class="section" id="s011-bb-t">
-<h2>S011: BB t<a class="headerlink" href="#s011-bb-t" title="Permalink to this headline">¶</a></h2>
+<span id="bbt"></span><h2>S011: BB t<a class="headerlink" href="#s011-bb-t" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> BB t: “Bijwoordelijke Bepaling van Tijd” = temporal adverbial modifier</p></li>
 <li><p><strong>Implementation</strong>: Xpath query with macros</p></li>
@@ -493,16 +495,20 @@
 <blockquote>
 <div><ul class="simple">
 <li><p><em>en nu is ie weg</em> <strong>met de vuilnisauto</strong>: covered</p></li>
-<li><p><em>en</em> <strong>als het dan mooi weer is</strong>, dan gaan we <strong>met Dennis</strong> <em>buiten voetballen</em> (not covered, Alpiono parses <em>met Dennis</em> as a <em>pc</em>, not as a <em>mod</em>). Maybe we should include pc/PPs with <em>met</em> as head as well.</p></li>
+<li><p><em>en</em> <strong>als het dan mooi weer is</strong>, dan gaan we <strong>met Dennis</strong> <em>buiten voetballen</em> (not covered, Alpino parses <em>met Dennis</em> as a <em>pc</em>, not as a <em>mod</em>). Maybe we should include pc/PPs with <em>met</em> as head as well.</p></li>
 </ul>
 </div></blockquote>
 </li>
 <li><p><em>Bepalingen van gesteldheid</em>:</p>
 <ul class="simple">
-<li><p><em>en dat vind ik</em> <strong>zo leuk</strong>: covered, but currently all <em>ap</em> ord <em>adj</em> nodes with relation equal to <em>predc</em> are covered, also the ones after copulas, which is wrong and should be corrected. This can be done easily by adapting the macro <strong>pred</strong> to require presence of a direct object if the relation is <em>predc</em>.</p></li>
+<li><p><em>en dat vind ik</em> <strong>zo leuk</strong>: covered, but currently all <em>ap</em> or <em>adj</em> nodes with relation equal to <em>predc</em> are covered, also the ones after copulas, which is wrong and should be corrected. This can be done easily by adapting the macro <strong>pred</strong> to require presence of a direct object if the relation is <em>predc</em>.</p></li>
 </ul>
 </li>
 </ul>
+</div>
+<div class="section" id="s019-form">
+<span id="stap-form"></span><h2>S019:  Form<a class="headerlink" href="#s019-form" title="Permalink to this headline">¶</a></h2>
+<p>&#64;&#64;to add&#64;&#64;</p>
 </div>
 </div>
 
@@ -529,6 +535,7 @@
 <li><a class="reference internal" href="#s010-bb-p">S010: BB p</a></li>
 <li><a class="reference internal" href="#s011-bb-t">S011: BB t</a></li>
 <li><a class="reference internal" href="#s012-bb-o">S012: BB o</a></li>
+<li><a class="reference internal" href="#s019-form">S019:  Form</a></li>
 </ul>
 </li>
 </ul>

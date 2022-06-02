@@ -65,7 +65,33 @@ The main characteristics are:
    * [dat lukte mij niet dus toen] heb ik uiteindelijk uh met de via de gang naar de voordeur gegaan
    * [ik weet niet hoe] ik bij thuis ben gekomen
 
+* **Adverbs**: Words that are traditionally classified as adverbs are either adjectives or (*adj*) or adverbs (*bw*) in Alpino. The main rule is that an adverb that is also an adjective is treated as an *adj*, other adverbs are treated as *bw*. Adverbial pronouns (*ervan*, *hierover*, etc) are also considered adverbs, and treated as  single word in the grammar (and not as two words which happen to be written together). There is no special property for R-words. R-words can function as an adverb or as pronoun. R-words are always treated as pronouns (*vnw*).
+
+Grammatical Properties
+----------------------
+
+D-COI properties
+^^^^^^^^^^^^^^^^
+
+Most nodes for words have next to the attribute *pt* other attributes. The core attributes are:
+
+   * **postag** its value is the DCOI-tag [Van Eynde 2005] Examples: VZ(init), VNW(aanw,det,stan,prenom,zonder,rest), WW(pv,tgw,ev)
+   * **pt** is the value for the simple postag. It is identical (ignoring case) to the code befife the left bracket of the *postag* attributec, e..g *vz*, *vnw*, *ww*
+   * a range of attributes that encode the parts between the round brackets () of the postag in separate attribute-value pairs.
+   * @@extend@@
+   
+Phrase properties 
+^^^^^^^^^^^^^^^^^  
+@@extend@@
+   
+Alpino properties
+^^^^^^^^^^^^^^^^^   
+@@extend@@
+
+
 Not all these characteristics are due to Alpino. Alpino itself often yields slightly different structures, but the Alpino-structures are adapted to conform to the conventions agreed upon in the consortia that created the Spoken Dutch Corpus and the Lassy treebanks. Alpino syntactic structures have often kept information about the original Alpino structure. For example, in Alpino structures,  single word phrases do have a phrasal node in the structure. The category of this node is indicated in the structures in the attribute *lcat*. The *pt* attribute conforms to the part of speech tagging conventions for Dutch treebanks, but the *pos* attribute contains the value of the part of speech code the Alpino parser uses internally itself.
+
+.. _alpinoclauses:
 
 Clauses in Alpino
 -----------------
@@ -75,7 +101,7 @@ Finite clauses can have any of the following values for the attribute *cat*:
 * **smain**: for main declarative clauses where the finite verb is not initial. e.g. **ik weet dat niet**. Main clauses with topicalised phrases (e.g. **dat weet ik niet**) also have the category *smain*, and do not differ from clauses that have no topicalised phrases except by the order of the words (indicated by means of the *begin* and *end* attributes).
 * **whq**: for main clause wh-questions, e.g. **hoe doe je dat dan**. The whq node contains a wh-phrase or word with relation *whd* (*hoe*) and a *sv1* node with relation *body* (*doe je dat dan*)
 * **whsub**: for subordinate wh-questions, e.g. *(weet jij)* **waar dat was**. The whsub node contains a wh-phrase or word with relation *whd* (*waar*) and a *ssub* node with relation *body* (*dat was*)
-* **sv1**: for finite clauses with an initial finite verb. Sv1 clause can be of many diferent types:
+* **sv1**: for finite clauses with an initial finite verb. *sv1* clauses can be of many different types:
   
   * main clause yes-no question, e.g., **heb je geen telefoon bij je?**
   * main clause imperative, e.g., **kom hier**
