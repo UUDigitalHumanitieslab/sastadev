@@ -155,7 +155,29 @@
 </pre></div>
 </div>
 </li>
-<li><p>There are restrictions on subjects in imperative clauses, expressed by the macro <strong>impsubjectok</strong>:</p></li>
+<li><p>There are restrictions on subjects in imperative clauses, expressed by the macro <strong>impsubjectok</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">impsubjectok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(not(%Ond%) or</span>
+<span class="s2">                   (node[</span><span class="si">%s</span><span class="s2">ubject% and</span>
+<span class="s2">                    </span><span class="si">%i</span><span class="s2">mpsubject%] and</span>
+<span class="s2">                    (</span><span class="si">%i</span><span class="s2">mpmodfound</span><span class="si">%  o</span><span class="s2">r %topcontainsexclamationmark%)</span>
+<span class="s2">                   )</span>
+<span class="s2">                  )&quot;&quot;&quot;</span>
+<span class="n">impsubject</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;su&quot; and (@word=&quot;jij&quot; or @word=&quot;u&quot;))&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>there either is no subject, or</p></li>
+<li><p>there is a subject but</p>
+<ul>
+<li><p>it is <em>jij</em> or <em>u</em> (<strong>impsubject</strong>) and</p></li>
+<li><p>either a imperative modifier is found (<strong>impmodfound</strong>) or the utternace conatin an exclamation mark</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</li>
 <li><p>there are restrictions on the verb in an imperative clause, expressed by the macro <strong>wwimpok</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wwimpok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;( %wwimpfeatok% and</span>
 <span class="s2">               not(%modalframe%) and</span>
@@ -210,18 +232,20 @@
 <ul>
 <li><p>the verb must be compatible with imperative mood (<strong>wwimpok</strong>)</p></li>
 <li><p>the relation that the verb bears must be compatible with imperatives (<strong>imprelok</strong>)</p></li>
-<li><p>the parent nod must have <em>cat</em> equal to <em>top</em></p></li>
+<li><p>the parent node must have <em>cat</em> equal to <em>top</em></p></li>
 <li><p>there must not be a question mark in the utterance</p></li>
 <li><p>there must be no period in the utterance.</p></li>
 <li><p><strong>Remark</strong> We must find a way to exclude <em>kijk</em> and <em>kijk eens</em> as an imperative in most cases, since it should be analysed as a V.U.</p></li>
+<li><p><strong>Remark</strong> We must allow other case forms for <em>jij</em> en <em>u</em> as subjkects in imperatives (but noy the reducded variant <em>je</em>)</p></li>
+<li><p><strong>remark</strong> There surely is overlap betwen the condition on modal verbs and the conditions imposed by <strong>potentialimpverb</strong>.</p></li>
 <li><p><strong>Schlichting</strong> (p. 62)</p>
 <p>“De kenmerken van de Gebiedende Wijs zijn in het kader van TARSP:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><p>de zin moet altijd beginnen met een werkwoord; dat werkwoord staat meestal in de vorm van de stam van het werkwoord, een enekel maal vinden we stam +t of de infinitief. (covered except stam +t)</p></li>
+<li><p>de zin moet altijd beginnen met een werkwoord; dat werkwoord staat meestal in de vorm van de stam van het werkwoord, een enkele maal vinden we Stam+t of de infinitief. (covered except Stam+t)</p></li>
 <li><p>Er is altijd een niet-vragende intonatie (covered by disallowing a question mark)</p></li>
-<li><p>Er is vaak een tweed of derde woord in de zin, bijvoorbeeld ‘maar’, ‘even’, ‘eens’. Covered</p></li>
-<li><p>Een gebideden wijs begint nooit met een modaal werkwoord, behalve met ‘laten’ (covered)</p></li>
+<li><p>Er is vaak een tweede of derde woord in de zin, bijvoorbeeld ‘maar’, ‘even’, ‘eens’. Covered</p></li>
+<li><p>Een gebiedende wijs begint nooit met een modaal werkwoord, behalve met ‘laten’ (covered)</p></li>
 </ol>
 </div></blockquote>
 </li>
@@ -230,17 +254,17 @@
 </div>
 <div class="section" id="macros-for-zinsdelen">
 <span id="zinsdelen"></span><h3>Macros for ‘Zinsdelen’<a class="headerlink" href="#macros-for-zinsdelen" title="Permalink to this headline">¶</a></h3>
-<p>The ‘zinsdelen’are <em>B</em>, <em>Ond</em>, <em>VC</em> and <em>W</em> and they correspond to some extent to  the following language measures, for ‘zinsdelen’:</p>
+<p>The ‘zinsdelen’ are <em>B</em>, <em>Ond</em>, <em>VC</em> and <em>W</em> and they correspond to some extent to  the following language measures, for ‘zinsdelen’:</p>
 <ul class="simple">
 <li><p>T007: B,  adverbial modifier (see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>)</p></li>
 <li><p>T063: Ond, subject   (see <a class="reference internal" href="#t063-ond"><span class="std std-ref">T063: Ond</span></a>)</p></li>
 <li><p>T097: VC, verbal complement (see <a class="reference internal" href="#t097-vc"><span class="std std-ref">T097: VC</span></a>)</p></li>
 <li><p>T120: W, verb</p></li>
 </ul>
-<p>But the correspondenc is only perfect for <em>B</em>. For <em>Ond</em> the definitions are different, but it is not clear whether that cannot be avoided. For <em>VC</em> the definitions are also different but perhaps they should be identical.
+<p>But the correspondence is only perfect for <em>B</em>. For <em>Ond</em> the definitions are different, but it is not clear whether that cannot be avoided. For <em>VC</em> the definitions are also different but perhaps they should be identical.
 For <em>W</em> there is no correspondence.
 Out of these language measures, only T120/W occurs in the form (‘profielkaart’), but it has a different interpretation than <em>W</em> in the composed language measures. <em>W</em> in the composed language measures means <em>predicate</em>, but language measure T120 with code <em>W</em> means <em>verb</em>. For example, in the sentence <em>Hij heeft gezwommen</em> there are two verbs (<em>heeft</em>, en <em>gezwommen</em>) but only one predicate (i.e <em>heeft gezwommen</em>).</p>
-<p>Language measures such as <em>WBVC</em>, <em>OndVC</em>, <em>OndW</em>, <em>OndWB</em>, <em>OndWBVC</em>, and several others are defined  by combinations of the definitions of recurring macros for ‘zinsdelen’(and some others conditions). For such language measures, special macros of for Ond, VC and W have been defined:</p>
+<p>Language measures such as <em>WBVC</em>, <em>OndVC</em>, <em>OndW</em>, <em>OndWB</em>, <em>OndWBVC</em>, and several others are defined  by combinations of the definitions of recurring macros for ‘zinsdelen’ (and some others conditions). For such language measures, special macros for <em>Ond</em>, <em>VC</em> and <em>W</em> have been defined:</p>
 <ul>
 <li><p><strong>Ond</strong>: has a simple definition:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ond</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;node[</span><span class="si">%s</span><span class="s2">ubject%]&quot;&quot;&quot;</span>
@@ -275,7 +299,7 @@ Out of these language measures, only T120/W occurs in the form (‘profielkaart�
 <li><p>separable particles of a verb that are not adpositions (<em>svp</em>)</p></li>
 </ul>
 <p>and we exclude all cases that can be analysed as an adverbial modifier (<strong>Tarsp_B</strong>, see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>)</p>
-<p>The macro <strong>Tarsp_pc_vc_exception</strong> is generated in the <em>generatemacros</em> module on the basis of a list of  pairs (verb, adposition), e.g. (<em>slaan</em>, <em>op</em>) in which Alpino analyzes the adposition as the head of an prepositional complement (pc), but where it should be considered the head of a modifier. See <a class="reference internal" href="methodimplementation.html#generatemacros"><span class="std std-ref">Generation of macros</span></a> for more details.</p>
+<p>The macro <strong>Tarsp_pc_vc_exception</strong> is generated in the <em>generatemacros</em> module on the basis of a list of  pairs (verb, adposition), e.g. (<em>slaan</em>, <em>op</em>) in which Alpino analyzes the adposition as the head of a prepositional complement (pc), but where it should be considered the head of a modifier. See <a class="reference internal" href="methodimplementation.html#generatemacros"><span class="std std-ref">Generation of macros</span></a> for more details.</p>
 </div></blockquote>
 </li>
 <li><p><strong>Tarsp_W</strong>: It is defined as:</p>
@@ -290,8 +314,8 @@ Out of these language measures, only T120/W occurs in the form (‘profielkaart�
 <h3>Macros for Counts of ‘zinsdelen’<a class="headerlink" href="#macros-for-counts-of-zinsdelen" title="Permalink to this headline">¶</a></h3>
 <p>Many composed language measures differ only in the number of complements or adverbial modifiers required. For example <em>Tarsp_OndWB</em> and <em>Tarsp_OndWBB</em> differ only in the number of adverbial modifiers that should be present (one, resp, two).
 This requires conditions on the number of such complements or modifiers.
-Note that one cannot simply include two expressions joined by <em>and</em> in an Xpath query (e.g. <em>%Tarsp_B% and %Tarsp_B%</em>) to cover the <em>BB</em> part of the language measure <em>Tarsp_OndWBB</em>. The reason is that in XPath such a query will then still match with  a structure containing a single adverbial modifier. We therefore use the predicate <em>count</em> in composed language measures.</p>
-<p>Adverbial modifiers and complements can occur not only under the node where the subject and verb occur but also inside a nonfinite verbal complement, so we gather both in a node set, union these nodesets and count the number of elements in the union. This leads to the following formulations:</p>
+Note that one cannot simply include two expressions joined by <em>and</em> in an Xpath query (e.g. <em>%Tarsp_B% and %Tarsp_B%</em>) to cover the <em>BB</em> part of the language measure <em>Tarsp_OndWBB</em>. The reason is that in XPath such a query will then still match with  a structure containing a single adverbial modifier. We therefore use the Xpath function <em>count</em> in composed language measures.</p>
+<p>Adverbial modifiers and complements can occur not only under the node where the subject and verb occur but also inside a nonfinite verbal complement, so we gather both in a node set, union (|) these node sets and count the number of elements in the union. This leads to the following formulations:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_B_X_count</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;count(node[%Tarsp_B%] | node[%nonfinvc%]/node[%Tarsp_B%]) &quot;&quot;&quot;</span>
 <span class="n">Tarsp_VC_X_count</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;count(node[%Tarsp_VC%] | node[%nonfinvc%]/node[%Tarsp_VC%]) &quot;&quot;&quot;</span>
 </pre></div>
@@ -479,7 +503,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <div><ul class="simple">
 <li><dl class="simple">
 <dt>Nodes with grammatical relation  <em>mod</em>, <em>ld</em> or <em>predm</em></dt><dd><ul>
-<li><p>but if the node is a phrase, it should not have the value <em>conj</em> for the attribute <em>cat</em>. In a conjunction the whole conjuction is not considered an adverbial modifier. The individual conjuncts are, see below.</p></li>
+<li><p>but if the node is a phrase, it should not have the value <em>conj</em> for the attribute <em>cat</em>. In a conjunction the whole conjunction is not considered an adverbial modifier. The individual conjuncts are, see below.</p></li>
 <li><p>if the node is a word, it should not be an interjection</p></li>
 </ul>
 </dd>
@@ -492,7 +516,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 <li><p>Case 2: adpositions, adverbs and R-pronouns that bear one of the relations <em>dp</em>, <em>–</em>, <em>nucl</em> or <em>body</em>, if they are not the only real node in the structure. The macro <strong>notonlyrealnode</strong> is defined below.</p></li>
 <li><p>Case 3: adpositional phrases with grammatical relation <em>dp</em> or <em>–</em> if they are not the only realnode</p></li>
-<li><p>Case 4: adpositional complements to a verbs that meets the requirements of the macro <strong>locverb</strong>. Verbs that have a locative interpretation often also have use where they are combined with a particular adposition (e.g. <em>staan + op</em>). This often leads to asn ambiguity, and Alpino very often selects the <em>pc</em> analysis. However, very young children do not know these uses yet, but almost always intend the locative use. This part of the query corrects for Alpino’s strategy.</p></li>
+<li><p>Case 4: adpositional complements to a verbs that meets the requirements of the macro <strong>locverb</strong>. Verbs that have a locative interpretation often also have use where they are combined with a particular adposition (e.g. <em>staan + op</em>). This often leads to an ambiguity, and Alpino very often selects the <em>pc</em> analysis. However, very young children do not know these uses yet, but almost always intend the locative use. This part of the query corrects for Alpino’s disambiguation strategy.</p></li>
 <li><p>Case 5: A conjunct if its parent node has a grammatical relation from <em>mod</em>, <em>ld</em> or <em>predm</em></p></li>
 <li><p>Case 6: adverbs that are a modifier inside an NP. Probably because Alpino analyses ambiguous cases by including the adverb in the NP.</p></li>
 <li><p>Case 7: nodes that meet the requirements of the macro <strong>Tarsp_nonmodadvcp</strong>.</p></li>
@@ -523,8 +547,16 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <span class="s2">                    @lemma=&quot;mogen&quot;)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
+<p>The macro <strong>Tarsp_nonmodadvcp</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_nonmodadvcp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;cp&quot; and</span>
+<span class="s2">                        (@rel=&quot;dp&quot; or @rel=&quot;--&quot;) and</span>
+<span class="s2">                        node[@pt=&quot;vg&quot; and @conjtype=&quot;onder&quot; and</span>
+<span class="s2">                             fBas@lemma!=&quot;dat&quot; and @lemma!=&quot;of&quot; ] )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>covering cp-nodes that could not be integrated in the whole structure (hence relation <em>dp</em> or <em>–</em>) and contain a subordinate conjunction other than <em>dat</em> or <em>of</em>.</p>
 <ul class="simple">
-<li><p><strong>Schlichting</strong>: “De bijwoordelijke bepaling zegt iets over de hele inhoud van de zin of iets over het werkwoord, een bijwoord of een bijvoeglijk naamwoord. Een zin kan meer dan één bijwoordelijke bepaling hebben.”Basically covered.</p></li>
+<li><p><strong>Schlichting</strong>: “De bijwoordelijke bepaling zegt iets over de hele inhoud van de zin of iets over het werkwoord, een bijwoord of een bijvoeglijk naamwoord. Een zin kan meer dan één bijwoordelijke bepaling hebben.” Basically covered.</p></li>
 <li><p><strong>Remark</strong> The <strong>locverb</strong> macro very probably has overlap with or is subsumed by the generated macro <strong>Tarsp_pc_vc_exception</strong></p></li>
 <li><p><strong>Remark</strong> Case 5 does not cover conjuncts under a node <em>conj</em> that meets the requirements of <strong>predcB</strong>, e.g <em>ik vind haar</em> <strong>mooi en aardig</strong></p></li>
 <li><p><strong>Remark</strong> The macro <strong>predcB</strong> does not cover cases where the object is absent due to topic drop (e.g. <em>vind ik</em> <strong>mooi</strong>). We could include a condition which includes cases where surely non-copular verbs (such as <em>vinden</em>) are listed, as was done in ASTA.</p></li>
@@ -533,7 +565,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <div class="section" id="t010-bbbv">
 <h3>T010: BBBv<a class="headerlink" href="#t010-bbbv" title="Permalink to this headline">¶</a></h3>
 <ul>
-<li><p><strong>Name</strong>: BBBv. (Bijwoord + Bijwoord + Bijvoeglijk woord, adverb + adverb + adjective</p></li>
+<li><p><strong>Name</strong>: BBBv. (Bijwoord + Bijwoord + Bijvoeglijk woord, adverb + adverb + adjective)</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
 <li><p><strong>Subcat</strong>: Ov</p></li>
 <li><p><strong>Level</strong>: Wg</p></li>
@@ -566,13 +598,15 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 57</p></li>
 <li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span><span class="ow">and</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;cp&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;body&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;ww&quot;</span> <span class="ow">and</span> <span class="nd">@pvagr</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]]]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span><span class="ow">and</span>
+       <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;cp&quot;</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;body&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;ww&quot;</span> <span class="ow">and</span> <span class="nd">@pvagr</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]]]</span>
 </pre></div>
 </div>
 </li>
 <li><p><strong>Schlichting</strong>: “Bijwoordelijke bijzin met verbindingswoord. Dit is dus een ondergeschikte zin die in de hoofdzin de functie van bijwoordelijke bepaling heeft. Het verbindingswoord is in deze fase meestal <em>als</em>”,.</p></li>
 </ul>
-<p>A straightforward query for a cp (“complementizer phrase”) with grammatical relation <em>mod</em>. The condition that the <em>body</em> must contain a finite verb is necessary because a <em>cp</em> can als have other phrases (e.g. <em>np</em>) as complement.</p>
+<p>A straightforward query for a cp (“complementizer phrase”) with grammatical relation <em>mod</em>. The condition that the <em>body</em> must contain a finite verb is necessary because a <em>cp</em> can also have other phrases (e.g. <em>np</em>) as complement.</p>
 </div>
 <div class="section" id="t012-bbv-b">
 <h3>T012: BBv/B<a class="headerlink" href="#t012-bbv-b" title="Permalink to this headline">¶</a></h3>
@@ -634,8 +668,43 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
-<p>&#64;&#64;todo&#64;&#64;</p>
-<ul class="simple">
+<p>The macro <strong>Tarsp_BBX</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_BBX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((@cat=&quot;top&quot; and</span>
+<span class="s2">                 count(.//node[@pt!=&#39;let&#39; and @pt!=&#39;vg&#39;])=3 and</span>
+<span class="s2">                 count(.//node[@special=&quot;er_loc&quot; or @pt=&quot;bw&quot; or</span>
+<span class="s2">                               @pt=&quot;vz&quot; or (@pt=&quot;adj&quot; and @rel=&quot;dp&quot; ) ])=2 and</span>
+<span class="s2">                      .//node[@pt=&quot;n&quot; or (@pt=&quot;vnw&quot; and not(@special=&quot;er_loc&quot;)) ]</span>
+<span class="s2">                ) or</span>
+<span class="s2">                ((@cat=&quot;sv1&quot; or @cat=&quot;smain&quot;) and not(%basicimperative%) and</span>
+<span class="s2">                  not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and</span>
+<span class="s2">                  count(.//node[%Tarsp_B%]) = 2 and </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2</span>
+<span class="s2">                )</span>
+<span class="s2">               )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation: there is match if either cas 1 holds or Case2:</p>
+<ul>
+<li><p>Case 1: the utterance contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>anywhere in the stucture exactly 3 real nodes, and</p></li>
+<li><p>anywhere in the structure 2 adverbs, adverbial pronouns, adpositions, or grammatically isolated (<em>rel</em> = <em>dp</em>) adjectives, and</p></li>
+<li><p>anywhere in the structure a noun, or a pronoun that is not an R-pronoun</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Case 2: there is a clause with category <em>sv1</em> or <em>smain</em></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>that is not an imperative clause, and</p></li>
+<li><p>that is not  yes-no question,  and</p></li>
+<li><p>that does not contain a subject, and</p></li>
+<li><p>that does contain a head verb, and</p></li>
+<li><p>that does contain 2 adverbial modifers, and</p></li>
+<li><p>that contains exactly 2 real complements or modifiers</p></li>
+</ul>
+</div></blockquote>
+</li>
 <li><p><strong>Schlichting</strong>: “Bijwoordelijke bepaling + Bijwoordelijke bepaling + een ander zinsdeel (Ond of W of VC of B)”</p></li>
 </ul>
 </div>
@@ -652,9 +721,10 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
-<span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="p">]</span> <span class="ow">and</span>
-<span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;adj&quot;</span><span class="p">]</span> <span class="ow">and</span>
-<span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">]]</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="p">]</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;adj&quot;</span><span class="p">]</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span><span class="p">]</span>
+      <span class="p">]</span>
 </pre></div>
 </div>
 </li>
@@ -788,12 +858,12 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
-<p>These are single word utterances consisting of an adjective or an adverb, and based on the examples that Schlichting gives (such as <em>uit</em>, <em>op</em>) adpositions should be included as well. (<em>uit</em> is parsed as an adverb by Alpino, but <em>op</em> as a adposition).</p>
-<p>The condition to restruct it to single word utterances use the macro <em>realnode</em>, which is defined as follows:</p>
+<p>These are single word utterances consisting of an adjective or an adverb, and based on the examples that Schlichting gives (such as <em>uit</em>, <em>op</em>) adpositions should be included as well. (<em>uit</em> is parsed as an adverb by Alpino, but <em>op</em> as an adposition).</p>
+<p>The condition to restrict it to single word utterances uses the macro <em>realnode</em>, which is defined as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">realnode</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;((not(@pt) or (@pt!=&quot;let&quot; and @pt!=&quot;tsw&quot;)) and (not(@postag) or @postag!=&quot;NA()&quot;))&quot;&quot;&quot;</span>
 </pre></div>
 </div>
-<p>It excludes interpunction symbols, interjections and words not classified for DCOI part of speech by Alpino (i.e., where <em>pos=NA()</em>),</p>
+<p>It excludes interpunction symbols, interjections and words not classified for DCOI part of speech by Alpino (i.e., where <em>postag=NA()</em>),</p>
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Bijvoeglijke naamwoorden en Bijwoorden”</p></li>
 <li><p><strong>Remark</strong>: R-pronouns (such as <em>daar</em>, explictly mentioned by Schlichting) are not covered yet. Perhaps use the macro <em>adjoradv</em> here.</p></li>
@@ -901,7 +971,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
-<li><p><strong>corbwmod</strong>: basically any modifying adverb that is quantificational in nature (by the macro <strong>qbwlemma</strong> (so far only <em>nog</em>):</p>
+<li><p><strong>corebwmod</strong>: basically any modifying adverb that is quantificational in nature (by the macro <strong>qbwlemma</strong> (so far only <em>nog</em>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">corebwmod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (node[@rel=&quot;mod&quot; and @pt=&quot;bw&quot; and %qbwlemma%]) &quot;&quot;&quot;</span>
 
 <span class="n">qbwlemma</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@lemma=&quot;nog&quot; ) &quot;&quot;&quot;</span>
@@ -981,13 +1051,13 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 <p>i.e. a NP that contains a verb as a head and a word that modifies it, and nothing else (example: <em>even pakken .</em>).</p>
 </li>
-<li><p>there is  node with <em>cat</em> = <em>du</em> that contains exactly one  <strong>realnode</strong> that meets the requirements of the macro <strong>bxnp1</strong></p></li>
+<li><p>there is  a node with <em>cat</em> = <em>du</em> that contains exactly one  <strong>realnode</strong> that meets the requirements of the macro <strong>bxnp1</strong></p></li>
 <li><p>there is a child node that meets the requirements of the macro <strong>bxnp2</strong>, i.e. a noun phrase consisting of a head and a single word  modifier, and nothing else (example: <em>die hier</em>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bxnp2</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;np&quot; and count(node)=2 and node[@rel=&quot;hd&quot;] and node[@rel=&quot;mod&quot; and </span><span class="si">%s</span><span class="s2">inglewordbw%])&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 </li>
-<li><p>there is  node with <em>cat</em> = <em>du</em> that contains exactly one  <strong>realnode</strong> that meets the requirements of the macro <strong>bxnp2</strong></p></li>
+<li><p>there is a node with <em>cat</em> = <em>du</em> that contains exactly one  <strong>realnode</strong> that meets the requirements of the macro <strong>bxnp2</strong></p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -999,7 +1069,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <span class="s2">                    count(node[</span><span class="si">%r</span><span class="s2">ealcomplormod%])=1 )&quot;&quot;&quot;</span>
 </pre></div>
 </div>
-<p>This covers cases where a nonfinite verbal complement is the only child of an <em>smain</em> category and contains only a head verb and an adverbial modifier (defined by macro <strong>Tarsp_B</strong>, see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>). Such structures can only arise after correction throgh the <em>smallclauses</em> module. (See :ref: <cite>smallclauses</cite>).</p>
+<p>This covers cases where a nonfinite verbal complement is the only child of an <em>smain</em> category and contains only a head verb and an adverbial modifier (defined by macro <strong>Tarsp_B</strong>, see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>). Such structures can only arise after correction through the <em>smallclauses</em> module. (See :ref: <cite>smallclauses</cite>).</p>
 </li>
 </ul>
 <p>The macro <strong>singlewordbw</strong> is defined as follows:</p>
@@ -1010,7 +1080,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <p>The macro <strong>Rpronoun</strong> simply lists all R-pronouns in a disjunction, and the <strong>adjadv</strong> macro is intended for words that are adverbs but analysed by Alpino (in some cases) as an adjective. So far, we only encountered this for <em>wel</em> (or was the <strong>adjoradv</strong> macro intended here?.</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt><strong>Schlichting</strong>: “Bijwoordelijke bepaling + een ander Zinsdeel. Dit andere Zinsdeel kan zijn een W, een VC of een B. BW, BVC en BB staan namelijk niet apart op de profielkaart. In de praktijk worden hier ook zinnen gescoord met een B en een ander zinsdeel waarvan men niet weet of het een onderwerp of een VC is. De zin ‘die ook’ bijvoorbeeld, kan betekenen ‘die moet ook’ of ‘die moet je ook daar doen’. Zulke twijfelgevallen kunenn we hier dus ook scoren.”</dt><dd><ul>
+<dt><strong>Schlichting</strong>: “Bijwoordelijke bepaling + een ander Zinsdeel. Dit andere Zinsdeel kan zijn een W, een VC of een B. BW, BVC en BB staan namelijk niet apart op de profielkaart. In de praktijk worden hier ook zinnen gescoord met een B en een ander zinsdeel waarvan men niet weet of het een onderwerp of een VC is. De zin ‘die ook’ bijvoorbeeld, kan betekenen ‘die moet ook’ of ‘die moet je ook daar doen’. Zulke twijfelgevallen kunnen we hier dus ook scoren.”</dt><dd><ul>
 <li><p>Basically covered. if noun or pronoun precedes the adverb SASTA analyses the utterance as a <em>OndB</em>, not as a <em>BX</em>. That corresponded best to the actual practice in the annotated data received.</p></li>
 </ul>
 </dd>
@@ -1051,7 +1121,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 66</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;de&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;de&quot;</span><span class="p">]</span> <span class="ow">and</span>
+       <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
@@ -1070,7 +1142,12 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 68</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="ow">and</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;aanw&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;die&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;deze&quot;</span><span class="p">)]</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="ow">and</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;aanw&quot;</span> <span class="ow">and</span>
+            <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span>
+            <span class="p">(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;die&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;deze&quot;</span><span class="p">)]</span> <span class="ow">and</span>
+       <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
@@ -1092,7 +1169,12 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 71</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="ow">and</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;aanw&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;dit&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;dat&quot;</span><span class="p">)]</span> <span class="ow">and</span> <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="ow">and</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;aanw&quot;</span> <span class="ow">and</span>
+            <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span>
+            <span class="p">(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;dit&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;dat&quot;</span><span class="p">)]</span> <span class="ow">and</span>
+       <span class="n">count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
@@ -1142,7 +1224,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
-<p>This query is self-explanatory. The condition on <em>rel</em> excluded <em>en</em> en conjunctions.</p>
+<p>This query is self-explanatory. The condition on <em>rel</em> excludes <em>en</em> in conjunctions.</p>
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Het verbindingswoord ‘en’ wordt in deze fase gebruik om een zinsdeel of een zin te introduceren. In fase VI wordt ‘en’ gebruikt om twee hoofdzinnen met elkaar te verbinden.”</p></li>
 </ul>
@@ -1166,7 +1248,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ul>
 <p>The query is self-explanatory. Note that the condition formulated in terms of the atribute <em>lemma</em> ensures that also variants of <em>er</em> such as <em>Er</em>, <em>d’r</em> and even <em>der</em> can be dealt with.</p>
 <ul class="simple">
-<li><p><strong>Schlichting</strong>: “Dit ‘er’ heeft slechts in enkele gevallen het karakter van een voornaamwoord. Het kan als zinsdeel de functie hebben van een bijwoordelijke bepaling: ‘zij komt er wel’, ‘ik heb er nog drie’, of van een onderwerp, bv. In : ‘er stond een plant voor het raam’. Zo’n zin kan dan twee onderwerpen hebben (‘er’ is dan een zgn. plaatsonderwerp, het andere onderwerp is dan het getalsonderwerp, dat wil zeggen dat dat onderwerp in het meervoud kan komen te staan: ‘er staat een kind’, ‘er staan twee kinderen’”</p></li>
+<li><p><strong>Schlichting</strong>: “Dit ‘er’ heeft slechts in enkele gevallen het karakter van een voornaamwoord. Het kan als zinsdeel de functie hebben van een bijwoordelijke bepaling: ‘zij komt er wel’, ‘ik heb er nog drie’, of van een onderwerp, bv. In: ‘er stond een plant voor het raam’. Zo’n zin kan dan twee onderwerpen hebben (‘er’ is dan een zgn. plaatsonderwerp, het andere onderwerp is dan het getalsonderwerp, dat wil zeggen dat dat onderwerp in het meervoud kan komen te staan: ‘er staat een kind’, ‘er staan twee kinderen’)”</p></li>
 </ul>
 </div>
 <div class="section" id="t038-geen-x">
@@ -1182,8 +1264,8 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
-<span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;geen&quot;</span><span class="p">]</span> <span class="ow">and</span>
-<span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]]</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;vnw&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;geen&quot;</span><span class="p">]</span> <span class="ow">and</span>
+       <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;n&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]]</span>
 </pre></div>
 </div>
 </li>
@@ -1191,7 +1273,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <p>The query is self-explanatory.</p>
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “‘geen’ meestal gevolgd door een zelfstandig naamwoord”</p></li>
-<li><p><strong>remark</strong> perhaps the number of nodes should be restricted to 2? Though <em>geen N meer</em> should also be accepted</p></li>
+<li><p><strong>Remark</strong> perhaps the number of nodes should be restricted to 2? Though <em>geen N meer</em> should also be accepted</p></li>
 </ul>
 </div>
 <div class="section" id="t039-he">
@@ -1211,9 +1293,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
-<p>The query is self-explanatory, but it is perhaps too broad. Also occurrences of <em>hè</em> at the beginning of an utterance will also be scored now.</p>
+<p>The query is self-explanatory, but it is perhaps too broad. Occurrences of <em>hè</em> at the beginning of an utterance will also be scored now.</p>
 <ul class="simple">
-<li><p><strong>Schlichting</strong>: “de naklank ‘hè’ in de betekenis van ‘vind je niet?’ of ‘dat vind je toch ook?’ maakt de voorafgaande uiting vragend.”</p></li>
+<li><p><strong>Schlichting</strong>: “De naklank ‘hè’ in de betekenis van ‘vind je niet?’ of ‘dat vind je toch ook?’ maakt de voorafgaande uiting vragend.”</p></li>
 </ul>
 </div>
 <div class="section" id="t040-hem">
@@ -1255,9 +1337,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
-<p>The query is self-explanatory. The condition that the <em>pt</em> is equal to <em>vnw</em> excludes occurrences of <em>het</em> as an article (because then <em>pt</em> = <em>lid</em>). The check on the lemma form allows also reduced forms (<em>‘t) and occurerences where the word conatins capital characters (e.g. *Het</em>).</p>
+<p>The query is self-explanatory. The condition that the <em>pt</em> is equal to <em>vnw</em> excludes occurrences of <em>het</em> as an article (because then <em>pt</em> = <em>lid</em>). The check on the lemma form allows also reduced forms (<em>‘t</em>) and occurrences where the word contains capital characters (e.g. <em>Het</em>).</p>
 <ul class="simple">
-<li><p><strong>Schlichting</strong>: ” Persoonlijk voornaamwoord ‘het, onder andere als lijdend voorwerp en als onderwerp.” Covered.</p></li>
+<li><p><strong>Schlichting</strong>: “Persoonlijk voornaamwoord ‘het’, onder andere als lijdend voorwerp en als onderwerp.” Covered.</p></li>
 </ul>
 </div>
 <div class="section" id="t042-hetzn">
@@ -1304,7 +1386,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ul>
 </div>
 <div class="section" id="t044-hww-i">
-<h3>T044: Hww i<a class="headerlink" href="#t044-hww-i" title="Permalink to this headline">¶</a></h3>
+<span id="t044-hwwi"></span><h3>T044: Hww i<a class="headerlink" href="#t044-hww-i" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Hww i.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1335,8 +1417,8 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <p>The core case can be described as follows:</p>
 <ul class="simple">
 <li><p>We look for a finite verb acting as a head</p></li>
-<li><p>that is a auxiliary verb (macro <strong>Tarsp_hww</strong>)</p></li>
-<li><p>and cooccurs with a verbal complement (<em>rel</em> = <em>vc</em>) that is either an infinitval phrase (<em>cat = *inf</em>) or a bare infinitive (<em>wvorm</em> = <em>inf</em>)</p></li>
+<li><p>that is an auxiliary verb (macro <strong>Tarsp_hww</strong>)</p></li>
+<li><p>and cooccurs with a verbal complement (<em>rel</em> = <em>vc</em>) that is either an infinitval phrase (<em>cat</em> = <em>inf</em>) or a bare infinitive (<em>wvorm</em> = <em>inf</em>)</p></li>
 </ul>
 <p>There is also a second case, for robustness (i.e. if Alpino misanalysed), with the macro <strong>robusthwwi</strong>, defined as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robusthwwi</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;top&quot; and</span>
@@ -1357,9 +1439,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p>Doen en laten (causaliteit)</p></li>
 <li><p>Doen (omschrijving)</p></li>
 </ol>
-<p>De hulpwerkwoorden die gevolgd worden door een infinitief worden niet gescoord bij HwwZ, Stam of Stam+t”</p>
-<p><strong>Remark</strong>: the auxiliary verbs that take <em>te</em> plus infinitive are not covered yet
-<strong>Remark</strong>: should we count <em>zitten</em>, <em>staan</em>, <em>liggen</em>, etc.  as HwwZ when not followed by infinitive or <em>te</em> + infinitive?</p>
+<p>De hulpwerkwoorden die gevolgd worden door een infinitief worden niet gescoord bij HwwZ, Stam of Stam+t”.</p>
+<p><strong>Remark</strong>: the auxiliary verbs that take <em>te</em> plus infinitive are not covered yet</p>
+<p><strong>Remark</strong>: should we count <em>zitten</em>, <em>staan</em>, <em>liggen</em>, etc.  as HwwZ when not followed by infinitive or <em>te</em> + infinitive?</p>
 </div>
 <div class="section" id="t045-hww-vd">
 <h3>T045: Hww Vd<a class="headerlink" href="#t045-hww-vd" title="Permalink to this headline">¶</a></h3>
@@ -1380,7 +1462,22 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: “Hulpwerkwoord gevolgd door het Voltooid deelwoord. Hulpwerkwoord + Voltooid deelwoord komt voor bij de voltooide toijd (‘jij hebt gemaakt’). het Voltooid deelwoord wordt apart bij de Woordstructuur gescoord. ook voltooid verleden tijd (‘jij had gemaakt’) kan hier gescoord worden. dan wordt eveneens bij Verleden tijd en bij Voltooid deelwoord gescoord. het hulpwerkwoord wordt niet gescoord bij Woordstructuur.”</p></li>
+</ul>
+<p>The core case of the query searches for one of the verbs <em>hebben</em>, <em>worden</em> or <em>zijn</em> in combination with a verbal complement that is either a participial phrase (<em>ppart</em>) or a bare participle (<em>wvorm</em> = <em>ppart</em>).</p>
+<p>There is also a robust case (macro <strong>robusthwwvd</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robusthwwvd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;top&quot; and</span>
+<span class="s2">                   .//node[@pt=&quot;ww&quot; and %vdhwws% and @wvorm=&quot;pv&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)] and</span>
+<span class="s2">                   .//node[@pt=&quot;ww&quot; and @wvorm=&quot;vd&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)]</span>
+<span class="s2">                  )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This macro searches for a misanalysed (<em>rel</em> equal to <em>–</em> or <em>dp</em>) finite auxiliary verb that takes a participial clause (macro <strong>vdhwws</strong>) anywhere in the structure, in combination with a misanalysed participial verb anywhere in the structure. The macro <strong>vdhwwws</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vdhwws</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@lemma=&quot;hebben&quot; or @lemma=&quot;zijn&quot; or @lemma=&quot;worden&quot;)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Hulpwerkwoord gevolgd door het Voltooid deelwoord. Hulpwerkwoord + Voltooid deelwoord komt voor bij de voltooide tijd (‘jij hebt gemaakt’). Het Voltooid deelwoord wordt apart bij de Woordstructuur gescoord. ook voltooid verleden tijd (‘jij had gemaakt’) kan hier gescoord worden. dan wordt eveneens bij Verleden tijd en bij Voltooid deelwoord gescoord. Het hulpwerkwoord wordt niet gescoord bij Woordstructuur.” Fully covered.</p></li>
+<li><p><strong>Remark</strong> The macro <strong>vdhwws</strong> should also be used in the core case of this query.</p></li>
 </ul>
 </div>
 <div class="section" id="t046-hwwz">
@@ -1392,14 +1489,46 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Level</strong>: VVW</p></li>
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
-<li><p><strong>Page</strong>: 84;85</p></li>
+<li><p><strong>Page</strong>: 84-85</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="o">%</span><span class="n">Tarsp_HwwZ</span><span class="o">%</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The macro <strong>tarsp_HwwZ</strong> is defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_HwwZ</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@pt=&quot;ww&quot; and @rel=&quot;hd&quot; and @wvorm=&quot;pv&quot; and</span>
+<span class="s2">                 ((%Tarsp_hww</span><span class="si">% o</span><span class="s2">r @lemma = &quot;hebben&quot;) and</span>
+<span class="s2">                  not(%Tarsp_vc_sibling%)</span>
+<span class="s2">                 ) or</span>
+<span class="s2">                 (@lemma=&quot;zijn&quot; and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )</span>
+<span class="s2">                )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The query searches for finite forms of a head verb and distinguishes two subcases:</p>
+<ul>
+<li><p>the finite form is a form of one of the auxiliary verbs that take an infinitival complement, or of the verb <em>hebben</em>: in this case no <em>vc</em> complement should be present, which is achieved by negting the <strong>Tarsp_vc_sibling</strong> macro, defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_vc_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;parent::node[ node[@rel=&quot;vc&quot;]]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p>the finite form is a form of the verb <em>zijn</em>: in this case a <em>vc</em> complement must be absent but an <em>ld</em> sibling must be present. This has been done to exclude regular copular uses of the verb <em>zijn</em> (when combined with an adjective (phrase) or noun (phrase) predicate. The presence of the <em>ld</em> sibling is ensured by the <strong>Tarsp_ld_sibling</strong> macro:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_ld_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;parent::node[ node[@rel=&quot;ld&quot;]]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><dl class="simple">
+<dt><strong>Schlichting</strong>: “Hulpwerkwoord Zelfstandig gebruikt. De eerste persoonsvorm die door de kinderen na het koppelwerkwoord geleerd wordt is de tegenwoordige tijd enkelvoud van het hulpwerkwoord, ‘zelfstandig’ gebruikt, ‘Zelfstandig’ betekent in dit verband dat het hulpwerkwoord niet gevolgd wordt door een hoofdwerkwoord. Tot deze ‘zelfstandig’ gebruikte hulpwerkwoorden rekenen we: <em>blijven, doen, gaan, hebben, hoeven, horen, komen, kunnen, laten, liggen, lopen, moeten, mogen, staan, willen, worden, zijn, zitten, zullen</em>”. The list provided here is identical to the list provided under T044 (see <a class="reference internal" href="#t044-hwwi"><span class="std std-ref">T044: Hww i</span></a>),  except that <em>behoren</em> is not explicitly mentioned, plus the auxiliaries <em>hebben</em>, <em>zijn</em> en <em>worden</em>.” Covered.</dt><dd><ul class="simple">
+<li><p>“Wanneer het hulpwerkwoord wordt gevolgd door een onbepaalde wijs (bijvoorbeeld; ‘ik wil fietsen’) of door een onvoltooid deelwoord (bijvoorbeeld: ‘ze heeft geroepen’) wordt het hier niet gescoord (zie Hww i, Fase III en Hww Vd, Fase IV).” Covered</p></li>
+<li><p>“Wanneer het ‘zelfstandig’gebruikte hulpwerkwoord in het meervoud staat (bijvoorbeeld: ‘nou gaan we’) wordt het niet hier gescoord maar bij het Meervoud van de Tegenwoordige Tijd.” Not covered</p></li>
+<li><p>“Wanneer het ‘zelfstandig’ gebruikte hulpwerkwoord in de verleden tijd staat (bijvoorbeedl: ‘dat deed jij’) wordt het niet hier gescoord maar bij de Verleden tijd.” Not Covered</p></li>
+<li><p>“De hulpwerkwoorden die hier gescoord worden, behoeven niet gescoord te worden bij Stam of Stam + t.”See under <em>Stam</em> and <em>Stam + t</em></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>Remark</strong> the uncovered cases can be improved by adding the following condition: &#64;pvagr!=”mv” and &#64;pvtijd!=”verl”</p></li>
 </ul>
 </div>
 <div class="section" id="t047-ik">
@@ -1418,7 +1547,10 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The query is self-explanatory. The condition formulated in terms of <em>lemma</em> (instead of <em>word</em>) also allows variants in case (<em>Ik</em>), reduced variants (<em>‘k</em>, <em>k</em>) en emphasised variants (<em>ikke</em>)</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Het persoonlijk voornaamwoord ‘ik’ wordt meestal in deze Fase ontwikkeld” (It involves Stage III).</p></li>
 </ul>
 </div>
 <div class="section" id="t048-into">
@@ -1433,7 +1565,10 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 59</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>Though it is trivial to implement this by looking for the presence of a question mark or exclamation mark, the use of these annotations by annotators appears to be qufaantekeninite inconsistent.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “In fase II stellen de kinderen alleen vragen door een vraagintonatie te gebruiken. Bij het uitschrijven van het sample wordt die intonatie aangegeven door een vraagteken. Bij het analyseren van een uiting die alleen vraagintonatie heeft maar niet de vorm van de vraag analyseren we de uiting eerst als Mededelende Zin; de aantekening intonatie komt er extra bij. Vraag-Intonatie is dus een extra scoring “</p></li>
 </ul>
 </div>
 <div class="section" id="t049-inv">
@@ -1449,18 +1584,45 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(((</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;sv1&quot;</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">parent</span><span class="p">::</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;whq&quot;</span><span class="p">]))</span> <span class="ow">or</span>
-    <span class="p">(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;smain&quot;</span> <span class="p">)</span>
-   <span class="p">)</span> <span class="ow">and</span>
-  <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;ww&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@stype</span><span class="p">)</span> <span class="ow">or</span> <span class="nd">@stype</span><span class="o">!=</span><span class="s2">&quot;imparative&quot;</span><span class="p">)</span> <span class="p">]</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="ow">and</span> <span class="n">number</span><span class="p">(</span><span class="nd">@end</span><span class="p">)</span><span class="o">&gt;../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span><span class="o">/</span><span class="nd">@end</span><span class="p">])</span> <span class="ow">or</span>
-  <span class="o">%</span><span class="n">robustinversion</span><span class="o">%</span><span class="p">]</span>
+         <span class="p">(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;smain&quot;</span> <span class="p">)</span>
+        <span class="p">)</span> <span class="ow">and</span>
+        <span class="n">node</span><span class="p">[</span><span class="nd">@pt</span><span class="o">=</span><span class="s2">&quot;ww&quot;</span> <span class="ow">and</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@stype</span><span class="p">)</span> <span class="ow">or</span> <span class="nd">@stype</span><span class="o">!=</span><span class="s2">&quot;imparative&quot;</span><span class="p">)</span> <span class="p">]</span> <span class="ow">and</span>
+                    <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="ow">and</span> <span class="n">number</span><span class="p">(</span><span class="nd">@end</span><span class="p">)</span><span class="o">&gt;../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span><span class="o">/</span><span class="nd">@end</span><span class="p">]</span>
+               <span class="p">)</span> <span class="ow">or</span>
+       <span class="o">%</span><span class="n">robustinversion</span><span class="o">%</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The core case of this query looks for</p>
+<ul class="simple">
+<li><p><em>sv1</em> nodes not dominated by a whq* node or <em>smain</em> clauses</p></li>
+<li><p>that are not imperatives</p></li>
+<li><p>in which the finite verb precedes the subject.</p></li>
+</ul>
+<p>The robust case has been implemented by the macro <strong>robustinversion</strong>, defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robustinversion</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;top&quot; and</span>
+<span class="s2">                      .//node[@pt=&quot;ww&quot;  and @wvorm=&quot;pv&quot; and  @rel!=&quot;hd&quot; and (not(@stype) or @stype!=&quot;imparative&quot;)] and</span>
+<span class="s2">                      .//node[@pt=&quot;vnw&quot; and @naamval=&quot;nomin&quot; and @rel!=&quot;su&quot; and</span>
+<span class="s2">                      @end&gt;..//node[@pt=&quot;ww&quot; and @wvorm=&quot;pv&quot;]/@end])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>It searches for wrongly analyzed structures  (cf. the conditions on the grammatical relations) that contain:</p>
+<ul>
+<li><p>anywhere a non-head finite verb that is not marked for <em>stype</em> = <em>imparative</em> (Alpino  indeed uses this misspelling of <em>imperative</em> as value)</p></li>
+<li><p>anywhere a non-subject nominative pronoun</p></li>
+<li><p>where the pronoun precedes the verb</p></li>
+<li><dl>
+<dt><strong>Schlichting</strong>:</dt><dd><p>“Hiermee wordt bedoeld de inversie of omkering van persoonsvorm en onderwerp. In de eerste constructie met onderwerp en persoonsvorm die zij leren, gebruiken de kinderen de volgorde onderwerp - persoonsvorm. heel spoedig daarna leren ze de inversievolgorde”</p>
+<p>Inversie hoeft in principe niet elke keer dat het voorkomt gescoord te worden. Het is van belang dat men bij elke leerling die in de Grammaticale Ontwikkelingsfase III of hoger valt controleert dat het kind twee- of driemaal de inversievolgorde gebruikt. Fouten tegen de regel van inversie worden apart genoteerd, bijvoorbeeld achterop de profielkaart. Het is waarschijnlijk dat in Zuid-Nederland deze Inversie wat later wordt geleerd dan in Noord-Nederland”</p>
+</dd>
+</dl>
+</li>
+<li><p><strong>Remark</strong> It is probably best to restrict Inversion to declarative clauses only. We probably can best use the macro <strong>declarative</strong> for this. Currently we exclude wh-questions and imperatives, but not yes-no questions. That will also make the exclusion of imperatives better and consistent with other language measures.</p></li>
 </ul>
 </div>
 <div class="section" id="t050-jij">
-<h3>T050: jij<a class="headerlink" href="#t050-jij" title="Permalink to this headline">¶</a></h3>
+<span id="id5"></span><h3>T050: jij<a class="headerlink" href="#t050-jij" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: jij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1469,13 +1631,19 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 79</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;jij&quot;</span> <span class="ow">or</span> <span class="p">(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;je&quot;</span>  <span class="ow">and</span> <span class="p">(</span><span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pr&quot;</span> <span class="ow">or</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pers&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="p">))]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;jij&quot;</span> <span class="ow">or</span>
+          <span class="p">(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;je&quot;</span>  <span class="ow">and</span> <span class="p">(</span><span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pr&quot;</span> <span class="ow">or</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pers&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;su&quot;</span> <span class="p">))]</span>
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The reduced form <em>je</em> does not have <em>jij</em> as its lemma, probably because it is also a reduced form of <em>jou</em> and <em>jouw</em>. Its lemma is <em>je</em>.
+The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>jij</em>) or <em>pr</em> (personal or reflexive pronoun, for <em>je</em>).</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “We vinden overwegend ‘jij’ in deze Fase; een enkele maal ‘je’.” (it concerns Stage III).</p></li>
+<li><p><strong>Remark</strong> use of <em>jij</em> as a single word utterance, or as a single word as <em>dp</em>, <em>sat</em>, or <em>nucl</em> is not covered now.</p></li>
 </ul>
 </div>
 <div class="section" id="t051-jou">
@@ -1488,13 +1656,23 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Original</strong>: yes</p></li>
 <li><p><strong>In form</strong>: yes</p></li>
 <li><p><strong>Page</strong>: 82</p></li>
-<li><p><strong>Implementation</strong>: Xpath with macros</p></li>
+<li><p><strong>Implementation</strong>: Xpath</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;je&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;jou&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pr&quot;</span> <span class="ow">or</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pers&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;obj1&quot;</span> <span class="ow">or</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;obj2&quot;</span><span class="p">)]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;je&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;jou&quot;</span><span class="p">)</span> <span class="ow">and</span>
+           <span class="p">(</span><span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pr&quot;</span> <span class="ow">or</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pers&quot;</span><span class="p">)</span> <span class="ow">and</span>
+               <span class="p">(</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;obj1&quot;</span> <span class="ow">or</span> <span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;obj2&quot;</span><span class="p">)]</span>
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p>The lemma differs for <em>jou</em> and <em>je</em>, see also <a class="reference internal" href="#t050-jij"><span class="std std-ref">T050: jij</span></a></p></li>
+<li><p>The <em>vwtype</em> for <em>je</em> and <em>jou</em> differs, so both options must be allowed</p></li>
+<li><p>The condition on the <em>rel</em> attribute is to exclude the possessive pronoun <em>je</em></p></li>
+<li><p><strong>Remark</strong> It should be checked whether both a condition on <em>vwtype</em> and a condition on <em>rel</em> are needed</p></li>
+<li><p><strong>Remark</strong>: the query does not account for cases where <em>jou</em> is the only word in an utterance, or the only word in a <em>dp</em> <em>sat</em> or <em>nucl</em> node. Extension of the query is needed. Or when it is a <em>predc</em> (<em>als ik jou was</em>).</p></li>
+<li><p><strong>Schlichting</strong>: “Het persoonlijk voornaamwoord ‘jou’ wordt zowel gebruikt als voorwerp als in bepalingen met een voorzetsel.”</p></li>
 </ul>
 </div>
 <div class="section" id="t052-kop">
@@ -1513,7 +1691,46 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The macro <a href="#id6"><span class="problematic" id="id7">**</span></a>Tarsp_Kop**is defiend as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Kop</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(   @pt=&quot;ww&quot; and @rel=&quot;hd&quot; and not(%Tarsp_hww%) and</span>
+
+<span class="s2">                 ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or</span>
+<span class="s2">                  (@lemma=&quot;zijn&quot; and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%) and not(%Tarsp_onlymodR_sibling%))</span>
+<span class="s2">                 )</span>
+<span class="s2">               )&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Explanation: a node is a copular verb if it is a verb acting as a head but not an auxiliary verb (<strong>Tarsp_hww</strong>), and</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>either it has a <em>predc</em> sibling (<strong>tarsp_predc_sibling</strong>) but no direct object (<em>obj1</em>) sibling (<strong>Tarsp_obj1_sibling</strong>), or</p></li>
+<li><p>the lemma equals <em>zijn</em> and it has no <em>vc</em> sibling (<strong>Tarsp_vc_sibling</strong>), no <em>ld</em> sibling, and no Rpronoun as modifier if no predicate is present (<strong>Tarsp_onlymodR_sibling</strong>)</p></li>
+</ul>
+</div></blockquote>
+<p>The <em>sibling</em> macros are defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_vc_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;parent::node[ node[@rel=&quot;vc&quot;]]&quot;&quot;&quot;</span>
+<span class="n">Tarsp_predc_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;parent::node[ node[@rel=&quot;predc&quot;]]&quot;&quot;&quot;</span>
+<span class="n">Tarsp_obj1_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;parent::node[ node[@rel=&quot;obj1&quot;]]&quot;&quot;&quot;</span>
+<span class="n">Tarsp_ld_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;parent::node[ node[@rel=&quot;ld&quot;]]&quot;&quot;&quot;</span>
+<span class="n">Tarsp_onlymodR_sibling</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(parent::node[node[@rel=&quot;mod&quot; and %Rpronoun%] and not(node[@rel=&quot;predc&quot;])])&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The definition of <em>zijn</em> as a copula does not require the presence of a predicate, it rather excludes complements and modifiers that indicate a  different usage of <em>zijn</em> (e.g., as an auxiliary verb, or as an independent verb of location). This has been done because in incomplete sentences or misanalysed sentences containing <em>zijn</em>, the most probable interpretation of <em>zijn</em> is  in most cases as a copula (with a left-out or unpronounced predicate).</p>
+<p>The query does not list the copulas explicitly because there are many more copulas than traditionally assumed and also many more than [Schlichting 2005:47] mentions for child language (e.g. <em>gaan</em>, <em>aanvoelen</em>, <em>raken</em>, etc).</p>
+<ul>
+<li><p><strong>Schlichting</strong>: “Koppelwerkwoord. We onderscheiden twee soorten gezegdes:”</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>“Werkwoordelijke, bijvoorbeeld ‘zij <em>werkt</em> ‘s morgens’”</p></li>
+<li><p>“Naamwoordelijke gezegdes, bijvoorbeeld ‘hij <em>is tuinman</em>’ en ‘jij <em>bent moe</em>’.”</p>
+<p>“Naamwoordelijke gezegdes bestaan uit een koppelwerkwoord en een naamwoordelijk deel van  het gezegde. het koppelwerkwoord heeft niet veel betekenis van zichzelf. het vormt de koppeling tussen het onderwerp en het naamwoordelijk deel van het gezegde. Het meest gebruikte koppelwerkwoord, ook in de kindertaal, is ‘zijn’. Andere voorkomende koppelwerkwoorden zijn ‘worden’, ‘blijven’ en ‘lijken’.</p>
+<p>“Aanvankelijk wordt alleen de vorm ‘is’ nog gebruikt. het Koppelwerkwoord wordt geanalyseerd als speciaal Zinsdeel ‘W-Kop’en wordt apart bij de Zinsdelen in fase II gescoord.”</p>
+</li>
+</ol>
+</div></blockquote>
+</li>
+<li><p><strong>Note</strong> In Sasta a copular verb is annotated by the code <em>Kop</em>, <strong>not</strong> by <em>W-Kop</em>.</p></li>
 </ul>
 </div>
 <div class="section" id="t053-maar">
@@ -1535,7 +1752,10 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
+<p>The first part of this query is self-explanatory, the second part has been included because Alpino often analyses an sentence-initial <em>maar</em> as an adverb instead of conjunction</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Het Verbindinsgwoord ‘maar’. Dit wordt introducerend gebruikt en om twee hoofdzinnen te verbinden.”</p></li>
 </ul>
 </div>
 <div class="section" id="t054-sv1">
@@ -1554,8 +1774,8 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
-<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
+<p>This is not a language measure of Tarsp, but it has been defined to identify verb-initial clauses (for development purposes)</p>
 </div>
 <div class="section" id="t055-mededelende-zin">
 <h3>T055: Mededelende Zin<a class="headerlink" href="#t055-mededelende-zin" title="Permalink to this headline">¶</a></h3>
@@ -1570,6 +1790,10 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 </ul>
+<p>This is not really a language measure, but rather a class of language measures that apply to declarative sentences.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t056-mij">
 <h3>T056: mij<a class="headerlink" href="#t056-mij" title="Permalink to this headline">¶</a></h3>
@@ -1583,10 +1807,14 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 81</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;me&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;mij&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pr&quot;</span> <span class="ow">or</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pers&quot;</span><span class="p">)]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[(</span><span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;me&quot;</span> <span class="ow">or</span> <span class="nd">@lemma</span><span class="o">=</span><span class="s2">&quot;mij&quot;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="p">(</span><span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pr&quot;</span> <span class="ow">or</span> <span class="nd">@vwtype</span><span class="o">=</span><span class="s2">&quot;pers&quot;</span><span class="p">)]</span>
 </pre></div>
 </div>
 </li>
+<li><p>The lemma differs for <em>mij</em> and <em>me</em>, see also <a class="reference internal" href="#t050-jij"><span class="std std-ref">T050: jij</span></a></p></li>
+<li><p>The <em>vwtype</em> for <em>mij</em> and <em>me</em> differs, so both options must be allowed</p></li>
+<li><p><strong>Schlichting</strong>: “Persoonlijk voornaamwoord ‘mij’, ‘me’, gebruikt als voorwerp en na een voorzetsel”</p></li>
 </ul>
 </div>
 <div class="section" id="t057-mvtt">
@@ -1606,6 +1834,11 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Meervoud van de tegenwoordige Tijd. Het gaat hier om congruentoe tussen Onderwerp en Werkwoord in het meervoud van de 1e, 2e en 3e persoon van de tegenwoordige tijd van het werkwoord, ook van het hulpwerkwoord. We bedoel hier comstructies als ‘ze komen’, ‘wij spelen’. het moet duidelijk zijn dat het werkwoord geen infinitief is. ook de congruentie tussen persoonsvorm en naamwoordelijk dele van het gezegde wordt hier gesccoord”</p></li>
+<li><p><strong>Remark</strong> Though Schlichting refers to “congruentie”(agreement), the query can be formulated in terms of properties of the finite verb alone.</p></li>
+</ul>
 </div>
 <div class="section" id="t058-mvzn">
 <h3>T058: MvZn<a class="headerlink" href="#t058-mvzn" title="Permalink to this headline">¶</a></h3>
@@ -1624,6 +1857,11 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
+<p>The query is self-explanatory.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: “Meervoudig Zelfstandig naamwoord. Zowel meervoudsvormen op ‘-en’ als op ‘-s’ komen voor. Wanneer kinderen een meervoud van de zelfstandige naamwoorden gebruiken betekent dit nog niet altijd dat zij de meervoudsregel begrepen hebben. Het woord ‘schoenen’ bijvoorbeeld kan heel goed alleen in het meervoud gebruikt worden door het kind. Daarom is het van belang dat men aantekent op de profielkaart welke meervoudsvormen men gevonden heeft. Zodra er een meervoudsvorm is gevonden van een woord dat waarschijnlijk ook in het enkelvoud is aangeboden, is het extra aantekenen niet meer nodig.”</p></li>
+<li><p><strong>Remark</strong> The plural forms are currently not put into the form.</p></li>
+</ul>
 </div>
 <div class="section" id="t059-nabep">
 <h3>T059: Nabep<a class="headerlink" href="#t059-nabep" title="Permalink to this headline">¶</a></h3>
@@ -1637,10 +1875,20 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 73</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@lemma</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;ook&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;dan&quot;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">parent</span><span class="p">::</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">!=</span><span class="s2">&quot;ww&quot;</span><span class="p">]]</span> <span class="ow">and</span> <span class="nd">@begin</span> <span class="o">&gt;=</span> <span class="o">../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span><span class="o">/</span><span class="nd">@end</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mod&quot;</span> <span class="ow">and</span>
+        <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="nd">@lemma</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;ook&quot;</span> <span class="ow">and</span> <span class="nd">@lemma</span><span class="o">!=</span><span class="s2">&quot;dan&quot;</span><span class="p">))</span> <span class="ow">and</span>
+        <span class="n">parent</span><span class="p">::</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span> <span class="ow">and</span> <span class="nd">@pt</span><span class="o">!=</span><span class="s2">&quot;ww&quot;</span><span class="p">]]</span> <span class="ow">and</span>
+        <span class="nd">@begin</span> <span class="o">&gt;=</span> <span class="o">../</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;hd&quot;</span><span class="p">]</span><span class="o">/</span><span class="nd">@end</span><span class="p">]</span>
 </pre></div>
 </div>
 </li>
+</ul>
+<p>Explanation:</p>
+<ul class="simple">
+<li><p>the node must be a modifier, and either a phrase, or if it is a single word it should not be <em>ook</em> or <em>dan</em></p></li>
+<li><p>it must modify a head that is not a verb inside an NP</p></li>
+<li><p>the node must follow the head</p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t060-nevens">
@@ -1655,10 +1903,17 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 56</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;cnj&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;smain&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;sv1&quot;</span><span class="p">)]</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;crd&quot;</span> <span class="p">]]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;cnj&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;smain&quot;</span> <span class="ow">or</span> <span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;sv1&quot;</span><span class="p">)]</span> <span class="ow">and</span>
+           <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;crd&quot;</span> <span class="p">]]</span>
 </pre></div>
 </div>
 </li>
+</ul>
+<p>Explanation:</p>
+<ul class="simple">
+<li><p>the node must contain an smain or sv1 with grammatical relation <em>cnj</em>, and</p></li>
+<li><p>it must contain a coordinator</p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t061-nevenschikkende">
@@ -1673,6 +1928,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 54</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t062-ombep">
@@ -1687,10 +1943,11 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 74</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t063-ond">
-<span id="id5"></span><h3>T063: Ond<a class="headerlink" href="#t063-ond" title="Permalink to this headline">¶</a></h3>
+<span id="id8"></span><h3>T063: Ond<a class="headerlink" href="#t063-ond" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ond.</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1725,6 +1982,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p>if there is an empty subject, to cover cases such as <em>wie zwom</em> <strong>er</strong>. Note that in <em>wie heeft</em> <strong>er</strong> gezwommen* this <em>er</em> is considered a subject beacuse of the empty subject of the participial clause, which is perhaps not what we want.</p></li>
 </ul>
 <p><strong>Remark</strong>: The condition on the presence of <em>pt</em> or <em>cat</em> incorrectly excludes <em>wie</em> in <em>wie doet dat</em>, <em>wie heeft dat gedaan</em>: <em>wie</em> is a <em>whd</em> an an antecedent to  an index node with grammatical relation <em>su</em> (see e.g. VKLTarsp, sampl 3, utterance 25 <em>weet ik niet</em> <strong>wie</strong> daarin zit. It has no consequences for the scores because <em>Ond</em> is not in the form and because in language measures such as OndWB etc a different definition of subject is used. It probably is better to replace the condition on <em>pt</em> and <em>cat</em> by a condition on the parent node, viz. that it must have as value for the <em>cat</em> attribute one of the values from <em>smain</em>, <em>sv1</em>, or <em>ssub</em> (categories for finite clauses or finite clause bodies).</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t064-ondb">
 <h3>T064: OndB<a class="headerlink" href="#t064-ondb" title="Permalink to this headline">¶</a></h3>
@@ -1750,6 +2010,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See <span class="xref std std-ref">smallclauses</span> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t065-ondbvc">
 <h3>T065: OndBVC<a class="headerlink" href="#t065-ondbvc" title="Permalink to this headline">¶</a></h3>
@@ -1776,6 +2039,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See <span class="xref std std-ref">smallclauses</span> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t066-onderbr">
 <h3>T066: Onderbr<a class="headerlink" href="#t066-onderbr" title="Permalink to this headline">¶</a></h3>
@@ -1789,6 +2055,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 58</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t067-onderschikkend-b">
@@ -1807,6 +2074,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t068-onderschikkend-vc">
@@ -1825,6 +2093,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t069-onderschikkende">
@@ -1843,6 +2112,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t070-onderwerpswoordgroep">
@@ -1861,6 +2131,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t071-ondvc">
@@ -1893,6 +2164,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See section <span class="xref std std-ref">smallclauses</span> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t072-ondw">
 <h3>T072: OndW<a class="headerlink" href="#t072-ondw" title="Permalink to this headline">¶</a></h3>
@@ -1924,6 +2198,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>This covers cases in which the predicate is a nonfite verb. See <span class="xref std std-ref">smallclauses</span> for clarification.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t073-ondwb">
 <h3>T073: OndWB<a class="headerlink" href="#t073-ondwb" title="Permalink to this headline">¶</a></h3>
@@ -1951,6 +2228,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t074-ondwbb">
 <h3>T074: OndWBB<a class="headerlink" href="#t074-ondwbb" title="Permalink to this headline">¶</a></h3>
@@ -1978,6 +2258,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t075-ondwbvc">
 <h3>T075: OndWBVC<a class="headerlink" href="#t075-ondwbvc" title="Permalink to this headline">¶</a></h3>
@@ -2006,6 +2289,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t076-ondwvc">
 <h3>T076: OndWVC<a class="headerlink" href="#t076-ondwvc" title="Permalink to this headline">¶</a></h3>
@@ -2034,6 +2320,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 <p>“”“</p>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t077-ondwvcvc-x">
 <h3>T077: OndWVCVC(X)<a class="headerlink" href="#t077-ondwvcvc-x" title="Permalink to this headline">¶</a></h3>
@@ -2061,6 +2350,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t078-ov2">
 <h3>T078: Ov2<a class="headerlink" href="#t078-ov2" title="Permalink to this headline">¶</a></h3>
@@ -2074,6 +2366,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 48</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t079-ov3">
@@ -2092,6 +2385,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t080-ov7">
@@ -2106,6 +2400,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 58</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t081-ovwg7">
@@ -2120,6 +2415,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 74</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t082-ovverb6">
@@ -2134,6 +2430,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 78</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t083-ov4">
@@ -2152,6 +2449,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t084-ov5">
@@ -2170,6 +2468,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t085-overige">
@@ -2188,6 +2487,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t086-samzn">
@@ -2238,6 +2538,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <p>New versions of Alpino may treat these words differently.</p>
 <p>However, not all words that are a compound are marked as such  in the Alpino lexicon (e.g. <em>tafelkleed</em>). Therefore we also use a list of compounds derived from CELEX.</p>
 <p>The language measure T086 has been implemented by the Python function getcompounds from the compounds module, which has been described <a class="reference internal" href="lexicons.html#getcompounds-label"><span class="std std-ref">here</span></a>.</p>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t087-stam">
 <h3>T087: Stam<a class="headerlink" href="#t087-stam" title="Permalink to this headline">¶</a></h3>
@@ -2262,6 +2565,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t088-stam-t">
@@ -2284,6 +2588,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t089-sz2">
@@ -2305,6 +2610,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t090-sz3">
@@ -2326,6 +2632,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t091-v-lijdend">
@@ -2340,6 +2647,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 42</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t092-v-meewerkend">
@@ -2354,6 +2662,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 42;43</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t093-v-voorzetsel">
@@ -2368,6 +2677,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 43</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t094-v-u-divers">
@@ -2392,6 +2702,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t095-v-u-soc-aangp">
@@ -2410,6 +2721,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t096-v-u-ster">
@@ -2424,6 +2736,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 38;39</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t150-v-u-nee-ja">
@@ -2442,10 +2755,11 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t097-vc">
-<span id="id6"></span><h3>T097: VC<a class="headerlink" href="#t097-vc" title="Permalink to this headline">¶</a></h3>
+<span id="id9"></span><h3>T097: VC<a class="headerlink" href="#t097-vc" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VC.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -2538,6 +2852,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t099-vcw">
@@ -2552,6 +2867,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Page</strong>: 46</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t100-vcwondbb">
@@ -2580,6 +2896,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <span class="s2">                     </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
+<ul class="simple">
+<li><p><strong>Schlichting</strong>: ” “</p></li>
+</ul>
 </div>
 <div class="section" id="t101-vcwoordgroep">
 <h3>T101: VCWoordgroep<a class="headerlink" href="#t101-vcwoordgroep" title="Permalink to this headline">¶</a></h3>
@@ -2597,6 +2916,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t102-verb-ov">
@@ -2620,6 +2940,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t103-vergr-trap">
@@ -2657,6 +2978,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t105-verl-tijd">
@@ -2675,6 +2997,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t106-vo-bij">
@@ -2697,6 +3020,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t107-vobij">
@@ -2715,6 +3039,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t108-volt-dw">
@@ -2733,6 +3058,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t109-voltd-fg">
@@ -2747,6 +3073,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 88</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t110-vr">
@@ -2886,6 +3213,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t115-vzbepbvzn">
@@ -2900,6 +3228,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 74</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t116-vzbepzn">
@@ -2918,6 +3247,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t117-vzn">
@@ -2936,6 +3266,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t118-vzznaz">
@@ -2950,6 +3281,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 70</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t119-s1w">
@@ -2968,6 +3300,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t120-w">
@@ -2986,6 +3319,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t121-w-x">
@@ -3067,6 +3401,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t125-wbvc">
@@ -3115,6 +3450,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t127-werkwoordswoordgroep">
@@ -3133,6 +3469,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t128-wij">
@@ -3151,6 +3488,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t129-wond-x">
@@ -3263,6 +3601,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t133-wvz">
@@ -3281,6 +3620,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t134-ww">
@@ -3295,6 +3635,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 73</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t135-wxy">
@@ -3395,6 +3736,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t139-x-w-deel">
@@ -3409,6 +3751,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 48;49</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t140-xneg">
@@ -3431,6 +3774,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t141-xy-w-deel">
@@ -3445,6 +3789,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 51</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t142-ze">
@@ -3463,6 +3808,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t143-zelf">
@@ -3477,6 +3823,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>:</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t144-zij">
@@ -3495,6 +3842,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t145-zn">
@@ -3516,6 +3864,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t147-znzn">
@@ -3536,6 +3885,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t148-znx">
@@ -3550,6 +3900,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 40</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t151-v-u-totaal">
@@ -3568,6 +3919,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t152-g-totaal">
@@ -3586,6 +3938,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t153-g-o-fase">
@@ -3604,6 +3957,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t154-pfii">
@@ -3622,6 +3976,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t155-pfiii">
@@ -3640,6 +3995,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t156-ovznbv4">
@@ -3654,6 +4010,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Page</strong>: 69</p></li>
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t157-screening">
@@ -3672,6 +4029,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t158-pfiv">
@@ -3690,6 +4048,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t159-pfv">
@@ -3708,6 +4067,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t160-pfvi">
@@ -3726,6 +4086,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t161-pfvii">
@@ -3744,6 +4105,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t162-pf">
@@ -3762,6 +4124,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 <div class="section" id="t165-formulier">
@@ -3780,6 +4143,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 </li>
+<li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
 </div>
 </div>
