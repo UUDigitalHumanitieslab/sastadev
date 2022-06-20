@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
     <title>Implementation of the methods &#8212; SASTA  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
@@ -12,6 +13,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
@@ -44,8 +46,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="implementation-of-the-methods">
-<h1>Implementation of the methods<a class="headerlink" href="#implementation-of-the-methods" title="Permalink to this headline">¶</a></h1>
+  <section id="implementation-of-the-methods">
+<h1>Implementation of the methods<a class="headerlink" href="#implementation-of-the-methods" title="Permalink to this heading">¶</a></h1>
 <p>The selection of the utterances to be analyzed  is currently not done by SASTA (though it probably is possible, and it is planned to experiment with it).</p>
 <p>Each method is described by a set of language measures. Each language measure has a number of properties, the most prominent one of which is   the query. Each method is represented as a table in an Excel document, in a subfolder <em>methods</em> in the code folder, with the language measures in the rows and the language measure properties in the columns.</p>
 <p>Each language measure has the following properties:</p>
@@ -79,7 +81,7 @@
 <p>A special class <em>Method</em> has been defined in the module methods.py.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="methods.Method">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">methods.</span></span><span class="sig-name descname"><span class="pre">Method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">queries:</span> <span class="pre">typing.Dict[str,</span> <span class="pre">query.Query],</span> <span class="pre">item2idmap:</span> <span class="pre">typing.Dict[typing.Tuple[str,</span> <span class="pre">str],</span> <span class="pre">str],</span> <span class="pre">altcodes:</span> <span class="pre">typing.Dict[typing.Tuple[str,</span> <span class="pre">str],</span> <span class="pre">typing.Tuple[str,</span> <span class="pre">str]],</span> <span class="pre">postquerylist:</span> <span class="pre">typing.List[str],</span> <span class="pre">methodfilename:</span> <span class="pre">str,</span> <span class="pre">defaultfilter:</span> <span class="pre">typing.Callable[[query.Query,</span> <span class="pre">typing.Dict[str,</span> <span class="pre">typing.List[typing.Tuple[str,</span> <span class="pre">int]]],</span> <span class="pre">typing.Tuple[str,</span> <span class="pre">int]],</span> <span class="pre">bool]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">allok&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/methods.html#Method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#methods.Method" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">methods.</span></span><span class="sig-name descname"><span class="pre">Method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">queries:</span> <span class="pre">~typing.Dict[str,</span> <span class="pre">~query.Query],</span> <span class="pre">item2idmap:</span> <span class="pre">~typing.Dict[~typing.Tuple[str,</span> <span class="pre">str],</span> <span class="pre">str],</span> <span class="pre">altcodes:</span> <span class="pre">~typing.Dict[~typing.Tuple[str,</span> <span class="pre">str],</span> <span class="pre">~typing.Tuple[str,</span> <span class="pre">str]],</span> <span class="pre">postquerylist:</span> <span class="pre">~typing.List[str],</span> <span class="pre">methodfilename:</span> <span class="pre">str,</span> <span class="pre">defaultfilter:</span> <span class="pre">~typing.Callable[[~query.Query,</span> <span class="pre">~typing.Dict[str,</span> <span class="pre">~typing.List[~typing.Tuple[str,</span> <span class="pre">int]]],</span> <span class="pre">~typing.Tuple[str,</span> <span class="pre">int]],</span> <span class="pre">bool]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">allok&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/methods.html#Method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#methods.Method" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div><p>The <em>Method</em> class has the following properties and methods:</p>
 </div></blockquote>
@@ -95,8 +97,8 @@
 </dd></dl>
 
 <p>A method is read in by the read_method function in the readmethod.py module.</p>
-<div class="section" id="queries">
-<h2>Queries<a class="headerlink" href="#queries" title="Permalink to this headline">¶</a></h2>
+<section id="queries">
+<h2>Queries<a class="headerlink" href="#queries" title="Permalink to this heading">¶</a></h2>
 <p>Queries take as input a syntactic structure for an utterance with utterance id <em>uttid</em>, implemented in sastadev as an lxml.etree Element.
 They return a list of syntactic structures (the ones that match with the query), each an lxml.etree Element. Code around the application of a query turns this list of syntactic structures into a Counter with <em>(uttid, position)</em> as keys. The position is equal to the value of the <em>end</em> attribute of the leftmost word of the matching syntactic structure, or <em>0</em> if no match with a specific word can be indicated (in case of deleted or absent words). Such results are called <em>exact results</em> because they align the query to a particular word in the utterance. A Counter for a given query is stored in a dictionary with the query id as key and the Counter as value.</p>
 <p>Actual comparisons with references to compute performance do not take the alignment into account, so the exact results are turned into (inexact) results which is a Counter with <em>uttid</em> as key. However, comparisons with references for development and debugging purposes (e.g. to create the “platinum check” files) do take the alignment into account.</p>
@@ -107,8 +109,8 @@ They return a list of syntactic structures (the ones that match with the query),
 <li><p>Python functions</p></li>
 </ul>
 <p>We will discuss each of them in a separate subsection.</p>
-<div class="section" id="xpath">
-<h3>Xpath<a class="headerlink" href="#xpath" title="Permalink to this headline">¶</a></h3>
+<section id="xpath">
+<h3>Xpath<a class="headerlink" href="#xpath" title="Permalink to this heading">¶</a></h3>
 <p>This is an example of an Xpath query, it is the query for the language measure T015 (BepBvZn) in TARSP:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;np&quot;</span> <span class="ow">and</span>
         <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;det&quot;</span> <span class="p">]</span> <span class="ow">and</span>
@@ -124,9 +126,9 @@ They return a list of syntactic structures (the ones that match with the query),
 </ul>
 <p>An Xpath query in SASTA  must start with <em>//</em> (it is necessary in the query and it distinguishes Xpath queries from python functions here). <em>//</em> means: search anywhere in the tree.</p>
 <p>Note that inside the Sasta code each Xpath query gets “.” (meaning: from this point on) put in front of it. This is needed because in SASTA (like in GrETEL and in contrast to PaQu) there is only a single document for the whole treebank (but no documents for the individual utterances), and // would cause a search in the whole treebank, not only in the current utterance.</p>
-</div>
-<div class="section" id="macros">
-<h3>Macros<a class="headerlink" href="#macros" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="macros">
+<h3>Macros<a class="headerlink" href="#macros" title="Permalink to this heading">¶</a></h3>
 <p>Xpath is a very simple language, and many things that you want to express in it can only be expressed in a very cumbersome manner. Furthermore, certain parts of queries recur in multiple queries, and these should be defined only once to keep them compatible. For example, the definition of auxiliary verb occurs both in <em>Hww i</em> and in <em>HwwZ</em>, and that definition is pretty cumbersome, in part because Alpino does not itself have the notion of auxiliary verb, in part because of the limited expressivity of Xpath.</p>
 <p>Xpath is so simple in part because it is usually used inside Xquery programs. Xquery is a full-fledged programming language with good expressivity. But in the GrETEL and SASTA context we do not have Xquery.
 In order to avoid these problems we introduced macros, inspired by their use in the PaQu and GRETEL applications. A macro is nothing more than a string to abbreviate another string. A macro in SASTA (and in GrETEL, and in PaQu) is surrounded by % signs.</p>
@@ -180,12 +182,12 @@ This is the usage information of the expandquery.py script:</p>
 <p>It is strongly recommended to have macro definitions begin and end with round brackets to avoid any operator priority issues. And generally, macros for conditions on nodes are often more reusable than macros for full nodes.
 If one looks in the macro files, one quickly sees that many macros are defined in terms of multiple other macros, e.g. the definition of Tarsp_OndWBVC uses 6 macros in its definition:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">(</span><span class="si">%d</span><span class="s2">eclarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3 )</span>
+<span class="s2">(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd %Ond</span><span class="si">% a</span><span class="s2">nd  %Tarsp_W</span><span class="si">% a</span><span class="s2">nd %Tarsp_B_X</span><span class="si">% a</span><span class="s2">nd %Tarsp_VC_X</span><span class="si">% a</span><span class="s2">nd </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3 )</span>
 <span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
 </div>
-<div class="section" id="generation-of-macros">
-<span id="generatemacros"></span><h4>Generation of macros<a class="headerlink" href="#generation-of-macros" title="Permalink to this headline">¶</a></h4>
+<section id="generation-of-macros">
+<span id="generatemacros"></span><h4>Generation of macros<a class="headerlink" href="#generation-of-macros" title="Permalink to this heading">¶</a></h4>
 <p>Macros make writing queries much simpler and makes it easier to maintain them. But in some cases macros are not enough, e.g. if a macro expansion is very large but built up in a regular way. One such case is dealt with by the module generatemacros.py:</p>
 <span class="target" id="module-generatemacros"></span><p>The generatemacros module provides the function generatemacros of type None -&gt; Dict[str, str], which generates a macrodictionary
 for systematically constructed macro definitions.</p>
@@ -199,11 +201,11 @@ for the combinations of the adposition with <em>er</em>, <em>hier</em> en <em>da
 <p>The generatemacros function generates this macro on the basis of a list of  (verb, adposition) pairs contained in this module.
 [These should probably better be moved to an exceptionslexicon module.]</p>
 <p>Running the module standalone outputs the macrodefinitions to stdout</p>
-</div>
-</div>
-</div>
-<div class="section" id="python-functions">
-<h2>Python functions<a class="headerlink" href="#python-functions" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+</section>
+<section id="python-functions">
+<h2>Python functions<a class="headerlink" href="#python-functions" title="Permalink to this heading">¶</a></h2>
 <p>In some cases formulating the query in Xpath is too cumbersome (even with macros). For such cases we can fall back on queries formulated in Python.</p>
 <p>In the definition of the query one includes the name of the Python function, for example (from TARSP): <em>sziplus6</em>.
 This function must be defined somewhere, of course. This can be done in any python module.</p>
@@ -215,8 +217,8 @@ yields  a rersult of any type as output</p>
 <p>If the function is defined in some other module, it must be imported here.
 The name of the function must be added to one of the variables
 <em>thetarspfunctions</em>, <em>thestapfunctions</em>, or <em>theastafunctions</em>, depending on the method that it belongs to.</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -269,7 +271,7 @@ The name of the function must be added to one of the variables
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -295,7 +297,7 @@ The name of the function must be added to one of the variables
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

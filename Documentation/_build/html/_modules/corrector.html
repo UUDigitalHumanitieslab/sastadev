@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
@@ -45,41 +46,41 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">alpino</span> <span class="k">import</span> <span class="n">getdehetwordinfo</span>
-<span class="kn">from</span> <span class="nn">basicreplacements</span> <span class="k">import</span> <span class="p">(</span><span class="n">basicexpansions</span><span class="p">,</span> <span class="n">basicreplacements</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">alpino</span> <span class="kn">import</span> <span class="n">getdehetwordinfo</span>
+<span class="kn">from</span> <span class="nn">basicreplacements</span> <span class="kn">import</span> <span class="p">(</span><span class="n">basicexpansions</span><span class="p">,</span> <span class="n">basicreplacements</span><span class="p">,</span>
                                <span class="n">getdisambiguationdict</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">cleanCHILDEStokens</span> <span class="k">import</span> <span class="n">cleantokens</span>
-<span class="kn">from</span> <span class="nn">config</span> <span class="k">import</span> <span class="n">PARSE_FUNC</span><span class="p">,</span> <span class="n">SDLOGGER</span>
-<span class="kn">from</span> <span class="nn">dedup</span> <span class="k">import</span> <span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">,</span> <span class="n">find_duplicates2</span><span class="p">,</span> <span class="n">find_janeenouduplicates</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">cleanCHILDEStokens</span> <span class="kn">import</span> <span class="n">cleantokens</span>
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="n">PARSE_FUNC</span><span class="p">,</span> <span class="n">SDLOGGER</span>
+<span class="kn">from</span> <span class="nn">dedup</span> <span class="kn">import</span> <span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">,</span> <span class="n">find_duplicates2</span><span class="p">,</span> <span class="n">find_janeenouduplicates</span><span class="p">,</span>
                    <span class="n">find_simpleduplicates</span><span class="p">,</span> <span class="n">find_substringduplicates2</span><span class="p">,</span>
                    <span class="n">getfilledpauses</span><span class="p">,</span> <span class="n">getprefixwords</span><span class="p">,</span> <span class="n">getrepeatedtokens</span><span class="p">,</span>
                    <span class="n">getunwantedtokens</span><span class="p">,</span> <span class="n">nodesfindjaneenou</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">deregularise</span> <span class="k">import</span> <span class="n">correctinflection</span>
-<span class="kn">from</span> <span class="nn">iedims</span> <span class="k">import</span> <span class="n">getjeforms</span>
-<span class="kn">from</span> <span class="nn">lexicon</span> <span class="k">import</span> <span class="n">de</span><span class="p">,</span> <span class="n">dets</span><span class="p">,</span> <span class="n">getwordinfo</span><span class="p">,</span> <span class="n">het</span><span class="p">,</span> <span class="n">informlexicon</span><span class="p">,</span> <span class="n">known_word</span><span class="p">,</span> <span class="n">isa_namepart</span><span class="p">,</span> <span class="n">tswnouns</span><span class="p">,</span> <span class="n">WordInfo</span>
-<span class="kn">from</span> <span class="nn">macros</span> <span class="k">import</span> <span class="n">expandmacros</span>
+<span class="kn">from</span> <span class="nn">deregularise</span> <span class="kn">import</span> <span class="n">correctinflection</span>
+<span class="kn">from</span> <span class="nn">iedims</span> <span class="kn">import</span> <span class="n">getjeforms</span>
+<span class="kn">from</span> <span class="nn">lexicon</span> <span class="kn">import</span> <span class="n">de</span><span class="p">,</span> <span class="n">dets</span><span class="p">,</span> <span class="n">getwordinfo</span><span class="p">,</span> <span class="n">het</span><span class="p">,</span> <span class="n">informlexicon</span><span class="p">,</span> <span class="n">known_word</span><span class="p">,</span> <span class="n">isa_namepart</span><span class="p">,</span> <span class="n">tswnouns</span><span class="p">,</span> <span class="n">WordInfo</span>
+<span class="kn">from</span> <span class="nn">macros</span> <span class="kn">import</span> <span class="n">expandmacros</span>
 <span class="c1"># from namepartlexicon import namepart_isa_namepart</span>
-<span class="kn">from</span> <span class="nn">sastatok</span> <span class="k">import</span> <span class="n">sasta_tokenize</span>
-<span class="kn">from</span> <span class="nn">sastatoken</span> <span class="k">import</span> <span class="n">Token</span><span class="p">,</span> <span class="n">tokenlist2stringlist</span>
-<span class="kn">from</span> <span class="nn">stringfunctions</span> <span class="k">import</span> <span class="p">(</span><span class="n">chatxxxcodes</span><span class="p">,</span> <span class="n">consonants</span><span class="p">,</span> <span class="n">deduplicate</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">sastatok</span> <span class="kn">import</span> <span class="n">sasta_tokenize</span>
+<span class="kn">from</span> <span class="nn">sastatoken</span> <span class="kn">import</span> <span class="n">Token</span><span class="p">,</span> <span class="n">tokenlist2stringlist</span>
+<span class="kn">from</span> <span class="nn">stringfunctions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">chatxxxcodes</span><span class="p">,</span> <span class="n">consonants</span><span class="p">,</span> <span class="n">deduplicate</span><span class="p">,</span>
                              <span class="n">endsinschwa</span><span class="p">,</span> <span class="n">fullworddehyphenate</span><span class="p">,</span> <span class="n">monosyllabic</span><span class="p">,</span>
                              <span class="n">vowels</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">sva</span> <span class="k">import</span> <span class="n">getsvacorrections</span>
-<span class="kn">from</span> <span class="nn">tokenmd</span> <span class="k">import</span> <span class="n">TokenListMD</span><span class="p">,</span> <span class="n">TokenMD</span><span class="p">,</span> <span class="n">mdlist2listmd</span>
-<span class="kn">from</span> <span class="nn">treebankfunctions</span> <span class="k">import</span> <span class="n">find1</span><span class="p">,</span> <span class="n">getattval</span><span class="p">,</span> <span class="n">getnodeyield</span><span class="p">,</span> <span class="n">showtree</span><span class="p">,</span> <span class="n">treeinflate</span><span class="p">,</span> <span class="n">fatparse</span>
-<span class="kn">from</span> <span class="nn">lxml</span> <span class="k">import</span> <span class="n">etree</span>
+<span class="kn">from</span> <span class="nn">sva</span> <span class="kn">import</span> <span class="n">getsvacorrections</span>
+<span class="kn">from</span> <span class="nn">tokenmd</span> <span class="kn">import</span> <span class="n">TokenListMD</span><span class="p">,</span> <span class="n">TokenMD</span><span class="p">,</span> <span class="n">mdlist2listmd</span>
+<span class="kn">from</span> <span class="nn">treebankfunctions</span> <span class="kn">import</span> <span class="n">find1</span><span class="p">,</span> <span class="n">getattval</span><span class="p">,</span> <span class="n">getnodeyield</span><span class="p">,</span> <span class="n">showtree</span><span class="p">,</span> <span class="n">treeinflate</span><span class="p">,</span> <span class="n">fatparse</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="c1"># from alternative import Alternative, Replacement, Metadata, Meta</span>
-<span class="kn">from</span> <span class="nn">metadata</span> <span class="k">import</span> <span class="n">Meta</span><span class="p">,</span> <span class="n">defaultbackplacement</span><span class="p">,</span> <span class="n">defaultpenalty</span><span class="p">,</span> <span class="n">bpl_node</span><span class="p">,</span> <span class="n">bpl_none</span><span class="p">,</span> <span class="n">bpl_word</span><span class="p">,</span> <span class="n">bpl_indeze</span><span class="p">,</span> \
+<span class="kn">from</span> <span class="nn">metadata</span> <span class="kn">import</span> <span class="n">Meta</span><span class="p">,</span> <span class="n">defaultbackplacement</span><span class="p">,</span> <span class="n">defaultpenalty</span><span class="p">,</span> <span class="n">bpl_node</span><span class="p">,</span> <span class="n">bpl_none</span><span class="p">,</span> <span class="n">bpl_word</span><span class="p">,</span> <span class="n">bpl_indeze</span><span class="p">,</span> \
     <span class="n">bpl_wordlemma</span><span class="p">,</span> <span class="n">mkSASTAMeta</span><span class="p">,</span> <span class="n">janeenou</span><span class="p">,</span> <span class="n">shortrep</span><span class="p">,</span> <span class="n">longrep</span><span class="p">,</span> <span class="n">repeatedseqtoken</span><span class="p">,</span> <span class="n">intj</span><span class="p">,</span> <span class="n">unknownword</span><span class="p">,</span> <span class="n">unknownsymbol</span><span class="p">,</span> \
     <span class="n">filled_pause</span><span class="p">,</span> <span class="n">repeatedjaneenou</span><span class="p">,</span> <span class="n">repeated</span><span class="p">,</span> <span class="n">substringrep</span><span class="p">,</span> <span class="n">fstoken</span><span class="p">,</span> <span class="n">falsestart</span>
-<span class="kn">from</span> <span class="nn">alpinoparsing</span> <span class="k">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">escape_alpino_input</span>
-<span class="kn">from</span> <span class="nn">expandquery</span> <span class="k">import</span> <span class="n">expandmacros</span>
-<span class="kn">from</span> <span class="nn">find_ngram</span> <span class="k">import</span> <span class="n">Ngram</span><span class="p">,</span> <span class="n">findmatches</span><span class="p">,</span> <span class="n">ngram1</span><span class="p">,</span> <span class="n">ngram2</span><span class="p">,</span> <span class="n">ngram7</span><span class="p">,</span> <span class="n">ngram10</span><span class="p">,</span> <span class="n">ngram11</span><span class="p">,</span> <span class="n">ngram16</span><span class="p">,</span> <span class="n">ngram17</span>
-<span class="kn">from</span> <span class="nn">smallclauses</span> <span class="k">import</span> <span class="n">smallclauses</span>
+<span class="kn">from</span> <span class="nn">alpinoparsing</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">escape_alpino_input</span>
+<span class="kn">from</span> <span class="nn">expandquery</span> <span class="kn">import</span> <span class="n">expandmacros</span>
+<span class="kn">from</span> <span class="nn">find_ngram</span> <span class="kn">import</span> <span class="n">Ngram</span><span class="p">,</span> <span class="n">findmatches</span><span class="p">,</span> <span class="n">ngram1</span><span class="p">,</span> <span class="n">ngram2</span><span class="p">,</span> <span class="n">ngram7</span><span class="p">,</span> <span class="n">ngram10</span><span class="p">,</span> <span class="n">ngram11</span><span class="p">,</span> <span class="n">ngram16</span><span class="p">,</span> <span class="n">ngram17</span>
+<span class="kn">from</span> <span class="nn">smallclauses</span> <span class="kn">import</span> <span class="n">smallclauses</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">sastatypes</span> <span class="k">import</span> <span class="n">BackPlacement</span><span class="p">,</span> <span class="n">MethodName</span><span class="p">,</span> <span class="n">Nort</span><span class="p">,</span> <span class="n">Penalty</span><span class="p">,</span> <span class="n">Position</span><span class="p">,</span> <span class="n">SynTree</span><span class="p">,</span> <span class="n">UttId</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">sastatypes</span> <span class="kn">import</span> <span class="n">BackPlacement</span><span class="p">,</span> <span class="n">MethodName</span><span class="p">,</span> <span class="n">Nort</span><span class="p">,</span> <span class="n">Penalty</span><span class="p">,</span> <span class="n">Position</span><span class="p">,</span> <span class="n">SynTree</span><span class="p">,</span> <span class="n">UttId</span>
 
 <span class="n">Correction</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Token</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Meta</span><span class="p">]]</span>
 <span class="n">MetaCondition</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Meta</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
@@ -100,7 +101,7 @@
 
 
 <span class="k">class</span> <span class="nc">Ngramcorrection</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ngram</span><span class="p">,</span> <span class="n">fpositions</span><span class="p">,</span> <span class="n">cpositions</span><span class="p">,</span> <span class="n">metafunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ngram</span><span class="p">,</span> <span class="n">fpositions</span><span class="p">,</span> <span class="n">cpositions</span><span class="p">,</span> <span class="n">metafunction</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ngram</span><span class="p">:</span> <span class="n">Ngram</span> <span class="o">=</span> <span class="n">ngram</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fpositions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Position</span><span class="p">,</span> <span class="n">Position</span><span class="p">]</span> <span class="o">=</span> <span class="n">fpositions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cpositions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Position</span><span class="p">,</span> <span class="n">Position</span><span class="p">]</span> <span class="o">=</span> <span class="n">cpositions</span>
@@ -250,11 +251,11 @@
 
     <span class="c1"># short repetitions</span>
     <span class="k">def</span> <span class="nf">oldcond</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Nort</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Nort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">5</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">informlexicon</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">.5</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">informlexicon</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">cond</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Nort</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Nort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span>
-            <span class="n">y</span><span class="p">))</span> <span class="o">&lt;</span> <span class="o">.</span><span class="mi">5</span>  <span class="c1"># check on lexicon put off actually two variants should be tried if the word is an existin gword</span>
+            <span class="n">y</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">.5</span>  <span class="c1"># check on lexicon put off actually two variants should be tried if the word is an existin gword</span>
 
     <span class="n">shortprefixtokens</span> <span class="o">=</span> <span class="n">getprefixwords</span><span class="p">(</span><span class="n">reducedtokens</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
     <span class="n">shortprefixpositions</span> <span class="o">=</span> <span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">shortprefixtokens</span><span class="p">]</span>
@@ -269,7 +270,7 @@
 
     <span class="c1"># long repetitions</span>
     <span class="k">def</span> <span class="nf">longcond</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Nort</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Nort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="o">.</span><span class="mi">5</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">informlexicon</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mf">.5</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">informlexicon</span><span class="p">(</span><span class="n">cleanwordofnort</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
     <span class="n">longprefixtokens</span> <span class="o">=</span> <span class="n">getprefixwords</span><span class="p">(</span><span class="n">reducedtokens</span><span class="p">,</span> <span class="n">longcond</span><span class="p">)</span>
     <span class="n">longprefixpositions</span> <span class="o">=</span> <span class="p">[</span><span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">longprefixtokens</span><span class="p">]</span>
@@ -1166,7 +1167,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1187,7 +1188,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

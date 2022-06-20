@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
@@ -38,34 +39,34 @@
           <div class="body" role="main">
             
   <h1>Source code for correcttreebank</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
 
-<span class="kn">from</span> <span class="nn">lxml</span> <span class="k">import</span> <span class="n">etree</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
 
-<span class="kn">from</span> <span class="nn">basicreplacements</span> <span class="k">import</span> <span class="n">basicreplacements</span>
-<span class="kn">from</span> <span class="nn">corrector</span> <span class="k">import</span> <span class="n">Correction</span><span class="p">,</span> <span class="n">getcorrections</span><span class="p">,</span> <span class="n">mkuttwithskips</span><span class="p">,</span> <span class="n">disambiguationdict</span>
-<span class="kn">from</span> <span class="nn">lexicon</span> <span class="k">import</span> <span class="n">de</span><span class="p">,</span> <span class="n">dets</span><span class="p">,</span> <span class="n">known_word</span>
-<span class="kn">from</span> <span class="nn">metadata</span> <span class="k">import</span> <span class="p">(</span><span class="n">Meta</span><span class="p">,</span> <span class="n">bpl_delete</span><span class="p">,</span> <span class="n">bpl_indeze</span><span class="p">,</span> <span class="n">bpl_node</span><span class="p">,</span> <span class="n">bpl_none</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">basicreplacements</span> <span class="kn">import</span> <span class="n">basicreplacements</span>
+<span class="kn">from</span> <span class="nn">corrector</span> <span class="kn">import</span> <span class="n">Correction</span><span class="p">,</span> <span class="n">getcorrections</span><span class="p">,</span> <span class="n">mkuttwithskips</span><span class="p">,</span> <span class="n">disambiguationdict</span>
+<span class="kn">from</span> <span class="nn">lexicon</span> <span class="kn">import</span> <span class="n">de</span><span class="p">,</span> <span class="n">dets</span><span class="p">,</span> <span class="n">known_word</span>
+<span class="kn">from</span> <span class="nn">metadata</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Meta</span><span class="p">,</span> <span class="n">bpl_delete</span><span class="p">,</span> <span class="n">bpl_indeze</span><span class="p">,</span> <span class="n">bpl_node</span><span class="p">,</span> <span class="n">bpl_none</span><span class="p">,</span>
                       <span class="n">bpl_word</span><span class="p">,</span> <span class="n">bpl_wordlemma</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">sastatok</span> <span class="k">import</span> <span class="n">sasta_tokenize</span>
-<span class="kn">from</span> <span class="nn">sastatoken</span> <span class="k">import</span> <span class="n">tokenlist2stringlist</span><span class="p">,</span> <span class="n">Token</span>
-<span class="kn">from</span> <span class="nn">sva</span> <span class="k">import</span> <span class="n">phicompatible</span>
-<span class="kn">from</span> <span class="nn">targets</span> <span class="k">import</span> <span class="n">get_mustbedone</span>
-<span class="kn">from</span> <span class="nn">treebankfunctions</span> <span class="k">import</span> <span class="p">(</span><span class="n">adaptsentence</span><span class="p">,</span> <span class="n">add_metadata</span><span class="p">,</span> <span class="n">countav</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">sastatok</span> <span class="kn">import</span> <span class="n">sasta_tokenize</span>
+<span class="kn">from</span> <span class="nn">sastatoken</span> <span class="kn">import</span> <span class="n">tokenlist2stringlist</span><span class="p">,</span> <span class="n">Token</span>
+<span class="kn">from</span> <span class="nn">sva</span> <span class="kn">import</span> <span class="n">phicompatible</span>
+<span class="kn">from</span> <span class="nn">targets</span> <span class="kn">import</span> <span class="n">get_mustbedone</span>
+<span class="kn">from</span> <span class="nn">treebankfunctions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">adaptsentence</span><span class="p">,</span> <span class="n">add_metadata</span><span class="p">,</span> <span class="n">countav</span><span class="p">,</span>
                                <span class="n">deletewordnodes</span><span class="p">,</span> <span class="n">find1</span><span class="p">,</span> <span class="n">getattval</span><span class="p">,</span> <span class="n">getbeginend</span><span class="p">,</span>
                                <span class="n">getcompoundcount</span><span class="p">,</span> <span class="n">getnodeyield</span><span class="p">,</span> <span class="n">getsentid</span><span class="p">,</span>
                                <span class="n">gettokposlist</span><span class="p">,</span> <span class="n">getyield</span><span class="p">,</span> <span class="n">myfind</span><span class="p">,</span> <span class="n">showflatxml</span><span class="p">,</span>
                                <span class="n">simpleshow</span><span class="p">,</span> <span class="n">transplant_node</span><span class="p">,</span> <span class="n">showtree</span><span class="p">,</span> <span class="n">treeinflate</span><span class="p">,</span> <span class="n">fatparse</span><span class="p">,</span> <span class="n">treewithtokenpos</span><span class="p">,</span>
                                <span class="n">updatetokenpos</span><span class="p">,</span> <span class="n">getuttid</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">config</span> <span class="k">import</span> <span class="n">PARSE_FUNC</span><span class="p">,</span> <span class="n">SDLOGGER</span>
-<span class="kn">from</span> <span class="nn">metadata</span> <span class="k">import</span> <span class="n">insertion</span>
-<span class="kn">from</span> <span class="nn">sastatoken</span> <span class="k">import</span> <span class="n">inflate</span><span class="p">,</span> <span class="n">deflate</span><span class="p">,</span> <span class="n">tokeninflate</span><span class="p">,</span> <span class="n">insertinflate</span>
-<span class="kn">from</span> <span class="nn">CHAT_Annotation</span> <span class="k">import</span> <span class="n">omittedword</span>
-<span class="kn">from</span> <span class="nn">cleanCHILDEStokens</span> <span class="k">import</span> <span class="n">cleantext</span>
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="n">PARSE_FUNC</span><span class="p">,</span> <span class="n">SDLOGGER</span>
+<span class="kn">from</span> <span class="nn">metadata</span> <span class="kn">import</span> <span class="n">insertion</span>
+<span class="kn">from</span> <span class="nn">sastatoken</span> <span class="kn">import</span> <span class="n">inflate</span><span class="p">,</span> <span class="n">deflate</span><span class="p">,</span> <span class="n">tokeninflate</span><span class="p">,</span> <span class="n">insertinflate</span>
+<span class="kn">from</span> <span class="nn">CHAT_Annotation</span> <span class="kn">import</span> <span class="n">omittedword</span>
+<span class="kn">from</span> <span class="nn">cleanCHILDEStokens</span> <span class="kn">import</span> <span class="n">cleantext</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">sastatypes</span> <span class="k">import</span> <span class="n">AltId</span><span class="p">,</span> <span class="n">CorrectionMode</span><span class="p">,</span> <span class="n">ErrorDict</span><span class="p">,</span> <span class="n">UttId</span><span class="p">,</span> <span class="n">MetaElement</span><span class="p">,</span> <span class="n">MethodName</span><span class="p">,</span> <span class="n">Penalty</span><span class="p">,</span> <span class="n">Position</span><span class="p">,</span> <span class="n">PositionStr</span><span class="p">,</span> \
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">sastatypes</span> <span class="kn">import</span> <span class="n">AltId</span><span class="p">,</span> <span class="n">CorrectionMode</span><span class="p">,</span> <span class="n">ErrorDict</span><span class="p">,</span> <span class="n">UttId</span><span class="p">,</span> <span class="n">MetaElement</span><span class="p">,</span> <span class="n">MethodName</span><span class="p">,</span> <span class="n">Penalty</span><span class="p">,</span> <span class="n">Position</span><span class="p">,</span> <span class="n">PositionStr</span><span class="p">,</span> \
     <span class="n">SynTree</span><span class="p">,</span> <span class="n">Targets</span><span class="p">,</span> <span class="n">Treebank</span>
 
 <span class="n">ampersand</span> <span class="o">=</span> <span class="s1">&#39;&amp;&#39;</span>
@@ -95,7 +96,7 @@
 
 
 <span class="k">class</span> <span class="nc">Alternative</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stree</span><span class="p">,</span> <span class="n">altid</span><span class="p">,</span> <span class="n">altsent</span><span class="p">,</span> <span class="n">penalty</span><span class="p">,</span> <span class="n">dpcount</span><span class="p">,</span> <span class="n">dhyphencount</span><span class="p">,</span> <span class="n">dimcount</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stree</span><span class="p">,</span> <span class="n">altid</span><span class="p">,</span> <span class="n">altsent</span><span class="p">,</span> <span class="n">penalty</span><span class="p">,</span> <span class="n">dpcount</span><span class="p">,</span> <span class="n">dhyphencount</span><span class="p">,</span> <span class="n">dimcount</span><span class="p">,</span>
                  <span class="n">compcount</span><span class="p">,</span> <span class="n">supcount</span><span class="p">,</span> <span class="n">compoundcount</span><span class="p">,</span> <span class="n">unknownwordcount</span><span class="p">,</span> <span class="n">sucount</span><span class="p">,</span> <span class="n">svaok</span><span class="p">,</span> <span class="n">deplusneutcount</span><span class="p">,</span> <span class="n">goodcatcount</span><span class="p">,</span>
                  <span class="n">hyphencount</span><span class="p">,</span> <span class="n">basicreplaceecount</span><span class="p">,</span> <span class="n">ambigcount</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stree</span><span class="p">:</span> <span class="n">SynTree</span> <span class="o">=</span> <span class="n">stree</span>
@@ -154,7 +155,7 @@
 
 
 <span class="k">class</span> <span class="nc">Original</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uttid</span><span class="p">,</span> <span class="n">stree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uttid</span><span class="p">,</span> <span class="n">stree</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uttid</span><span class="p">:</span> <span class="n">UttId</span> <span class="o">=</span> <span class="n">uttid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stree</span><span class="p">:</span> <span class="n">SynTree</span> <span class="o">=</span> <span class="n">stree</span>
 
@@ -169,7 +170,7 @@
 
 
 <span class="k">class</span> <span class="nc">OrigandAlts</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orig</span><span class="p">,</span> <span class="n">alts</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orig</span><span class="p">,</span> <span class="n">alts</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig</span> <span class="o">=</span> <span class="n">orig</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">AltId</span><span class="p">,</span> <span class="n">Alternative</span><span class="p">]</span> <span class="o">=</span> <span class="n">alts</span>  <span class="c1"># a dictionary with altid as key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected</span><span class="p">:</span> <span class="n">AltId</span> <span class="o">=</span> <span class="n">selected</span>
@@ -929,7 +930,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -950,7 +951,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

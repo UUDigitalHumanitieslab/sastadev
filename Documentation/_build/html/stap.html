@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
     <title>STAP Language Measures &#8212; SASTA  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
@@ -12,6 +13,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
@@ -44,12 +46,12 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="stap-language-measures">
-<h1>STAP Language Measures<a class="headerlink" href="#stap-language-measures" title="Permalink to this headline">¶</a></h1>
+  <section id="stap-language-measures">
+<h1>STAP Language Measures<a class="headerlink" href="#stap-language-measures" title="Permalink to this heading">¶</a></h1>
 <p>The STAP language measures have been written by Sjoerd Eilander, though Jan Odijk reviewed them and revised some of them, especially the ones for “bijwoordelijke bepalingen”.</p>
 <p>For each language measure, we explain the abbreviation and its name, specify how it has been implemented (as an Xpath query, as an Xpath query with macros, or as a Python function), and mention the section and the page where the measure is described in [van Ierland et al. 2008]. We also cite from the documentation to indicate which aspect of the documentation a particular part of the query implements.</p>
-<div class="section" id="s001-ns">
-<h2>S001: NS<a class="headerlink" href="#s001-ns" title="Permalink to this headline">¶</a></h2>
+<section id="s001-ns">
+<h2>S001: NS<a class="headerlink" href="#s001-ns" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> NS: “nevenschikking” = coordination</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -73,9 +75,9 @@
 </li>
 <li><p>or with grammatical relation <em>dlink</em> - this for cases where a coordinator introduces a single clause, e.g. <strong>en</strong> <em>op de teefee mag het</em>, <strong>maar</strong> wat is Maria?*. (“Nevenschikking wordt ook gescoord wanneer een nevenschikkend voegwoord gebruikt is aan het begin van een hoofdzin die het begin van de beurt is, ook als een interjectie voorafgaat.”)</p></li>
 </ul>
-</div>
-<div class="section" id="s002-os">
-<h2>S002: OS<a class="headerlink" href="#s002-os" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s002-os">
+<h2>S002: OS<a class="headerlink" href="#s002-os" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> OS: “onderschikking” = subordination</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -102,9 +104,9 @@
 <p><strong>Remark</strong> Cases with <em>tag</em>, <em>nucl</em>, <em>sat</em> and <em>mod</em> should be reconsidered: they usually occur in complex combinations of subordinate clauses where one should be counted and one should not (because of a superordinate cp).</p>
 <p><strong>Remark</strong> <em>dp</em>, <em>mod</em> and <em>vc</em> also occur as relations (in Lassy-Small, not in STAP samples so far) and should be counted in (as they currently are)</p>
 <p><strong>Remark</strong> Maybe cat = sv1 with appropriate grammatical relations for subordinate clauses (e.g. rel = mod) and with a clausal node as parent should be added here, though it may be difficult to exclude parentheticals (e.g. “zie pag. 3”)</p>
-</div>
-<div class="section" id="s003-pv">
-<h2>S003: PV<a class="headerlink" href="#s003-pv" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s003-pv">
+<h2>S003: PV<a class="headerlink" href="#s003-pv" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> PV: “persoonsvorm” = finite verb</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -118,9 +120,9 @@
 <li><p>“Bij de scoring wordt uitgegaan van 50 persoonsvormen. De VU met -1 moeten van 50 worden afgetrokken en de persoonsvormen die aangegeven zijn met +1, +2, etc. moeten weer bij dit getal worden opgeteld.”</p></li>
 </ul>
 <p>The results of the query for S003 are used in the computation of the relevant cells in the STAP form. See <a class="reference internal" href="#stap-form"><span class="std std-ref">S019:  Form</span></a></p>
-</div>
-<div class="section" id="s004-sgg">
-<h2>S004: SGG<a class="headerlink" href="#s004-sgg" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s004-sgg">
+<h2>S004: SGG<a class="headerlink" href="#s004-sgg" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> SGG: “Samengesteld Gezegde” = composite predicate</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -150,9 +152,9 @@
 <li><p>“Ook combinaties van deze soorten komen voor in één zin. Dit telt als één Samengesteld gezegde”: covered if they involve coordination, as in the example given.</p></li>
 <li><p>“Voor scoring van Samengesteld gezegde is noodzakelijk dat twee werkwoorden volledig gerealiseerd zijn. Wanneer alleen een deel van een scheidbaar zelfstandig werkwoord gerealiseerd is, telt dit niet als Samengesteld gezegde. Voorbeeld: k.ik heb het op/”: covered.</p></li>
 </ul>
-</div>
-<div class="section" id="s005-vt">
-<h2>S005: VT<a class="headerlink" href="#s005-vt" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s005-vt">
+<h2>S005: VT<a class="headerlink" href="#s005-vt" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> VT: “Verleden Tijd” = past tense</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -165,9 +167,9 @@
 <li><p>“Iedere Verleden tijd wordt gescoord, zowel correcte als incorrecte vormen, omdat beide soorten wijzen op morfologische activiteit van het kind: correct past tenses are covered, incorrect past tenses only if SASTA can correct it to a correct past tense. If the correct past tense is indicated by means of a CHAT annotation, e.g., <em>slaapten [: sliepen]</em>, then it can be counted as well, but this has not been implemented yet.</p></li>
 <li><p>“Een foute Verleden tijd, die reeds gescoord is bij Ongrammaticaliteit wordt hier dus weer gescoord.”: see previous bullet</p></li>
 </ul>
-</div>
-<div class="section" id="s006-vd">
-<h2>S006: VD<a class="headerlink" href="#s006-vd" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s006-vd">
+<h2>S006: VD<a class="headerlink" href="#s006-vd" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> VD: “Voltooid Deelword” = perfect participle</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -181,9 +183,9 @@
 <li><p>“Een Voltooid deelwoord dat functioneert als naamwoordelijk deel van het gezegde of als bijvoeglijke bepaling, wordt ook meegeteld.”: covered</p></li>
 <li><p>“In een VU kunnen meerdere Voltooid deelwoorden voorkomen”: covered</p></li>
 </ul>
-</div>
-<div class="section" id="s007-n">
-<h2>S007: N<a class="headerlink" href="#s007-n" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s007-n">
+<h2>S007: N<a class="headerlink" href="#s007-n" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> N: “Naamwoord” = noun</p></li>
 <li><p><strong>Implementation</strong>: Xpath query.</p></li>
@@ -198,9 +200,9 @@
 <li><p>or that are multiword units (cat = mwu) for a name (pos = name) (“Eigennamen die bestaan uit een voornaam en achternaam zijn als één Naamwoord gescoord.”)</p></li>
 </ul>
 <p>The “Handleiding” also states: “Maar eigennamen met een naamwoordelijke specificatie zijn geteld als twee Naamwoorden”, and that is covered.</p>
-</div>
-<div class="section" id="s008-bvbep">
-<h2>S008: BvBep<a class="headerlink" href="#s008-bvbep" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s008-bvbep">
+<h2>S008: BvBep<a class="headerlink" href="#s008-bvbep" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> BvBep: “Bijvoeglijke Bepaling” = attributive adjunct</p></li>
 <li><p><strong>Implementation</strong>: Xpath query with macros</p></li>
@@ -208,7 +210,7 @@
 <li><p><strong>Page:</strong> 55</p></li>
 </ul>
 <p>The query is defined as <code class="docutils literal notranslate"><span class="pre">//node[%bijvbep%]</span></code>, where the definition of the macro <em>bijvbep</em> uses many other macros:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bijvbep</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;( (</span><span class="si">%c</span><span class="s2">orebijvbep</span><span class="si">% o</span><span class="s2">r </span><span class="si">%o</span><span class="s2">nbepvnwmod</span><span class="si">% o</span><span class="s2">r %twdet</span><span class="si">% o</span><span class="s2">r %apdet</span><span class="si">% o</span><span class="s2">r %app</span><span class="si">% o</span><span class="s2">r </span><span class="si">%d</span><span class="s2">etn</span><span class="si">% o</span><span class="s2">r </span><span class="si">%d</span><span class="s2">etnp</span><span class="si">% o</span><span class="s2">r %possdetp%) and not(%adjmodwwBB%))&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bijvbep</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;( (</span><span class="si">%c</span><span class="s2">orebijvbep</span><span class="si">% o</span><span class="s2">r </span><span class="si">%o</span><span class="s2">nbepvnwmod</span><span class="si">% o</span><span class="s2">r %twdet</span><span class="si">% o</span><span class="s2">r </span><span class="si">%a</span><span class="s2">pdet</span><span class="si">% o</span><span class="s2">r </span><span class="si">%a</span><span class="s2">pp</span><span class="si">% o</span><span class="s2">r </span><span class="si">%d</span><span class="s2">etn</span><span class="si">% o</span><span class="s2">r </span><span class="si">%d</span><span class="s2">etnp</span><span class="si">% o</span><span class="s2">r %possdetp%) and not(</span><span class="si">%a</span><span class="s2">djmodwwBB%))&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 <p>The explanation for the macros used is as follow:</p>
@@ -261,9 +263,9 @@
 </div></blockquote>
 <p>and neither of them is covered, but possessive  nouns and noun phrases are included in the query (by <strong>detn</strong> and <strong>possdet</strong>) though the <em>Handleiding</em> is silent about them. &#64;&#64;Should they be included&#64;&#64;?</p>
 </div></blockquote>
-</div>
-<div class="section" id="s009-zelfst-vnw">
-<h2>S009: zelfst.vnw.<a class="headerlink" href="#s009-zelfst-vnw" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s009-zelfst-vnw">
+<h2>S009: zelfst.vnw.<a class="headerlink" href="#s009-zelfst-vnw" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> zelfst.vnw.: “Zelfstandig voornaamwoord derde persoon” = independent  3rd person pronoun</p></li>
 <li><p><strong>Implementation</strong>: Xpath query with macros</p></li>
@@ -302,9 +304,9 @@
 </div></blockquote>
 </li>
 </ul>
-</div>
-<div class="section" id="s010-bb-p">
-<h2>S010: BB p<a class="headerlink" href="#s010-bb-p" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s010-bb-p">
+<h2>S010: BB p<a class="headerlink" href="#s010-bb-p" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> BB p: “Bijwoordelijke Bepaling van Plaats” = locative adverbial modifier</p></li>
 <li><p><strong>Implementation</strong>: Xpath query with macros</p></li>
@@ -323,9 +325,11 @@
 <span class="s2">  %predclocadj</span><span class="si">% o</span><span class="s2">r</span>
 <span class="s2">  %predclocap</span><span class="si">% o</span><span class="s2">r</span>
 <span class="s2">  </span><span class="si">%s</span><span class="s2">vp_bw</span><span class="si">% o</span><span class="s2">r</span>
-<span class="s2">  </span><span class="si">%lo</span><span class="s2">c_vzBB%</span>
+<span class="s2">  </span><span class="si">%lo</span><span class="s2">c_vzBB</span><span class="si">% o</span><span class="s2">r</span>
+<span class="s2">  %mod_Rpronoun%</span>
 <span class="s2"> ) and</span>
-<span class="s2"> not(%new_STAP_BB_t%)</span>
+<span class="s2"> not(%new_STAP_BB_t%) and</span>
+<span class="s2"> %STAP_geen_BB%</span>
 <span class="s2">)</span>
 <span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
@@ -346,7 +350,9 @@
 <li><p><strong>predclocap</strong>: for predicative aps with a locative adjective as head, e.g., <em>mag ik</em> <strong>veel hoger</strong> <em>zitten?</em></p></li>
 <li><p><strong>svp_bw</strong>: for adverbs that function as an <em>svp</em>, e.g. <em>tasje doen we</em> <strong>weg</strong>, <em>kom je dan</em> <strong>terug</strong>. <strong>Remark</strong>: we should exclude <em>samen</em>, and <em>genoeg</em>.</p></li>
 <li><p><strong>loc_vzBB</strong>: for locative adpositions functioning as an adverbial modifier. This is mainly for locative adpositions that could not be integrated into the structure, as e.g., in <strong>op</strong> <em>mijn eigen</em></p></li>
+<li><p><strong>mod_Rpronoun</strong>: for R-pronouns functioning as a modifier. The macro simply lists all R-pronouns and requires them to have the <em>mod</em> relation</p></li>
 <li><p><strong>new_STAP_BB_t</strong>: it should not be a temporal adverbial modifier. See section <a class="reference internal" href="#bbt"><span class="std std-ref">S011: BB t</span></a></p></li>
+<li><p><strong>STAP_geen_BB</strong>: some frequent adverbs should be excluded (see below), which is done with this macro</p></li>
 </ul>
 <p>The <em>Handleiding</em> states:</p>
 <ul class="simple">
@@ -383,28 +389,29 @@
 </div></blockquote>
 <ul class="simple">
 <li><p>“de vet gedrukte opeenvolgende woorden passen semantisch bij elkaar: één Bijwoordelijke bepaling van plaats.”: covered</p></li>
-<li><p><strong>Remark</strong>: we do not exclude the frequent adverbs mentioned under “niet gescoord”, though a macro for this exists: <strong>STAP_geen_BB</strong></p></li>
-<li><p><strong>Remark</strong>: we do not include R-pronouns with relation <em>mod</em></p></li>
 </ul>
-</div>
-<div class="section" id="s011-bb-t">
-<span id="bbt"></span><h2>S011: BB t<a class="headerlink" href="#s011-bb-t" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s011-bb-t">
+<span id="bbt"></span><h2>S011: BB t<a class="headerlink" href="#s011-bb-t" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> BB t: “Bijwoordelijke Bepaling van Tijd” = temporal adverbial modifier</p></li>
 <li><p><strong>Implementation</strong>: Xpath query with macros</p></li>
 <li><p><strong>Page:</strong> 59</p></li>
 </ul>
 <p>The query is defined as //node[%new_STAP_BB_t%], where the macro <em>new_STAP_BB_t</em> is defined as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">new_STAP_BB_t</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">%advBBt</span><span class="si">% o</span><span class="s2">r</span>
-<span class="s2">%advpBBt</span><span class="si">% o</span><span class="s2">r</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">new_STAP_BB_t</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; ((</span>
+<span class="si">%a</span><span class="s2">dvBBt</span><span class="si">% o</span><span class="s2">r</span>
+<span class="si">%a</span><span class="s2">dvpBBt</span><span class="si">% o</span><span class="s2">r</span>
 <span class="s2">%npBBt</span><span class="si">% o</span><span class="s2">r</span>
-<span class="s2">%apBBt</span><span class="si">% o</span><span class="s2">r</span>
-<span class="s2">%adjBBt</span><span class="si">% o</span><span class="s2">r</span>
+<span class="si">%a</span><span class="s2">pBBt</span><span class="si">% o</span><span class="s2">r</span>
+<span class="si">%a</span><span class="s2">djBBt</span><span class="si">% o</span><span class="s2">r</span>
 <span class="s2">%ppnpBBt</span><span class="si">% o</span><span class="s2">r</span>
-<span class="si">%g</span><span class="s2">eledenBBt%&quot;&quot;&quot;</span>
+<span class="si">%g</span><span class="s2">eledenBBt</span><span class="si">% o</span><span class="s2">r</span>
+<span class="s2">%temporal_mwu%</span>
+<span class="s2">) and %STAP_geen_BB%)</span>
 </pre></div>
 </div>
+<p>“””</p>
 <p>We discuss each of the macros used inside this query</p>
 <ul>
 <li><p><strong>advBBt</strong> searches for adverbs (<em>bw</em>) that are adverbial modifiers (<strong>BB</strong>, see above) and that meet the requirements of the <strong>temp</strong> macro. The macro <strong>temp</strong> identifies temporal adverbs by frame properties of the word  (<strong>tempadv</strong>) or the lemma (<strong>templemma</strong>) while avoiding excludedlemmas (<strong>excludedlemma</strong>):</p>
@@ -417,13 +424,13 @@
 </div></blockquote>
 </li>
 <li><p><strong>advpBBt</strong> is defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">advpBBt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;advp&quot; and %BB% and node[@rel=&quot;hd&quot; and %temp% ])&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">advpBBt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;advp&quot; and %BB</span><span class="si">% a</span><span class="s2">nd node[@rel=&quot;hd&quot; and %temp% ])&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 <p>so it searches for adverb phrase (<em>advp</em>) that are adverbial modifiers (<strong>BB</strong>, see above) and that have a head that meets the conditions of the macro <strong>temp</strong>.</p>
 </li>
 <li><p><strong>npBBt</strong> is defined as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npBBt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;np&quot; and %BB% and node[@rel=&quot;hd&quot; and %tempnoun%])&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npBBt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;np&quot; and %BB</span><span class="si">% a</span><span class="s2">nd node[@rel=&quot;hd&quot; and %tempnoun%])&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 <p>so it searches for noun phrases that are adverbial modifiers and have a head that meets the condition of the macro <strong>tempnoun</strong>:</p>
@@ -442,6 +449,14 @@
 </ul>
 </li>
 <li><p><strong>geledenBBt</strong> searches for past participial phrases (<em>ppart</em>) that are adverbial modifiers (via macro <strong>BB</strong>) and that have a head with lemma equal to <em>geleden</em></p></li>
+<li><p><strong>temporal_mwu</strong> searches for phrases that were tagged by Alpino as a multiword expression (MWU in Dutch, for “meerwoordsuiting”) but denote a temporal adverbial, such as <em>‘s avonds</em> ‘in the evening’, by searching for mwus containing a temporal noun. Temporal nouns are defined as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tempnoun</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@special=&quot;tmp&quot; or starts-with(@frame, &quot;tmp_noun&quot;)</span>
+<span class="s2">                                or starts-with(@frame, &quot;tmp_np&quot;) or %tempnounlemma%)&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>in which <strong>tempnounlemma</strong> is an exhaustive list of temporal lemmas</p>
+</li>
+<li><p><strong>STAP_geen_BB</strong> excludes frequent adverbs. See s010 above.</p></li>
 </ul>
 <p>The <em>Handleiding</em> states: “Deze variabele omvat Bijwoordelijke bepalingen van tijd, van duur, van frequentie en alles wat verwant is aan tijd. Ook de vragende bijwoorden van tijd (<em>wanneer</em>, <em>hoe lang</em>, etc) worden hier gescoord. It provides the example:</p>
 <ul class="simple">
@@ -454,14 +469,10 @@
 <li><p>en toen ging ik <strong>‘s avonds</strong> op m’n papa z’n nek staan</p></li>
 <li><p>en toen ging ik eraf springen en m’n moeder <strong>ook een keer</strong></p></li>
 </ul>
-<p>Of these <em>‘s avonds</em> is not covered, though it should be easy to add it:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">node</span><span class="p">[</span><span class="nd">@cat</span><span class="o">=</span><span class="s2">&quot;mwu&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="nd">@rel</span><span class="o">=</span><span class="s2">&quot;mwp&quot;</span> <span class="ow">and</span> <span class="o">%</span><span class="n">tempnoun</span><span class="o">%</span><span class="p">]</span>
-</pre></div>
-</div>
 <p>Also <em>ook een keer</em> is not covered because Alpino analyses the NP as a modifier of the noun <em>moeder</em>.</p>
-</div>
-<div class="section" id="s012-bb-o">
-<h2>S012: BB o<a class="headerlink" href="#s012-bb-o" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s012-bb-o">
+<h2>S012: BB o<a class="headerlink" href="#s012-bb-o" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Name</strong> BB t: “Overige Bijwoordelijke Bepaling” = other adverbial modifier</p></li>
 <li><p><strong>Implementation</strong>: Xpath query with macros</p></li>
@@ -472,7 +483,8 @@
 <span class="s2">                                           not(</span><span class="si">%e</span><span class="s2">xcludedadverb%) and</span>
 <span class="s2">                                           (%BB</span><span class="si">% o</span><span class="s2">r %pred</span><span class="si">% o</span><span class="s2">r </span><span class="si">%s</span><span class="s2">vp_bbo%) and</span>
 <span class="s2">                                           not(%new_STAP_BB_t%) and</span>
-<span class="s2">                                           not(%new_STAP_BB_p%)</span>
+<span class="s2">                                           not(%new_STAP_BB_p%) and</span>
+<span class="s2">                                           %STAP_geen_BB%</span>
 <span class="s2">                                        )</span>
 <span class="s2">&quot;&quot;&quot;</span>
 </pre></div>
@@ -482,35 +494,34 @@
 <li><p><strong>bbo_pt</strong>: any node with a value for the <em>pt</em> attribute that can function as an adverbial modifier</p></li>
 <li><p><strong>bbo_cat</strong>: any node with a value for the <em>cat</em> attribute that can function as an adverbial modifier</p></li>
 <li><p><strong>bbo_mwu</strong>: any node with <em>cat</em> equal to “mwu* and containing a node that meets the requirements of the macro <strong>bbo_pt</strong></p></li>
-<li><p><strong>excludedadverb</strong>: this identifies the adverbs that should not be scored as an adverbial modifier</p></li>
-<li><p><strong>(%BB% or %pred% or %svp_bbo%)</strong>: functioning as an aderbial modifier (<strong>BB</strong>) or as a predicate (<strong>pred</strong>), whether as a complement (<em>predc</em>) or as a secondary predicte (<em>predm</em>), or as an <em>svp</em> (by the macro <strong>svp_bbo</strong>, which also requires <em>pt</em> to be equal to <em>adj</em> or <em>bw</em>, and allows a word with a specific <em>lemma</em>.</p></li>
+<li><p><strong>excludedadverb</strong>: this identifies the adverbs that should not be scored as an adverbial modifier (doubled by <strong>STAP_geen_BB</strong>)</p></li>
+<li><p><strong>BB</strong>: functioning as an adverbial modifier</p></li>
+<li><p><strong>pred</strong>: this identifies phrases functioning as a secondary predicate, denoted <em>predc</em> or <em>predm</em> by Alpino. However, <em>predc</em> also indicates main predicates, which are excluded by requiring the phrase not to be a sister to a copula in the syntactic structure. Copulae are identified by having the <em>hd</em> relation, and (because Alpino does not distinguish between main verbs, modal verbs and copulae) having the POS <em>ww</em> and the lemma of one of the classic Dutch copulae: <em>zijn, worden, blijven, lijken, blijken, schijnen, dunken, heten, voorkomen</em></p></li>
+<li><p><strong>svp_bbo</strong>: functioning as an <em>svp</em> (by the macro <strong>svp_bbo</strong>, which also requires <em>pt</em> to be equal to <em>adj</em> or <em>bw</em>, and allows a word with a specific <em>lemma</em></p></li>
 <li><p><strong>not(%new_STAP_BB_t%)</strong>: it should not be a temporal adverbial modifier</p></li>
 <li><p><strong>not(%new_STAP_BB_p%)</strong>: it should not be a locative adverbial modifier</p></li>
 </ul>
 <p>The <em>Handleiding</em> states: “De Overige bijwoordelijke bepalingen omvatten:”</p>
 <ul>
-<li><p>Bijwoordelijke bepalingen met een andere functie dan plaats of tijd;”: covered</p></li>
-<li><p>De overige vragende bijwoorden (<em>waarom</em>, <em>hoe</em>, etc) worden hier ook gescoord.: covered</p></li>
+<li><p>“Bijwoordelijke bepalingen met een andere functie dan plaats of tijd;”: covered</p></li>
+<li><p>“De overige vragende bijwoorden (<em>waarom</em>, <em>hoe</em>, etc) worden hier ook gescoord.”: covered</p></li>
+<li><p>“Bepalingen van gesteldheid.”: covered</p></li>
 <li><p>Examples:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><em>en nu is ie weg</em> <strong>met de vuilnisauto</strong>: covered</p></li>
 <li><p><em>en</em> <strong>als het dan mooi weer is</strong>, dan gaan we <strong>met Dennis</strong> <em>buiten voetballen</em> (not covered, Alpino parses <em>met Dennis</em> as a <em>pc</em>, not as a <em>mod</em>). Maybe we should include pc/PPs with <em>met</em> as head as well.</p></li>
+<li><p><em>en dat vind ik</em> <strong>zo leuk</strong>: covered</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p><em>Bepalingen van gesteldheid</em>:</p>
-<ul class="simple">
-<li><p><em>en dat vind ik</em> <strong>zo leuk</strong>: covered, but currently all <em>ap</em> or <em>adj</em> nodes with relation equal to <em>predc</em> are covered, also the ones after copulas, which is wrong and should be corrected. This can be done easily by adapting the macro <strong>pred</strong> to require presence of a direct object if the relation is <em>predc</em>.</p></li>
 </ul>
-</li>
-</ul>
-</div>
-<div class="section" id="s019-form">
-<span id="stap-form"></span><h2>S019:  Form<a class="headerlink" href="#s019-form" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="s019-form">
+<span id="stap-form"></span><h2>S019:  Form<a class="headerlink" href="#s019-form" title="Permalink to this heading">¶</a></h2>
 <p>&#64;&#64;to add&#64;&#64;</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -567,7 +578,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -593,7 +604,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

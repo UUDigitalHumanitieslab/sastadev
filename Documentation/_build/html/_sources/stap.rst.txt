@@ -274,9 +274,11 @@ The query is ``//node[%new_STAP_BB_p%]`` where the macro *new_STAP_BB_p* is defi
 	  %predclocadj% or
 	  %predclocap% or
 	  %svp_bw% or
-	  %loc_vzBB%
+	  %loc_vzBB% or
+	  %mod_Rpronoun%
 	 ) and
-	 not(%new_STAP_BB_t%)
+	 not(%new_STAP_BB_t%) and
+	 %STAP_geen_BB%
 	)
 	"""
 
@@ -296,7 +298,9 @@ We will discuss each of the parts of this macro:
 * **predclocap**: for predicative aps with a locative adjective as head, e.g., *mag ik* **veel hoger** *zitten?*
 * **svp_bw**: for adverbs that function as an *svp*, e.g. *tasje doen we* **weg**, *kom je dan* **terug**. **Remark**: we should exclude *samen*, and *genoeg*.
 * **loc_vzBB**: for locative adpositions functioning as an adverbial modifier. This is mainly for locative adpositions that could not be integrated into the structure, as e.g., in **op** *mijn eigen*
+* **mod_Rpronoun**: for R-pronouns functioning as a modifier. The macro simply lists all R-pronouns and requires them to have the *mod* relation
 * **new_STAP_BB_t**: it should not be a temporal adverbial modifier. See section :ref:`BBT`
+* **STAP_geen_BB**: some frequent adverbs should be excluded (see below), which is done with this macro
 
 
 The *Handleiding* states:
@@ -327,8 +331,6 @@ More specifically on "Bijwoordelijke bepalingen van plaats". It includes:
   
 * "de vet gedrukte opeenvolgende woorden passen semantisch bij elkaar: één Bijwoordelijke bepaling van plaats.": covered
 
-* **Remark**: we do not exclude the frequent adverbs mentioned under "niet gescoord", though a macro for this exists: **STAP_geen_BB**
-* **Remark**: we do not include R-pronouns with relation *mod* 
 
 .. _BBT:
 
@@ -341,14 +343,18 @@ S011: BB t
 
 The query is defined as //node[%new_STAP_BB_t%], where the macro *new_STAP_BB_t* is defined as follows::
 
-    new_STAP_BB_t = """ 
+    new_STAP_BB_t = """ ((
    %advBBt% or
    %advpBBt% or
    %npBBt% or
    %apBBt% or
    %adjBBt% or
    %ppnpBBt% or
-   %geledenBBt%"""
+   %geledenBBt% or
+   %temporal_mwu%
+   ) and %STAP_geen_BB%)
+""" 
+
    
 We discuss each of the macros used inside this query
 
@@ -385,6 +391,14 @@ We discuss each of the macros used inside this query
   
 * **geledenBBt** searches for past participial phrases (*ppart*) that are adverbial modifiers (via macro **BB**) and that have a head with lemma equal to *geleden*
 
+* **temporal_mwu** searches for phrases that were tagged by Alpino as a multiword expression (MWU in Dutch, for "meerwoordsuiting") but denote a temporal adverbial, such as *'s avonds* 'in the evening', by searching for mwus containing a temporal noun. Temporal nouns are defined as follows::
+
+	tempnoun = """ (@special="tmp" or starts-with(@frame, "tmp_noun") 
+					or starts-with(@frame, "tmp_np") or %tempnounlemma%)"""
+	
+  in which **tempnounlemma** is an exhaustive list of temporal lemmas
+
+* **STAP_geen_BB** excludes frequent adverbs. See s010 above.
 
 The *Handleiding* states: "Deze variabele omvat Bijwoordelijke bepalingen van tijd, van duur, van frequentie en alles wat verwant is aan tijd. Ook de vragende bijwoorden van tijd (*wanneer*, *hoe lang*, etc) worden hier gescoord. It provides the example:
 
@@ -397,10 +411,6 @@ There are also the examples:
 * en toen ging m'n papa me optillen/
 * en toen ging ik **'s avonds** op m'n papa z'n nek staan
 * en toen ging ik eraf springen en m'n moeder **ook een keer**
-
-Of these *'s avonds* is not covered, though it should be easy to add it::
-
-    //node[@cat="mwu" and node[@rel="mwp" and %tempnoun%]
 	
 Also *ook een keer* is not covered because Alpino analyses the NP as a modifier of the noun *moeder*.
 
@@ -417,7 +427,8 @@ The query is defined as `//node[%new_STAP_BB_o%]` where the macro **new_STAP_BB_
 						   not(%excludedadverb%) and 
 						   (%BB% or %pred% or %svp_bbo%) and 
 						   not(%new_STAP_BB_t%) and 
-						   not(%new_STAP_BB_p%) 
+						   not(%new_STAP_BB_p%) and
+						   %STAP_geen_BB%
 						)
 	""" 
 
@@ -426,24 +437,27 @@ We discuss each of the aspsects of this macro:
 * **bbo_pt**: any node with a value for the *pt* attribute that can function as an adverbial modifier
 * **bbo_cat**: any node with a value for the *cat* attribute that can function as an adverbial modifier
 * **bbo_mwu**: any node with *cat* equal to "mwu* and containing a node that meets the requirements of the macro **bbo_pt**
-* **excludedadverb**: this identifies the adverbs that should not be scored as an adverbial modifier 
-* **(%BB% or %pred% or %svp_bbo%)**: functioning as an aderbial modifier (**BB**) or as a predicate (**pred**), whether as a complement (*predc*) or as a secondary predicte (*predm*), or as an *svp* (by the macro **svp_bbo**, which also requires *pt* to be equal to *adj* or *bw*, and allows a word with a specific *lemma*.
+* **excludedadverb**: this identifies the adverbs that should not be scored as an adverbial modifier (doubled by **STAP_geen_BB**)
+* **BB**: functioning as an adverbial modifier
+* **pred**: this identifies phrases functioning as a secondary predicate, denoted *predc* or *predm* by Alpino. However, *predc* also indicates main predicates, which are excluded by requiring the phrase not to be a sister to a copula in the syntactic structure. Copulae are identified by having the *hd* relation, and (because Alpino does not distinguish between main verbs, modal verbs and copulae) having the POS *ww* and the lemma of one of the classic Dutch copulae: *zijn, worden, blijven, lijken, blijken, schijnen, dunken, heten, voorkomen*
+* **svp_bbo**: functioning as an *svp* (by the macro **svp_bbo**, which also requires *pt* to be equal to *adj* or *bw*, and allows a word with a specific *lemma*
 * **not(%new_STAP_BB_t%)**: it should not be a temporal adverbial modifier
 * **not(%new_STAP_BB_p%)**: it should not be a locative adverbial modifier
 
 
 The *Handleiding* states: "De Overige bijwoordelijke bepalingen omvatten:"
 
-* Bijwoordelijke bepalingen met een andere functie dan plaats of tijd;": covered
-* De overige vragende bijwoorden (*waarom*, *hoe*, etc) worden hier ook gescoord.: covered
+* "Bijwoordelijke bepalingen met een andere functie dan plaats of tijd;": covered
+* "De overige vragende bijwoorden (*waarom*, *hoe*, etc) worden hier ook gescoord.": covered
+* "Bepalingen van gesteldheid.": covered
+
 * Examples:
 
    * *en nu is ie weg* **met de vuilnisauto**: covered
    * *en* **als het dan mooi weer is**, dan gaan we **met Dennis** *buiten voetballen* (not covered, Alpino parses *met Dennis* as a *pc*, not as a *mod*). Maybe we should include pc/PPs with *met* as head as well.
+   * *en dat vind ik* **zo leuk**: covered
 
-* *Bepalingen van gesteldheid*:
 
-  * *en dat vind ik* **zo leuk**: covered, but currently all *ap* or *adj* nodes with relation equal to *predc* are covered, also the ones after copulas, which is wrong and should be corrected. This can be done easily by adapting the macro **pred** to require presence of a direct object if the relation is *predc*.
 
 
 .. _STAP-form:

@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
     <title>TARSP Language Measures &#8212; SASTA  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
@@ -12,6 +13,7 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
@@ -44,11 +46,11 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="tarsp-language-measures">
-<h1>TARSP Language Measures<a class="headerlink" href="#tarsp-language-measures" title="Permalink to this headline">¶</a></h1>
+  <section id="tarsp-language-measures">
+<h1>TARSP Language Measures<a class="headerlink" href="#tarsp-language-measures" title="Permalink to this heading">¶</a></h1>
 <p>We will describe here all Tarsp language measures, in the order of the identifiers assigned to them. However, a few language measures are special in that they systematically composed out of recurring macros. See  <span class="xref std std-ref">TarspAnnotation</span> for more on these language measures, which we will call <em>composed language measures</em>. We will discuss the most important macros that are used in the queries for such language measures first, in section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a>.</p>
-<div class="section" id="macros-for-composed-language-measures">
-<span id="composedmeasures"></span><h2>Macros for Composed Language Measures<a class="headerlink" href="#macros-for-composed-language-measures" title="Permalink to this headline">¶</a></h2>
+<section id="macros-for-composed-language-measures">
+<span id="composedmeasures"></span><h2>Macros for Composed Language Measures<a class="headerlink" href="#macros-for-composed-language-measures" title="Permalink to this heading">¶</a></h2>
 <p>Composed language measures often consist of:</p>
 <ul class="simple">
 <li><p>a macro for the mood of the clause (declarative, question, imperative)</p></li>
@@ -56,8 +58,8 @@
 <li><p>macros for counts of complements and modifiers</p></li>
 </ul>
 <p>We will discuss each of these.</p>
-<div class="section" id="macros-for-clause-mood">
-<h3>Macros for clause mood<a class="headerlink" href="#macros-for-clause-mood" title="Permalink to this headline">¶</a></h3>
+<section id="macros-for-clause-mood">
+<h3>Macros for clause mood<a class="headerlink" href="#macros-for-clause-mood" title="Permalink to this heading">¶</a></h3>
 <p>The <em>mood</em> of a clause is determined on the basis of a lot of different clues. Interpunctuation symbols also play a role: we especially do not allow interpunctuation symbols that contradict a mood (e.g. an imperative followed by a question mark). We therefore use several macros for interpunctions symbols:</p>
 <ul class="simple">
 <li><p><strong>topcontainsquestionsmark</strong></p></li>
@@ -71,8 +73,8 @@
 </div>
 <p>The other two are defined analogously.</p>
 <p>The most problematic clausal category is <em>sv1</em>, since it can head declaratives, questions and imperatives (see <a class="reference internal" href="alpinoparser.html#alpinoclauses"><span class="std std-ref">Clauses in Alpino</span></a>). Distinguishing these correctly is no trivial matter, and the queries we made are certainly not perfect.</p>
-<div class="section" id="declaratives">
-<span id="id1"></span><h4>Declaratives<a class="headerlink" href="#declaratives" title="Permalink to this headline">¶</a></h4>
+<section id="declaratives">
+<span id="id1"></span><h4>Declaratives<a class="headerlink" href="#declaratives" title="Permalink to this heading">¶</a></h4>
 <p>Declarative clauses are identified by the macro <strong>declarative</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">declarative</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;smain&quot; or</span>
 <span class="s2">                 (@cat=&quot;ssub&quot; and not(%partofwhquestion%)) or</span>
@@ -92,9 +94,9 @@
 <span class="s2">                       parent::node[@cat=&quot;whq&quot; or @cat=&quot;whsub&quot; ]) &quot;&quot;&quot;</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="questions">
-<span id="id2"></span><h4>Questions<a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="questions">
+<span id="id2"></span><h4>Questions<a class="headerlink" href="#questions" title="Permalink to this heading">¶</a></h4>
 <p>Yes-no questions are identified by the macro <strong>ynquery</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ynquery</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;@cat=&quot;sv1&quot; and</span>
 <span class="s2">          (@rel=&quot;--&quot; or @rel=&quot;dp&quot;) and</span>
@@ -121,9 +123,9 @@
 </pre></div>
 </div>
 <p>covering both main clauses (<em>whq</em>) and subordinate clauses (<em>whsub</em>).</p>
-</div>
-<div class="section" id="imperatives">
-<span id="id3"></span><h4>Imperatives<a class="headerlink" href="#imperatives" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="imperatives">
+<span id="id3"></span><h4>Imperatives<a class="headerlink" href="#imperatives" title="Permalink to this heading">¶</a></h4>
 <p>Imperatives are identified by the macro <strong>basicimperative</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">basicimperative</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%normalimp</span><span class="si">% o</span><span class="s2">r %bareverbimp% )&quot;&quot;&quot;</span>
 </pre></div>
@@ -132,8 +134,8 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">normalimp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;sv1&quot; and</span>
 <span class="s2">                not(%topcontainsquestionmark%) and</span>
 <span class="s2">                (not(%topcontainsperiodmark%) or </span><span class="si">%i</span><span class="s2">mpmodfound%) and</span>
-<span class="s2">                </span><span class="si">%i</span><span class="s2">mprelok% and</span>
-<span class="s2">                </span><span class="si">%i</span><span class="s2">mpsubjectok% and</span>
+<span class="s2">                </span><span class="si">%i</span><span class="s2">mprelok</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                </span><span class="si">%i</span><span class="s2">mpsubjectok</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                node[%wwimpok%]</span>
 <span class="s2">            )&quot;&quot;&quot;</span>
 </pre></div>
@@ -143,7 +145,7 @@
 <li><p>The category must be <em>sv1</em></p></li>
 <li><p>the utterance must not contain a question mark</p></li>
 <li><p>it does not contain a period unless an adverbial modifier typical for imperatives is present. The latter is checked by the macro <strong>impmodfound</strong>. Such an adverbial modifier can occur in the main clause but also in a subordinate nonfinite clause (macro <strong>nonfinvc</strong>). The adverbs typical for imperatives are <em>maar</em> and <em>eens</em> (macro <strong>basicimpmod</strong>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">impmodfound</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimpmod</span><span class="si">% o</span><span class="s2">r node[%nonfinvc% and %basicimpmod%])&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">impmodfound</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimpmod</span><span class="si">% o</span><span class="s2">r node[%nonfinvc</span><span class="si">% a</span><span class="s2">nd %basicimpmod%])&quot;&quot;&quot;</span>
 <span class="n">basicimpmod</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(node[@rel=&quot;mod&quot; and (@lemma=&quot;maar&quot; or @lemma=&quot;eens&quot;)])&quot;&quot;&quot;</span>
 <span class="n">nonfinvc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@rel=&quot;vc&quot; and %nonfincat%) &quot;&quot;&quot;</span>
 <span class="n">nonfincat</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@cat=&quot;inf&quot; or @cat=&quot;ppart&quot;)&quot;&quot;&quot;</span>
@@ -157,7 +159,7 @@
 </li>
 <li><p>There are restrictions on subjects in imperative clauses, expressed by the macro <strong>impsubjectok</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">impsubjectok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(not(%Ond%) or</span>
-<span class="s2">                   (node[</span><span class="si">%s</span><span class="s2">ubject% and</span>
+<span class="s2">                   (node[</span><span class="si">%s</span><span class="s2">ubject</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                    </span><span class="si">%i</span><span class="s2">mpsubject%] and</span>
 <span class="s2">                    (</span><span class="si">%i</span><span class="s2">mpmodfound</span><span class="si">%  o</span><span class="s2">r %topcontainsexclamationmark%)</span>
 <span class="s2">                   )</span>
@@ -179,9 +181,9 @@
 </div></blockquote>
 </li>
 <li><p>there are restrictions on the verb in an imperative clause, expressed by the macro <strong>wwimpok</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wwimpok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;( %wwimpfeatok% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wwimpok</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;( %wwimpfeatok</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">               not(%modalframe%) and</span>
-<span class="s2">               %zijnimpok%       and</span>
+<span class="s2">               %zijnimpok</span><span class="si">%       a</span><span class="s2">nd</span>
 <span class="s2">               %potentialimpverb%</span>
 <span class="s2">          )&quot;&quot;&quot;</span>
 </pre></div>
@@ -221,8 +223,8 @@
 </li>
 </ul>
 <p>The macro <strong>bareverbimp</strong> is defined as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bareverbimp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%wwimpok% and</span>
-<span class="s2">                  </span><span class="si">%i</span><span class="s2">mprelok%  and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bareverbimp</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%wwimpok</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  </span><span class="si">%i</span><span class="s2">mprelok</span><span class="si">%  a</span><span class="s2">nd</span>
 <span class="s2">                  parent::node[@cat=&quot;top&quot;] and</span>
 <span class="s2">                  not(%topcontainsquestionmark%) and</span>
 <span class="s2">                  not(%topcontainsperiodmark%)) &quot;&quot;&quot;</span>
@@ -250,10 +252,10 @@
 </div></blockquote>
 </li>
 </ul>
-</div>
-</div>
-<div class="section" id="macros-for-zinsdelen">
-<span id="zinsdelen"></span><h3>Macros for ‘Zinsdelen’<a class="headerlink" href="#macros-for-zinsdelen" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+<section id="macros-for-zinsdelen">
+<span id="zinsdelen"></span><h3>Macros for ‘Zinsdelen’<a class="headerlink" href="#macros-for-zinsdelen" title="Permalink to this heading">¶</a></h3>
 <p>The ‘zinsdelen’ are <em>B</em>, <em>Ond</em>, <em>VC</em> and <em>W</em> and they correspond to some extent to  the following language measures, for ‘zinsdelen’:</p>
 <ul class="simple">
 <li><p>T007: B,  adverbial modifier (see <a class="reference internal" href="#t007-b"><span class="std std-ref">T007: B</span></a>)</p></li>
@@ -309,9 +311,9 @@ Out of these language measures, only T120/W occurs in the form (‘profielkaart�
 <p>Nonfinite verbs are not excluded by this definition but they are excluded by the mood conditions.</p>
 </li>
 </ul>
-</div>
-<div class="section" id="macros-for-counts-of-zinsdelen">
-<h3>Macros for Counts of ‘zinsdelen’<a class="headerlink" href="#macros-for-counts-of-zinsdelen" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="macros-for-counts-of-zinsdelen">
+<h3>Macros for Counts of ‘zinsdelen’<a class="headerlink" href="#macros-for-counts-of-zinsdelen" title="Permalink to this heading">¶</a></h3>
 <p>Many composed language measures differ only in the number of complements or adverbial modifiers required. For example <em>Tarsp_OndWB</em> and <em>Tarsp_OndWBB</em> differ only in the number of adverbial modifiers that should be present (one, resp, two).
 This requires conditions on the number of such complements or modifiers.
 Note that one cannot simply include two expressions joined by <em>and</em> in an Xpath query (e.g. <em>%Tarsp_B% and %Tarsp_B%</em>) to cover the <em>BB</em> part of the language measure <em>Tarsp_OndWBB</em>. The reason is that in XPath such a query will then still match with  a structure containing a single adverbial modifier. We therefore use the Xpath function <em>count</em> in composed language measures.</p>
@@ -345,23 +347,23 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p>nonfinite verbal complements, using the macro <strong>nonfinvc</strong> defined above</p></li>
 <li><p>the head verb (<em>not(&#64;rel=”hd”)</em>). We exclude this because there can be multiple verbs in a clause but they should always count as one ‘zinsdeel’, viz. predicate. The value that   <strong>realcomplormodnodecount</strong> is compared with is therefore always one lower than one would expect, because the predicate is assumed to be always present, and is not counted by <strong>realcomplormodnodecount</strong> . For example, for <em>OndWBB</em>, with 4 ‘zinsdelen’, the value that <strong>realcomplormodnodecount</strong> must have is equal to <strong>3</strong>, not <strong>4</strong>.</p></li>
 </ul>
-</div>
-<div class="section" id="concrete-example-tarsp-ondwbb">
-<h3>Concrete Example: <strong>Tarsp_OndWBB</strong><a class="headerlink" href="#concrete-example-tarsp-ondwbb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="concrete-example-tarsp-ondwbb">
+<h3>Concrete Example: <strong>Tarsp_OndWBB</strong><a class="headerlink" href="#concrete-example-tarsp-ondwbb" title="Permalink to this heading">¶</a></h3>
 <p>Given all of the above, it should be clear why the definition of <strong>Tarsp_OndWBB</strong> is as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                  %Ond% and</span>
-<span class="s2">                  %Tarsp_W% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                  %Tarsp_B_X_count% = 2 and</span>
 <span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="language-measures">
-<h2>Language Measures<a class="headerlink" href="#language-measures" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="t001-vr-wond">
-<h3>T001: (Vr)WOnd+<a class="headerlink" href="#t001-vr-wond" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+<section id="language-measures">
+<h2>Language Measures<a class="headerlink" href="#language-measures" title="Permalink to this heading">¶</a></h2>
+<section id="t001-vr-wond">
+<h3>T001: (Vr)WOnd+<a class="headerlink" href="#t001-vr-wond" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: (Vr)WOnd+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -374,9 +376,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: “Vraagwoordzin waarbij het vraagwoord is weggelaten. Het werkwoord +, meestal, het Onderwerp zijn gerealiseerd. Daarna kunnen nog één of meer Zinsdelen volgen.”</p></li>
 </ul>
-</div>
-<div class="section" id="t003-6">
-<h3>T003: 6+<a class="headerlink" href="#t003-6" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t003-6">
+<h3>T003: 6+<a class="headerlink" href="#t003-6" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: 6+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -396,9 +398,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “6 Zinsdelen of meer in een zin”</p></li>
 </ul>
-</div>
-<div class="section" id="t004-aan-uit">
-<h3>T004: Aan/uit<a class="headerlink" href="#t004-aan-uit" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t004-aan-uit">
+<h3>T004: Aan/uit<a class="headerlink" href="#t004-aan-uit" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Aan/uit.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -411,9 +413,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: “Soms wordt een zinsdeel aan het begin of aan het einde van de zin met andere woorden herhaald. Die herhaling noemen we ‘Aanloop’ aan het begin van een zin en ‘Uitloop’ aan het einde van de zin.”</p></li>
 </ul>
-</div>
-<div class="section" id="t005-als">
-<h3>T005: als<a class="headerlink" href="#t005-als" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t005-als">
+<h3>T005: als<a class="headerlink" href="#t005-als" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: als.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -434,9 +436,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong> “‘als’ is het eerste verbindingswoord van de ondergeschikte zin. ‘als’ wordt hier ook gescoord wanneer de onderschikkende zonder hoofdzin gebruikt wordt.</p></li>
 <li><p><strong>Remark</strong>: Fully covered but it is unclear whether <em>als</em> as used in comparisons also should be included. All Schlichting’s examples concern conditional <em>als</em>. So maybe this query should be restricted somewhat.</p></li>
 </ul>
-</div>
-<div class="section" id="t006-avn">
-<h3>T006: Avn<a class="headerlink" href="#t006-avn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t006-avn">
+<h3>T006: Avn<a class="headerlink" href="#t006-avn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Avn. (Aanwijzend Voornaamwoord als nomen)</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -458,9 +460,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p>and if a <em>position</em> attribute is present it should not have the value <em>prenom</em> (otherwise it is not used independently)</p></li>
 <li><p><strong>Schlichting</strong>: “Aanwijzend Voornaamwoord: ‘die’, ‘dit’, ‘deze’, ‘dat’ zelfstandig gebruikt.” fully covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t007-b">
-<span id="id4"></span><h3>T007: B<a class="headerlink" href="#t007-b" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t007-b">
+<span id="id4"></span><h3>T007: B<a class="headerlink" href="#t007-b" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: B. (Bijwoordelijke Bepaling)</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -536,7 +538,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 <p>where <strong>realnode</strong> excludes interpunction signs, interjections, or nodes without any pos or category label:</p>
 <blockquote>
-<div><p>realnode = “”“((not(&#64;pt) or (&#64;pt!=”let” and &#64;pt!=”tsw”)) and (not(&#64;postag) or &#64;postag!=”NA()”))”“”</p>
+<div><p>realnode = “””((not(&#64;pt) or (&#64;pt!=”let” and &#64;pt!=”tsw”)) and (not(&#64;postag) or &#64;postag!=”NA()”))”””</p>
 </div></blockquote>
 <p>The macro <strong>locverb</strong> is defined as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">locverb</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@lemma=&quot;staan&quot; or @lemma=&quot;zitten&quot; or @lemma=&quot;rijden&quot; or</span>
@@ -561,9 +563,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Remark</strong> Case 5 does not cover conjuncts under a node <em>conj</em> that meets the requirements of <strong>predcB</strong>, e.g <em>ik vind haar</em> <strong>mooi en aardig</strong></p></li>
 <li><p><strong>Remark</strong> The macro <strong>predcB</strong> does not cover cases where the object is absent due to topic drop (e.g. <em>vind ik</em> <strong>mooi</strong>). We could include a condition which includes cases where surely non-copular verbs (such as <em>vinden</em>) are listed, as was done in ASTA.</p></li>
 </ul>
-</div>
-<div class="section" id="t010-bbbv">
-<h3>T010: BBBv<a class="headerlink" href="#t010-bbbv" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t010-bbbv">
+<h3>T010: BBBv<a class="headerlink" href="#t010-bbbv" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BBBv. (Bijwoord + Bijwoord + Bijvoeglijk woord, adverb + adverb + adjective)</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -585,9 +587,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “Bijwoord + Bijwoord + Bijvoeglijk Woord. Deze constructie heeft een Bijvoeglijk woord als kern. Het is eigenlijk een BBv/B voorafgegaan door een bijwoord.</p></li>
 </ul>
 <p>The first adverb is analysed as a modifier or measure expression of the second adverb. Together they form a phrase of category <em>ap</em> or <em>advp</em> that cooccurs with a head <em>adj</em>. Both phrases mentioned can contain only two nodes as children. This analysis contradicts the analysis by Schlichting, which suggest that the first adverb modifies the combination of the second adverb with the adjective. But an analysis that matches with the query given seems the most plausible analysis for the second example (<em>hij is veel te hoog</em>). As for the first example (<em>een kindje is nog te klein voor</em>), a more plausible analysis has <em>nog</em> as a sentential modifier, and that is how Alpino analyses it.</p>
-</div>
-<div class="section" id="t011-bbijzin">
-<h3>T011: Bbijzin<a class="headerlink" href="#t011-bbijzin" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t011-bbijzin">
+<h3>T011: Bbijzin<a class="headerlink" href="#t011-bbijzin" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Bbijzin. Bijwoordelijke Bijzin (adverbial subordinate clause)</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -607,9 +609,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “Bijwoordelijke bijzin met verbindingswoord. Dit is dus een ondergeschikte zin die in de hoofdzin de functie van bijwoordelijke bepaling heeft. Het verbindingswoord is in deze fase meestal <em>als</em>”,.</p></li>
 </ul>
 <p>A straightforward query for a cp (“complementizer phrase”) with grammatical relation <em>mod</em>. The condition that the <em>body</em> must contain a finite verb is necessary because a <em>cp</em> can also have other phrases (e.g. <em>np</em>) as complement.</p>
-</div>
-<div class="section" id="t012-bbv-b">
-<h3>T012: BBv/B<a class="headerlink" href="#t012-bbv-b" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t012-bbv-b">
+<h3>T012: BBv/B<a class="headerlink" href="#t012-bbv-b" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BBv/B.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -629,15 +631,15 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ul>
 <p>This query is straightforward implementation of an adverb modifying an adjective or adverb functioning as a head. It makes use of the macro <em>adjoradv</em> (twice), which is defined as follows:</p>
 <ul class="simple">
-<li><p>adjoradv = “”“(&#64;pt=”bw” or &#64;pt=”adj” or (&#64;pt=”vnw” and (&#64;pos=”adj” or &#64;pos=”adv”)))”“”</p></li>
+<li><p>adjoradv = “””(&#64;pt=”bw” or &#64;pt=”adj” or (&#64;pt=”vnw” and (&#64;pos=”adj” or &#64;pos=”adv”)))”””</p></li>
 </ul>
 <p>The macro covers not only words with the value <em>adj</em> or <em>bw</em> for <em>pt</em> but also words with <em>pt=vnw</em> where the Alpino <em>pos</em> attribute has the value <em>adj</em> or <em>adv</em>. The latter is needed for a word such <em>veel</em> and for R-words such as <em>daar</em>.</p>
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Bijwoord + Bijvoeglijk woord of Bijwoord. De eerste B is vaak een bijwoord van graad, of zegt in ieder geval iets van het tweede woord in deze woordgroep. Het tweede woord is meestal cde kern van de woordgroep.”</p></li>
 </ul>
-</div>
-<div class="section" id="t013-bbvzn">
-<h3>T013: BBvZn<a class="headerlink" href="#t013-bbvzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t013-bbvzn">
+<h3>T013: BBvZn<a class="headerlink" href="#t013-bbvzn" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: BBvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -650,9 +652,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: “Bijwoord + Bijvoeglijk woord + Zelfstandig naamwoord”</p></li>
 </ul>
-</div>
-<div class="section" id="t014-bbx">
-<h3>T014: BBX<a class="headerlink" href="#t014-bbx" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t014-bbx">
+<h3>T014: BBX<a class="headerlink" href="#t014-bbx" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BBX.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -676,7 +678,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <span class="s2">                      .//node[@pt=&quot;n&quot; or (@pt=&quot;vnw&quot; and not(@special=&quot;er_loc&quot;)) ]</span>
 <span class="s2">                ) or</span>
 <span class="s2">                ((@cat=&quot;sv1&quot; or @cat=&quot;smain&quot;) and not(%basicimperative%) and</span>
-<span class="s2">                  not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and</span>
+<span class="s2">                  not(%ynquery%) and not(%Ond%) and  %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                  count(.//node[%Tarsp_B%]) = 2 and </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2</span>
 <span class="s2">                )</span>
 <span class="s2">               )&quot;&quot;&quot;</span>
@@ -707,9 +709,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 <li><p><strong>Schlichting</strong>: “Bijwoordelijke bepaling + Bijwoordelijke bepaling + een ander zinsdeel (Ond of W of VC of B)”</p></li>
 </ul>
-</div>
-<div class="section" id="t015-bepbvzn">
-<h3>T015: BepBvZn<a class="headerlink" href="#t015-bepbvzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t015-bepbvzn">
+<h3>T015: BepBvZn<a class="headerlink" href="#t015-bepbvzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BepBvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -735,9 +737,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Remark</strong>: does not cover numerals, which also fall under “bijvoeglijk”. Probably best to make a macro for “bijvoeglijk woord”</p></li>
 <li><p><strong>Remark</strong>: restrict this to exactly 3 nodes under NP.</p></li>
 </ul>
-</div>
-<div class="section" id="t016-bepznbv">
-<h3>T016: BepZnBv<a class="headerlink" href="#t016-bepznbv" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t016-bepznbv">
+<h3>T016: BepZnBv<a class="headerlink" href="#t016-bepznbv" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BepZnBv.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -761,9 +763,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Remark</strong>: The  example <strong>een heleboel water</strong> is not covered by this query</p></li>
 <li><p><strong>Remark</strong>: Currently any NP is allowed, this should be restrcted to an NP with only two nodes (determiner or modifier + head)</p></li>
 </ul>
-</div>
-<div class="section" id="t017-bezzn">
-<h3>T017: BezZn<a class="headerlink" href="#t017-bezzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t017-bezzn">
+<h3>T017: BezZn<a class="headerlink" href="#t017-bezzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BezZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -786,9 +788,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “Bezittelijke voornaamwoord + Zelfstandig naamwoord”</p></li>
 <li><p><strong>Remark</strong>: according to the query, the  NP can consist of more than just the possessive pronoun and the noun. This should be restricted</p></li>
 </ul>
-</div>
-<div class="section" id="t018-bijvoeglijke-bijzin">
-<h3>T018: Bijvoeglijke Bijzin<a class="headerlink" href="#t018-bijvoeglijke-bijzin" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t018-bijvoeglijke-bijzin">
+<h3>T018: Bijvoeglijke Bijzin<a class="headerlink" href="#t018-bijvoeglijke-bijzin" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Bijvoeglijke Bijzin.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -809,9 +811,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: Though “bijvoeglijke bijzin” is mentioned with T020 (p. 53-54) there is to our knowledge no separate description of them.</p></li>
 <li><p><strong>Remark</strong>: Should <em>whrel</em> be included here as well, perhaps with a condition that there is also a noun or subtantivised adjective as antecedent?</p></li>
 </ul>
-</div>
-<div class="section" id="t019-bijwoordelijke-bepalingwoordgroep">
-<h3>T019: Bijwoordelijke bepalingwoordgroep<a class="headerlink" href="#t019-bijwoordelijke-bepalingwoordgroep" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t019-bijwoordelijke-bepalingwoordgroep">
+<h3>T019: Bijwoordelijke bepalingwoordgroep<a class="headerlink" href="#t019-bijwoordelijke-bepalingwoordgroep" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Bijwoordelijke bepalingwoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -824,9 +826,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: “Bijwoordelijke bepalingwoordgroep”</p></li>
 </ul>
-</div>
-<div class="section" id="t020-bijzin-z-verb">
-<h3>T020: Bijzin z Verb<a class="headerlink" href="#t020-bijzin-z-verb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t020-bijzin-z-verb">
+<h3>T020: Bijzin z Verb<a class="headerlink" href="#t020-bijzin-z-verb" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Bijzin z Verb.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -839,9 +841,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: “Bijzin zonder verbindingswoord. De bijzinnen kunnen Bijwoordelijke bijzinnen zijn, VC bijzinnen of Bijvoeglijke bijzinnen.”</p></li>
 </ul>
-</div>
-<div class="section" id="t023-bv-b">
-<h3>T023: Bv/B<a class="headerlink" href="#t023-bv-b" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t023-bv-b">
+<h3>T023: Bv/B<a class="headerlink" href="#t023-bv-b" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Bv/B.</p></li>
 <li><p><strong>Category</strong>: Eenwoordzin</p></li>
@@ -868,9 +870,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “Bijvoeglijke naamwoorden en Bijwoorden”</p></li>
 <li><p><strong>Remark</strong>: R-pronouns (such as <em>daar</em>, explictly mentioned by Schlichting) are not covered yet. Perhaps use the macro <em>adjoradv</em> here.</p></li>
 </ul>
-</div>
-<div class="section" id="t024-bv-z-e">
-<h3>T024: Bv z e<a class="headerlink" href="#t024-bv-z-e" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t024-bv-z-e">
+<h3>T024: Bv z e<a class="headerlink" href="#t024-bv-z-e" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Bv z e.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -892,9 +894,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Bijvoeglijk naamwoord zonder ‘e’-uitgang”</p></li>
 </ul>
-</div>
-<div class="section" id="t025-bvbepzn">
-<h3>T025: BvBepZn<a class="headerlink" href="#t025-bvbepzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t025-bvbepzn">
+<h3>T025: BvBepZn<a class="headerlink" href="#t025-bvbepzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BvBepZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -920,9 +922,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p>there is no specific condition on the adverb (e.g. no mention of <em>nog</em>), Schlichting’s criterion “als het gevolgd kan worden door een telwoord” is difficult to implement.</p></li>
 <li><p><strong>Schlichting</strong>: “Bijvoeglijk woord + bepaler + Zelfstandig naamwoord. Het bijvoeglijk woord is meestal ‘nog’. We beschouwen ‘nog’ alleen als bijvoeglijk woord als het gevolgd kan worden door een telwoord.”</p></li>
 </ul>
-</div>
-<div class="section" id="t027-bvzn">
-<h3>T027: BvZn<a class="headerlink" href="#t027-bvzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t027-bvzn">
+<h3>T027: BvZn<a class="headerlink" href="#t027-bvzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -946,7 +948,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ol>
 <p>The query is defined using the macro <em>BvZn</em>, which is defined as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BvZn</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (count(node)=2 and</span>
-<span class="s2">            (  (</span><span class="si">%he</span><span class="s2">adn% and (</span><span class="si">%c</span><span class="s2">oreadjmod</span><span class="si">% o</span><span class="s2">r </span><span class="si">%c</span><span class="s2">orevnwmod</span><span class="si">% o</span><span class="s2">r </span><span class="si">%c</span><span class="s2">orebwmod%))</span>
+<span class="s2">            (  (</span><span class="si">%he</span><span class="s2">adn</span><span class="si">% a</span><span class="s2">nd (</span><span class="si">%c</span><span class="s2">oreadjmod</span><span class="si">% o</span><span class="s2">r </span><span class="si">%c</span><span class="s2">orevnwmod</span><span class="si">% o</span><span class="s2">r </span><span class="si">%c</span><span class="s2">orebwmod%))</span>
 
 <span class="s2">            )</span>
 <span class="s2">           )</span>
@@ -979,9 +981,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </div>
 </li>
 </ul>
-</div>
-<div class="section" id="t029-bwondbb">
-<h3>T029: BWondBB<a class="headerlink" href="#t029-bwondbb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t029-bwondbb">
+<h3>T029: BWondBB<a class="headerlink" href="#t029-bwondbb" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BWondBB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1000,16 +1002,16 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ul>
 <blockquote>
 <div><p>Straigthforward implementation using of the macro <strong>Tarsp_BWOndBB</strong>, which is defined as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_BWOndBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and %Ond% and</span>
-<span class="s2">                   %Tarsp_W% and %Tarsp_B_X_count% = 3 and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_BWOndBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                   %Tarsp_W</span><span class="si">% a</span><span class="s2">nd %Tarsp_B_X_count% = 3 and</span>
 <span class="s2">                   </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
-</div>
-<div class="section" id="t030-bx">
-<h3>T030: BX<a class="headerlink" href="#t030-bx" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t030-bx">
+<h3>T030: BX<a class="headerlink" href="#t030-bx" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: BX.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1073,7 +1075,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 </ul>
 <p>The macro <strong>singlewordbw</strong> is defined as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singlewordbw</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@pt=&quot;bw&quot; or %Rpronoun</span><span class="si">% o</span><span class="s2">r %adjadv%)&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singlewordbw</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@pt=&quot;bw&quot; or %Rpronoun</span><span class="si">% o</span><span class="s2">r </span><span class="si">%a</span><span class="s2">djadv%)&quot;&quot;&quot;</span>
 <span class="n">adjadv</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(@pt=&#39;adj&#39; and (@lemma=&#39;wel&#39;))&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -1087,9 +1089,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </dl>
 </li>
 </ul>
-</div>
-<div class="section" id="t031-c">
-<h3>T031: C<a class="headerlink" href="#t031-c" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t031-c">
+<h3>T031: C<a class="headerlink" href="#t031-c" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: C .</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1108,9 +1110,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ol>
 <p>Bij de analyse worden Voorwerpen en Complementen alle twee ‘VC’ genoemd.
 “</p>
-</div>
-<div class="section" id="t032-de">
-<h3>T032: de<a class="headerlink" href="#t032-de" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t032-de">
+<h3>T032: de<a class="headerlink" href="#t032-de" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: de.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1129,9 +1131,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 <li><p><strong>Schlichting</strong>: “Bepaald lidwoord + enkelvoudig mannelijk of vrouwelijk Zelfstandig naamwoord of meervoudig Zelfstandig naamwoord. De constructies ‘in de mand’ en ‘naar het ziekenhuis’ worden gescoord bij VzBepZn èn bij ‘de’.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t033-die-dezezn">
-<h3>T033: die/dezeZn<a class="headerlink" href="#t033-die-dezezn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t033-die-dezezn">
+<h3>T033: die/dezeZn<a class="headerlink" href="#t033-die-dezezn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: die/dezeZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1156,9 +1158,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Aanwijzend Voornaamwoord + Zelfstandig naamwoord in enkelvoud of meervoud”. Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t034-dit-datzn">
-<h3>T034: dit/datZn<a class="headerlink" href="#t034-dit-datzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t034-dit-datzn">
+<h3>T034: dit/datZn<a class="headerlink" href="#t034-dit-datzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: dit/datZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1183,9 +1185,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Aanwijzend Voornaamwoord + onzijdig Zelfstandig naamwoord. Ook onjuist gebruik mag gescoord worden.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t035-een">
-<h3>T035: een<a class="headerlink" href="#t035-een" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t035-een">
+<h3>T035: een<a class="headerlink" href="#t035-een" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: een.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1206,9 +1208,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “Onbepaald lidwoord + Zelfstandig naamwoord. Ook het onbepaalde lidwoord + Bijvoeglijke woord, gebruikt als Zelfstandig naamwoord, wordt hier gescoord, bijvoorbeeld ‘een andere’.”</p></li>
 </ul>
 <p><strong>Remark</strong> Substantivised adjectives are not covered yet.</p>
-</div>
-<div class="section" id="t036-en">
-<h3>T036: en<a class="headerlink" href="#t036-en" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t036-en">
+<h3>T036: en<a class="headerlink" href="#t036-en" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: en.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -1228,9 +1230,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Het verbindingswoord ‘en’ wordt in deze fase gebruik om een zinsdeel of een zin te introduceren. In fase VI wordt ‘en’ gebruikt om twee hoofdzinnen met elkaar te verbinden.”</p></li>
 </ul>
-</div>
-<div class="section" id="t037-er">
-<h3>T037: er<a class="headerlink" href="#t037-er" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t037-er">
+<h3>T037: er<a class="headerlink" href="#t037-er" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: er.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1250,9 +1252,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Dit ‘er’ heeft slechts in enkele gevallen het karakter van een voornaamwoord. Het kan als zinsdeel de functie hebben van een bijwoordelijke bepaling: ‘zij komt er wel’, ‘ik heb er nog drie’, of van een onderwerp, bv. In: ‘er stond een plant voor het raam’. Zo’n zin kan dan twee onderwerpen hebben (‘er’ is dan een zgn. plaatsonderwerp, het andere onderwerp is dan het getalsonderwerp, dat wil zeggen dat dat onderwerp in het meervoud kan komen te staan: ‘er staat een kind’, ‘er staan twee kinderen’)”</p></li>
 </ul>
-</div>
-<div class="section" id="t038-geen-x">
-<h3>T038: geen X<a class="headerlink" href="#t038-geen-x" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t038-geen-x">
+<h3>T038: geen X<a class="headerlink" href="#t038-geen-x" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: geen X.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1275,9 +1277,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “‘geen’ meestal gevolgd door een zelfstandig naamwoord”</p></li>
 <li><p><strong>Remark</strong> perhaps the number of nodes should be restricted to 2? Though <em>geen N meer</em> should also be accepted</p></li>
 </ul>
-</div>
-<div class="section" id="t039-he">
-<h3>T039: hè<a class="headerlink" href="#t039-he" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t039-he">
+<h3>T039: hè<a class="headerlink" href="#t039-he" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hè.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1297,9 +1299,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “De naklank ‘hè’ in de betekenis van ‘vind je niet?’ of ‘dat vind je toch ook?’ maakt de voorafgaande uiting vragend.”</p></li>
 </ul>
-</div>
-<div class="section" id="t040-hem">
-<h3>T040: hem<a class="headerlink" href="#t040-hem" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t040-hem">
+<h3>T040: hem<a class="headerlink" href="#t040-hem" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hem.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1319,9 +1321,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Het persoonlijk voornaamwoord ‘hem’, gebruikt als voorwerp.”. Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t041-het">
-<h3>T041: het<a class="headerlink" href="#t041-het" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t041-het">
+<h3>T041: het<a class="headerlink" href="#t041-het" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: het .</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1341,9 +1343,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Persoonlijk voornaamwoord ‘het’, onder andere als lijdend voorwerp en als onderwerp.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t042-hetzn">
-<h3>T042: hetZn<a class="headerlink" href="#t042-hetzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t042-hetzn">
+<h3>T042: hetZn<a class="headerlink" href="#t042-hetzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hetZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1362,9 +1364,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 <li><p><strong>Schlichting</strong>: “Bepaald lidwoord + onzijdig Zelfstandig naamwoord. Ook onjuist gebruik mag gescoord worden. De constructie ‘naar het strand’ wordt gescoord bij VzbepZn èn bij hetZn.”</p></li>
 </ul>
-</div>
-<div class="section" id="t043-hij">
-<h3>T043: hij<a class="headerlink" href="#t043-hij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t043-hij">
+<h3>T043: hij<a class="headerlink" href="#t043-hij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: hij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1384,9 +1386,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “‘hij’ en ‘ie’ worden op de profielkaart beide bij ‘hij’ gescoord. ‘ie’ komt vaker voor dan ‘hij’ in deze fase.”</p></li>
 </ul>
-</div>
-<div class="section" id="t044-hww-i">
-<span id="t044-hwwi"></span><h3>T044: Hww i<a class="headerlink" href="#t044-hww-i" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t044-hww-i">
+<span id="t044-hwwi"></span><h3>T044: Hww i<a class="headerlink" href="#t044-hww-i" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Hww i.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1404,7 +1406,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ul>
 <p>The macro <strong>Tarsp_Hwwi</strong> is defined as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Hwwi</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(( @pt=&quot;ww&quot; and @rel=&quot;hd&quot; and @wvorm=&quot;pv&quot; and</span>
-<span class="s2">                   %Tarsp_hww% and</span>
+<span class="s2">                   %Tarsp_hww</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                   ((parent::node[node[@cat=&quot;inf&quot;and @rel=&quot;vc&quot;]]) or</span>
 <span class="s2">                    (parent::node[node[@pt=&quot;ww&quot; and @rel=&quot;vc&quot; and @wvorm=&quot;inf&quot;]])</span>
 <span class="s2">                   )</span>
@@ -1422,7 +1424,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </ul>
 <p>There is also a second case, for robustness (i.e. if Alpino misanalysed), with the macro <strong>robusthwwi</strong>, defined as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robusthwwi</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;top&quot; and</span>
-<span class="s2">                  .//node[@pt=&quot;ww&quot; and %Tarsp_hww% and @wvorm=&quot;pv&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)] and</span>
+<span class="s2">                  .//node[@pt=&quot;ww&quot; and %Tarsp_hww</span><span class="si">% a</span><span class="s2">nd @wvorm=&quot;pv&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)] and</span>
 <span class="s2">                  .//node[@pt=&quot;ww&quot; and @wvorm=&quot;inf&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)]</span>
 <span class="s2">                 )&quot;&quot;&quot;</span>
 </pre></div>
@@ -1442,9 +1444,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <p>De hulpwerkwoorden die gevolgd worden door een infinitief worden niet gescoord bij HwwZ, Stam of Stam+t”.</p>
 <p><strong>Remark</strong>: the auxiliary verbs that take <em>te</em> plus infinitive are not covered yet</p>
 <p><strong>Remark</strong>: should we count <em>zitten</em>, <em>staan</em>, <em>liggen</em>, etc.  as HwwZ when not followed by infinitive or <em>te</em> + infinitive?</p>
-</div>
-<div class="section" id="t045-hww-vd">
-<h3>T045: Hww Vd<a class="headerlink" href="#t045-hww-vd" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t045-hww-vd">
+<h3>T045: Hww Vd<a class="headerlink" href="#t045-hww-vd" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Hww Vd.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1466,7 +1468,7 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <p>The core case of the query searches for one of the verbs <em>hebben</em>, <em>worden</em> or <em>zijn</em> in combination with a verbal complement that is either a participial phrase (<em>ppart</em>) or a bare participle (<em>wvorm</em> = <em>ppart</em>).</p>
 <p>There is also a robust case (macro <strong>robusthwwvd</strong>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robusthwwvd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; (@cat=&quot;top&quot; and</span>
-<span class="s2">                   .//node[@pt=&quot;ww&quot; and %vdhwws% and @wvorm=&quot;pv&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)] and</span>
+<span class="s2">                   .//node[@pt=&quot;ww&quot; and %vdhwws</span><span class="si">% a</span><span class="s2">nd @wvorm=&quot;pv&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)] and</span>
 <span class="s2">                   .//node[@pt=&quot;ww&quot; and @wvorm=&quot;vd&quot; and (@rel=&quot;--&quot; or @rel=&quot;dp&quot;)]</span>
 <span class="s2">                  )&quot;&quot;&quot;</span>
 </pre></div>
@@ -1479,9 +1481,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <li><p><strong>Schlichting</strong>: “Hulpwerkwoord gevolgd door het Voltooid deelwoord. Hulpwerkwoord + Voltooid deelwoord komt voor bij de voltooide tijd (‘jij hebt gemaakt’). Het Voltooid deelwoord wordt apart bij de Woordstructuur gescoord. ook voltooid verleden tijd (‘jij had gemaakt’) kan hier gescoord worden. dan wordt eveneens bij Verleden tijd en bij Voltooid deelwoord gescoord. Het hulpwerkwoord wordt niet gescoord bij Woordstructuur.” Fully covered.</p></li>
 <li><p><strong>Remark</strong> The macro <strong>vdhwws</strong> should also be used in the core case of this query.</p></li>
 </ul>
-</div>
-<div class="section" id="t046-hwwz">
-<h3>T046: HwwZ<a class="headerlink" href="#t046-hwwz" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t046-hwwz">
+<h3>T046: HwwZ<a class="headerlink" href="#t046-hwwz" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: HwwZ.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1530,9 +1532,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 <li><p><strong>Remark</strong> the uncovered cases can be improved by adding the following condition: &#64;pvagr!=”mv” and &#64;pvtijd!=”verl”</p></li>
 </ul>
-</div>
-<div class="section" id="t047-ik">
-<h3>T047: ik<a class="headerlink" href="#t047-ik" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t047-ik">
+<h3>T047: ik<a class="headerlink" href="#t047-ik" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: ik.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1552,9 +1554,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Het persoonlijk voornaamwoord ‘ik’ wordt meestal in deze Fase ontwikkeld” (It involves Stage III).</p></li>
 </ul>
-</div>
-<div class="section" id="t048-into">
-<h3>T048: Into<a class="headerlink" href="#t048-into" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t048-into">
+<h3>T048: Into<a class="headerlink" href="#t048-into" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Into.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1570,9 +1572,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “In fase II stellen de kinderen alleen vragen door een vraagintonatie te gebruiken. Bij het uitschrijven van het sample wordt die intonatie aangegeven door een vraagteken. Bij het analyseren van een uiting die alleen vraagintonatie heeft maar niet de vorm van de vraag analyseren we de uiting eerst als Mededelende Zin; de aantekening intonatie komt er extra bij. Vraag-Intonatie is dus een extra scoring “</p></li>
 </ul>
-</div>
-<div class="section" id="t049-inv">
-<h3>T049: Inv<a class="headerlink" href="#t049-inv" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t049-inv">
+<h3>T049: Inv<a class="headerlink" href="#t049-inv" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Inv.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1620,9 +1622,9 @@ Note that one cannot simply include two expressions joined by <em>and</em> in an
 </li>
 <li><p><strong>Remark</strong> It is probably best to restrict Inversion to declarative clauses only. We probably can best use the macro <strong>declarative</strong> for this. Currently we exclude wh-questions and imperatives, but not yes-no questions. That will also make the exclusion of imperatives better and consistent with other language measures.</p></li>
 </ul>
-</div>
-<div class="section" id="t050-jij">
-<span id="id5"></span><h3>T050: jij<a class="headerlink" href="#t050-jij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t050-jij">
+<span id="id5"></span><h3>T050: jij<a class="headerlink" href="#t050-jij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: jij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1645,9 +1647,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Schlichting</strong>: “We vinden overwegend ‘jij’ in deze Fase; een enkele maal ‘je’.” (it concerns Stage III).</p></li>
 <li><p><strong>Remark</strong> use of <em>jij</em> as a single word utterance, or as a single word as <em>dp</em>, <em>sat</em>, or <em>nucl</em> is not covered now.</p></li>
 </ul>
-</div>
-<div class="section" id="t051-jou">
-<h3>T051: jou<a class="headerlink" href="#t051-jou" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t051-jou">
+<h3>T051: jou<a class="headerlink" href="#t051-jou" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: jou.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1674,9 +1676,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Remark</strong>: the query does not account for cases where <em>jou</em> is the only word in an utterance, or the only word in a <em>dp</em> <em>sat</em> or <em>nucl</em> node. Extension of the query is needed. Or when it is a <em>predc</em> (<em>als ik jou was</em>).</p></li>
 <li><p><strong>Schlichting</strong>: “Het persoonlijk voornaamwoord ‘jou’ wordt zowel gebruikt als voorwerp als in bepalingen met een voorzetsel.”</p></li>
 </ul>
-</div>
-<div class="section" id="t052-kop">
-<h3>T052: Kop<a class="headerlink" href="#t052-kop" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t052-kop">
+<h3>T052: Kop<a class="headerlink" href="#t052-kop" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Kop.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1695,7 +1697,7 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <p>The macro <a href="#id6"><span class="problematic" id="id7">**</span></a>Tarsp_Kop**is defiend as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Kop</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(   @pt=&quot;ww&quot; and @rel=&quot;hd&quot; and not(%Tarsp_hww%) and</span>
 
-<span class="s2">                 ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or</span>
+<span class="s2">                 ((%Tarsp_predc_sibling</span><span class="si">% a</span><span class="s2">nd not(%Tarsp_obj1_sibling%)) or</span>
 <span class="s2">                  (@lemma=&quot;zijn&quot; and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%) and not(%Tarsp_onlymodR_sibling%))</span>
 <span class="s2">                 )</span>
 <span class="s2">               )&quot;&quot;&quot;</span>
@@ -1732,9 +1734,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Note</strong> In Sasta a copular verb is annotated by the code <em>Kop</em>, <strong>not</strong> by <em>W-Kop</em>.</p></li>
 </ul>
-</div>
-<div class="section" id="t053-maar">
-<h3>T053: maar<a class="headerlink" href="#t053-maar" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t053-maar">
+<h3>T053: maar<a class="headerlink" href="#t053-maar" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: maar.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -1757,9 +1759,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: “Het Verbindinsgwoord ‘maar’. Dit wordt introducerend gebruikt en om twee hoofdzinnen te verbinden.”</p></li>
 </ul>
-</div>
-<div class="section" id="t054-sv1">
-<h3>T054: Sv1<a class="headerlink" href="#t054-sv1" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t054-sv1">
+<h3>T054: Sv1<a class="headerlink" href="#t054-sv1" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Sv1.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -1776,9 +1778,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>This is not a language measure of Tarsp, but it has been defined to identify verb-initial clauses (for development purposes)</p>
-</div>
-<div class="section" id="t055-mededelende-zin">
-<h3>T055: Mededelende Zin<a class="headerlink" href="#t055-mededelende-zin" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t055-mededelende-zin">
+<h3>T055: Mededelende Zin<a class="headerlink" href="#t055-mededelende-zin" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Mededelende Zin.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1794,9 +1796,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t056-mij">
-<h3>T056: mij<a class="headerlink" href="#t056-mij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t056-mij">
+<h3>T056: mij<a class="headerlink" href="#t056-mij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: mij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -1816,9 +1818,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p>The <em>vwtype</em> for <em>mij</em> and <em>me</em> differs, so both options must be allowed</p></li>
 <li><p><strong>Schlichting</strong>: “Persoonlijk voornaamwoord ‘mij’, ‘me’, gebruikt als voorwerp en na een voorzetsel”</p></li>
 </ul>
-</div>
-<div class="section" id="t057-mvtt">
-<h3>T057: MvTT<a class="headerlink" href="#t057-mvtt" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t057-mvtt">
+<h3>T057: MvTT<a class="headerlink" href="#t057-mvtt" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: MvTT.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1839,9 +1841,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Schlichting</strong>: “Meervoud van de tegenwoordige Tijd. Het gaat hier om congruentoe tussen Onderwerp en Werkwoord in het meervoud van de 1e, 2e en 3e persoon van de tegenwoordige tijd van het werkwoord, ook van het hulpwerkwoord. We bedoel hier comstructies als ‘ze komen’, ‘wij spelen’. het moet duidelijk zijn dat het werkwoord geen infinitief is. ook de congruentie tussen persoonsvorm en naamwoordelijk dele van het gezegde wordt hier gesccoord”</p></li>
 <li><p><strong>Remark</strong> Though Schlichting refers to “congruentie”(agreement), the query can be formulated in terms of properties of the finite verb alone.</p></li>
 </ul>
-</div>
-<div class="section" id="t058-mvzn">
-<h3>T058: MvZn<a class="headerlink" href="#t058-mvzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t058-mvzn">
+<h3>T058: MvZn<a class="headerlink" href="#t058-mvzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: MvZn.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -1862,9 +1864,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Schlichting</strong>: “Meervoudig Zelfstandig naamwoord. Zowel meervoudsvormen op ‘-en’ als op ‘-s’ komen voor. Wanneer kinderen een meervoud van de zelfstandige naamwoorden gebruiken betekent dit nog niet altijd dat zij de meervoudsregel begrepen hebben. Het woord ‘schoenen’ bijvoorbeeld kan heel goed alleen in het meervoud gebruikt worden door het kind. Daarom is het van belang dat men aantekent op de profielkaart welke meervoudsvormen men gevonden heeft. Zodra er een meervoudsvorm is gevonden van een woord dat waarschijnlijk ook in het enkelvoud is aangeboden, is het extra aantekenen niet meer nodig.”</p></li>
 <li><p><strong>Remark</strong> The plural forms are currently not put into the form.</p></li>
 </ul>
-</div>
-<div class="section" id="t059-nabep">
-<h3>T059: Nabep<a class="headerlink" href="#t059-nabep" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t059-nabep">
+<h3>T059: Nabep<a class="headerlink" href="#t059-nabep" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Nabep.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1890,9 +1892,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p>the node must follow the head</p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t060-nevens">
-<h3>T060: Nevens<a class="headerlink" href="#t060-nevens" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t060-nevens">
+<h3>T060: Nevens<a class="headerlink" href="#t060-nevens" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Nevens.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1915,9 +1917,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p>it must contain a coordinator</p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t061-nevenschikkende">
-<h3>T061: Nevenschikkende<a class="headerlink" href="#t061-nevenschikkende" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t061-nevenschikkende">
+<h3>T061: Nevenschikkende<a class="headerlink" href="#t061-nevenschikkende" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Nevenschikkende.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -1930,9 +1932,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t062-ombep">
-<h3>T062: Ombep<a class="headerlink" href="#t062-ombep" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t062-ombep">
+<h3>T062: Ombep<a class="headerlink" href="#t062-ombep" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Ombep.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -1945,9 +1947,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t063-ond">
-<span id="id8"></span><h3>T063: Ond<a class="headerlink" href="#t063-ond" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t063-ond">
+<span id="id8"></span><h3>T063: Ond<a class="headerlink" href="#t063-ond" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ond.</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -1985,9 +1987,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t064-ondb">
-<h3>T064: OndB<a class="headerlink" href="#t064-ondb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t064-ondb">
+<h3>T064: OndB<a class="headerlink" href="#t064-ondb" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2004,7 +2006,7 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                 node[%Tarsp_Basic_B%]  and</span>
 <span class="s2">                 count(node) = 2)&quot;&quot;&quot;</span>
 </pre></div>
@@ -2013,9 +2015,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t065-ondbvc">
-<h3>T065: OndBVC<a class="headerlink" href="#t065-ondbvc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t065-ondbvc">
+<h3>T065: OndBVC<a class="headerlink" href="#t065-ondbvc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndBVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2032,7 +2034,7 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                   node[%Tarsp_Basic_B%]  and</span>
 <span class="s2">                   node[%Tarsp_Basic_VC%]  and</span>
 <span class="s2">                   count(node) = 3) &quot;&quot;&quot;</span>
@@ -2042,9 +2044,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t066-onderbr">
-<h3>T066: Onderbr<a class="headerlink" href="#t066-onderbr" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t066-onderbr">
+<h3>T066: Onderbr<a class="headerlink" href="#t066-onderbr" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Onderbr.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2057,9 +2059,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t067-onderschikkend-b">
-<h3>T067: Onderschikkend: B<a class="headerlink" href="#t067-onderschikkend-b" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t067-onderschikkend-b">
+<h3>T067: Onderschikkend: B<a class="headerlink" href="#t067-onderschikkend-b" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderschikkend: B.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2076,9 +2078,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t068-onderschikkend-vc">
-<h3>T068: Onderschikkend: VC<a class="headerlink" href="#t068-onderschikkend-vc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t068-onderschikkend-vc">
+<h3>T068: Onderschikkend: VC<a class="headerlink" href="#t068-onderschikkend-vc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderschikkend: VC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2095,9 +2097,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t069-onderschikkende">
-<h3>T069: Onderschikkende<a class="headerlink" href="#t069-onderschikkende" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t069-onderschikkende">
+<h3>T069: Onderschikkende<a class="headerlink" href="#t069-onderschikkende" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderschikkende.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2114,9 +2116,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t070-onderwerpswoordgroep">
-<h3>T070: Onderwerpswoordgroep<a class="headerlink" href="#t070-onderwerpswoordgroep" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t070-onderwerpswoordgroep">
+<h3>T070: Onderwerpswoordgroep<a class="headerlink" href="#t070-onderwerpswoordgroep" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Onderwerpswoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -2133,9 +2135,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t071-ondvc">
-<h3>T071: OndVC<a class="headerlink" href="#t071-ondvc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t071-ondvc">
+<h3>T071: OndVC<a class="headerlink" href="#t071-ondvc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2152,7 +2154,7 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                   node[%Tarsp_Basic_VC%]  and</span>
 <span class="s2">                   count(node) = 2) &quot;&quot;&quot;</span>
 </pre></div>
@@ -2167,9 +2169,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t072-ondw">
-<h3>T072: OndW<a class="headerlink" href="#t072-ondw" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t072-ondw">
+<h3>T072: OndW<a class="headerlink" href="#t072-ondw" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndW.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2186,8 +2188,8 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndW</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                %Ond% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndW</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                %Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                (%Tarsp_W</span><span class="si">%  o</span><span class="s2">r node[%Tarsp_onlyWinVC%]) and</span>
 <span class="s2">                </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 0 )&quot;&quot;&quot;</span>
 </pre></div>
@@ -2201,9 +2203,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t073-ondwb">
-<h3>T073: OndWB<a class="headerlink" href="#t073-ondwb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t073-ondwb">
+<h3>T073: OndWB<a class="headerlink" href="#t073-ondwb" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2220,10 +2222,10 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                  %Ond% and</span>
-<span class="s2">                  %Tarsp_W% and</span>
-<span class="s2">                  %Tarsp_B_X%  and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Tarsp_B_X</span><span class="si">%  a</span><span class="s2">nd</span>
 <span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2 )&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -2231,9 +2233,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t074-ondwbb">
-<h3>T074: OndWBB<a class="headerlink" href="#t074-ondwbb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t074-ondwbb">
+<h3>T074: OndWBB<a class="headerlink" href="#t074-ondwbb" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWBB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2250,9 +2252,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                   %Ond% and</span>
-<span class="s2">                   %Tarsp_W% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                   %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                   %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                   %Tarsp_B_X_count% = 2 and</span>
 <span class="s2">                   </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
 </pre></div>
@@ -2261,9 +2263,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t075-ondwbvc">
-<h3>T075: OndWBVC<a class="headerlink" href="#t075-ondwbvc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t075-ondwbvc">
+<h3>T075: OndWBVC<a class="headerlink" href="#t075-ondwbvc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWBVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2280,11 +2282,11 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                    %Ond% and</span>
-<span class="s2">                    %Tarsp_W% and</span>
-<span class="s2">                    %Tarsp_B_X% and</span>
-<span class="s2">                    %Tarsp_VC_X% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                    %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                    %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                    %Tarsp_B_X</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                    %Tarsp_VC_X</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                    </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3 )&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -2292,9 +2294,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t076-ondwvc">
-<h3>T076: OndWVC<a class="headerlink" href="#t076-ondwvc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t076-ondwvc">
+<h3>T076: OndWVC<a class="headerlink" href="#t076-ondwvc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2311,21 +2313,21 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                   %Ond% and</span>
-<span class="s2">                   %Tarsp_W%  and</span>
-<span class="s2">                   %Tarsp_VC_X% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                   %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                   %Tarsp_W</span><span class="si">%  a</span><span class="s2">nd</span>
+<span class="s2">                   %Tarsp_VC_X</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                   </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2 )</span>
 </pre></div>
 </div>
-<p>“”“</p>
+<p>“””</p>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t077-ondwvcvc-x">
-<h3>T077: OndWVCVC(X)<a class="headerlink" href="#t077-ondwvcvc-x" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t077-ondwvcvc-x">
+<h3>T077: OndWVCVC(X)<a class="headerlink" href="#t077-ondwvcvc-x" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: OndWVCVC(X).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2342,9 +2344,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWVCVCX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                      %Ond% and</span>
-<span class="s2">                      %Tarsp_W% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_OndWVCVCX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                      %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                      %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                      %Tarsp_VC_X_count% = 2  and</span>
 <span class="s2">                      </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &lt;= 4 )&quot;&quot;&quot;</span>
 </pre></div>
@@ -2353,9 +2355,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t078-ov2">
-<h3>T078: Ov2<a class="headerlink" href="#t078-ov2" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t078-ov2">
+<h3>T078: Ov2<a class="headerlink" href="#t078-ov2" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Ov2.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2368,9 +2370,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t079-ov3">
-<h3>T079: Ov3<a class="headerlink" href="#t079-ov3" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t079-ov3">
+<h3>T079: Ov3<a class="headerlink" href="#t079-ov3" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ov3.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2387,9 +2389,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t080-ov7">
-<h3>T080: Ov7<a class="headerlink" href="#t080-ov7" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t080-ov7">
+<h3>T080: Ov7<a class="headerlink" href="#t080-ov7" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Ov7.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2402,9 +2404,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t081-ovwg7">
-<h3>T081: OvWg7<a class="headerlink" href="#t081-ovwg7" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t081-ovwg7">
+<h3>T081: OvWg7<a class="headerlink" href="#t081-ovwg7" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: OvWg7.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -2417,9 +2419,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t082-ovverb6">
-<h3>T082: OvVerb6<a class="headerlink" href="#t082-ovverb6" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t082-ovverb6">
+<h3>T082: OvVerb6<a class="headerlink" href="#t082-ovverb6" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: OvVerb6.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -2432,9 +2434,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t083-ov4">
-<h3>T083: Ov4<a class="headerlink" href="#t083-ov4" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t083-ov4">
+<h3>T083: Ov4<a class="headerlink" href="#t083-ov4" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ov4.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2451,9 +2453,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t084-ov5">
-<h3>T084: Ov5<a class="headerlink" href="#t084-ov5" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t084-ov5">
+<h3>T084: Ov5<a class="headerlink" href="#t084-ov5" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Ov5.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2470,9 +2472,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t085-overige">
-<h3>T085: Overige<a class="headerlink" href="#t085-overige" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t085-overige">
+<h3>T085: Overige<a class="headerlink" href="#t085-overige" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Overige.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -2489,9 +2491,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t086-samzn">
-<h3>T086: SamZn<a class="headerlink" href="#t086-samzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t086-samzn">
+<h3>T086: SamZn<a class="headerlink" href="#t086-samzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: SamZn.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -2541,9 +2543,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t087-stam">
-<h3>T087: Stam<a class="headerlink" href="#t087-stam" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t087-stam">
+<h3>T087: Stam<a class="headerlink" href="#t087-stam" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Stam.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -2567,9 +2569,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t088-stam-t">
-<h3>T088: Stam+t<a class="headerlink" href="#t088-stam-t" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t088-stam-t">
+<h3>T088: Stam+t<a class="headerlink" href="#t088-stam-t" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Stam+t.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -2590,9 +2592,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t089-sz2">
-<h3>T089: Sz2+<a class="headerlink" href="#t089-sz2" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t089-sz2">
+<h3>T089: Sz2+<a class="headerlink" href="#t089-sz2" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Sz2+.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -2612,9 +2614,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t090-sz3">
-<h3>T090: Sz3+<a class="headerlink" href="#t090-sz3" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t090-sz3">
+<h3>T090: Sz3+<a class="headerlink" href="#t090-sz3" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Sz3+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2634,9 +2636,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t091-v-lijdend">
-<h3>T091: V (lijdend)<a class="headerlink" href="#t091-v-lijdend" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t091-v-lijdend">
+<h3>T091: V (lijdend)<a class="headerlink" href="#t091-v-lijdend" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V (lijdend).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -2649,9 +2651,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t092-v-meewerkend">
-<h3>T092: V (meewerkend)<a class="headerlink" href="#t092-v-meewerkend" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t092-v-meewerkend">
+<h3>T092: V (meewerkend)<a class="headerlink" href="#t092-v-meewerkend" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V (meewerkend).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -2664,9 +2666,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t093-v-voorzetsel">
-<h3>T093: V (voorzetsel)<a class="headerlink" href="#t093-v-voorzetsel" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t093-v-voorzetsel">
+<h3>T093: V (voorzetsel)<a class="headerlink" href="#t093-v-voorzetsel" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V (voorzetsel).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -2679,9 +2681,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t094-v-u-divers">
-<h3>T094: V.U. Divers<a class="headerlink" href="#t094-v-u-divers" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t094-v-u-divers">
+<h3>T094: V.U. Divers<a class="headerlink" href="#t094-v-u-divers" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Divers.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -2704,9 +2706,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t095-v-u-soc-aangp">
-<h3>T095: V.U. Soc. AangP<a class="headerlink" href="#t095-v-u-soc-aangp" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t095-v-u-soc-aangp">
+<h3>T095: V.U. Soc. AangP<a class="headerlink" href="#t095-v-u-soc-aangp" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Soc. AangP.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -2723,9 +2725,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t096-v-u-ster">
-<h3>T096: V.U. Ster<a class="headerlink" href="#t096-v-u-ster" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t096-v-u-ster">
+<h3>T096: V.U. Ster<a class="headerlink" href="#t096-v-u-ster" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: V.U. Ster.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -2738,9 +2740,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t150-v-u-nee-ja">
-<h3>T150: V.U. Nee/ja<a class="headerlink" href="#t150-v-u-nee-ja" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t150-v-u-nee-ja">
+<h3>T150: V.U. Nee/ja<a class="headerlink" href="#t150-v-u-nee-ja" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Nee/ja.</p></li>
 <li><p><strong>Category</strong>: V.U.</p></li>
@@ -2757,9 +2759,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t097-vc">
-<span id="id9"></span><h3>T097: VC<a class="headerlink" href="#t097-vc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t097-vc">
+<span id="id9"></span><h3>T097: VC<a class="headerlink" href="#t097-vc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VC.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -2835,9 +2837,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <ul class="simple">
 <li><p><strong>Remark</strong> we do not treat secondary predicates  such as <em>ik kan dat</em> <strong>alleen</strong> as complements, but as adverbial modifiers.</p></li>
 </ul>
-</div>
-<div class="section" id="t098-vcbijzin">
-<h3>T098: Vcbijzin<a class="headerlink" href="#t098-vcbijzin" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t098-vcbijzin">
+<h3>T098: Vcbijzin<a class="headerlink" href="#t098-vcbijzin" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vcbijzin.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2854,9 +2856,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t099-vcw">
-<h3>T099: VCW<a class="headerlink" href="#t099-vcw" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t099-vcw">
+<h3>T099: VCW<a class="headerlink" href="#t099-vcw" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: VCW.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2869,9 +2871,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t100-vcwondbb">
-<h3>T100: VCWOndBB<a class="headerlink" href="#t100-vcwondbb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t100-vcwondbb">
+<h3>T100: VCWOndBB<a class="headerlink" href="#t100-vcwondbb" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VCWOndBB.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -2888,20 +2890,20 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VCWOndBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative% and</span>
-<span class="s2">                     %Ond% and</span>
-<span class="s2">                     %Tarsp_W% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VCWOndBB</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                     %Ond</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                     %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                     %Tarsp_B_X_count% = 2 and</span>
-<span class="s2">                     %Tarsp_VC_X% and</span>
+<span class="s2">                     %Tarsp_VC_X</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                     </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t101-vcwoordgroep">
-<h3>T101: VCWoordgroep<a class="headerlink" href="#t101-vcwoordgroep" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t101-vcwoordgroep">
+<h3>T101: VCWoordgroep<a class="headerlink" href="#t101-vcwoordgroep" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VCWoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -2918,9 +2920,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t102-verb-ov">
-<h3>T102: Verb Ov<a class="headerlink" href="#t102-verb-ov" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t102-verb-ov">
+<h3>T102: Verb Ov<a class="headerlink" href="#t102-verb-ov" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Verb Ov.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -2942,9 +2944,9 @@ The values of <em>vwtype</em> can be <em>pers</em> (personal pronoun, for <em>ji
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t103-vergr-trap">
-<h3>T103: Vergr trap<a class="headerlink" href="#t103-vergr-trap" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t103-vergr-trap">
+<h3>T103: Vergr trap<a class="headerlink" href="#t103-vergr-trap" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Vergr trap.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -2961,9 +2963,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Vergrotende trap van het bijvoeglijk naamwoord.”</p></li>
 </ul>
-</div>
-<div class="section" id="t104-verkl">
-<h3>T104: Verkl<a class="headerlink" href="#t104-verkl" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t104-verkl">
+<h3>T104: Verkl<a class="headerlink" href="#t104-verkl" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Verkl.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -2980,9 +2982,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t105-verl-tijd">
-<h3>T105: Verl Tijd<a class="headerlink" href="#t105-verl-tijd" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t105-verl-tijd">
+<h3>T105: Verl Tijd<a class="headerlink" href="#t105-verl-tijd" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Verl Tijd.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -2999,9 +3001,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t106-vo-bij">
-<h3>T106: Vo/bij<a class="headerlink" href="#t106-vo-bij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t106-vo-bij">
+<h3>T106: Vo/bij<a class="headerlink" href="#t106-vo-bij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vo/bij.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3022,9 +3024,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t107-vobij">
-<h3>T107: Vobij<a class="headerlink" href="#t107-vobij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t107-vobij">
+<h3>T107: Vobij<a class="headerlink" href="#t107-vobij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vobij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -3041,9 +3043,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t108-volt-dw">
-<h3>T108: Volt dw<a class="headerlink" href="#t108-volt-dw" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t108-volt-dw">
+<h3>T108: Volt dw<a class="headerlink" href="#t108-volt-dw" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Volt dw.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -3060,9 +3062,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t109-voltd-fg">
-<h3>T109: Voltd fg<a class="headerlink" href="#t109-voltd-fg" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t109-voltd-fg">
+<h3>T109: Voltd fg<a class="headerlink" href="#t109-voltd-fg" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Voltd fg.</p></li>
 <li><p><strong>Category</strong>: Woordstructuur</p></li>
@@ -3075,9 +3077,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t110-vr">
-<h3>T110: Vr<a class="headerlink" href="#t110-vr" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t110-vr">
+<h3>T110: Vr<a class="headerlink" href="#t110-vr" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -3094,9 +3096,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>This language measure actually does not exist. It has been included and implemented because the code <em>Vr</em> occurs in the Schlichting appendix  (example 20, p. 91, and example 22, p. 92). Example 20 should have been annotated as <em>Vr(XY)</em>, and example 22 as <em>Vr4</em>.</p>
-</div>
-<div class="section" id="t111-vr-xy">
-<h3>T111: Vr(XY)<a class="headerlink" href="#t111-vr-xy" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t111-vr-xy">
+<h3>T111: Vr(XY)<a class="headerlink" href="#t111-vr-xy" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr(XY).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3113,7 +3115,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VrXY</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_VrXY</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                 node[@rel=&quot;whd&quot;] and</span>
 <span class="s2">                 node[@cat=&quot;sv1&quot; and</span>
 <span class="s2">                      @rel=&quot;body&quot;  and</span>
@@ -3133,9 +3135,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </div></blockquote>
 </li>
 </ul>
-</div>
-<div class="section" id="t112-vr4">
-<h3>T112: Vr4<a class="headerlink" href="#t112-vr4" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t112-vr4">
+<h3>T112: Vr4<a class="headerlink" href="#t112-vr4" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr4.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3153,7 +3155,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Schlichting</strong> “Vraagwoord + drie Zinsdelen.” Covered.</p></li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Vr4</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Vr4</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                node[@rel=&quot;whd&quot;] and</span>
 <span class="s2">                node[@cat=&quot;sv1&quot; and</span>
 <span class="s2">                     @rel=&quot;body&quot;  and</span>
@@ -3162,9 +3164,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </pre></div>
 </div>
 <p>See section <a class="reference internal" href="#composedmeasures"><span class="std std-ref">Macros for Composed Language Measures</span></a> for details.</p>
-</div>
-<div class="section" id="t113-vr5">
-<h3>T113: Vr5+<a class="headerlink" href="#t113-vr5" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t113-vr5">
+<h3>T113: Vr5+<a class="headerlink" href="#t113-vr5" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Vr5+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3181,7 +3183,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Vr5plus</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_Vr5plus</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%Tarsp_whq</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                    node[@rel=&quot;whd&quot;] and</span>
 <span class="s2">                    node[@cat=&quot;sv1&quot; and</span>
 <span class="s2">                         @rel=&quot;body&quot;  and</span>
@@ -3193,9 +3195,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Vraagzinnen die beginnen met een vraagwoord en behalve dat Vraagwoord nog vier of meer Zinsdelen hebben.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t114-vzb">
-<h3>T114: VzB<a class="headerlink" href="#t114-vzb" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t114-vzb">
+<h3>T114: VzB<a class="headerlink" href="#t114-vzb" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VzB.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3215,9 +3217,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t115-vzbepbvzn">
-<h3>T115: VzBepBvZn<a class="headerlink" href="#t115-vzbepbvzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t115-vzbepbvzn">
+<h3>T115: VzBepBvZn<a class="headerlink" href="#t115-vzbepbvzn" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: VzBepBvZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3230,9 +3232,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t116-vzbepzn">
-<h3>T116: VzBepZn<a class="headerlink" href="#t116-vzbepzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t116-vzbepzn">
+<h3>T116: VzBepZn<a class="headerlink" href="#t116-vzbepzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VzBepZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3249,9 +3251,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t117-vzn">
-<h3>T117: VzN<a class="headerlink" href="#t117-vzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t117-vzn">
+<h3>T117: VzN<a class="headerlink" href="#t117-vzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: VzN.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3268,9 +3270,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t118-vzznaz">
-<h3>T118: VzZnAz<a class="headerlink" href="#t118-vzznaz" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t118-vzznaz">
+<h3>T118: VzZnAz<a class="headerlink" href="#t118-vzznaz" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: VzZnAz.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3283,9 +3285,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t119-s1w">
-<h3>T119: S1W<a class="headerlink" href="#t119-s1w" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t119-s1w">
+<h3>T119: S1W<a class="headerlink" href="#t119-s1w" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: S1W.</p></li>
 <li><p><strong>Category</strong>: Eenwoordzin</p></li>
@@ -3302,9 +3304,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t120-w">
-<h3>T120: W<a class="headerlink" href="#t120-w" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t120-w">
+<h3>T120: W<a class="headerlink" href="#t120-w" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: W.</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -3321,9 +3323,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t121-w-x">
-<h3>T121: W(X)<a class="headerlink" href="#t121-w-x" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t121-w-x">
+<h3>T121: W(X)<a class="headerlink" href="#t121-w-x" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: W(X).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3343,7 +3345,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 &#64;&#64;add description&#64;&#64;</p>
 <p>In a later stage  a query with macros was defined for it, but  the Python function has not been replaced yet.</p>
 <p>The query has a straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wx</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wx</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">         </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &lt;= 1)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3352,9 +3354,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Remark</strong> Experiment with replaceing the wx function by the query with macros</p></li>
 <li><p><strong>Schlichting</strong> “de Gebiedende Wijszinnen bestaan in deze fase uit één of twee zinsdelen.” Covered</p></li>
 </ul>
-</div>
-<div class="section" id="t122-pv-loos">
-<h3>T122: PV-loos<a class="headerlink" href="#t122-pv-loos" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t122-pv-loos">
+<h3>T122: PV-loos<a class="headerlink" href="#t122-pv-loos" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PV-loos.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -3370,9 +3372,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </div>
 </li>
 </ul>
-</div>
-<div class="section" id="t123-waarschijnlijk-fout-geanalyseerde-nevenschikking">
-<h3>T123: waarschijnlijk fout geanalyseerde nevenschikking<a class="headerlink" href="#t123-waarschijnlijk-fout-geanalyseerde-nevenschikking" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t123-waarschijnlijk-fout-geanalyseerde-nevenschikking">
+<h3>T123: waarschijnlijk fout geanalyseerde nevenschikking<a class="headerlink" href="#t123-waarschijnlijk-fout-geanalyseerde-nevenschikking" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: waarschijnlijk fout geanalyseerde nevenschikking.</p></li>
 <li><p><strong>Category</strong>:</p></li>
@@ -3384,9 +3386,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Implementation</strong>: Xpath with macros</p></li>
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 </ul>
-</div>
-<div class="section" id="t124-want">
-<h3>T124: want<a class="headerlink" href="#t124-want" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t124-want">
+<h3>T124: want<a class="headerlink" href="#t124-want" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: want.</p></li>
 <li><p><strong>Category</strong>: Verbindingswoorden</p></li>
@@ -3403,9 +3405,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t125-wbvc">
-<h3>T125: WBVC<a class="headerlink" href="#t125-wbvc" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t125-wbvc">
+<h3>T125: WBVC<a class="headerlink" href="#t125-wbvc" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WBVC.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3422,10 +3424,10 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative%  and</span>
-<span class="s2">                 %Tarsp_W% and</span>
-<span class="s2">                 %Tarsp_B_X% and</span>
-<span class="s2">                 %Tarsp_VC_X% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WBVC</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(</span><span class="si">%d</span><span class="s2">eclarative</span><span class="si">%  a</span><span class="s2">nd</span>
+<span class="s2">                 %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                 %Tarsp_B_X</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                 %Tarsp_VC_X</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                 </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2 )&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3433,9 +3435,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Werkwoord + Bijwoordelijke bepaling + Voorwerp of Complement.” Covered</p></li>
 </ul>
-</div>
-<div class="section" id="t126-wdeel">
-<h3>T126: Wdeel<a class="headerlink" href="#t126-wdeel" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t126-wdeel">
+<h3>T126: Wdeel<a class="headerlink" href="#t126-wdeel" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Wdeel.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3452,9 +3454,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t127-werkwoordswoordgroep">
-<h3>T127: Werkwoordswoordgroep<a class="headerlink" href="#t127-werkwoordswoordgroep" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t127-werkwoordswoordgroep">
+<h3>T127: Werkwoordswoordgroep<a class="headerlink" href="#t127-werkwoordswoordgroep" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Werkwoordswoordgroep.</p></li>
 <li><p><strong>Category</strong>: Uitbreiding Zinsdelen</p></li>
@@ -3471,9 +3473,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t128-wij">
-<h3>T128: wij<a class="headerlink" href="#t128-wij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t128-wij">
+<h3>T128: wij<a class="headerlink" href="#t128-wij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: wij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -3490,9 +3492,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t129-wond-x">
-<h3>T129: Wond(X)<a class="headerlink" href="#t129-wond-x" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t129-wond-x">
+<h3>T129: Wond(X)<a class="headerlink" href="#t129-wond-x" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Wond(X).</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3509,11 +3511,11 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOndX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOndX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                  not(%basicimperative%) and</span>
-<span class="s2">                  %topcontainsquestionmark% and</span>
-<span class="s2">                  %Tarsp_W% and</span>
-<span class="s2">                  %Ond% and</span>
+<span class="s2">                  %topcontainsquestionmark</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% &lt;= 2)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3521,9 +3523,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Werkwoord + Onderwerp, meestal gevolgd door een derde zinsdeel.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t130-wond4">
-<h3>T130: WOnd4<a class="headerlink" href="#t130-wond4" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t130-wond4">
+<h3>T130: WOnd4<a class="headerlink" href="#t130-wond4" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WOnd4.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3540,11 +3542,11 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOnd4</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOnd4</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                  not(%basicimperative%) and</span>
-<span class="s2">                  %topcontainsquestionmark% and</span>
-<span class="s2">                  %Tarsp_W% and</span>
-<span class="s2">                  %Ond% and</span>
+<span class="s2">                  %topcontainsquestionmark</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                  %Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                  </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3552,9 +3554,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Werkwoord + Onderwerp + twee Zinsdelen.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t131-wond5">
-<h3>T131: WOnd5+<a class="headerlink" href="#t131-wond5" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t131-wond5">
+<h3>T131: WOnd5+<a class="headerlink" href="#t131-wond5" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WOnd5+.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3571,11 +3573,11 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOnd5plus</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Tarsp_WOnd5plus</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%ynquery</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                      not(%basicimperative%) and</span>
-<span class="s2">                      %topcontainsquestionmark% and</span>
-<span class="s2">                      %Tarsp_W% and</span>
-<span class="s2">                      %Ond% and</span>
+<span class="s2">                      %topcontainsquestionmark</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                      %Tarsp_W</span><span class="si">% a</span><span class="s2">nd</span>
+<span class="s2">                      %Ond</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">                      </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% =4)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3583,9 +3585,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Vraagzinnen die beginnen met een Werkwoord en een Onderwerp en daarbij nog drie of meer Zinsdelen hebben.” Covered.</p></li>
 </ul>
-</div>
-<div class="section" id="t132-woordgroep-onderstrepen">
-<h3>T132: woordgroep(onderstrepen)<a class="headerlink" href="#t132-woordgroep-onderstrepen" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t132-woordgroep-onderstrepen">
+<h3>T132: woordgroep(onderstrepen)<a class="headerlink" href="#t132-woordgroep-onderstrepen" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: woordgroep(onderstrepen).</p></li>
 <li><p><strong>Category</strong>: Zinsdelen</p></li>
@@ -3603,9 +3605,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t133-wvz">
-<h3>T133: WVz<a class="headerlink" href="#t133-wvz" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t133-wvz">
+<h3>T133: WVz<a class="headerlink" href="#t133-wvz" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WVz.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3622,9 +3624,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t134-ww">
-<h3>T134: WW<a class="headerlink" href="#t134-ww" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t134-ww">
+<h3>T134: WW<a class="headerlink" href="#t134-ww" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: WW.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3637,9 +3639,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t135-wxy">
-<h3>T135: WXY<a class="headerlink" href="#t135-wxy" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t135-wxy">
+<h3>T135: WXY<a class="headerlink" href="#t135-wxy" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WXY.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3656,7 +3658,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxy</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxy</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">          </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 2)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3664,9 +3666,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Werkwoord + twee Zinsdelen”. Covered</p></li>
 </ul>
-</div>
-<div class="section" id="t136-wxyz">
-<h3>T136: WXYZ<a class="headerlink" href="#t136-wxyz" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t136-wxyz">
+<h3>T136: WXYZ<a class="headerlink" href="#t136-wxyz" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WXYZ.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3683,7 +3685,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxyz</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxyz</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">           </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 3)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3691,9 +3693,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <ul class="simple">
 <li><p><strong>Schlichting</strong> “Werkwoord + drie Zinsdelen”. Covered</p></li>
 </ul>
-</div>
-<div class="section" id="t137-wxyz5">
-<h3>T137: WXYZ5*<a class="headerlink" href="#t137-wxyz5" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t137-wxyz5">
+<h3>T137: WXYZ5*<a class="headerlink" href="#t137-wxyz5" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: WXYZ5*.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3710,7 +3712,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 </ul>
 <p>Straightforward implementation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxyz5</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative% and</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wxyz5</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(%basicimperative</span><span class="si">% a</span><span class="s2">nd</span>
 <span class="s2">            </span><span class="si">%r</span><span class="s2">ealcomplormodnodecount% = 4)&quot;&quot;&quot;</span>
 </pre></div>
 </div>
@@ -3719,9 +3721,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Remark</strong> The label should be chaned to <em>WXY5</em>, the varinat with the asterisk should be an alternative.</p></li>
 <li><p><strong>Schlichting</strong> “Werkwoord + vier Zinsdelen”. Covered</p></li>
 </ul>
-</div>
-<div class="section" id="t138-x-en-x-en-x">
-<h3>T138: X en X (en X)<a class="headerlink" href="#t138-x-en-x-en-x" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t138-x-en-x-en-x">
+<h3>T138: X en X (en X)<a class="headerlink" href="#t138-x-en-x-en-x" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: X en X (en X).</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3738,9 +3740,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t139-x-w-deel">
-<h3>T139: X(W)deel<a class="headerlink" href="#t139-x-w-deel" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t139-x-w-deel">
+<h3>T139: X(W)deel<a class="headerlink" href="#t139-x-w-deel" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: X(W)deel.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3753,9 +3755,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t140-xneg">
-<h3>T140: Xneg<a class="headerlink" href="#t140-xneg" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t140-xneg">
+<h3>T140: Xneg<a class="headerlink" href="#t140-xneg" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Xneg.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3776,9 +3778,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t141-xy-w-deel">
-<h3>T141: XY(W)deel<a class="headerlink" href="#t141-xy-w-deel" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t141-xy-w-deel">
+<h3>T141: XY(W)deel<a class="headerlink" href="#t141-xy-w-deel" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: XY(W)deel.</p></li>
 <li><p><strong>Category</strong>: Zinsconstructies</p></li>
@@ -3791,9 +3793,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t142-ze">
-<h3>T142: ze<a class="headerlink" href="#t142-ze" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t142-ze">
+<h3>T142: ze<a class="headerlink" href="#t142-ze" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: ze.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -3810,9 +3812,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t143-zelf">
-<h3>T143: zelf<a class="headerlink" href="#t143-zelf" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t143-zelf">
+<h3>T143: zelf<a class="headerlink" href="#t143-zelf" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: zelf.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -3825,9 +3827,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t144-zij">
-<h3>T144: zij<a class="headerlink" href="#t144-zij" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t144-zij">
+<h3>T144: zij<a class="headerlink" href="#t144-zij" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: zij.</p></li>
 <li><p><strong>Category</strong>: Voornaamwoorden</p></li>
@@ -3844,9 +3846,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t145-zn">
-<h3>T145: Zn<a class="headerlink" href="#t145-zn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t145-zn">
+<h3>T145: Zn<a class="headerlink" href="#t145-zn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Zn.</p></li>
 <li><p><strong>Category</strong>: Eenwoordzin</p></li>
@@ -3866,9 +3868,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t147-znzn">
-<h3>T147: ZnZn<a class="headerlink" href="#t147-znzn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t147-znzn">
+<h3>T147: ZnZn<a class="headerlink" href="#t147-znzn" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: ZnZn.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3887,9 +3889,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t148-znx">
-<h3>T148: Znx<a class="headerlink" href="#t148-znx" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t148-znx">
+<h3>T148: Znx<a class="headerlink" href="#t148-znx" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: Znx.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -3902,9 +3904,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t151-v-u-totaal">
-<h3>T151: V.U. Totaal<a class="headerlink" href="#t151-v-u-totaal" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t151-v-u-totaal">
+<h3>T151: V.U. Totaal<a class="headerlink" href="#t151-v-u-totaal" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: V.U. Totaal.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -3921,9 +3923,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t152-g-totaal">
-<h3>T152: G Totaal<a class="headerlink" href="#t152-g-totaal" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t152-g-totaal">
+<h3>T152: G Totaal<a class="headerlink" href="#t152-g-totaal" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: G Totaal.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -3940,9 +3942,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t153-g-o-fase">
-<h3>T153: G.O Fase<a class="headerlink" href="#t153-g-o-fase" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t153-g-o-fase">
+<h3>T153: G.O Fase<a class="headerlink" href="#t153-g-o-fase" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: G.O Fase.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -3959,9 +3961,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t154-pfii">
-<h3>T154: PFII<a class="headerlink" href="#t154-pfii" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t154-pfii">
+<h3>T154: PFII<a class="headerlink" href="#t154-pfii" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFII.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -3978,9 +3980,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t155-pfiii">
-<h3>T155: PFIII<a class="headerlink" href="#t155-pfiii" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t155-pfiii">
+<h3>T155: PFIII<a class="headerlink" href="#t155-pfiii" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFIII.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -3997,9 +3999,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t156-ovznbv4">
-<h3>T156: OvZnBv4<a class="headerlink" href="#t156-ovznbv4" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t156-ovznbv4">
+<h3>T156: OvZnBv4<a class="headerlink" href="#t156-ovznbv4" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><strong>Name</strong>: OvZnBv4.</p></li>
 <li><p><strong>Category</strong>: Woordgroepen</p></li>
@@ -4012,9 +4014,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 <li><p><strong>Query</strong> defined as: <strong>not implemented yet</strong></p></li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t157-screening">
-<h3>T157: Screening<a class="headerlink" href="#t157-screening" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t157-screening">
+<h3>T157: Screening<a class="headerlink" href="#t157-screening" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Screening.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -4031,9 +4033,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t158-pfiv">
-<h3>T158: PFIV<a class="headerlink" href="#t158-pfiv" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t158-pfiv">
+<h3>T158: PFIV<a class="headerlink" href="#t158-pfiv" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFIV.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -4050,9 +4052,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t159-pfv">
-<h3>T159: PFV<a class="headerlink" href="#t159-pfv" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t159-pfv">
+<h3>T159: PFV<a class="headerlink" href="#t159-pfv" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFV.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -4069,9 +4071,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t160-pfvi">
-<h3>T160: PFVI<a class="headerlink" href="#t160-pfvi" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t160-pfvi">
+<h3>T160: PFVI<a class="headerlink" href="#t160-pfvi" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFVI.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -4088,9 +4090,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t161-pfvii">
-<h3>T161: PFVII<a class="headerlink" href="#t161-pfvii" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t161-pfvii">
+<h3>T161: PFVII<a class="headerlink" href="#t161-pfvii" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PFVII.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -4107,9 +4109,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t162-pf">
-<h3>T162: PF<a class="headerlink" href="#t162-pf" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t162-pf">
+<h3>T162: PF<a class="headerlink" href="#t162-pf" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: PF.</p></li>
 <li><p><strong>Category</strong>: Aggregate</p></li>
@@ -4126,9 +4128,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-<div class="section" id="t165-formulier">
-<h3>T165: Formulier<a class="headerlink" href="#t165-formulier" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="t165-formulier">
+<h3>T165: Formulier<a class="headerlink" href="#t165-formulier" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p><strong>Name</strong>: Formulier.</p></li>
 <li><p><strong>Category</strong>: Forms</p></li>
@@ -4145,9 +4147,9 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
 </li>
 <li><p><strong>Schlichting</strong>: ” “</p></li>
 </ul>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -4360,7 +4362,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -4386,7 +4388,7 @@ No annotations for this measure occur in the Auris TD and DTD data. The language
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Jan Odijk, Jelte van Boheemen, Martin Kroon.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>
