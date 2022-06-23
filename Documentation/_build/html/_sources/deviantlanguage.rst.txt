@@ -94,3 +94,10 @@ Incorrect possessive pronouns
 
 Wrong pronunciation of content words in the transcript
 """"""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. _smallclauses:
+
+Small clauses
+"""""""""""""
+
+@@to be added@@

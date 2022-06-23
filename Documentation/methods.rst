@@ -17,11 +17,12 @@ It is desirable to include in a sample not only the utterances of the target chi
 
 Each method defines so-called language measures. A transcript of a spontaneous language session is annotated with codes to indicate which language measures are applicable in which utterance. Sometimes the codes are aligned with specific words, but that is often not the case.  
 
+.. _tarspannotations:
 
 TARSP Annotations
 -----------------
 
-SASTA outputs only codes for  language measures that are included in the method-specific form.
+SASTA outputs only codes for  language measures that are included in the method-specific form ('Profielkaart').
 
 The TARSP language measures for ‘Zinsdelen’ are Ond, W, VC, and B. Of these, only W occurs in the form.
 

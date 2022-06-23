@@ -1,5 +1,7 @@
 from Sziplus import getnodecount
 from treebankfunctions import getattval
+from sastatypes import SynTree
+from typing import List, Set
 
 noimplemmas = {'hoeven', 'moeten', 'mogen', 'kunnen', 'hebben', 'willen', 'hebben', 'zitten'}
 noimpwords = {'ben', 'bent', 'is', 'zijn'}
@@ -101,7 +103,10 @@ def wond5plus(syntree):
     return results
 
 
-def impwi(syntree, nodecounts):
+def impwi(syntree: SynTree, nodecounts:Set[int]) -> List[SynTree]:
+    '''
+    The function impwi finds nodes for imperative clauses in *syntree* with the number of nodes equal to one of the  integers in the *nodecounts* set
+    '''
     results = []
     cands = syntree.xpath(impquery)
     ok = True
@@ -129,7 +134,11 @@ def impwi(syntree, nodecounts):
     return results
 
 
-def wx(syntree):
+def wx(syntree: SynTree) -> List[SynTree]:
+    '''
+    The function *wx* finds nodes for imperative clauses with 1 or 2 nodes.
+    it uses the function *impwi* to achieve that.
+    '''
     results = impwi(syntree, {1, 2})
     return results
 

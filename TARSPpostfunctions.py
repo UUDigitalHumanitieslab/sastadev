@@ -1,5 +1,5 @@
 '''
-defines functions for the TARSP post part of the methods
+The module TARSPpostfunctions defines functions for the TARSP post part of the methods
 
 '''
 from collections import Counter
@@ -8,17 +8,45 @@ from query import core_process
 from treebankfunctions import getmeta
 from config import SDLOGGER
 
+from typing import Dict, List
+from sastatypes import SynTree, QId, Query, QueryDict, Stage
+from allresults import AllResults
+
 OndVC = 'T071'
 OndWVC = 'T076'
 OndWBVC = 'T075'
 
+#: The variable (constant) *vuqueryids* contains a list of Query identifiers for
+#: queries for fixed expressions (V.U.).
 vuqueryids = ['T094', 'T095', 'T096', 'T150']
+#: The variable (constant) *tarsp_clausetypes* contains the (lower case) values for the
+#: subcategory of a query that represent clause types.
 tarsp_clausetypes = ['mededelende zin', 'vragen', 'gebiedende wijs']
+#: The variable (constant) *excludedqids* contains a list of QIds for queries that
+#: should be excluded in computing G.O. Fase.
 excludedqids = ['T039', 'T048', 'T049', 'T052']   # TARSP p. 21: hè, Into, Inversie, Kop
+#: The variable (constant) *gofase_minthreshold* contains the value of the minimum
+#: percentage of analysis units that must have been scored to be included in G.O. Fase.
 gofase_minthreshold = 0.05  # 5% p21 Tarsp 2005
 
 
-def getqueriesbystage(queries):
+def getqueriesbystage(queries: QueryDict) -> Dict[Stage, List[QId]]:
+    '''
+    The function *getqueriesbystage* creates a dictionary with a stage as key and a
+    list of QIds as value.
+
+    It selects those QIds for which the query's (lower cased) subcategory is contained
+    in the constant *tarsp_clausetypes*:
+
+    .. autodata:: TARSPpostfunctions::tarsp_clausetypes
+
+    and which is not included in the list of *excludedqids*:
+
+    .. autodata:: TARSPpostfunctions::excludedqids
+
+    if these conditions are met, the QId is appended to the dictionary item with key
+    equal to the stage of the query associated with QId.
+    '''
     results = {}
     for qid in queries:
         if queries[qid].subcat.lower() in tarsp_clausetypes and qid not in excludedqids:
@@ -30,7 +58,14 @@ def getqueriesbystage(queries):
     return results
 
 
-def vutotaal(allresults, _):
+def vutotaal(allresults: AllResults, _: SynTree) -> int:
+    '''
+    The function *vutotaal* computes the total number of  "Vaste Uitdrukkingen" (VU) in
+    the variable *allresults*. It uses the set *vuqueryids* to determine which
+    queries to take into account and which not:
+
+     .. autodata:: vuqueryids
+    '''
     scores = []
     for qid in vuqueryids:
         if qid in allresults.coreresults:
@@ -43,17 +78,22 @@ def vutotaal(allresults, _):
     return result
 
 
-def gtotaal(allresults, _):
+def gtotaal(allresults: AllResults, _:SynTree) -> int:
+    '''
+    The function *gtotaal* computes the number of utterances to be analysed. It does
+    so by subtracting the number of V.U. utterances and the results for *Atotaal* from
+    the total number of utterances.
+    '''
     Atotaal = 0
     vutotaal = allresults.postresults['T151']
     Gtotaal = allresults.uttcount - Atotaal - vutotaal
     return Gtotaal
 
 
-def countutts(acounter):
+def countutts(acounter: Counter):
     '''
-    input parameter acounter: Counter()
-    returns sum of the lengths of the values for each key in acounter
+    The function *countutts* returns the sum of the values for each key in
+    *acounter*.
     '''
     result = 0
     for k in acounter:
@@ -61,7 +101,19 @@ def countutts(acounter):
     return result
 
 
-def getuttcountsbystage(queriesbystage, allresults):
+def getuttcountsbystage(queriesbystage: Dict[Stage, List[QId]], allresults: AllResults)\
+        -> Dict[Stage, int]:
+    '''
+    The function *getuttcountsbystage* computes a dictionary *uttcounts* of Stage,
+    int items based on the input parameters *queriesbystage* and *allresults*.
+
+    For each qid in *queriesbystage* that is a qid for a core query, it counts the
+    number of utterances marked in  *allresults.coreresults*. For this it uses the
+    function *countutts*:
+
+    .. autofunction:: TARSPpostfunctions::countutts
+
+    '''
     uttcounts = {}
     for stage in queriesbystage:
         uttcounts[stage] = 0
@@ -71,7 +123,18 @@ def getuttcountsbystage(queriesbystage, allresults):
     return uttcounts
 
 
-def getstage(uttcounts, allresults):
+def getstage(uttcounts: Dict[Stage, int], allresults: AllResults) -> Stage:
+    '''
+    The function *getstage* computes the stage on the basis of the *uttcounts*
+    dictionary with Stage, int items and *allresults*
+
+    The stage is taken into consideration if its number of scores divided by *gtotaal* is
+    greater or equal to the value of *gofase_minthreshold*:
+
+    .. autodata:: TARSPpostfunctions::gofase_minthreshold
+
+    From the remaining candidates the highest stage value is selected.
+    '''
     cands = []
     gtotaal = allresults.postresults['T152']
     for el in uttcounts:
@@ -87,16 +150,48 @@ def getstage(uttcounts, allresults):
     return result
 
 
-def gofase(allresults, thequeries):
+def gofase(allresults: AllResults, thequeries: QueryDict) -> Stage:
+    '''
+    The function *gofase* computes the stage given the results in the parameter
+    *allresults* and the queries in the parameter *thequeries*.
+
+    It first obtains *queriesbystage*, a dictionary of Stage, List[QId] items, via the
+    function  *getqueriesbystage* applied to *thequeries*:
+
+    .. autofunction:: TARSPpostfunctions::getqueriesbystage
+
+    Next, it obtains *uttcounts*,  a dictionary of Stage, int items by applying the
+    function  *getuttcountsbystage* to *queriesbystage* and *allresults*:
+
+    .. autofunction:: TARSPpostfunctions::getuttcountsbystage
+
+    Finally, it obtains the stage by applying the function *getstage* to *uttcounts*
+    and *allresults*:
+
+    .. autofunction:: TARSPpostfunctions::getstage
+
+    and then it returns the obtained *stage*.
+    '''
     result = 0
-    queriesbystage = getqueriesbystage(thequeries)
-    uttcounts = getuttcountsbystage(queriesbystage, allresults)
-    result = getstage(uttcounts, allresults)
+    queriesbystage: Dict[Stage, List[QId]] = getqueriesbystage(thequeries)
+    uttcounts: Dict[Stage, int] = getuttcountsbystage(queriesbystage, allresults)
+    result: Stage = getstage(uttcounts, allresults)
 
     return result
 
 
-def genpfi(stage, allresults, allqueries):
+def genpfi(stage: Stage, allresults: AllResults, allqueries:QueryDict) -> int:
+    '''
+    The function *genpfi* computes the *Profielscore* (PF) for the stage given by the
+    parameter *stage* on the basis of *allresults* and the query dictionary *allqueries*.
+    It selects the queries of the given stage that are core queries and that are not
+    *star2* queries.
+
+    From these, it only selects the ones for which the number of results is larger than 0.
+    It adds *OndVC* if *OndWVC* or *OndWBVC* has been scored.
+    Special measures for *Xneg*, *OndB*, *VCW* and *BX* still have to be implemented.
+    The description in Schlichting (p. 23) is not specific enough.
+    '''
     theqids = [qid for qid in allqueries if allqueries[qid].fase == stage and allqueries[qid].process == core_process
                and allqueries[qid].special1 != 'star2']
     coreresults = allresults.coreresults
@@ -112,42 +207,80 @@ def genpfi(stage, allresults, allqueries):
     return result
 
 
-def pf2(allresults, allqueries):
+def pf2(allresults: AllResults, allqueries: QueryDict) -> int:
+    '''
+    The function *pf2* uses the function *genpfi* to compute the 'Profielscore' for Stage II
+    '''
     return genpfi(2, allresults, allqueries)
 
 
-def pf3(allresults, allqueries):
+def pf3(allresults: AllResults, allqueries: QueryDict) -> int:
+    '''
+    The function *pf3* uses the function *genpfi* to compute the 'Profielscore' for Stage III
+    '''
     return genpfi(3, allresults, allqueries)
 
 
-def pf4(allresults, allqueries):
+def pf4(allresults: AllResults, allqueries: QueryDict) -> int:
+    '''
+    The function *pf4* uses the function *genpfi* to compute the 'Profielscore' for Stage IV
+    '''
     return genpfi(4, allresults, allqueries)
 
 
-def pf5(allresults, allqueries):
+def pf5(allresults: AllResults, allqueries: QueryDict):
+    '''
+    The function *pf5* uses the function *genpfi* to compute the 'Profielscore' for Stage V
+    '''
     return genpfi(5, allresults, allqueries)
 
 
-def pf6(allresults, allqueries):
+def pf6(allresults: AllResults, allqueries: QueryDict) -> int:
+    '''
+    The function *pf6* uses the function *genpfi* to compute the 'Profielscore' for Stage VI
+    '''
     return genpfi(6, allresults, allqueries)
 
 
-def pf7(allresults, allqueries):
-    return genpfi(7, allresults, allqueries)
+def pf7(allresults: AllResults, allqueries: QueryDict) -> int:
+    '''
+    The function *pf7* uses the function *genpfi* to compute the 'Profielscore' for Stage VII
+    '''
+    return genpfi(7, allresults,  allqueries)
 
 
-def pf(allresults, allqueries):
+def pf(allresults: AllResults, allqueries: QueryDict) -> int:
+    '''
+    The function *pf* computes the *'Profielscore'* for the whole sample (*PF*) by
+    summing the  'Profielscore's per stage as computed by *pf2* through *pf7*.
+
+    The *'Profielscore's* per stage are computed by *pf2* through *pf7*, each of which
+    uses the function *genpfi*:
+
+    .. autofunction:: TARSPpostfunctions::genpfi
+
+    '''
     postresults = allresults.postresults
     result = sum([postresults['T154'], postresults['T155'], postresults['T158'],
                   postresults['T159'], postresults['T160'], postresults['T161']])
     return result
 
 
-def getname(allresults, allqueries):
+def getname(allresults: AllResults, allqueries: QueryDict) -> str:
+    '''
+    The function *getname* obtains the name of the patient/child being investigated
+    from the metadata. It uses the function *getmeta* to achieve this.
+
+    '''
     result = getmeta('name')
     return result
 
 
-def getchildage(allresults, allqueries):
+def getchildage(allresults: AllResults, allqueries: QueryDict) -> str:
+    '''
+    The function *getchildage* is intended to obtain the age of the child being
+    investigated from the metadata. It still has to be implemented. Currently it simply returns the empty string..
+
+    '''
     result = ''
     return result
