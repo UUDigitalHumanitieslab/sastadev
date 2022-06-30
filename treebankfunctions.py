@@ -39,12 +39,18 @@ class Metadata:
         result = etree.Element('meta', type=self.type, name=self.name, value=self.value)
         return result
 
-
+#: The constant *min_sasta_length* sets the minimum length a word must have to count as
+#: a real, though unknown, word
 min_sasta_length = 9
+
+#: The constant *sasta_short_length* sets the maximum length an unknown word may have
+#: to be discarded as a real word
 sasta_short_length = 4
 
 space = ' '
 vertbar = '|'
+#: The constant *compoundsep* is the symbol used to separate the compound parts in a
+# lemma.
 compoundsep = '_'
 
 numberpattern = r'^[\d\.,]+$'
@@ -668,18 +674,35 @@ def istrueclausalnode(thenode: SynTree) -> bool:
 
 
 def iscompound(node: SynTree) -> bool:
+    '''
+    The function *iscompound* determines whether a node is a node for a compound word.
+    This is the case if the *lemma* attribute contains the compound separator
+    *compoundsep*
+
+    .. autodata:: treebankfunctions::compoundsep
+    '''
     lemma = getattval(node, 'lemma')
     result = compoundsep in lemma
     return result
 
 
 def isdiminutive(node: SynTree) -> bool:
+    '''
+    The function *isdiminutive* checks whether *node* is  a node for diminutive word.
+    This is the case if the attribute *graad* has the value *dim*.
+
+    '''
     graad = getattval(node, 'graad')
     result = graad == 'dim'
     return result
 
 
 def issubstantivised_verb(node: SynTree) -> bool:
+    '''
+    The function *issubstantivised_verb* checks whether a node is a node for a
+    substantivised verb (i.e. if *pt* = *ww* and *positie* = *nom*)
+
+    '''
     nodept = getattval(node, 'pt')
     nodepositie = getattval(node, 'positie')
     result = nodept == 'ww' and nodepositie == 'nom'
@@ -687,6 +710,10 @@ def issubstantivised_verb(node: SynTree) -> bool:
 
 
 def getsiblings(node: SynTree) -> List[SynTree]:
+    '''
+    The function *getsiblings* returns the list of sibling nodes of *node*
+
+    '''
     parent = node.getparent()
     siblings = [n for n in parent if n != node]
     return siblings
@@ -709,6 +736,11 @@ def showtns(tokennodelist: List[SynTree]) -> str:
 
 
 def all_lower_consonantsnode(node: SynTree) -> bool:
+    '''
+    The function *all_lower_consonantsnode* checks whether *node* is a node for a word
+    that consists of all lower case consonants.
+
+    '''
     word = getattval(node, 'word')
     result = all([c.islower() for c in word])
     result = result and allconsonants(word)
@@ -716,11 +748,23 @@ def all_lower_consonantsnode(node: SynTree) -> bool:
 
 
 def sasta_long(node: SynTree) -> bool:
+    '''
+    The function sasta_long checks whether the length of the *word* attribute of the
+    node is greater or equal to *min_sasta_length*:
+
+    .. autodata:: treebankfunctions::min_sasta_length
+
+    '''
     word = getattval(node, 'word')
     result = len(word) >= min_sasta_length
     return result
 
 def spec_noun(node: SynTree) -> bool:
+    '''
+    The function *spec_noun* checks whether the node is node of *pt* *spec* which is a
+    name or name part (as determined by the attributes *pos* and *frame*).
+
+    '''
     pt = getattval(node, 'pt')
     pos = getattval(node, 'pos')
     frame = getattval(node, 'frame')
@@ -731,6 +775,10 @@ def spec_noun(node: SynTree) -> bool:
 
 
 def is_duplicate_spec_noun(node: SynTree) -> bool:
+    '''
+    The function *is_duplicate_spec_noun* checks whether there is any duplicate of the
+    word among its siblings (ignoring case).
+    '''
     siblings = getsiblings(node)
     result = True
     word = getattval(node, 'word')
@@ -748,6 +796,16 @@ def onbvnwdet(node: SynTree) -> bool:
 
 
 def asta_recognised_lexnode(node: SynTree) -> bool:
+    '''
+    The function *asta_recognised_lexnode* determines whether *node* should count as a
+    lexical verb in the ASTA method.
+
+    This is the case if *pt* equals *ww* and the node is not a substantivised verb as
+    determined by the function *issubstantivised_verb*:
+
+    .. autofunction:: treebankfunctions::issubstantivised_verb
+
+    '''
     if issubstantivised_verb(node):
         result = False
     else:
@@ -756,6 +814,48 @@ def asta_recognised_lexnode(node: SynTree) -> bool:
 
 
 def asta_recognised_nounnode(node: SynTree) -> bool:
+    '''
+    The function *asta_recognised_nounnode* determines whether *node* should count as a
+    noun in the ASTA method.
+
+    This is the case if
+
+    * either the node meets the conditions of *sasta_pseudonym*
+
+       .. autofunction:: treebankfunctions::sasta_pseudonym
+
+    * or the node meets the conditions of *spec_noun*
+
+       .. autofunction:: treebankfunctions::spec_noun
+
+    * or the node meets the conditions of *is_duplicate_spec_noun*
+
+       .. autofunction:: treebankfunctions::is_duplicate_spec_noun
+
+    * or the node meets the conditions of *sasta_long*
+
+       .. autofunction:: treebankfunctions::sasta_long
+
+    * or the node meets the conditions of *recognised_wordnodepos*
+
+       .. autofunction:: treebankfunctions::recognised_wordnodepos
+
+    * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
+
+       .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
+
+    However, the node should:
+
+    * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
+
+       .. autofunction:: treebankfunctions::all_lower_consonantsnode
+
+    * nor satisfy the conditions of *short_nucl_n*:
+
+       .. autofunction:: treebankfunctions::short_nucl_n
+
+    '''
+
     if issubstantivised_verb(node):
         pos = 'ww'
     else:
@@ -792,26 +892,57 @@ def isnumber(node: SynTree) -> bool:
 
 
 def sasta_short(inval: str) -> bool:
+    '''
+    The function *sasta_short* determines whether the string *inval* is short, i.e,
+    with a length smaller or equal than *sasta_short_length*:
+
+    .. autodata:: treebankfunctions::sasta_short_length
+
+    '''
     result = len(inval) <= sasta_short_length
     return result
 
 
 def short_nucl_n(node: SynTree) -> bool:
+    '''
+    The function *short_nucl_n* determines whether *node* is a node for a word with
+    *pt* equal to *n*, relation *nucl*, and whose *word* attribute is short (as
+    determined by the  function *sasta_short*)
+
+    .. autofunction:: treebankfunctions::sasta_short
+    '''
     pt = getattval(node, 'pt')
     rel = getattval(node, 'rel')
     word = getattval(node, 'word')
     result = pt == 'n' and rel == 'nucl' and sasta_short(word)
     return result
 
-
+#: The constant *sasta_pseudonyms* list the strings that replace names for
+#: pseudonymisation purposes.
 sasta_pseudonyms = ['NAAM', 'VOORNAAM', 'ACHTERNAAM', 'ZIEKENHUIS', 'STRAAT', 'PLAATS', 'PLAATSNAAM', 'KIND', 'BEROEP',
                     'OPLEIDING']
+#: The constant *pseudonym_patternlist* contains regular expressions for pseudonyms
+#: based on elements from the *sasta_pseudonyms* (pseudonym + number).
 pseudonym_patternlist = [r'^{}\d?$'.format(el) for el in sasta_pseudonyms]
 pseudonym_pattern = vertbar.join(pseudonym_patternlist)
 pseudonymre = re.compile(pseudonym_pattern)
 
 
 def sasta_pseudonym(node: SynTree) -> bool:
+    '''
+    The function *sasta_pseudonym* determines whether the *word* attribute of *node* is a SASTA pseudonym.
+
+    It uses the *pseudonymre* regular expression, which is created by joining
+    the pseudonym regular expressions of the *pseudonym_patternlist* as alternatives. the
+    pseudonym regular
+    expressions have been created using the constant sasta_pseudonyms:
+
+    .. autodata:: treebankfunctions::sasta_pseudonyms
+       :noindex:
+
+    .. autodata:: treebankfunctions::pseudonym_patternlist
+
+    '''
     word = getattval(node, 'word')
     match = pseudonymre.match(word)
     result = match is not None
@@ -819,6 +950,30 @@ def sasta_pseudonym(node: SynTree) -> bool:
 
 
 def recognised_wordnodepos(node: SynTree, pos: str) -> bool:
+    '''
+    The function *recognised_wordnodepos* determines for *node* whether it is a known
+    word of part of speech code *pos*.
+
+    It distinguishes several subcases that yield the result True:
+
+    * the value of the *word* attribute of *node* is a known word form (as determined by the function *lex.informlexiconpos*
+
+    * the lower-cased value of the *word* attribute of *node* is a known word form (as determined by the function *lex.informlexiconpos*
+
+    * the node is a node for a compound, as determined by the function *iscompound*:
+
+        .. autofunction:: treebankfunctions::iscompound
+           :noindex:
+
+    * the node is a node for a diminutive, as determined by the function *isdiminutive*:
+
+        .. autofunction:: treebankfunctions::isdiminutive
+           :noindex:
+
+    * the node is a node for a name part, as determined by the function *lex.isa_namepart*
+
+
+    '''
     word = getattval(node, 'word')
     lcword = word.lower()
     result = lex.informlexiconpos(word, pos) or lex.informlexiconpos(lcword, pos) or \
@@ -827,6 +982,30 @@ def recognised_wordnodepos(node: SynTree, pos: str) -> bool:
 
 
 def recognised_wordnode(node: SynTree) -> bool:
+    '''
+    The function *recognised_wordnode* determines for *node* whether it is a known word.
+
+    It distinguishes several subcases that yield the result True:
+
+    * the value of the *word* attribute of *node* is a known word form (as determined
+    by the function *lex.informlexicon*
+
+    * the lower-cased value of the *word* attribute of *node* is a known word form (as
+    determined by the function *lex.informlexicon
+
+    * the node is a node for a compound, as determined by the function *iscompound*:
+
+        .. autofunction:: treebankfunctions::iscompound
+
+    * the node is node for a diminutive, as determined by the function *isdiminutive*:
+
+        .. autofunction:: treebankfunctions::isdiminutive
+
+    * the node is a node for a name part, as determined by the function *lex.isa_namepart*
+
+
+    '''
+
     word = getattval(node, 'word')
     lcword = word.lower()
     result = lex.informlexicon(word) or lex.informlexicon(lcword) or iscompound(node) or isdiminutive(
@@ -835,12 +1014,22 @@ def recognised_wordnode(node: SynTree) -> bool:
 
 
 def recognised_lemmanode(node: SynTree) -> bool:
+    '''
+    The function *recognised_lemmanode* checks whether the *lemma* of *node* is in
+    the lexicon  (as determined by the function *lex.informlexicon*).
+
+    '''
     lemma = getattval(node, 'lemma')
     result = lex.informlexicon(lemma)
     return result
 
 
 def recognised_lemmanodepos(node: SynTree, pos: str) -> bool:
+    '''
+    The function *recognised_lemmanodepos* checks whether the *lemma* of *node* is in
+    the lexicon with part of speech *pos* (as determined by * lex.informlexiconpos*).
+
+    '''
     lemma = getattval(node, 'lemma')
     result = lex.informlexiconpos(lemma, pos)
     return result

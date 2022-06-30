@@ -185,7 +185,9 @@ def vr5plus(syntree: SynTree) -> List[SynTree]:
     return results
 
 
-def nodeiplus(syntree: SynTree, i: int, query: str) -> List[SynTree]:
+def nodeiplus(syntree: SynTree,
+              i: int,
+              query: str) -> List[SynTree]:
     '''
     The function *nodeiplus* counts the number of real nodes in the nodes
     resulting from applying the Xpath query *query* to *syntree*. If this count is

@@ -8,6 +8,9 @@ from treebankfunctions import (asta_recognised_lexnode,
                                asta_recognised_nounnode, clausecats, find1,
                                getattval, getnodeyield, getyield, showtns)
 
+from typing import Callable, Dict, List
+from sastatypes import SynTree
+
 noun_xpath = './/node[%asta_noun%]'
 expanded_noun_xpath = expandmacros(noun_xpath)
 
@@ -23,7 +26,7 @@ expandedastacoredelpvquery = expandmacros(astacoredelpvquery)
 dpancestorsquery = 'ancestor::node[@rel="dp"] | self::node[@rel="dp" or @rel="--"]'
 
 
-def get_dupindex(stree, cond):
+def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
     dupindex = {}
     dupxpath = './/xmeta[{cond}]'.format(cond=cond)
     dupmetadatalist = stree.xpath(dupxpath)
@@ -41,17 +44,37 @@ def get_dupindex(stree, cond):
     return dupindex
 
 
-def asta_noun(stree):
+def asta_noun(
+              stree: SynTree) \
+              -> List[SynTree]:
+    '''The function *asta_noun* uses the function *asta_x* with parameters *stree*,
+    *expanded_noun_path* and the function *asta_recognised_nounnode*.
+
+    The *expanded_noun_path* is the expansion of the macro **noun_path**.
+
+    .. autofunction:: treebankfunctions::asta_recognised_nounnode
+
+    '''
     results = asta_x(stree, expanded_noun_xpath, asta_recognised_nounnode)
     return results
 
 
-def asta_lex(stree):
+def asta_lex(stree: SynTree) -> List[SynTree]:
+    '''The function *asta_lex* uses the function *asta_x* with parameters *stree*,
+    *expanded_lex_path* and the function *asta_recognised_nounnode*.
+
+    The *expanded_lex_path* is the expansion of the macro **lex_path**.
+
+    .. autofunction:: treebankfunctions::asta_recognised_lexnode
+         :noindex:
+
+    '''
+
     results = asta_x(stree, expanded_lex_xpath, asta_recognised_lexnode)
     return results
 
 
-def old_asta_noun(stree):
+def old_asta_noun(stree: SynTree) -> List[SynTree]:
     theyield = getyield(stree)   # for debugging purposes
     thenodeyield = getnodeyield(stree)
     cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(repeated, repeatedseqtoken, longrep, substringrep)
@@ -86,7 +109,7 @@ def old_asta_noun(stree):
     return result
 
 
-def verbleftof(node, positions):
+def verbleftof(node: SynTree, positions: List[str]) -> bool:
     nodebegin = getattval(node, 'begin')
     for position in positions:
         if int(position) < int(nodebegin):
@@ -94,7 +117,7 @@ def verbleftof(node, positions):
     return False
 
 
-def asta_delpv(stree):
+def asta_delpv(stree: SynTree) -> List[SynTree]:
     coredelpvnodes = stree.xpath(expandedastacoredelpvquery)
     streeleaves = getnodeyield(stree)
     wwbegins = [getattval(node, 'begin') for node in streeleaves if getattval(node, 'pt') == 'ww']
@@ -102,7 +125,9 @@ def asta_delpv(stree):
     return delpvnodes
 
 
-def asta_x(stree, xpathexpr, recognized_x_f):
+def asta_x(stree: SynTree,
+           xpathexpr: str,
+           recognized_x_f: Callable[[SynTree], bool]) -> List [ SynTree]:
     theyield = getyield(stree)   # for debugging purposes
     thenodeyield = getnodeyield(stree)
     cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(repeated, repeatedseqtoken, longrep, substringrep)

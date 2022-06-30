@@ -33,3 +33,5 @@ sastalog.txt
 
 # documentation
 Documentation/_build/
+
+*.py___jb_tmp___

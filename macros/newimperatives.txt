@@ -163,7 +163,7 @@ Tarsp_WOnd5plus = """(%ynquery% and not(%basicimperative%) and %topcontainsquest
 """
 
 Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub"))"""
-
+]
 Tarsp_VrXY = """(%Tarsp_whq% and
         node[@rel="whd"] and
         node[@cat="sv1" and @rel="body"  and %realcomplormodnodecount% = 1])"""
