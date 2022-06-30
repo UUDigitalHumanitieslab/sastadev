@@ -30,3 +30,6 @@ config.py
 # additional files
 .idea/
 sastalog.txt
+
+# documentation
+Documentation/_build/
