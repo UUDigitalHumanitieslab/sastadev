@@ -307,7 +307,7 @@ excludedadverb = """ ( @lemma="al" or
                        @lemma="nog" or
                        @lemma="weer" or
                        @lemma="eens" or
-                       @lemma="nog" or
+                       @lemma="nou" or
                        @lemma="nu" or
                        @lemma="wel" or
                        @lemma="gewoon" or

@@ -61,13 +61,14 @@ Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
 Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
 
-Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and 
+Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" 
    ) and 
    not(%Tarsp_vc_sibling%)) or
    (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
+
  )
 """
 
