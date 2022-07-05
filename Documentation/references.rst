@@ -3,9 +3,15 @@ References
 
 [Boxum et al.2013] Elsbeth Boxum, Fennetta van der Scheer, and Mariëlle Zwaga. 2013. Analyse voor spontane Taal bij Afasie. Standaard in samenwerking met de VKL. VKL, October. https://klinischelinguistiek.nl/uploads/201307asta4eversie.pdf .  
 
-[ASTA Appendix] Appendix lastige gevallen concept voor SASTA.docx
+[ASTA Appendix concept] Appendix lastige gevallen concept voor SASTA.docx
+
+[ASTA Appendix] Nina Blom en Elsbeth Boxum. 2022. ASTA: Appendix lastige gevallen.
 
 [Boxum et al. 2019] Elsbeth Boxum, Fennetta van der Scheer, Nely van Werven, Wencke Dirksen, and  Roel Jonkers. 2019. 'Toevoeging van nieuwe linguïstische en communicatieve maten binnen de huidige ASTA'. In STEM-, SPRAAK- EN TAALPATHOLOGIE, Vol. 24, 2019, pp. 23-40 32.8310/2019-23, University of Groningen Press https://doi.org/10.21827/5ce3b9f148e00 
+
+[Broekhuis et al. 2015] Hans Broekhuis, Norbert Corver & Riet Vos. 2015 *Syntax of Dutch. Verbs and Verb Phrases I*. Amsterdam University Press
+
+[Cramer & van Noord 2007 ] Bart Cramer & Gertjan van Noord. Manual for syntactic annotation. https://urd2.let.rug.nl/~vannoord/DCOI/AnnotationGuide.html last accessed 2022-06-14
 
 [van Ierland et al.2008] Margreet van Ierland, Jeannette Verbeek, and Leen van den Dungen. 2008. Spontane Taal Analyse Protocol. Handleiding van het STAP-instrument. UvA, Amsterdam.
 

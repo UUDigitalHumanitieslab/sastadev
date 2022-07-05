@@ -15,6 +15,7 @@ Welcome to the SASTAdev documentation!
    ./methodimplementation
    ./Tarsp
    ./stap
+   ./asta
    ./lexicons
    ./deviantlanguage
    ./auxiliarymodules
