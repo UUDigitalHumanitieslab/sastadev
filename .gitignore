@@ -30,4 +30,11 @@ venv.bak/
 # additional files
 .idea/
 sastalog.txt
+*.py___jb_tmp___
 .DS_Store
+
+# documentation
+Documentation/_build/
+
+
+

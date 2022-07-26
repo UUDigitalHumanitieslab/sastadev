@@ -6,6 +6,8 @@ import xlsxwriter
 
 from ASTApostfunctions import wordcountperutt, nounlemmaqid, verblemmaqid
 from treebankfunctions import getattval
+#from dataconfig import intreebanksfolder, formsfolder
+from forms import getformfilename
 
 green = '#00FF00'
 red = '#FF0000'
@@ -21,10 +23,6 @@ grey = '#B0B0B0'
 # orange = 'yellow'
 
 
-def getformfilename(infilename):
-    (base, _) = os.path.splitext(infilename)
-    formname = base + '_astaformulier' + '.xlsx'
-    return formname
 
 
 class ExcelForm:
@@ -351,7 +349,7 @@ def astaform(allresults, _, in_memory=False):
     if in_memory:
         target = BytesIO()
     else:
-        target = getformfilename(allresults.filename)
+        target = getformfilename(allresults.filename, '_astaformulier')
 
     theworkbook, target = make_astaform(theform, astadata, target)
     theworkbook.close()

@@ -4,6 +4,9 @@ from stringfunctions import realwordstring
 from copy import deepcopy
 from lexicon import getwordposinfo, getwordinfo
 
+from typing import List
+from sastatypes import SynTree
+
 lpad = 3
 zero = '0'
 astamaxwordcount = 300
@@ -23,6 +26,72 @@ tijdfoutpvqid = 'A041'
 nounlemmaqid = 'A046'
 verblemmaqid = 'A049'
 
+specialform = 'Special Form'
+errormarking = 'Error Marking'
+
+#: The varibale (constant) *mdnamemdxpathtemplate* is an Xpath template to find
+#: metadata (xmeta) with  name=*mdname* and value=*mdvalue*
+mdnamemdxpathtemplate = """.//xmeta[@name="{mdname}" and @value="{mdvalue}"]"""
+
+ptposxpathtemplate = './/node[@pt and @begin="{position}"]'
+
+
+def mdbasedquery(stree: SynTree, mdname: str, mdvalue: str) -> List[SynTree]:
+    '''
+    The function *mdbasedquery* searches for metadata in *stree* with name = *mdname*
+    and value = *mdvalue*. It then obtains the position of the node to which the
+    metadata apply, and next finds all nodes with that position as value for its *begin* attribute.
+    '''
+    mdnamemdxpath = mdnamemdxpathtemplate.format(mdname=mdname, mdvalue=mdvalue)
+    mdnamemds = stree.xpath(mdnamemdxpath)
+    results = []
+    for mdnamemd in mdnamemds:
+        annotatedposstr = mdnamemd.attrib['annotatedposlist']
+        if annotatedposstr != '':
+            mdbeginval = annotatedposstr[1:-1]
+            ptposxpath = ptposxpathtemplate.format(position=mdbeginval)
+            newresults = stree.xpath(ptposxpath)
+            results += newresults
+
+    return results
+
+
+def neologisme(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *neologisme* identifies the nodes for which the CHAT error marking "[*
+    n]" or the special form "@n" applies. It uses the function *mdbasedquery* to
+    achieve this.
+
+    .. autofunction:: ASTApostfunctions::mdbasedquery
+
+    '''
+    results1 = mdbasedquery(stree, errormarking, "['n']")
+    results2 = mdbasedquery(stree, specialform, '@n')
+    results = results1 + results2
+    return results
+
+
+def sempar(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *sempar* identifies the nodes for which the CHAT error marking "[*
+    s]"  applies. It uses the function *mdbasedquery* to achieve this.
+
+    '''
+    results = mdbasedquery(stree, errormarking, "['s']")
+    return results
+
+
+def phonpar(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *phonpar* identifies the nodes for which the CHAT error marking "[*
+    p]"  applies. It uses the function *mdbasedquery* to achieve this.
+
+
+
+    '''
+    results = mdbasedquery(stree, errormarking, "['p']")
+    return results
+
 
 def sumctr(ctr):
     result = sum(ctr.values())
@@ -33,8 +102,10 @@ def wordcountperutt(allresults):
     lemmas = getalllemmas(allresults)
     wordcounts = {uttid: sum(ctr.values()) for uttid, ctr in lemmas.items()}
     ignorewordcounts = deepcopy(
-        allresults.coreresults[samplesizeqid]) if samplesizeqid in allresults.coreresults else Counter()  # samplesize
-    ignorewordcounts += allresults.coreresults[mluxqid] if mluxqid in allresults.coreresults else Counter()  # mlux
+        allresults.coreresults[
+            samplesizeqid]) if samplesizeqid in allresults.coreresults else Counter()  # samplesize
+    ignorewordcounts += allresults.coreresults[
+        mluxqid] if mluxqid in allresults.coreresults else Counter()  # mlux
     # ignorewordcounts += allresults.coreresults['A050'] if 'A050' in allresults.coreresults else Counter() # echolalie covered by mlux
     result = {}
     for uttid in wordcounts:
@@ -46,10 +117,14 @@ def wordcountperutt(allresults):
 
 
 def finietheidsindex(allresults, _):
-    allpvs = allresults.coreresults[pvqid] if pvqid in allresults.coreresults else Counter()
-    subpvs = allresults.coreresults[subpvqid] if subpvqid in allresults.coreresults else Counter()
-    delpvs = allresults.coreresults[delpvqid] if delpvqid in allresults.coreresults else Counter()
-    tijdfoutpvs = allresults.coreresults[tijdfoutpvqid] if tijdfoutpvqid in allresults.coreresults else Counter()
+    allpvs = allresults.coreresults[
+        pvqid] if pvqid in allresults.coreresults else Counter()
+    subpvs = allresults.coreresults[
+        subpvqid] if subpvqid in allresults.coreresults else Counter()
+    delpvs = allresults.coreresults[
+        delpvqid] if delpvqid in allresults.coreresults else Counter()
+    tijdfoutpvs = allresults.coreresults[
+        tijdfoutpvqid] if tijdfoutpvqid in allresults.coreresults else Counter()
     foutepvs = subpvs + delpvs + tijdfoutpvs
     allpvcount = sumctr(allpvs)
     foutepvcount = sumctr(foutepvs)
@@ -125,12 +200,14 @@ def getalllemmas(allresults):
     result = {}
     if allresults.annotationinput:
         for uttid in allresults.allutts:
-            lemmas = [bgetlemma(w) for w in allresults.allutts[uttid] if realwordstring(w)]
+            lemmas = [bgetlemma(w) for w in allresults.allutts[uttid] if
+                      realwordstring(w)]
             result[uttid] = Counter(lemmas)
     else:
         for syntree in allresults.analysedtrees:
             uttid = getuttid(syntree)
-            lemmas = [getattval(node, 'lemma') for node in getnodeyield(syntree) if realword(node)]
+            lemmas = [getattval(node, 'lemma') for node in getnodeyield(syntree) if
+                      realword(node)]
             result[uttid] = Counter(lemmas)
     return result
 
@@ -160,7 +237,8 @@ def oldgetcondlemmas(allresults, _, cond):
                 result.update([(theword, uttid)])
     return result
 
-#not used anymore, contains an error
+
+# not used anymore, contains an error
 def getcondlemmas(allresults, _, cond):
     result = Counter()
     if allresults.annotationinput:

@@ -72,17 +72,17 @@ def getfirstwordposition(matchtree):
         position = 0
     return position
 
-
-def getmarkedyield(wordlist, positions):
-    pos = 1
-    resultlist = []
-    for w in wordlist:
-        if pos in positions:
-            resultlist.append(mark(w))
-        else:
-            resultlist.append(w)
-        pos += 1
-    return resultlist
+#moved to treebannkfunctions
+# def getmarkedyield(wordlist, positions):
+#     pos = 1
+#     resultlist = []
+#     for w in wordlist:
+#         if pos in positions:
+#             resultlist.append(mark(w))
+#         else:
+#             resultlist.append(w)
+#         pos += 1
+#     return resultlist
 
 
 def mismatches(queryid, queries, theresultsminusgold, goldminustheresults, allmatches, allutts, platinumcheckfile):
@@ -133,7 +133,8 @@ def exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches,
     for hit in theresultsminusgold:
         uttid, position = hit
         if (queryid, uttid) in allmatches or annotationinput:
-            markposition = 1 if position == 0 else position
+            #markposition = 1 if position == 0 else position
+            markposition = position
             markedwordlist = getmarkedyield(allutts[uttid], [markposition])
             uttstr = space.join(markedwordlist)
             platinumcheckrow1 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
@@ -155,7 +156,8 @@ def exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches,
     for hit in goldminustheresults:
         (uttid, position) = hit
         if uttid in allutts:
-            markposition = 1 if position == 0 else position
+            #markposition = 1 if position == 0 else position
+            markposition = position
             markedwordlist = getmarkedyield(allutts[uttid], [markposition])
             uttstr = space.join(markedwordlist)
         else:

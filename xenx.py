@@ -1,4 +1,6 @@
 from treebankfunctions import clausecats, getattval
+from sastatypes import SynTree
+from typing import Dict, List
 
 conjxpath = './/node[@cat="conj" and (count(node)=3 or count(node)=5)]'
 
@@ -20,7 +22,12 @@ def getptcat(node):
     return result
 
 
-def xenx(tree):
+def xenx(tree: SynTree) -> List[SynTree]:
+    '''
+    The function *xenx* selects conjuncts consisting of 3 or 5 children: either two
+    conjuncts and one coordinator, or three conjuncts and 2 coordinators. The conjuncts
+    must have the same values for *pt*  or *cat* attributes.
+    '''
     results = []
     conjs = tree.xpath(conjxpath)
     #print(conjs)

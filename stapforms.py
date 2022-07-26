@@ -6,6 +6,8 @@ from collections import defaultdict
 from openpyxl import load_workbook
 from allresults import AllResults
 from config import SD_DIR, SDLOGGER
+from forms import getformfilename
+
 
 scoresheetname = 'STAP 1 - 5'
 maxutt = 50
@@ -60,8 +62,9 @@ def data2rowtuples(data):
 def makestapform(allresults, _, basexl=basexl, in_memory=False):
     if not in_memory:
         # copy the basexl to a new one with the appropriate name
-        (base, ext) = os.path.splitext(allresults.filename)
-        target = base + '_STAP-Form' + '.xlsx'
+        #(base, ext) = os.path.splitext(allresults.filename)
+        #target = base + '_STAP-Form' + '.xlsx'
+        target = getformfilename(allresults.filename, '_STAP-Form')
 
         copyfile(basexl, target)
 

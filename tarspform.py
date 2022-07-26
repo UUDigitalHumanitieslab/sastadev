@@ -3,12 +3,14 @@ import re
 from collections import Counter
 from io import BytesIO
 
-import xlrd
+import xlsx
+#import xlrd
 import xlsxwriter
 from config import SD_DIR
 from counterfunctions import counter2liststr
+from forms import getformfilename
 
-tarspmethodfilename = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
+
 
 ordA = ord('A')
 comma = ','
@@ -19,6 +21,11 @@ idcpat = r'^[TSA][0-9]{3}c$'
 idre = re.compile(idpat)
 idcre = re.compile(idcpat)
 
+tarspformsuffix = '_TARSP-Form'
+
+#tarspformsuffixext = tarspformsuffix + xlsxext
+#intreebanksfolder = 'intreebanks'
+
 
 def getshortloc(colctr, rowctr):
     #colctr must be smaller than 26
@@ -28,20 +35,30 @@ def getshortloc(colctr, rowctr):
     return result
 
 
+# def oldreadbaseform(infilename):
+#     basesheet = {}
+#     wb = xlrd.open_workbook(infilename)
+#     sheet = wb.sheet_by_index(0)
+#     startrow = 0
+#     startcol = 0
+#     lastrow = sheet.nrows
+#     lastcol = sheet.ncols
+#     for rowctr in range(startrow, lastrow):
+#         for colctr in range(startcol, lastcol):
+#             curval = sheet.cell_value(rowctr, colctr)
+#             if curval is not None and curval != '':
+#                 basesheet[(rowctr, colctr)] = curval
+#     return basesheet
+
 def readbaseform(infilename):
     basesheet = {}
-    wb = xlrd.open_workbook(infilename)
-    sheet = wb.sheet_by_index(0)
-    startrow = 0
-    startcol = 0
-    lastrow = sheet.nrows
-    lastcol = sheet.ncols
-    for rowctr in range(startrow, lastrow):
-        for colctr in range(startcol, lastcol):
-            curval = sheet.cell_value(rowctr, colctr)
+    header, data = xlsx.getxlsxdata(infilename)
+    for rowctr, row in enumerate(data):
+        for colctr, curval in enumerate(row):
             if curval is not None and curval != '':
                 basesheet[(rowctr, colctr)] = curval
     return basesheet
+
 
 
 def is_id(word):
@@ -86,8 +103,14 @@ def mktarspform(allresults, _, in_memory=False):
     global basesheet
 
     if not in_memory:
-        (base, ext) = os.path.splitext(allresults.filename)
-        target = base + '_TARSP-Form' + xlsxext
+        target = getformfilename(allresults.filename, tarspformsuffix )
+        #(base, ext) = os.path.splitext(allresults.filename)
+        #core, filename = os.path.split(base)
+        #root, lastfolder = os.path.split(core)
+        #if lastfolder == intreebanksfolder:
+        #    target = os.path.join(root, 'forms', filename + tarspformsuffixext)
+        #else:
+        #   target = base + tarspformsuffixext
     else:
         target = BytesIO()
 

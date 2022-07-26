@@ -1,41 +1,11 @@
+''''
+This module is not used anymore
+'''
 from math import log
 
-
-class MethodInfo:
-    def __init__(self, path, basenamemodel, silverpath, silvertemplate, deffn):
-        self.path = path
-        self.basenamemodel = basenamemodel
-        self.silverpath = silverpath
-        self.silvertemplate = silvertemplate
-        self.definitionfn = deffn
+knownmethods = {'asta', 'stap', 'tarsp'}
 
 
-asta_path = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\astadata\ASTA'
-asta_basemodel = 'ASTA_sample_{}'
-asta_model = 'ASTA_sample_{}_analysis'
-asta_silverpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\astadata\Silver'
-asta_silvertemplate = r'{}'
-asta_def_fn = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\ASTA\ASTA Index Current.xlsx'
-
-stap_path = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\stapdata'
-stap_basemodel = r'STAP_{}'
-stap_model = r'STAP_{}_analysis'
-stap_silverpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\STAP\Zilver'
-stap_silvertemplate = '{}'
-stap_def_fn = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\STAP\STAP_Index_Current.xlsx'
-
-
-tarsp_path = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\tarsp'
-tarsp_basemodel = 'TARSP_{}'
-tarsp_model = 'TARSP_{}_analysis'
-tarsp_silverpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\TARSP\Zilver'
-tarsp_silvertemplate = r'{}'
-tarsp_def_fn = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\TARSP Index Current.xlsx'
-
-knownmethods = dict()
-knownmethods['ASTA'] = MethodInfo(asta_path, asta_basemodel, asta_silverpath, asta_silvertemplate, asta_def_fn)
-knownmethods['STAP'] = MethodInfo(stap_path, stap_basemodel, stap_silverpath, stap_silvertemplate, stap_def_fn)
-knownmethods['TARSP'] = MethodInfo(tarsp_path, tarsp_basemodel, tarsp_silverpath, tarsp_silvertemplate, tarsp_def_fn)
 
 
 def isknownmethod(mname):

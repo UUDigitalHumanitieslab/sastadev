@@ -35,17 +35,8 @@ platinumsuffix = '.platinum.tsv'
 platinumeditedsuffix = '.platinum-edited.tsv'
 
 
-stapsilverpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\STAP\Zilver'
-stapsilvertemplate = 'MZ_{}'
 
 
-#methodname = 'STAP'
-#methodname = 'TARSP'
-#methodname = 'ASTA'
-#methodpath = methodinfo.knownmethods[methodname].path
-#methodsilverpath = methodinfo.knownmethods[methodname].silverpath
-#methodsilvertemplate = methodinfo.knownmethods[methodname].silvertemplate
-#methodbasenamemodel = methodinfo.knownmethods[methodname].basenamemodel
 
 
 def write2excel(datadict, header, filename):

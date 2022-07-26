@@ -1,39 +1,8 @@
 from lxml import etree
 #from CHAT_Annotation import specialform, errormarking
+from ASTApostfunctions import  sempar, phonpar, neologisme
 
-specialform = 'Special Form'
-errormarking  = 'Error Marking'
 
-mdnamemdxpathtemplate = """.//xmeta[@name="{mdname}" and @value="{mdvalue}"]"""
-ptposxpathtemplate = './/node[@pt and @begin="{position}"]'
-
-def mdbasedquery(stree, mdname, mdvalue):
-    mdnamemdxpath = mdnamemdxpathtemplate.format(mdname=mdname, mdvalue=mdvalue)
-    mdnamemds = stree.xpath(mdnamemdxpath)
-    results = []
-    for mdnamemd in mdnamemds:
-        annotatedposstr = mdnamemd.attrib['annotatedposlist']
-        if annotatedposstr != '':
-            mdbeginval = annotatedposstr[1:-1]
-            ptposxpath = ptposxpathtemplate.format(position=mdbeginval)
-            newresults = stree.xpath(ptposxpath)
-            results += newresults
-
-    return results
-
-def neologisme(stree):
-    results1 = mdbasedquery(stree, errormarking,"['n']")
-    results2 = mdbasedquery(stree, specialform, '@n')
-    results = results1 + results2
-    return results
-
-def sempar(stree):
-    results = mdbasedquery(stree, errormarking, "['s']")
-    return results
-
-def phonpar(stree):
-    results = mdbasedquery(stree, errormarking, "['p']")
-    return results
 
 
 def test(stree):

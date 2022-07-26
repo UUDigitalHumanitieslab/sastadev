@@ -251,7 +251,7 @@ def smallclauses(tokensmd, tree):
             if hasgenitive(first):
                 genform = makegen(lemma(first))
                 fpos = int(getattval(first, 'begin'))
-                inserttokens = [Token('[: ' + genform + ']', fpos, subpos=5)]
+                inserttokens = [Token("z'n", fpos, subpos=5)]
                 resultlist = mktokenlist(tokens, fpos, inserttokens)
                 metadata += mkinsertmeta(inserttokens, resultlist)
             else:

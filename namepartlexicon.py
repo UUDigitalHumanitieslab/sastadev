@@ -1,17 +1,43 @@
+'''
+
+
+The namepartlexicon module:
+
+* reads in the data from the file names/nameparts/namepartslexicon.csv
+* stores it in the namepartlexicon  dictionary (Dict[str, int]) with its frequency
+* provides  functions for checking membership of the namepartlexicon:
+
+
+
+.. autofunction:: namepart_isa_namepart
+.. autofunction:: namepart_isa_namepart_uc
+
+'''
+
 import csv
 import os
 
 from config import SD_DIR
+from typing import Dict
 
-tab = '\t'
-namepartlexicon = {}
+tab: str = '\t'
+namepartlexicon: Dict[str, int] = {}
 
 
-def namepart_isa_namepart(word):
+def namepart_isa_namepart(word: str) -> bool:
+    '''
+    The function namepart_isa_namepart checks whether the string *word* occurs in the namepartlexicon dictionary.
+
+    '''
     return word in namepartlexicon
 
 
-def namepart_isa_namepart_uc(word):
+def namepart_isa_namepart_uc(word: str) -> bool:
+    '''
+    The function namepart_isa_namepart_uc checks whether the string *word* with its initial character in upper case
+    occurs in the namepartlexicon dictionary.
+
+    '''
     if word is None or word == '':
         result = False
     else:
@@ -26,5 +52,5 @@ with open(namepartfilename, 'r', encoding='utf8') as namepartfile:
     csvreader = csv.reader(namepartfile, delimiter=tab)
     for row in csvreader:
         namepart = row[0]
-        frq = row[1]
+        frq = int(row[1])
         namepartlexicon[namepart] = frq

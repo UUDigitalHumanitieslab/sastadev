@@ -1,12 +1,27 @@
+'''
+The lexicon module is the interface to the lexicon.
+It is intended to abstract from the concrete lexicon used.
+
+Currently we especially use the CELEX lexicon.
+This module also contains some special word lists. Perhaps we should set up a special Exception List module
+for this purpose.
+
+
+'''
+
 import celexlexicon
 import treebankfunctions
 from namepartlexicon import namepart_isa_namepart, namepart_isa_namepart_uc
+
+from typing import Any, Dict, List, Optional, Tuple
+from sastatypes import CELEXPosCode, CELEX_INFL, DCOITuple, DeHet, Lemma, SynTree, WordInfo
 
 space = ' '
 
 celex = 'celex'
 alpino = 'alpino'
 
+# the CHAT codes xxx and yyy must be recognised as valid codes and as valid words in some cases
 chatspecials = ['xxx', 'yyy']
 
 
@@ -18,26 +33,53 @@ tswnouns = ['baby', 'jongen', 'juf', 'jufforouw', 'mam', 'mama', 'mamma', 'meisj
 
 de = '1'
 het = '2'
+# List of de-determiners, List of corresponding het-determiners, and implicitly by this a mapping between the two
 dets = {}
 dets[de] = ['de', 'die', 'deze', 'onze', 'welke', 'iedere', 'elke', 'zulke']
 dets[het] = ['het', 'dat', 'dit', 'ons', 'welk', 'ieder', 'elk', 'zulk']
 
 
-def isa_namepart(word):
+
+def isa_namepart(word: str) -> bool:
+    '''
+    is the word a name part
+    :param word:
+    :return:
+    '''
     return namepart_isa_namepart(word)
 
-def isa_namepart_uc(word):
+
+def isa_namepart_uc(word: str) -> bool:
+    '''
+    is the word in upper case a name part
+    :param word:
+    :return:
+    '''
     return namepart_isa_namepart_uc(word)
 
 
 
 
-def lookup(dct, key):
+def lookup(dct: Dict[str, Any], key: str) -> str:
+    '''
+    looks up key in dct, if so it returns dct[key] else ''
+    :param dct:
+    :param key:
+    :return:
+    '''
     result = dct[key] if key in dct else ''
     return result
 
 
-def pvinfl2dcoi(word, infl, lemma):
+def pvinfl2dcoi(word: str, infl: CELEX_INFL, lemma: Lemma) -> Optional[DCOITuple]:
+    '''
+    encodes the CELEX code infl for word (which must be a pv) as a DCOI Tuple
+    at least if the CELEX lexicon is used, else None
+    :param word:
+    :param infl:
+    :param lemma:
+    :return:
+    '''
     if lexicon == celex:
         results = celexlexicon.celexpv2dcoi(word, infl, lemma)
         wvorm = lookup(results, 'wvorm')
@@ -56,21 +98,37 @@ def pvinfl2dcoi(word, infl, lemma):
     return result
 
 
-def getwordposinfo(word, pos):
+def getwordposinfo(word: str, pos: str) -> List[WordInfo]:
+    '''
+    yields the list of WordInfo for word str with part of speech code pos by looking it up in the lexicon in use
+    :param word:
+    :param pos:
+    :return:
+    '''
     results = []
     if lexicon == celex:
         results = celexlexicon.getwordposinfo(word, pos)
     return results
 
 
-def getwordinfo(word):
+def getwordinfo(word: str) -> List[WordInfo]:
+    '''
+    yields the list of WordInfo for word str  by looking it up in the lexicon in use
+    :param word:
+    :return:
+    '''
     results = []
     if lexicon == celex:
         results = celexlexicon.getwordinfo(word)
     return results
 
 
-def informlexicon(word):
+def informlexicon(word: str) -> bool:
+    '''
+    checks whether word is in the  word form lexicon
+    :param word:
+    :return:
+    '''
     allwords = word.split(space)
     result = True
     for aword in allwords:
@@ -83,7 +141,14 @@ def informlexicon(word):
     return result
 
 
-def informlexiconpos(word, pos):
+def informlexiconpos(word: str, pos: str) -> bool:
+    '''
+    checks whether word with part of speech code pos is in the word form lexicon
+    :param word:
+    :param pos:
+    :return:
+    '''
+
     allwords = word.split(space)
     result = True
     for aword in allwords:
@@ -96,17 +161,33 @@ def informlexiconpos(word, pos):
     return result
 
 
-def chatspecial(word):
+def chatspecial(word: str) -> bool:
     result = word in chatspecials
     return result
 
 
-def known_word(word):
+def known_word(word: str) -> bool:
+    '''
+    a word is considered to be a known_word if it occurs in the word form lexicon,
+    if it is a name part, or if it is a chatspecial item
+    :param word:
+    :return:
+    '''
     result = informlexicon(word) or isa_namepart(word) or chatspecial(word)
     return result
 
 
-def getinflforms(thesubj, thepv, inversion):
+def getinflforms(thesubj: SynTree, thepv: SynTree, inversion: bool) -> List[str]:
+    '''
+    yields the list of  finite verb word forms that
+    -agrees with the subject node (thesubj),
+    -has the same lemma as the word form in the pv node
+    -is compatible with whether there is inversion or not
+    :param thesubj:
+    :param thepv:
+    :param inversion:
+    :return:
+    '''
     if lexicon == 'celex':
         pt = treebankfunctions.getattval(thepv, 'pt')
         pos = celexlexicon.pos2posnum[pt]

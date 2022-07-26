@@ -1,12 +1,20 @@
+'''
+The module cleanCHILDEStokens provides the function cleantext to tokenize and clean utterances,
+yielding a cleaned text and associated metadata.
 
+* ..autofunction:: cleantext
+
+'''
 import re
 from copy import deepcopy
 
 import CHAT_Annotation
 import sastatok
 from config import SDLOGGER
-from metadata import Meta, bpl_none
-from sastatoken import show
+from metadata import Meta, bpl_none, Metadata
+from sastatoken import show, Token
+from typing import List, Union, Tuple, Pattern, Optional, TextIO
+from sastatypes import IntSpan
 
 hexformat = '\\u{0:04X}'
 
@@ -31,7 +39,7 @@ bstate, ostate, oostate, costate, ccstate = 0, 1, 2, 3, 4
 illegalcleanedchatsymbols = '<>'
 
 
-def findscopeclose(tokens, offset=0):
+def findscopeclose(tokens: List[Token], offset: int=0) -> Optional[IntSpan]:
     tokenctr = 0
     bracketcounter = -1
     begin = None
@@ -54,7 +62,7 @@ def findscopeclose(tokens, offset=0):
     return result
 
 
-def clearnesting(intokens, repkeep):
+def clearnesting(intokens: List[Token], repkeep: bool) -> Tuple[List[Token], Metadata]:
     tokens = deepcopy(intokens)
     bracketcounter = -1
     newtokens = []
@@ -83,8 +91,8 @@ def clearnesting(intokens, repkeep):
         tokenctr += 1
     return(newtokens, metadata)
 
-
-def checkline(line, newline, outfilename, lineno, logfile):
+#this is probably obsolete, it still uses Python2 syntax (print)
+def checkline(line: str, newline: str, outfilename: str, lineno, logfile: TextIO):
     if checkpattern.search(newline) or pluspattern.search(newline):
         print(outfilename, lineno, 'suspect character', file=logfile)
         print('input=<{}>'.format(line[:-1]), file=logfile)
@@ -93,11 +101,20 @@ def checkline(line, newline, outfilename, lineno, logfile):
         print('charcodes=<{}>'.format(thecodes), file=logfile)
 
 
-def purifytokens(tokens):
+def purifytokens(tokens: List[Token]) -> List[Token]:
     result = [token for token in tokens if token.word not in illegalcleanedchatsymbols]
     return result
 
-def cleantext(utt, repkeep, tokenoutput=False):
+CleanedText = Union[List[Token],str]
+
+def cleantext(utt: str, repkeep: bool, tokenoutput: bool=False) -> Tuple[CleanedText, Metadata]:
+    '''
+
+    :param utt:
+    :param repkeep:
+    :param tokenoutput:
+    :return:
+    '''
     newutt = robustness(utt)
     tokens = sastatok.sasta_tokenize(newutt)
     inwordlist = [t.word for t in tokens]
@@ -120,7 +137,7 @@ def cleantext(utt, repkeep, tokenoutput=False):
         return (resultstring, resultmetadata)
 
 
-def cleantokens(tokens, repkeep):
+def cleantokens(tokens: List[Token], repkeep: bool) -> Tuple[List[Token], Metadata]:
     newtokens = deepcopy(tokens)
     metadata = []
 
@@ -136,7 +153,7 @@ def cleantokens(tokens, repkeep):
     return (newtokens, metadata)
 
 
-def str2codes(str):
+def str2codes(str: str) -> List[Tuple[str, str]]:
     result = []
     for i in range(len(str)):
         curchar = str[i]
@@ -145,14 +162,15 @@ def str2codes(str):
     return(result)
 
 
-def removesuspects(str):
+def removesuspects(str: str) -> str:
     result1 = re.sub(checkpattern, space, str)
     result2 = re.sub(pluspattern1, r'\1', result1)
     result = re.sub(pluspattern2, r'\1', result2)
     return result
 
+RobustnessTuple = Tuple[Pattern, str, str, str]
 
-robustnessrules = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
+robustnessrules : List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
                    (re.compile('#'), '#', '', 'Number Sign (#, Unicode U+0023) removed'),
                    #(re.compile('#'), '#', '(.)', 'Number Sign (#, Unicode U+0023) replaced by CHAT (short) pause code: (.)'),
                    (re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
@@ -166,7 +184,7 @@ robustnessrules = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis
                    ]
 
 
-def robustness(utt):
+def robustness(utt: str) -> str:
     newutt = utt
     for (regex, instr, outstr, msg) in robustnessrules:
         newnewutt = regex.sub(outstr, newutt)
@@ -185,12 +203,12 @@ pluspattern1 = re.compile(r'(\W)\+')
 pluspattern2 = re.compile(r'\+(\W)')
 
 
-def ispunctuation(wrd):
+def ispunctuation(wrd: str) -> bool:
     result = wrd in '.?!;,!<>'
     return result
 
 
-def smartjoin(strings):
+def smartjoin(strings: List[str]) -> str:
     result = ''
     lstrings = len(strings)
     if lstrings > 0:

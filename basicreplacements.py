@@ -1,6 +1,12 @@
 from collections import defaultdict
 from metadata import bpl_word, bpl_node
 from deregularise import correctinflection
+from typing import Dict, List, Tuple
+from sastatypes import ReplacementMode
+
+BasicExpansion = Tuple[str, List[str], str, str, str]
+BasicReplacement = Tuple[str, str, str, str, str]
+KnownReplacement = Tuple[str, str, str, str, str, ReplacementMode]
 
 pron = 'Pronunciation'
 orth = 'Orthography'
@@ -23,6 +29,8 @@ phonrepl = '/{wrong}/ instead of /{correct}/'
 wronginfl = 'Incorrect inflection'
 morph = 'Morphology'
 overgen = 'Overgeneralisation'
+typo = 'Typo'
+typorepl = '{wrong} instead of {correct}'
 
 Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden', 'benevens', 'bij', 'binnen',
            'binnenuit', 'boven', 'bovenaan', 'bovenin', 'bovenop', 'buiten', 'dichtbij', 'door', 'doorheen', 'heen',
@@ -34,7 +42,8 @@ Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden'
 ervzvariants = [('der' + vz, 'er' + vz, pron, varpron, d_er) for vz in Rvzlist] + \
                [("d'r" + vz, 'er' + vz, pron, varpron, d_er) for vz in Rvzlist]
 
-basicreplacementlist = [('as', 'als', pron, infpron, codared), ('isse', 'is', pron, infpron, addschwa),
+basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared),
+                                                ('isse', 'is', pron, infpron, addschwa),
                         ('ooke', 'ook', pron, infpron, addschwa),
                         ('t', "'t", orth, spellerr, apomiss), ('effjes', 'eventjes', pron, infpron, varpron),
                         ('effetjes', 'eventjes', pron, infpron, varpron),
@@ -56,16 +65,18 @@ basicreplacementlist = [('as', 'als', pron, infpron, codared), ('isse', 'is', pr
                         ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der')),
                         ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di')),
                         ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron)),
-                        ('maggen', 'mogen', morph, wronginfl, overgen)
+                        ('maggen', 'mogen', morph, wronginfl, overgen),
+                        ('aleen', 'alleen', orth, typo, typorepl.format(wrong='alleen', correct='alleen'))
                         ] + ervzvariants
-# ('inne', 'in', pron, infpron, addschwa) # put off because it b;ock inne -> in de
+# ('inne', 'in', pron, infpron, addschwa) # put off because it blocks inne -> in de
 
 
-basicreplacements = defaultdict(list)
+basicreplacements: Dict[str, List[Tuple[List[str], str, str, str]]] = defaultdict(list)
 for w1, w2, c, n, v in basicreplacementlist:
     basicreplacements[w1].append((w2, c, n, v))
 
-basicexpansionlist = [('innu', ['in', 'de'], pron, infpron, contract),
+basicexpansionlist: List[BasicExpansion] = \
+                     [('innu', ['in', 'de'], pron, infpron, contract),
                       ('inne', ['in', 'de'], pron, infpron, contract),
                       ('dis', ['dit', 'is'], pron, infpron, contract),
                       ('das', ['dat', 'is'], pron, infpron, contract),
@@ -76,21 +87,21 @@ basicexpansionlist = [('innu', ['in', 'de'], pron, infpron, contract),
                       ('of-t-ie', ['of', 'ie'], pron, infpron, t_ie),
                       ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie)]
 
-basicexpansions = defaultdict(list)
-for w1, w2, c, n, v in basicexpansionlist:
+basicexpansions: Dict[str, List[Tuple[List[str], str, str, str]]] = defaultdict(list)
+for (w1, w2, c, n, v) in basicexpansionlist:
     basicexpansions[w1].append((w2, c, n, v))
 
-knownreplacements = [
+knownreplacements: List[KnownReplacement] = [
     ('ze', "z'n", pron, infpron, fndrop, bpl_word),
     ('desu', 'deze', pron, infpron, zdev, bpl_word),
     ('mij', 'mijn', pron, infpron, fndrop, bpl_word),
 
 ]
 
-knownreplacementsdict = {(repl[0], repl[1]): repl for repl in knownreplacements}
+knownreplacementsdict: Dict[Tuple[str, str], KnownReplacement] = {(repl[0], repl[1]): repl for repl in knownreplacements}
 
 
-def getmeta4CHATreplacements(wrongword, correctword):
+def getmeta4CHATreplacements(wrongword: str, correctword: str) -> KnownReplacement:
     if (wrongword, correctword) in knownreplacementsdict:
         result = knownreplacementsdict[(wrongword, correctword)]
     else:
@@ -105,7 +116,8 @@ def getmeta4CHATreplacements(wrongword, correctword):
 
 
 # keer removed
-disambiguation_replacements = [(['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
+disambiguation_replacements: List[Tuple[List[str], str]] = \
+                              [(['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
                                  'kwartet', 'kruis'], 'gas'),
                                (['toren', 'fiets', 'puzzel', 'boom', 'vis', 'melk', 'zon', 'pot', 'klok',
                                  'school', 'boer', 'lepel', 'jas', 'tuin', 'fles', 'lucht', 'emmer', 'maan', 'kachel',
@@ -123,7 +135,7 @@ disambiguation_replacements = [(['huis', 'water', 'paard', 'werk', 'stuur', 'fee
                                ]
 
 
-def getdisambiguationdict():
+def getdisambiguationdict() -> Dict[str, str]:
     disambiguationdict = {}
     for ws, repl in disambiguation_replacements:
         for w in ws:

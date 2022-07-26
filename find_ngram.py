@@ -3,6 +3,8 @@ import os
 from dedup import filledpauseslexicon
 from treebankfunctions import (getattval, getnodeyield, getstree, getuttid,
                                getyield, onbvnwdet)
+from dataconfig import dataroot
+from dataconfig import intreebanksfolder, outtreebanksfolder
 
 digits2 = r'\d\d'
 
@@ -13,17 +15,22 @@ dld = 'dld'
 schl = 'schlichting'
 auris = 'auris'
 
-filenamepatterns = {}
-filenamepatterns[asta] = 'ASTA_sample_{}'
-filenamepatterns[tarsp] = 'TARSP_{}'
-filenamepatterns[stap] = 'STAP_{}'
-filenamepatterns[dld] = 'dld{}'
+def shorten(fullname):
+    _, filename = os.path.split(fullname)
+    basename, _ = os.path.splitext(filename)
+    return basename
+
+def getpaths(dataset):
+    result = [os.path.join(dataroot, 'VKLStap', intreebanksfolder),
+              os.path.join(dataroot, 'VKLStap', outtreebanksfolder)]
+    return result
 
 paths = {}
-paths[stap] = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\stapdata'
-paths[asta] = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\astadata\ASTA'
-paths[tarsp] = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\tarsp'
-paths[dld] = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\UUHUAurisTrain\allauristest\outdata'
+
+paths[stap] = getpaths('VKLStap')
+paths[asta] = getpaths('VKLASTA')
+paths[tarsp] = getpaths('VKLTarsp')
+paths[dld] = getpaths('Auris')
 
 ext = '.xml'
 
@@ -69,18 +76,11 @@ def findmatches(ngram, leaves):
 
 def getfilenames(ds, session=None):
     inpath = paths[ds]
-    infilenamepath = filenamepatterns[ds]
-    # infilenamepattern = r'^{}{}{}$'.format(os.path.join(inpath, infilenamepath), digits2, ext)
-    # infilenamere = re.compile(infilenamepattern)
-    # rawinfilenames = getallfilenames(inpath, {ext})
-    # infilenames = [fn for fn in rawinfilenames if infilenamere.match(fn)]
     if session is not None:
         def cond(x): return (x + 1 == session)
     else:
         def cond(_): return True
-    infilenames = [(ds + str(i + 1).rjust(2, '0'), infilenamepath.format(str(i + 1).rjust(2, '0')) + ext) for i in range(10) if cond(i)]
-    infilenames += [(ds + str(i + 1).rjust(2, '0') + '_c', infilenamepath.format(str(i + 1).rjust(2, '0')) + '_corrected' + ext) for i in range(10) if cond(i)]
-    infullnames = [(ds, (os.path.join(inpath, infilename))) for (ds, infilename) in infilenames]
+    infullnames = [os.path.join(path, ifn) for path in paths[ds] for ifn in os.listdir(path)]
     return infullnames
 
 
@@ -224,7 +224,8 @@ def main():
     # for ds in [asta]:
     #    infullnames += getfilenames(ds, session=4)
 
-    for short, infullname in infullnames:
+    for infullname in infullnames:
+        short = shorten(infullname)
         fulltreebank = getstree(infullname)
         if fulltreebank is not None:
             treebank = fulltreebank.getroot()

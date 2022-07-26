@@ -1,4 +1,5 @@
 from config import SDLOGGER
+import os
 from treebankfunctions import getstree, getnodeyield, getattval
 from dedup import filledpauseslexicon
 from top3000 import ishuman, transitive, intransitive, pseudotr, isanimate, genlexicon
@@ -9,29 +10,35 @@ from tokenmd import TokenListMD
 from metadata import Meta, bpl_delete, defaultpenalty, insertion, smallclause, SASTA, bpl_none, tokenmapping,\
     insertiontokenmapping
 from smallclauses import smallclauses, word, getleavestr, bg
+from  dataconfig import dataroot, intreebanksfolder
 
 
-testbank = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\TARSP\smallclausetest.xml"
-schlichtingtreebank = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\schlichtingtreebank\TREEBANK_ID.xml'
-mieke06 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\miekeplat_tests\TARSP_MIEKE06_ID.xml"
-mieke08 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\miekeplat_tests\TARSP_MIEKE08_ID.xml"
-aurisraw = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\Auris\AURIS_ELISKA_ORIGINAL_ID.xml"
-tarsp02 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\Tarsp_02.xml"
-tarsp06 = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\tarspdata\Tarsp_06.xml"
-#schlichtingall = r"D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\treebank_schlichting_all_examples\TREEBANK_SCHLICHTING_CHAT_ID.xml"
+def getfn(dataset, filename):
+    result = os.path.join(dataroot, dataset, intreebanksfolder, filename)
+    return result
+
+testbank = getfn( 'sctest',  "smallclausetest.xml")
+#schlichtingtreebank = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\schlichtingtreebank\TREEBANK_ID.xml'
+schlichtingtreebank = getfn('schlichting', 'TARVB2_ID2.xml')
+mieke06 = getfn('miekeplat', "TARSP_MIEKE06_ID.xml")
+mieke08 = getfn('miekeplat', "TARSP_MIEKE08_ID.xml")
+aurisraw = getfn('Eliska', 'AURIS_ELISKA_ORIGINAL_ID.xml')
+tarsp02 = os.path.join(dataroot, 'VKLTarsp', intreebanksfolder, 'Tarsp_02.xml')
+tarsp06 = os.path.join(dataroot, 'VKLTarsp', intreebanksfolder, 'Tarsp_06.xml')
+schlichtingall = os.path.join(dataroot, 'Schlichtingall', intreebanksfolder, 'TREEBANK_SCHLICHTING_CHAT_ID.xml')
 
 
 
 
 
 def main():
-    smalltest = True
+    smalltest = False
     if smalltest:
         fullnames = [testbank]
     else:
-        fullnames = [ schlichtingtreebank,  mieke06, mieke08, aurisraw, tarsp02, tarsp06]
+        fullnames = [ schlichtingtreebank,  mieke06, mieke08, aurisraw, tarsp02, tarsp06, schlichtingall]
     for infullname in fullnames:
-        print(infullname)
+        print(f'\n{infullname}\n')
         fulltreebank = getstree(infullname)
         if fulltreebank is not None:
             treebank = fulltreebank.getroot()

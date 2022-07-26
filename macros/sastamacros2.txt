@@ -93,14 +93,16 @@ not(((@cat="pp"
         or @lemma="soms")))
     and %STAP_geen_BB%]
 	
-new_STAP_BB_t = """ 
+new_STAP_BB_t = """ ((
    %advBBt% or
    %advpBBt% or
    %npBBt% or
    %apBBt% or
    %adjBBt% or
    %ppnpBBt% or
-   %geledenBBt%
+   %geledenBBt% or
+   %temporal_mwu%
+   ) and %STAP_geen_BB%)
 """ 
    
 temp = """ ((%tempadv% or %templemma%) and not(%excludedlemma%))
@@ -145,7 +147,7 @@ apBBt = """ (@cat="ap" and @rel="mod" and node[@rel="hd" and %tempadj%] )
 adjBBt = """ (@pt="adj" and @rel="mod" and %notinNP% and %tempadj%)
 """
 
-tempadj = """ (@special="tmp" or @frame="adjective(er(tmpadv))" or @frame="adjective(tmpadv)" or @lemma="gauw")
+tempadj = """ (@special="tmp" or @frame="adjective(er(tmpadv))" or @frame="adjective(tmpadv)" or @frame="adjective(no_e(tmpadv))" or @lemma="gauw")
 """
 
 notinNP = """ ( parent::node[@cat!="np"] )
@@ -180,10 +182,22 @@ new_STAP_BB_p = """
   %predclocadj% or
   %predclocap% or
   %svp_bw% or
-  %loc_vzBB%
+  %loc_vzBB% or
+  %mod_Rpronoun%
  ) and
- not(%new_STAP_BB_t%)
+ not(%new_STAP_BB_t%) and
+ %STAP_geen_BB%
 )
+"""
+
+mod_Rpronoun = """
+(
+ %Rpronoun% and @rel='mod'
+)
+"""
+
+temporal_mwu = """
+(@cat="mwu" and node[@rel="mwp" and %tempnoun%])
 """
 
 ld_pp = """  (@cat="pp" and @rel="ld")
@@ -260,12 +274,28 @@ new_STAP_BB_o = """ ((  %bbo_pt% or %bbo_cat% or %bbo_mwu%) and
                        not(%excludedadverb%) and 
                        (%BB% or %pred% or %svp_bbo%) and 
                        not(%new_STAP_BB_t%) and 
-                       not(%new_STAP_BB_p%) 
+                       not(%new_STAP_BB_p%) and
+                       %STAP_geen_BB%
 					)
 """ 
 
-pred = """  (@rel="predc"  or @rel="predm")
+
+pred = """
+(
+  (@rel="predc" and not(../node[%STAP_copula% and @rel='hd']))
+  or @rel="predm"
+)
 """
+
+STAP_copula = """
+(@pt='ww' and (@lemma='zijn' or @lemma='worden' or @lemma='blijven' or @lemma='lijken' or @lemma='blijken' or @lemma='schijnen' or @lemma='dunken' or @lemma='heten' or @lemma='voorkomen'))
+"""
+
+
+
+
+
+STAP_modalww = """  (@lemma="zullen" or @lemma="willen" or @lemma="moeten" or @lemma="mogen" or @lemma="kunnen" or @lemma="hoeven") """
 
 excludedadverb = """ ( @lemma="al" or
                        @lemma="meer" or
@@ -277,7 +307,7 @@ excludedadverb = """ ( @lemma="al" or
                        @lemma="nog" or
                        @lemma="weer" or
                        @lemma="eens" or
-                       @lemma="nog" or
+                       @lemma="nou" or
                        @lemma="nu" or
                        @lemma="wel" or
                        @lemma="gewoon" or

@@ -16,7 +16,7 @@ from dedup import (cleanwordofnort, find_duplicates2, find_janeenouduplicates,
                    getunwantedtokens, nodesfindjaneenou)
 from deregularise import correctinflection
 from iedims import getjeforms
-from lexicon import de, dets, getwordinfo, het, informlexicon, known_word, isa_namepart, tswnouns
+from lexicon import de, dets, getwordinfo, het, informlexicon, known_word, isa_namepart, tswnouns, WordInfo
 from macros import expandmacros
 # from namepartlexicon import namepart_isa_namepart
 from sastatok import sasta_tokenize
@@ -35,11 +35,18 @@ from metadata import Meta, defaultbackplacement, defaultpenalty, bpl_node, bpl_n
     filled_pause, repeatedjaneenou, repeated, substringrep, fstoken, falsestart
 from alpinoparsing import parse, escape_alpino_input
 from expandquery import expandmacros
-from find_ngram import findmatches, ngram1, ngram2, ngram7, ngram10, ngram11, ngram16, ngram17
+from find_ngram import Ngram, findmatches, ngram1, ngram2, ngram7, ngram10, ngram11, ngram16, ngram17
 from smallclauses import smallclauses
+
+from typing import Any, Callable, Dict, List, Optional, Tuple
+from sastatypes import BackPlacement, MethodName, Nort, Penalty, Position, SynTree, UttId
+
+Correction = Tuple[List[Token], List[Meta]]
+MetaCondition = Callable[[Meta], bool]
 
 SASTA = 'SASTA'
 
+hyphen = '-'
 repetition = 'Repetition'
 
 replacepattern = '{} [: {} ]'
@@ -54,28 +61,28 @@ wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik']
 
 class Ngramcorrection:
     def __init__(self, ngram, fpositions, cpositions, metafunction):
-        self.ngram = ngram
-        self.fpositions = fpositions
-        self.cpositions = cpositions
+        self.ngram: Ngram = ngram
+        self.fpositions: Tuple[Position, Position] = fpositions
+        self.cpositions: Tuple[Position, Position] = cpositions
         self.metafunction = metafunction
 
 
-def mkmeta(att, val, type='text'):
+def mkmeta(att: str, val: str, type: str ='text') -> str:
     result = metatemplate.format(type, att, val)
     return result
 
 
-def anychars(chars):
+def anychars(chars: str) -> str:
     result = '[' + chars + ']'
     return result
 
 
-def opt(pattern):
+def opt(pattern: str) -> str:
     result = '(' + pattern + ')?'
     return result
 
 
-def replacement(inword, outword):
+def replacement(inword: str, outword: str) -> str:
     result = replacepattern.format(inword, outword)
     return result
 
@@ -87,7 +94,7 @@ gaatiere = re.compile(gaatiepattern)
 neutersgnoun = 'boekje'  # seecet here an unambiguous neuter noun
 
 
-def skiptokens(tokenlist, skiptokenlist):
+def skiptokens(tokenlist: List[Token], skiptokenlist: List[Token]) -> List[Token]:
     '''
 
     :param tokenlist:
@@ -106,7 +113,9 @@ def skiptokens(tokenlist, skiptokenlist):
     return resultlist
 
 
-def ngramreduction(reducedtokens, token2nodemap, allremovetokens, allremovepositions, allmetadata, ngramcor):
+def ngramreduction(reducedtokens: List[Token], token2nodemap: Dict[Token, SynTree] , allremovetokens: List[Token],
+                   allremovepositions: List[Position], allmetadata: List[Meta], ngramcor: Ngramcorrection) \
+          -> Tuple[List[Token], List[Token], List[Meta]]:
     # metadat function should still be added / abstracted
     (fb, fe) = ngramcor.fpositions
     (cb, ce) = ngramcor.cpositions
@@ -130,7 +139,7 @@ def ngramreduction(reducedtokens, token2nodemap, allremovetokens, allremoveposit
     return reducedtokens, allremovetokens, allmetadata
 
 
-def reduce(tokens, tree):
+def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], List[Meta]]:
     if tree is None:
         SDLOGGER.error('No tree for :{}\nNo reduction applied'.format(tokens))
         return ((tokens, []))
@@ -200,10 +209,10 @@ def reduce(tokens, tree):
     allmetadata += metadata
 
     # short repetitions
-    def oldcond(x, y):
+    def oldcond(x: Nort, y: Nort) -> bool:
         return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) < .5 and not informlexicon(cleanwordofnort(x))
 
-    def cond(x, y):
+    def cond(x: Nort, y: Nort) -> bool:
         return len(cleanwordofnort(x)) / len(cleanwordofnort(
             y)) < .5  # check on lexicon put off actually two variants should be tried if the word is an existin gword
 
@@ -219,10 +228,10 @@ def reduce(tokens, tree):
     reducedtokens = [tok for tok in reducedtokens if tok not in shortprefixtokens]
 
     # long repetitions
-    def cond(x, y):
+    def longcond(x: Nort, y: Nort) -> bool:
         return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) >= .5 and not informlexicon(cleanwordofnort(x))
 
-    longprefixtokens = getprefixwords(reducedtokens, cond)
+    longprefixtokens = getprefixwords(reducedtokens, longcond)
     longprefixpositions = [token.pos for token in longprefixtokens]
     repeatedtokens = getrepeatedtokens(reducedtokens, longprefixtokens)
     allremovetokens += longprefixtokens
@@ -290,7 +299,8 @@ def reduce(tokens, tree):
 
     # vnw pv vnw pv
 
-    def metaf(falsestarttokens, falsestartpositions, correcttokens):
+    def metaf(falsestarttokens: List[Token], falsestartpositions: List[Position], correcttokens: List[Token]) \
+            -> List[Meta]:
         return \
             [Meta('Retracing', 'Retracing with Correction', annotatedposlist=falsestartpositions,
                   annotatedwordlist=[c.word for c in falsestarttokens],
@@ -356,7 +366,7 @@ def reduce(tokens, tree):
     return (skipmarkedtokens, allmetadata)
 
 
-def keycheck(key, dict):
+def keycheck(key: Any, dict: Dict[Any, Any]) -> bool:
     if key not in dict:
         SDLOGGER.error('key {}  not in dictionary. Contents of dictionary:'.format(key))
         for akey, val in dict.items():
@@ -368,49 +378,51 @@ def keycheck(key, dict):
     return key in dict
 
 
-def combinesorted(toklist1, toklist2):
+def combinesorted(toklist1: List[Token], toklist2: List[Token]) -> List[Token]:
     result = toklist1 + toklist2
     sortedresult = sorted(result, key=lambda tok: tok.pos)
     return sortedresult
 
 
-def getcorrection(utt, tree=None, interactive=False):
-    # NOT used anymore!!!!
+# def getcorrection(utt, tree=None, interactive=False):
+#     # NOT used anymore!!!!
+#
+#     allmetadata = []
+#     rawtokens = sasta_tokenize(utt)
+#     wordlist = tokenlist2stringlist(rawtokens)
+#
+#     tokens, metadata = cleantokens(rawtokens, repkeep=False)
+#     allmetadata += metadata
+#     tokensmd = TokenListMD(tokens, [])
+#
+#     # reducedtokens, allremovedtokens, metadata = reduce(tokens)
+#     # allremovedtokens, metadata = reduce(tokens)
+#     skipmarkedtokens, metadata = reduce(tokens, tree)
+#     # reducedtokensmd = TokenListMD(reducedtokens, [])
+#     reducedtokensmd = TokenListMD(skipmarkedtokens, [])
+#
+#     alternativemds = getalternatives(reducedtokensmd, tree, 0)
+#     # alternativemds = getalternatives(tokensmd, allremovedtokens, tree, 0)
+#     # unreducedalternativesmd = [TokenListMD(combinesorted(alternativemd.tokens, allremovedtokens), alternativemd.metadata) for alternativemd in alternativemds]
+#
+#     # correctiontokensmd = unreducedalternativesmd[-1] if unreducedalternativesmd != [] else tokensmd
+#     correctiontokensmd = alternativemds[-1] if alternativemds != [] else tokensmd
+#
+#     correction = tokenlist2stringlist(correctiontokensmd.tokens)
+#     allmetadata += correctiontokensmd.metadata
+#
+#     result = (correction, allmetadata)
+#     return result
 
-    allmetadata = []
-    rawtokens = sasta_tokenize(utt)
-    wordlist = tokenlist2stringlist(rawtokens)
 
-    tokens, metadata = cleantokens(rawtokens, repkeep=False)
-    allmetadata += metadata
-    tokensmd = TokenListMD(tokens, [])
-
-    # reducedtokens, allremovedtokens, metadata = reduce(tokens)
-    # allremovedtokens, metadata = reduce(tokens)
-    skipmarkedtokens, metadata = reduce(tokens, tree)
-    # reducedtokensmd = TokenListMD(reducedtokens, [])
-    reducedtokensmd = TokenListMD(skipmarkedtokens, [])
-
-    alternativemds = getalternatives(reducedtokensmd, tree, 0)
-    # alternativemds = getalternatives(tokensmd, allremovedtokens, tree, 0)
-    # unreducedalternativesmd = [TokenListMD(combinesorted(alternativemd.tokens, allremovedtokens), alternativemd.metadata) for alternativemd in alternativemds]
-
-    # correctiontokensmd = unreducedalternativesmd[-1] if unreducedalternativesmd != [] else tokensmd
-    correctiontokensmd = alternativemds[-1] if alternativemds != [] else tokensmd
-
-    correction = tokenlist2stringlist(correctiontokensmd.tokens)
-    allmetadata += correctiontokensmd.metadata
-
-    result = (correction, allmetadata)
-    return result
-
-
-def getcorrections(rawtokens, method, tree=None, interactive=False):
+def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[SynTree] = None,
+                   interactive: bool = False) -> List[Correction]:
     allmetadata = []
     # rawtokens = sasta_tokenize(utt)
     wordlist = tokenlist2stringlist(rawtokens)
     utt = space.join(wordlist)
     origutt = utt
+    #print(utt)
 
     # check whether the tree has the same yield
     origtree = tree
@@ -431,7 +443,7 @@ def getcorrections(rawtokens, method, tree=None, interactive=False):
     allmetadata += metadata
 
     # alternativemds = getalternatives(reducedtokensmd, tree, 0)
-    alternativemds = getalternatives(reducedtokensmd, method, tree, 0)
+    alternativemds = getalternatives(reducedtokensmd, method, tree, '0')
     # unreducedalternativesmd = [TokenListMD(combinesorted(alternativemd.tokens, allremovedtokens), alternativemd.metadata) for alternativemd in alternativemds]
 
     intermediateresults = alternativemds if alternativemds != [] else [tokensmd]
@@ -446,15 +458,15 @@ def getcorrections(rawtokens, method, tree=None, interactive=False):
 
 
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
-def getalternatives(origtokensmd, method, tree, uttid):
+def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId):
     tokensmd = explanationasreplacement(origtokensmd, tree)
     if tokensmd is None:
         tokensmd = origtokensmd
 
     tokens = tokensmd.tokens
     allmetadata = tokensmd.metadata
-    newtokens = []
-    alternatives = []
+    #newtokens = []
+    #alternatives = []
     alternativetokenmds = {}
     validalternativetokenmds = {}
     tokenctr = 0
@@ -467,7 +479,7 @@ def getalternatives(origtokensmd, method, tree, uttid):
     # get all the new token sequences
     tokenctr = 0
     lvalidalternativetokenmds = len(validalternativetokenmds)
-    altutts = [[]]
+    altutts : List[List[TokenMD]] = [[]]
     newutts = []
     while tokenctr < lvalidalternativetokenmds:
         for tokenmd in validalternativetokenmds[tokenctr]:
@@ -545,7 +557,7 @@ def getalternatives(origtokensmd, method, tree, uttid):
 skiptemplate = "[ @skip {} ]"
 
 
-def oldmkuttwithskips(tokens, toskip):
+def oldmkuttwithskips(tokens: List[Token], toskip: List[Token]) -> str:
     sortedtokens = sorted(tokens, key=lambda x: x.pos)
     resultlist = []
     for token in sortedtokens:
@@ -557,7 +569,7 @@ def oldmkuttwithskips(tokens, toskip):
     return result
 
 
-def mkuttwithskips(tokens, delete=True):
+def mkuttwithskips(tokens: List[Token], delete: bool = True) -> Tuple[str, List[Position]]:
     sortedtokens = sorted(tokens, key=lambda x: x.pos)
     resultlist = []
     tokenposlist = []
@@ -574,8 +586,7 @@ def mkuttwithskips(tokens, delete=True):
     return result, tokenposlist
 
 
-def oldgetexpansions(uttmd):
-    expansionfound = False
+def oldgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     newtokens = []
     tokenctr = 0
     newtokenctr = 0
@@ -616,8 +627,7 @@ def oldgetexpansions(uttmd):
     return result
 
 
-
-def getexpansions(uttmd):
+def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     expansionfound = False
     newtokens = []
     tokenctr = 0
@@ -660,7 +670,7 @@ def getexpansions(uttmd):
     return result
 
 
-def lexcheck(intokensmd, allalternativemds):
+def lexcheck(intokensmd: TokenListMD, allalternativemds: List[TokenListMD]) -> List[TokenListMD]:
     finalalternativemds = [intokensmd]
     for alternativemd in allalternativemds:
         diff_found = False
@@ -690,8 +700,10 @@ def lexcheck(intokensmd, allalternativemds):
 #    return result
 
 
-def updatenewtokenmds(newtokenmds, token, newwords, beginmetadata, name, value, cat, subcat=None,
-                      penalty=defaultpenalty, backplacement=defaultbackplacement):
+def updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newwords: List[str], beginmetadata: List[Meta], \
+                       name: str, value: str, cat: str, subcat: Optional[str] = None,
+                      penalty: Penalty = defaultpenalty, backplacement: BackPlacement = defaultbackplacement) \
+                -> List[TokenMD]:
     for nw in newwords:
         nwt = Token(nw, token.pos)
         meta = mkSASTAMeta(token, nwt, name=name, value=value, cat=cat, subcat=subcat, penalty=penalty,
@@ -702,7 +714,7 @@ def updatenewtokenmds(newtokenmds, token, newwords, beginmetadata, name, value, 
     return newtokenmds
 
 
-def gettokensplusxmeta(tree):
+def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     '''
     converts the origutt into  list of xmeta elements
     :param tree: input tree
@@ -714,7 +726,7 @@ def gettokensplusxmeta(tree):
     return tokens2, metadata
 
 
-def findxmetaatt(xmetalist, name, cond=lambda x: True):
+def findxmetaatt(xmetalist: List[Meta], name: str, cond: MetaCondition = lambda x: True) -> Optional[Meta]:
     cands = [xm for xm in xmetalist if xm.name == name and cond(xm)]
     if cands == []:
         result = None
@@ -723,7 +735,7 @@ def findxmetaatt(xmetalist, name, cond=lambda x: True):
     return result
 
 
-def tokenreplace(oldtokens, newtoken):
+def tokenreplace(oldtokens: List[Token], newtoken: Token) -> List[Token]:
     newtokens = []
     for token in oldtokens:
         if token.pos == newtoken.pos:
@@ -733,7 +745,7 @@ def tokenreplace(oldtokens, newtoken):
     return newtokens
 
 
-def explanationasreplacement(tokensmd, tree):
+def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[TokenListMD]:
     # interpret single word explanation as replacement # this will work only after retokenistion of the origutt
     result = None
     origmetadata = tokensmd.metadata
@@ -766,7 +778,8 @@ def explanationasreplacement(tokensmd, tree):
 specialdevoicingwords = {'fan'}
 
 
-def initdevoicing(token, voiceless, voiced, newtokenmds, beginmetadata):
+def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[TokenMD], beginmetadata: List[Meta]) \
+        -> List[TokenMD]:
     # initial s -> z, f -> v
     if not known_word(token.word.lower()) or token.word.lower() in specialdevoicingwords:
         if token.word[0] == voiceless:
@@ -780,10 +793,11 @@ def initdevoicing(token, voiceless, voiced, newtokenmds, beginmetadata):
     return newtokenmds
 
 
-def getalternativetokenmds(tokenmd, method, tokens, tokenctr, tree, uttid):
+def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int, \
+                           tree: SynTree, uttid: UttId) -> List[TokenMD]:
     token = tokenmd.token
     beginmetadata = tokenmd.metadata
-    newtokenmds = []
+    newtokenmds: List[TokenMD] = []
 
     if token.skip:
         return newtokenmds
@@ -796,7 +810,7 @@ def getalternativetokenmds(tokenmd, method, tokens, tokenctr, tree, uttid):
                                         name='Character Case', value='Lower case', cat='Orthography')
 
     # dehyphenate
-    if not known_word(token.word):
+    if not known_word(token.word) and hyphen in token.word:
         newwords = fullworddehyphenate(token.word, known_word)
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Dehyphenation', value='Dehyphenation', cat='Pronunciation',
@@ -929,14 +943,18 @@ def getalternativetokenmds(tokenmd, method, tokens, tokenctr, tree, uttid):
     return newtokenmds
 
 
-def getvalidalternativetokenmds(tokenmd, newtokenmds):
+def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) -> List[TokenMD]:
     validnewtokenmds = [tokenmd for tokenmd in newtokenmds if known_word(tokenmd.token.word)]
     if validnewtokenmds == []:
         validnewtokenmds = [tokenmd]
     return validnewtokenmds
 
 
-def gaatie(word):
+def gaatie(word: str) -> List[str]:
+    '''
+    The function *gaatie* replaces  a word that matches with the gaatiepattern by a sequence of two words where
+    the first word equals word[:-2] and the second word equals word[-2:]
+    '''
     results = []
     if gaatiere.match(word):
         if informlexicon(word[:-2]):  # and if it is a verb this is essential because now tie is also split into t ie
@@ -945,7 +963,7 @@ def gaatie(word):
     return results
 
 
-def getwrongdetalternatives(tokensmd, tree, uttid):
+def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
     correctiondone = False
     tokens = tokensmd.tokens
     metadata = tokensmd.metadata
@@ -958,7 +976,7 @@ def getwrongdetalternatives(tokensmd, tree, uttid):
             nexttoken = tokens[tokenctr + 1]
             # we want to exclude some words
             if nexttoken.skip:
-                wordinfos = []
+                wordinfos: List[WordInfo] = []
             elif nexttoken.word in wrongdet_excluded_words:
                 wordinfos = []
             else:
@@ -991,7 +1009,7 @@ def getwrongdetalternatives(tokensmd, tree, uttid):
     return results
 
 
-def getindezemwp(prevtokennode, tokennode):
+def getindezemwp(prevtokennode: SynTree, tokennode: SynTree) -> bool:
     ok = True
     ok = ok and getattval(prevtokennode, 'lemma') in {'in'}
     ok = ok and getattval(prevtokennode, 'rel') in {'mwp'}
@@ -1000,7 +1018,7 @@ def getindezemwp(prevtokennode, tokennode):
     return ok
 
 
-def correctPdit(tokensmd, tree, uttid):
+def correctPdit(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
     correctiondone = False
     tokennodes = getnodeyield(tree)
     tokens = tokensmd.tokens
@@ -1049,12 +1067,12 @@ def correctPdit(tokensmd, tree, uttid):
     return results
 
 
-def parseas(w, code):
+def parseas(w: str, code: str) -> str:
     result = '[ @add_lex {} {} ]'.format(code, w)
     return result
 
 
-def swapdehet(dedet):
+def swapdehet(dedet: str) -> Optional[str]:
     if dedet in dets[de]:
         deindex = dets[de].index(dedet)
     else:
@@ -1077,7 +1095,7 @@ def outputalternatives(tokens, alternatives, outfile):
         print(tokens[el], slash.join(alternatives[el]), file=outfile)
 
 
-def mkchatutt(intokens, outtokens):
+def mkchatutt(intokens: List[str], outtokens: List[str]) -> List[str]:
     result = []
     for (intoken, outtoken) in zip(intokens, outtokens):
         newtoken = intoken if intoken == outtoken else replacement(intoken, outtoken)
@@ -1085,7 +1103,7 @@ def mkchatutt(intokens, outtokens):
     return result
 
 
-def altmkchatutt(intokens, outtoken):
+def altmkchatutt(intokens: List[str], outtoken: str) -> List[str]:
     result = []
     for intoken in intokens:
         newtoken = intoken if intoken == outtoken else replacement(intoken, outtoken)

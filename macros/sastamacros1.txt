@@ -61,13 +61,14 @@ Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
 Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
 
-Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and 
+Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" 
    ) and 
    not(%Tarsp_vc_sibling%)) or
    (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
+
  )
 """
 
@@ -504,3 +505,16 @@ Tarsp_VzN = """(%vzn1xpath% or %vzn2xpath% ) """
 vzn1xpath = """(@cat="pp" and (node[@pt="vz"] and node[(@pt="n" or @pt="vnw") and not (%Rpronoun%) and @rel="obj1"] and not(node[@pt="vz" and @vztype="fin"])))"""
 vzn2xpath = """(node[@lemma="in" and @rel="mwp"] and node[@lemma="deze" and @rel="mwp"])"""
 vzn3xpath = """(@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @begin>=../node[@pt="vz"]/@end and count(node)<=3] )"""
+
+noRpronounx = """not(ancestor::node[@cat="top"]/descendant::node[%Rpronounx%])"""
+
+transitivevz = """( @lemma='aan' or @lemma='bij' or @lemma='door' or @lemma='in' or @lemma='naar' or @lemma='naartoe'  or 
+                    @lemma='op' or  @lemma='over' or   @lemma='tegen' or @lemma='toe' or  @lemma='tussen' or @lemma='uit' or
+					@lemma='van' or  @lemma='voor'
+					)"""
+
+Rpronounx = """(%Rpronoun% or @lemma="daarzo" or @lemma="hierzo") """
+
+followedbydet = """(@end=ancestor::node[@cat="top"]/descendant::node[%det%]/@begin)"""
+
+det = """(@pt="lid" or @lemma="dit" or @lemma="deze" or @lemma="die" or @lemma="dat" or (@pt="vnw" and @vwtype="bez") ) """

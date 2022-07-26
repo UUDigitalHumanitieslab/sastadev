@@ -16,9 +16,9 @@ def get_targets(treebank):
     roles = treebank.xpath(rolevalxpath)
     targetrolesfound = any(map(lambda x: x.lower() in targetroles, roles))
     synannotations = treebank.xpath(synxpath)
-    # if synannotations != []:
-    #    result = target_bysyn
-    if xsids != []:
+    if synannotations != []:
+       result = target_bysyn
+    elif xsids != []:
         result = target_xsid
     elif intargets != []:
         result = target_intarget
