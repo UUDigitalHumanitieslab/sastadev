@@ -47,7 +47,7 @@ Headers[Class] = "Class"
 
 comma = ","
 
-dictfilename = os.path.join(SD_DIR, "compoundfiles", "Ncompounds-attempt2.txt")
+dictfilename = os.path.join(SD_DIR, 'data', 'compoundfiles', 'Ncompounds-attempt2.txt')
 dictfile = open(dictfilename, 'r', encoding='utf8')
 
 getwordsxpath = ".//node[@pt]"

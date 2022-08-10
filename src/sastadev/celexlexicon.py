@@ -53,7 +53,7 @@ logfile = sys.stderr
 
 # initialisation
 # read the celex lexicon
-inputfolder = os.path.join(SD_DIR, 'celexlexicon', 'dutch')
+inputfolder = os.path.join(SD_DIR, 'data', 'celexlexicon', 'dutch')
 
 dmwfilename = 'DMWCDOK.txt'
 dmwfullname = os.path.join(inputfolder, dmwfilename)

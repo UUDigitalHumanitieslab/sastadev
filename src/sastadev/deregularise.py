@@ -22,7 +22,7 @@ metaarr['ge'] = ''
 metaarr[''] = noge
 metaarr['e'] = nog
 
-correctionfilename = 'inflectioncorrection.tsv.txt'
+correctionfilename = os.path.join(SD_DIR, 'data', 'inflectioncorrection.tsv.txt')
 
 v_prefixes = ['her', 'ver', 'ont']
 separable_prefixes = ['aan', 'aaneen', 'aantoe', 'achter', 'achteraan', 'achterna', 'achterom', 'achterop', 'achterover', 'achteruit',

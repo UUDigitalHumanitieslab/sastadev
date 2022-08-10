@@ -95,7 +95,7 @@ def intransitive(node: SynTree) -> bool:
 
 semicolon = ';'
 
-filename = os.path.join(SD_DIR, r'top3000\Woordenlijsten Current.xlsx')
+filename = os.path.join(SD_DIR, 'data', 'top3000', 'Woordenlijsten Current.xlsx')
 
 
 lexiconheader, lexicondata = getxlsxdata(filename)

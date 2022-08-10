@@ -75,7 +75,7 @@ def expandmacrosdict(expr: str, macrodict: Dict[str, str]) -> str:
     return newexpr
 
 
-macrodir = op.join(SD_DIR, 'macros')
+macrodir = op.join(SD_DIR, 'data', 'macros')
 macrofilenames = [op.join(macrodir, 'sastamacros1.txt'), op.join(macrodir, 'sastamacros2.txt'), op.join(macrodir, 'newimperatives.txt')]
 
 macrodict = generatemacros()

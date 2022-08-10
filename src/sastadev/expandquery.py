@@ -1,6 +1,8 @@
+import os.path as op
 import sys
 from optparse import OptionParser
 
+from config import SD_DIR
 from macros import expandmacros
 
 
@@ -21,7 +23,7 @@ def main():
         print('Specify a query (-q) or a filename containing a query (-f)', file=sys.stderr)
         exit(-1)
     expandedquery = expandmacros(query)
-    outfilename = 'expandedqueries.txt'
+    outfilename = op.join(SD_DIR, 'data', 'expandedqueries.txt')
     with open(outfilename, 'w', encoding='utf8') as of:
         print(expandedquery, file=of)
 

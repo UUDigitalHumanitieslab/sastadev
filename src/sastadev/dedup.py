@@ -751,7 +751,7 @@ def samplesize2(stree):
 
 # initialize filledpauseslexicon
 filledpauseslexicon = set()
-filledpausesfilename = os.path.join(SD_DIR, 'filledpauseslexicon', 'filledpauseslexicon.txt')
+filledpausesfilename = os.path.join(SD_DIR, 'data', 'filledpauseslexicon', 'filledpauseslexicon.txt')
 filledpausesfile = open(filledpausesfilename, 'r', encoding='utf8')
 for word in filledpausesfile:
     cleanword = word.strip()

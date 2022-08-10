@@ -159,5 +159,5 @@ def mktarspform(allresults, _, in_memory=False):
 
 
 # initialisation
-basefilename = os.path.join(SD_DIR, 'form_templates', 'TARSP Form Current.xlsx')
+basefilename = os.path.join(SD_DIR, 'data', 'form_templates', 'TARSP Form Current.xlsx')
 basesheet = readbaseform(basefilename)
