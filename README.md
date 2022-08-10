@@ -11,3 +11,9 @@ cd pypi
 ./prepare.sh
 twine upload dist/*
 ```
+
+## Type checking
+[mypy](http://www.mypy-lang.org/) type checking is configured in `pyproject.toml`, simply run:
+```bash
+mypy
+```
