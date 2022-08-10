@@ -17,3 +17,13 @@ twine upload dist/*
 ```bash
 mypy
 ```
+
+## Running
+The package provides a console script `sastadev` that runs `sastadev.main`. Example usage:
+```bash
+sastadev --f sample.xml --m TARSP.xlsx --a sample_annos.xlsx
+```
+For full options, run:
+```bash
+sastadev -h
+```
