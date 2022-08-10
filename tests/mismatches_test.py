@@ -1,4 +1,4 @@
-from ..mismatches import exactcompare
+from sastadev.mismatches import exactcompare
 
 
 def test_compare():

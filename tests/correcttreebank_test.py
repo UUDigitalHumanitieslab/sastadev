@@ -1,6 +1,6 @@
 from lxml import etree
 
-from ..correcttreebank import getdeplusneutcount
+from sastadev.correcttreebank import getdeplusneutcount
 
 streestrings = {}
 streestrings[0] = """

@@ -1,7 +1,7 @@
 import os
 
-from .. import methodinfo
-from ..mksilver import (getsilverannotations, permprefix,
+from sastadev import methodinfo
+from sastadev.mksilver import (getsilverannotations, permprefix,
                         platinumcheckeditedsuffix, platinumchecksuffix,
                         platinumeditedsuffix, platinumsuffix)
 

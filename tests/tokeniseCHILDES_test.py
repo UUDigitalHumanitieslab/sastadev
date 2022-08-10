@@ -1,4 +1,4 @@
-from ..tokeniseCHILDES import tokenise
+from sastadev.tokeniseCHILDES import tokenise
 
 
 def test_tokenise_childes():
