@@ -56,6 +56,9 @@ space = ' '
 
 disambiguationdict = getdisambiguationdict()
 
+#: The constant *wrongdet_excluded_words* contains words that lead to incorrect
+#: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
+#: therefore have to be excluded from determiner replacement.
 wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik']
 
 
@@ -89,9 +92,11 @@ def replacement(inword: str, outword: str) -> str:
 
 # duppattern = r'(.)\1{2,}'
 # dupre = re.compile(duppattern)
+#: The pattern *gaatiepattern* identifies words ending in *tie* preceded by at least a
+#: vowel and optionally a consonant.
 gaatiepattern = r'^.*' + anychars(vowels) + opt(anychars(consonants)) + 'tie$'
 gaatiere = re.compile(gaatiepattern)
-neutersgnoun = 'boekje'  # seecet here an unambiguous neuter noun
+neutersgnoun = 'boekje'  # select here an unambiguous neuter noun
 
 
 def skiptokens(tokenlist: List[Token], skiptokenlist: List[Token]) -> List[Token]:
@@ -775,11 +780,26 @@ def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[T
 
 
 # some words are known but very unlikely as such
+#: The constant *specialdevoicingwords* contains known words that start with a
+#: voiceless consonant for which the word starting with the corresponding voiced
+#: consonant is much more likely in young children's speech.
 specialdevoicingwords = {'fan'}
 
 
 def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[TokenMD], beginmetadata: List[Meta]) \
         -> List[TokenMD]:
+    '''
+    The function *initdevoicing* takes as input *token*, checks whether it is an
+    unknown word or a special known word. If the token's word starts with *voiceless*
+    it creates a newword with the tokens's word initial character replaced by *voiced*.
+    If the result is a known word, *newtokenmds* is updated with the new replacement
+    and *beginmetadata*, and it returns *newtokenmds*.
+
+    A known word is *special* if it is contained in the variable *specialdevoicingwords*.
+
+    .. autodata:: corrector::specialdevoicingwords
+
+    '''
     # initial s -> z, f -> v
     if not known_word(token.word.lower()) or token.word.lower() in specialdevoicingwords:
         if token.word[0] == voiceless:
@@ -883,8 +903,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # wrong verb forms: gekeekt -> gekeken: done!
 
-    # me ze (grote/oudere/ kleine) moeder /vader/zusje/ broer -> mijn me s done by Alpiono, here we do ze
-    # next xpath does not work becasue it must be preceded by a . !!
+    # me ze (grote/oudere/ kleine) moeder /vader/zusje/ broer -> mijn me s done by Alpino, here we do ze
+    # next xpath does not work because it must be preceded by a . !!
     # zexpathmodel = """//node[@word="ze" and @begin={begin} and (@rel="--"  or (@rel="obj1" and parent::node[@cat="pp"])) and @end = ancestor::node[@cat="top"]/descendant::node[@pt="n"]/@begin]"""
     if token.word.lower() == 'ze' or token.word.lower() == 'su':
         # find the node that corresponds to this token in the tree
@@ -952,8 +972,11 @@ def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) ->
 
 def gaatie(word: str) -> List[str]:
     '''
-    The function *gaatie* replaces  a word that matches with the gaatiepattern by a sequence of two words where
-    the first word equals word[:-2] and the second word equals word[-2:]
+    The function *gaatie* replaces  a word that matches with  *gaatiepattern*  (e.g.
+    *gaatie*) by a sequence of two words where the first word equals word[:-2] (
+    *gaat*) and is a known word and the second word equals word[-2:] (*ie*).
+
+    .. autodata:: corrector::gaatiepattern
     '''
     results = []
     if gaatiere.match(word):
@@ -964,6 +987,28 @@ def gaatie(word: str) -> List[str]:
 
 
 def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    '''
+    The function *getwrongdetalternatives* takes as input a TokenListMD *tokensmd*,  the
+    original parse of the utterance (*tree*) and the *uttid* of the utterance.
+
+    It inspects each token in the token list of *tokensmd* that should not be skipped
+    and that is a utrum determiner. If the token that immediately follows this
+    determiner is not a token to be ignored we obtain the gender properties of the
+    token's word (there can be multiple if it is ambiguous). If one of the properties
+    is neuter gender and none is uter, then the uter determiner is replaced by its neuter
+    variant as a new alternative.
+
+    The token following must be ignored if it has the property *skip=True* or if it
+    belongs to words that would lead to wrong corrections, as specified in the constant
+    *wrongdet_excluded_words*:
+
+    .. autodata:: corrector::wrongdet_excluded_words
+
+    The properties of the token following are determined by the function
+    *getdehetwordinfo* from the module *alpino*:
+
+    .. autofunction:: alpino::getdehetwordinfo
+    '''
     correctiondone = False
     tokens = tokensmd.tokens
     metadata = tokensmd.metadata
@@ -1019,6 +1064,25 @@ def getindezemwp(prevtokennode: SynTree, tokennode: SynTree) -> bool:
 
 
 def correctPdit(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    '''
+    The function *correctPdit* replaces demonstrative pronouns immediately preceded by
+    an adposition by the pronoun *hem*. It sets the value of the *backplacement*
+    attribute of the metadata to *bpl_node* so that it will be replaced again by the
+    original node after the parse has been done, unless the original parse contained the multiword
+    unit *in deze*. Then the *backplacement* attribute gets the value *bpl_indeze* so
+    that in a later stage some special replacements will be performed.
+
+    The function takes as input:
+
+    * *tokensmd* of type *TpkenListMD* : the list of tokens wit hassociated metadata
+
+    *tree* of type *SynTree*: the parse of the original utterance
+
+    *uttid* of type *UttId*: the utterance identifier of the utterance (currently not
+    used)
+
+    It yields a list  containing the alternatives generated (of type List[TokenListMD].
+    '''
     correctiondone = False
     tokennodes = getnodeyield(tree)
     tokens = tokensmd.tokens

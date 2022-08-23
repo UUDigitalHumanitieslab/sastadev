@@ -2,7 +2,7 @@
 SASTA en SASTAdev
 =================
 
-A distinction must be made between SASTA and SASTAdev. We will describe their characteristics below. SASTA and SASTAdev are both on github repository https://github.com/UUDigitalHumanitieslab/sastadev .
+A distinction must be made between SASTA and SASTAdev. We will describe their characteristics below. SASTA and SASTAdev are both on github, SASTAdev as repository https://github.com/UUDigitalHumanitieslab/sastadev, and SASTA as git repository https://github.com/UUDigitalHumanitieslab/sasta
 
 SASTA
 -----

@@ -1733,17 +1733,20 @@ def treeinflate(stree: SynTree, start: int = 10, inc: int = 10) -> None:
     '''
     The function *treeinflate* adapts the input tree *stree* in such a way that:
 
-    * for word nodes: the int value of the *begin* attribute o (ib) is changed to str(newib =(ib + 1) * inc), and the value of the *end* attribute to str(newib + 1)
+    * for word nodes: the int value of the *begin* attribute  (ib) is changed to str(newib =(ib + 1) * 10), and the value of the *end* attribute to str(newib + 1)
     * for phrasal nodes: new values for *begin* and *end* are computed by the function *getbeginend*
     * for other nodes: the same as  for word nodes
 
     The parameters of this function are:
 
     * stree: input syntactic structure, which is modified
-    * start: not used yet and probably not necessary (default value = 10)
-    * inc: increment, by default set to 10 (not used yet)
+    * start: not used yet (see below)) (default value = 10)
+    * inc: increment, by default set to 10 (not used yet, see below)
 
     and it returns *None*.
+
+    **Remark** This should be changed for words so that newib = start + (ib * inc) and
+    newie =  newib + 1
 
     '''
     # fatstree = deepcopy(stree)

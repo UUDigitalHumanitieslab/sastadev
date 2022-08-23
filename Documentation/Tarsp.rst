@@ -148,7 +148,7 @@ Explanation:
     * there is a subject but
     
       * it is *jij* or *u* (**impsubject**) and
-      * either a imperative modifier is found (**impmodfound**) or the utternace conatin an exclamation mark      
+      * either a imperative modifier is found (**impmodfound**) or the utterance contains an exclamation mark      
 
 * there are restrictions on the verb in an imperative clause, expressed by the macro **wwimpok**::
 
@@ -229,7 +229,7 @@ But the correspondence is only perfect for *B*.
 
 * **Remark** For *Ond* the definitions are different, but it is not clear whether that cannot be avoided. 
 * **Remark** For *VC* the definitions are also different but perhaps they should be identical. 
-* **Remark** For *W* there is no immediat;y obvious correspondence, but perhaps there should be. It looks as if the necessary restrictions have been implemented independently twice.
+* **Remark** For *W* there is no immediately obvious correspondence, but perhaps there should be. It looks as if the necessary restrictions have been implemented independently twice.
 
 Out of these language measures, only T120/W occurs in the form ('profielkaart'). 
 
@@ -261,7 +261,7 @@ It differs from the definition of :ref:`T063_Ond` because T063 has to exclude su
     * predicative complements (*predc*)
     * locative/directional complements (*ld*)
     * indirect objects (*obj2*)
-    * finite verbal complement (macro **Tarsp_finvc**)
+    * finite verbal complements (macro **Tarsp_finvc**)
     * pronouns with relation *vc*, this is for sluiced subordinate clauses as in *ik weet* **wat**, *effe kijken* **waar**
     * separable particles of a verb that are not adpositions (*svp*)
     

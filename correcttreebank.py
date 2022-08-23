@@ -206,7 +206,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
     It returns a triple consisting of
 
     * the corrected treebank
-    * an error dictionary: a list of errors detected and how they have corrected
+    * an error dictionary: a list of errors detected and how they have been corrected
     * a list of all original utterances and all alternatives that have been considered
 
     '''
@@ -396,43 +396,52 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
 
     The following steps are carried out:
 
-    1. The original utterance, with all CHAT-annotations, is cleaned using the function *cleantext* from the module
-    *cleanCHILDEStokens*. This is necessary to generate the metadata for the CHAT-annotations, but it can be
-    discarded when the original parses use the same *cleantext* function. Currently that is not possible yet because
-    the original parsing is done via GrETEL modules, which cannot handle complex metadata (xmeta). The result of
-    this operation is a list of tokens of type *Token* as defined in the module *sastatoken*. @@add ref@@
+      1. The original utterance, with all CHAT-annotations, is cleaned using the
+      function *cleantext* from the module *cleanCHILDEStokens*. This is necessary to
+      generate the metadata for the CHAT-annotations, but it can be discarded when the
+      original parses use the same *cleantext* function. Currently that is not
+      possible yet because the original parsing is done via GrETEL modules,
+      which cannot handle complex metadata (xmeta). The result of this operation is a
+      list of tokens of type *Token* as defined in the module *sastatoken*. @@add ref@@
 
-    2. Alpino parses are inflated to be able to deal easily with insertions and deletions. @@add ref@@
+      2. Alpino parses are inflated to be able to deal easily with insertions and
+      deletions. See below for more details.
 
-    3. The corrections are obtained by calling the function *getcorrections* from the module *corrector*
+      3. The corrections are obtained by calling the function *getcorrections* from the module *corrector*. xx
 
-    4. The corrections may have tokens that are marked with skip=True, in which case they should not be included in the
-    corrected utterance, so  a corrected utterance with these words left out is created.
+      4. The corrections may have tokens that are marked with skip=True, in which case
+      they  should not be included in the  corrected utterance, so  a corrected
+      utterance with these words left out is created.
 
-    5. Each corrected utterance  is parsed, resulting in an inflated syntactic structure.
+      5. Each corrected utterance  is parsed, resulting in an inflated syntactic
+      structure.
 
-    6. Words that were left out are now introduced into the syntactic structure, in such a way that they have no
-    grammatical relations with other words.
+      6. Words that were left out are now introduced into the syntactic structure,
+      in such a way that they have no grammatical relations with other words.
 
-    7. The best alternative is selected from among the original utterance and the generated corrected utterances by
-    the function *selectcorrection* from the module *correcttreebank*.
+      7. The best alternative is selected from among the original utterance and the
+      generated corrected utterances by the function *selectcorrection* from the
+      module *correcttreebank*.
 
-    8. The original words and sometimes their properties are now substituted for the corrections. The exact nature of
-    the replacement is determined by the value of the *backplacement* attribute of the metadata. Expansions are not
-    replaced yet, because they must be replaced only after the queries have been executed. Nodes for words that have
-    to be deleted are collected, but the actual deletion only takes place in the next step.
+      8. The original words and sometimes their properties are now substituted for the
+      corrections. The exact nature of the replacement is determined by the value of
+      the *backplacement* attribute of the metadata. Expansions are not replaced yet,
+      because they must be replaced only after the queries have been executed. Nodes
+      for words that have to be deleted are collected, but the actual deletion only
+      takes place in the next step.
 
-    9. Words that were marked to be deleted are now all deleted, by the function *deletewordnodes* of the module
-    *treebankfunction*.
+      9. Words that were marked to be deleted are now all deleted, by the function
+      tada *deletewordnodes* of the module *treebankfunction*. xx
 
-    10. The metadata are updated and added to the syntactic structure.
+      10. The metadata are updated and added to the syntactic structure.
 
-    11. During the whole process the mapping between the nodes for words in the original syntactic structure and the
-    nodes for words in the syntactic structure for the corrected utterance must be perfect. A check is performed
-    to determine whether this is the case.
+      11. During the whole process the mapping between the nodes for words in the
+      original syntactic structure and the nodes for words in the syntactic structure
+      for the corrected utterance must be perfect. A check is performed to determine
+      whether this is the case.
 
-    12. Finally, the corrected syntactic structure and the specification of the original utterance and all alternatives
-    considered is returned.
+      12. Finally, the corrected syntactic structure and the specification of the
+      original utterance and all alternatives considered is returned.
 
     '''
 

@@ -5,10 +5,12 @@ Alpino parser
 
 Utterances are parsed with the Alpino parser. The Alpino parser uses the Alpino grammar during parsing, and one has to know some major aspects of this grammar (and, when actually defining a query, every fine detail of the structures at hand). 
 
+Alpino uses a grammatical formalism inspired by Head-driven Phrase Structure Grammar (HPSG, [Pollard & Sag 1987, 1994]) and it uses internally Directed Acyclic Graphs (DAGs) as the data type for syntactic structures. However, Alpino outputs  syntactic structures in accordance with conventions agreed upon in large Dutch treebank projects (projects for the Spoken Dutch Corpus treebank and for the LASSY treebank). These require trees as the data type for syntactic structures and several additional requirements. Alpino meets these requirements but in some cases retains some of the properties of its own internal syntactic structures, especially when these are richer than the standard tree structures. We will point out some of these cases below.
+
 Alpino syntactic structures
 ---------------------------
 
-The syntactic structures are encoded in XML in accordance with the `alpino_ds DTD <https://github.com/rug-compling/alpinods>`_ . The top level element is alpino_ds (the root node), with directly below this:
+The syntactic structures that Alpino generates are trees, and they are encoded in XML in accordance with the `alpino_ds DTD <https://github.com/rug-compling/alpinods>`_ . The top level element is alpino_ds (the root node), with directly below this:
 
 * parser (optional) for properties of the parser
 * node (obligatory): the syntactic structure
@@ -20,43 +22,85 @@ We use the following sentence to illustrate the main characteristics of Alpino s
 
 `Het slechte weer heeft al schade aangericht <https://gretel.hum.uu.nl/ng/tree?sent=%3Csentence%3EHet%20slechte%20weer%20heeft%20al%20schade%20aangericht%3C/sentence%3E%0A%20%20&xml=%3Calpino_ds%20version%3D%221.3%22%3E%0A%20%20%3Cnode%20begin%3D%220%22%20cat%3D%22top%22%20end%3D%227%22%20id%3D%220%22%20rel%3D%22top%22%3E%0A%20%20%20%20%3Cnode%20begin%3D%220%22%20cat%3D%22smain%22%20end%3D%227%22%20id%3D%221%22%20rel%3D%22--%22%3E%0A%20%20%20%20%20%20%3Cnode%20begin%3D%220%22%20cat%3D%22np%22%20end%3D%223%22%20id%3D%222%22%20index%3D%221%22%20rel%3D%22su%22%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20begin%3D%220%22%20end%3D%221%22%20frame%3D%22determiner%28het%2Cnwh%2Cnmod%2Cpro%2Cnparg%2Cwkpro%29%22%20id%3D%223%22%20infl%3D%22het%22%20lcat%3D%22detp%22%20lemma%3D%22het%22%20lwtype%3D%22bep%22%20naamval%3D%22stan%22%20npagr%3D%22evon%22%20pos%3D%22det%22%20postag%3D%22LID%28bep%2Cstan%2Cevon%29%22%20pt%3D%22lid%22%20rel%3D%22det%22%20root%3D%22het%22%20sense%3D%22het%22%20wh%3D%22nwh%22%20word%3D%22Het%22/%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20aform%3D%22base%22%20begin%3D%221%22%20buiging%3D%22met-e%22%20end%3D%222%22%20frame%3D%22adjective%28e%29%22%20graad%3D%22basis%22%20id%3D%224%22%20infl%3D%22e%22%20lcat%3D%22ap%22%20lemma%3D%22slecht%22%20naamval%3D%22stan%22%20pos%3D%22adj%22%20positie%3D%22prenom%22%20postag%3D%22ADJ%28prenom%2Cbasis%2Cmet-e%2Cstan%29%22%20pt%3D%22adj%22%20rel%3D%22mod%22%20root%3D%22slecht%22%20sense%3D%22slecht%22%20vform%3D%22adj%22%20word%3D%22slechte%22/%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20begin%3D%222%22%20end%3D%223%22%20frame%3D%22noun%28het%2Cmass%2Csg%29%22%20gen%3D%22het%22%20genus%3D%22onz%22%20getal%3D%22ev%22%20graad%3D%22basis%22%20id%3D%225%22%20lcat%3D%22np%22%20lemma%3D%22weer%22%20naamval%3D%22stan%22%20ntype%3D%22soort%22%20num%3D%22sg%22%20pos%3D%22noun%22%20postag%3D%22N%28soort%2Cev%2Cbasis%2Conz%2Cstan%29%22%20pt%3D%22n%22%20rel%3D%22hd%22%20rnum%3D%22sg%22%20root%3D%22weer%22%20sense%3D%22weer%22%20word%3D%22weer%22/%3E%0A%20%20%20%20%20%20%3C/node%3E%0A%20%20%20%20%20%20%3Cnode%20begin%3D%223%22%20end%3D%224%22%20frame%3D%22verb%28hebben%2Csg_heeft%2Caux_psp_hebben%29%22%20id%3D%226%22%20infl%3D%22sg_heeft%22%20lcat%3D%22smain%22%20lemma%3D%22hebben%22%20pos%3D%22verb%22%20postag%3D%22WW%28pv%2Ctgw%2Cmet-t%29%22%20pt%3D%22ww%22%20pvagr%3D%22met-t%22%20pvtijd%3D%22tgw%22%20rel%3D%22hd%22%20root%3D%22heb%22%20sc%3D%22aux_psp_hebben%22%20sense%3D%22heb%22%20stype%3D%22declarative%22%20tense%3D%22present%22%20word%3D%22heeft%22%20wvorm%3D%22pv%22/%3E%0A%20%20%20%20%20%20%3Cnode%20begin%3D%220%22%20cat%3D%22ppart%22%20end%3D%227%22%20id%3D%227%22%20rel%3D%22vc%22%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20begin%3D%220%22%20end%3D%223%22%20id%3D%228%22%20index%3D%221%22%20rel%3D%22su%22/%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20begin%3D%224%22%20end%3D%225%22%20frame%3D%22adverb%22%20id%3D%229%22%20lcat%3D%22advp%22%20lemma%3D%22al%22%20pos%3D%22adv%22%20postag%3D%22BW%28%29%22%20pt%3D%22bw%22%20rel%3D%22mod%22%20root%3D%22al%22%20sense%3D%22al%22%20word%3D%22al%22/%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20begin%3D%225%22%20end%3D%226%22%20frame%3D%22noun%28de%2Ccount%2Csg%29%22%20gen%3D%22de%22%20genus%3D%22zijd%22%20getal%3D%22ev%22%20graad%3D%22basis%22%20id%3D%2210%22%20lcat%3D%22np%22%20lemma%3D%22schade%22%20naamval%3D%22stan%22%20ntype%3D%22soort%22%20num%3D%22sg%22%20pos%3D%22noun%22%20postag%3D%22N%28soort%2Cev%2Cbasis%2Czijd%2Cstan%29%22%20pt%3D%22n%22%20rel%3D%22obj1%22%20rnum%3D%22sg%22%20root%3D%22schade%22%20sense%3D%22schade%22%20word%3D%22schade%22/%3E%0A%20%20%20%20%20%20%20%20%3Cnode%20begin%3D%226%22%20buiging%3D%22zonder%22%20end%3D%227%22%20frame%3D%22verb%28hebben%2Cpsp%2Cninv%28transitive%2Cpart_transitive%28aan%29%29%29%22%20id%3D%2211%22%20infl%3D%22psp%22%20lcat%3D%22ppart%22%20lemma%3D%22aan_richten%22%20pos%3D%22verb%22%20positie%3D%22vrij%22%20postag%3D%22WW%28vd%2Cvrij%2Czonder%29%22%20pt%3D%22ww%22%20rel%3D%22hd%22%20root%3D%22richt_aan%22%20sc%3D%22part_transitive%28aan%29%22%20sense%3D%22richt_aan%22%20word%3D%22aangericht%22%20wvorm%3D%22vd%22/%3E%0A%20%20%20%20%20%20%3C/node%3E%0A%20%20%20%20%3C/node%3E%0A%20%20%3C/node%3E%0A%20%20%3Csentence%3EHet%20slechte%20weer%20heeft%20al%20schade%20aangericht%3C/sentence%3E%0A%20%20%3Ccomments%3E%0A%20%20%20%20%3Ccomment%3EQ%23ng1648721663%7CHet%20slechte%20weer%20heeft%20al%20schade%20aangericht%7C1%7C1%7C-6.54556328848%3C/comment%3E%0A%20%20%3C/comments%3E%0A%3C/alpino_ds%3E>`_
 
-Clicking on it shows a web page where you can actually view the syntactic structure of this sentence.
+Clicking on it shows a web page where you can actually view the syntactic structure of this sentence. The viewer used here is the GrETEL viewer, and it shows only a subset of the properties of nodes in this syntactic structure. The full XML-representation of this structure is::
 
-The main characteristics are:
+	<alpino_ds version="1.3">
+	  <node begin="0" cat="top" end="7" id="0" rel="top">
+		<node begin="0" cat="smain" end="7" id="1" rel="--">
+		  <node begin="0" cat="np" end="3" id="2" index="1" rel="su">
+			<node begin="0" end="1" frame="determiner(het,nwh,nmod,pro,nparg,wkpro)" id="3" infl="het" lcat="detp" lemma="het" lwtype="bep" naamval="stan" npagr="evon" pos="det" postag="LID(bep,stan,evon)" pt="lid" rel="det" root="het" sense="het" wh="nwh" word="Het"/>
+			<node aform="base" begin="1" buiging="met-e" end="2" frame="adjective(e)" graad="basis" id="4" infl="e" lcat="ap" lemma="slecht" naamval="stan" pos="adj" positie="prenom" postag="ADJ(prenom,basis,met-e,stan)" pt="adj" rel="mod" root="slecht" sense="slecht" vform="adj" word="slechte"/>
+			<node begin="2" end="3" frame="noun(het,mass,sg)" gen="het" genus="onz" getal="ev" graad="basis" id="5" lcat="np" lemma="weer" naamval="stan" ntype="soort" num="sg" pos="noun" postag="N(soort,ev,basis,onz,stan)" pt="n" rel="hd" rnum="sg" root="weer" sense="weer" word="weer"/>
+		  </node>
+		  <node begin="3" end="4" frame="verb(hebben,sg_heeft,aux_psp_hebben)" id="6" infl="sg_heeft" lcat="smain" lemma="hebben" pos="verb" postag="WW(pv,tgw,met-t)" pt="ww" pvagr="met-t" pvtijd="tgw" rel="hd" root="heb" sc="aux_psp_hebben" sense="heb" stype="declarative" tense="present" word="heeft" wvorm="pv"/>
+		  <node begin="0" cat="ppart" end="7" id="7" rel="vc">
+			<node begin="0" end="3" id="8" index="1" rel="su"/>
+			<node begin="4" end="5" frame="adverb" id="9" lcat="advp" lemma="al" pos="adv" postag="BW()" pt="bw" rel="mod" root="al" sense="al" word="al"/>
+			<node begin="5" end="6" frame="noun(de,count,sg)" gen="de" genus="zijd" getal="ev" graad="basis" id="10" lcat="np" lemma="schade" naamval="stan" ntype="soort" num="sg" pos="noun" postag="N(soort,ev,basis,zijd,stan)" pt="n" rel="obj1" rnum="sg" root="schade" sense="schade" word="schade"/>
+			<node begin="6" buiging="zonder" end="7" frame="verb(hebben,psp,ninv(transitive,part_transitive(aan)))" id="11" infl="psp" lcat="ppart" lemma="aan_richten" pos="verb" positie="vrij" postag="WW(vd,vrij,zonder)" pt="ww" rel="hd" root="richt_aan" sc="part_transitive(aan)" sense="richt_aan" word="aangericht" wvorm="vd"/>
+		  </node>
+		</node>
+	  </node>
+	  <sentence>Het slechte weer heeft al schade aangericht</sentence>
+	  <comments>
+		<comment>Q#ng1648721663|Het slechte weer heeft al schade aangericht|1|1|-6.54556328848</comment>
+	  </comments>
+	</alpino_ds>
+	
+The main characteristics of Alpino syntactic structures are:
 
-* The structures are constituent trees. So they contain nodes not only for words but also for phrases (constituents). In the example sentence, the phrases are the nodes labeled *smain* (declarative main clause), *np* (noun phrase),   *ppart* (past participial phrase), and *top*
-* Top node: each syntactic structure always has a node labeled top as its root.
-* Nodes for words have an attribute *pt* (simple part of speech code), nodes for phrases have an attribute *cat* (syntactic category). In exceptional  cases *pt*  can be lacking in nodes for words, but then there is always the *pos*  attribute. 
-* Order: the nodes in a tree occur in a certain order, but this order has no meaning. A tree with two nodes switched in order is thus equivalent to the original tree
-* Surface order: surface order of the nodes and words is indicated by the attributes *begin* and *end* of a node, which have integers turned into string as values. The value of the *begin* attribute of the left most word is *'0'*, the value of the *end* attribute of  a word is always equal to str(int(begin) + 1), so it is '1' for the first word. Empty nodes (nodes without a *cat*, *pt* or *pos* attribute but with an *index* attribute) have their *begin* and *end* attributes equal to the corresponding attributes of its antecedent. Phrases also have *begin* and *end* attributes, with the *begin* attribute equal to the smallest value of the *begin* attributes of its direct children (except for empty nodes), and its end attribute equal to the largest value of the *end* attributes of its direct children.  Note that nodes for two phrases N1 and N2 can have different relations with regard to linear order:
+* The structures are constituent trees. So they contain nodes not only for words but also for phrases (constituents). In the example sentence, the phrases are the nodes labeled *smain* (declarative main clause), *np* (noun phrase),   *ppart* (past participial phrase), and *top*. The phrases in these syntactic structures are phrases at an abstract level of analysis, not necessarily phrases at the surface level (see also below, under *order*).
+* Top node: each syntactic structure always has a node labeled *top* as its root.
+* Attribute-value pairs: Nodes have attribute-value pairs (feature name/feature value pairs), implemented as XML attribute-value pairs.
+* Nodes for words have an attribute *pt* (simple part of speech code), nodes for phrases have an attribute *cat* (syntactic category). In exceptional  cases *pt*  can be lacking in nodes for words, but then there is always the *pos*  attribute (the Alpino-internal attribute for part of speech tag). Nodes for words also always have the attribute *word* (for the actual surface form of the word).
+* Order: the nodes in a tree occur in a certain order, but this order has no meaning. A tree with two nodes switched in order is thus equivalent to the original tree.
+* Surface order: surface order of the nodes and words is indicated by the attributes *begin* and *end* of a node, which have integers turned into strings as values. These attributes are not shown in the GrETEL tree viewer. The value of the *begin* attribute of the left most word is *'0'*, the value of the *end* attribute of  a word is always equal to str(int(begin) + 1), so it is '1' for the first word. A node without a *cat*, *pt* or *pos* attribute but with an *index* attribute, informally called an 'empty node', has its *begin* and *end* attributes equal to the corresponding attributes of its antecedent (see below for more information about such nodes and their antecedents). Phrases also have *begin* and *end* attributes, with the *begin* attribute equal to the smallest value of the *begin* attributes of its direct children, and its end attribute equal to the largest value of the *end* attributes of its direct children.
 
-  * N1 can precede N2
-  * N1 can follow N2
-  * N1 can contain N2
-  * N1 can be contained in N2
-  * N1 can overlap with N2
+	For the example sentence given above the values of the *begin* and *end* attributes can be represented in the easiest way as follows:
+
+    *  0 het 1 slechte 2 weer 3 heeft 4 al 5 schade 6 aangericht 7
+
+    where the number preceding a word is the value of its *begin* attribute, and the number following a word is the value of its *end* attribute.
+
+    Note that nodes for two phrases N1 and N2 can have different relations with regard to linear order:
+
+      * N1 can precede N2 @@add examples@@
+      * N1 can follow N2
+      * N1 can contain N2
+      * N1 can be contained in N2
+      * N1 can overlap with N2
   
   
-* If a phrase consists just of one word, no phrase node occurs. So, there is no *advp* (adverbial phrase) above the adverb *al*, no *adjp* (adjectival phrase) above the adjective *slechte*, and no *detp* (determiner phrase) above the article (lid) *het*.
-* Nodes have a label for a grammatical relation:
+* If a phrase consists just of one word, no phrase node occurs. So, there is no *advp* (adverbial phrase) above the adverb *al*, no *adjp* (adjectival phrase) above the adjective *slechte*, and no *detp* (determiner phrase) above the article (lid) *het*. This is due to one of the conventions agreed upon in the Dutch treebank projects. Internally, Alpino does have phrasal nodes in such cases, and Alpino retains some information about this in the syntactic structures (attribute *lcat*, see below).
+* Nodes have a label for a grammatical relation (as a value of the attribute *rel*):
 
-  *  e.g. *su* (subject) for the np *het slechte weer*, *mod* (modifier) for the modifiers *slechte* and *al*, obj1 (direct object) for  *schade*, det (determiner) for the article *het*, vc for the past participial phrase  *al schade aangericht* and hd (head) for *heeft* ( head of the main clause) and *aangericht* (head of the participial clause). The smain node is labeled with the grammatical relation ``--`` (two hyphens), and the top node has relation *top*. 
+  *  e.g. *su* (subject) for the np *het slechte weer*, *mod* (modifier) for the modifiers *slechte* and *al*, *obj1* (direct object) for  *schade*, *det* (determiner) for the article *het*, *vc* (verbal complement) for the past participial phrase  *al schade aangericht* and *hd* (head) for *heeft* ( head of the main clause) and *aangericht* (head of the participial clause). The smain node is labeled with the grammatical relation ``--`` (two hyphens), and the top node has relation *top*. 
   * Conceptually it is wrong to treat a grammatical relation as a property of a node (it should be a label of the edge), and in some cases this leads to more complex operations. 
-  * Because grammatical relations are made explicit by means of labels and are not encoded configurationally, the structures can be relatively flat 
+  * Because grammatical relations are made explicit by means of values for an attribute and are not encoded configurationally, the structures can be relatively flat. 
   * We often use the notation *rel*/*poscat* to describe a node with relation *rel* and with *pt* or *cat* *poscat* (e.g. *su/np*, *hd/ww*).
+  * For an overview of the relations that Alpino distinguishes, see https://paqu.let.rug.nl:8068/info.html#rel
 
-* Nodes can have a value for the attribute index. A node with relation *rel*, pt or cat *poscat* and index *i* is notated as follows in this document: rel / poscat:i
-* Certain words have multiple grammatical relations in one syntactic structure. In these cases, next to the normal node (which we will call the antecedent)  one or more additional nodes are present with just an index and a grammatical relation (and *begin* and *end* attributes), but no other attributes, in particular not *pt*, *pos* or *cat*. These nodes are coindexed with the antecedent. In the example sentence, the phrase *het slechte weer* is the subject of *heeft*  (see the dominating su/np:1 node) and the subject of *aangericht*, represented here by the additional su/:1 node under vc/ppart. These ‘empty nodes’ are used in constructions such as:
+* Nodes can have a value for the attribute *index*. A node with relation *rel*, pt or cat *poscat* and index *i* is notated as follows in this document: rel / poscat:i
+* Certain words have multiple grammatical relations in the syntactic structure. In these cases, next to the normal node (which we will call the antecedent)  one or more additional nodes are present with just an index and a grammatical relation (and *begin* and *end* attributes), but no other attributes, in particular not *pt*, *pos*, *cat* or *word*. These nodes are coindexed with the antecedent. In the example sentence, the phrase *het slechte weer* is the subject of *heeft*  (see the dominating su/np:1 node) and the subject of *aangericht*, represented here by the additional su/:1 node under vc/ppart. These ‘empty nodes’ are used for cases in which a word or phrase plays multiple roles in a sentence, for example in constructions such as:
 
-  * Control
-  * Subject to subject raising, object to subject raising
-  * Passives (‘NP-movement’)
-  * Wh-movement in questions, relative clauses ec.
-  * Ellipsis (e.g., *heel zeldzaam en  complex*)
+  * Control: 'ik vroeg hem  dat te doen': *hem* object of *vroeg* and subject of *dat te doen*.
+  * Subject to subject raising: 'Het lijkt te regenen': *het* subject of *lijkt* and of *regenen*. 
+  * Object to subject raising: ik zag hem dat doen: *hem* object of *zag* and *subject* of *doen*.
+  * Passives (‘NP-movement’): 'het huis werd geschilderd': *het huis* subject of *werd* and *object* of *geschilderd*.
+  * Wh-movement in questions, relative clauses etc. 'Wat heeft hij gekocht': *wat* head of the question and object of *gekocht*.
+  * Ellipsis (e.g., *heel zeldzaam en  complex*): *heel* a modifier of *zeldzaam* and of *complex*.
   
 * **Auxiliary verbs** are not distinguished from lexical verbs in Alpino. All are treated the same. An 'auxiliary verb' such as *heeft* in the example sentence therefore takes a  participial phrase as a complement.  
-* **Conversions** are not explicitly represented in the *pt* attribute. Many words can act as a word with a different *pt*, e.g. infinitives as a noun (*het lezen van boeken*), participles as an adjective (*hij is erg opgewonden*), adjectives as a noun (*de zieke bleef thuis*), numerals as a noun (*in 2022*), etc. This is **never** indicated by means of the *pt* attribute, in some cases by some other attribute. 
-* Alpino does not have an equivalent of what is called the complementive in the Syntax of Dutch [Broekhuis et al. 2015, 239]. But what comes closest is 
+* Words of a particular part of speech are often used as if they are of a different part of speech. Sometimes these words are **conversions**, i.e actually changed the part of speech. In any case, in such examples always the original part of speech is represented in the *pt* attribute. The different use is sometimes indicated by a different attribute, as we indicate after the examples. Many words can act as a word with a different *pt*, e.g. 
+
+     * infinitives as a noun: *het lezen van boeken* (pt=ww, positie=nom), 
+	 * participles as an adjective *hij is erg opgewonden* (pt=ww, often pos=adj),
+     * prenominal participles are probably often both a verb and an adjective: *de door de mensen gekochte spullen* (pt=ww, positie=prenom)
+	 * adjectives as a noun: *de zieke bleef thuis* (pt=adj, positie=nom), 
+	 * numerals as a noun: *in 2022* (pt=num, positie=vrij) 
+	 
+	 
+* Alpino does not have an equivalent of what is called the *complementive* in the Syntax of Dutch [Broekhuis et al. 2015, 239]. But what comes closest is 
 
   * phrases with grammatical relation *ld* for locative and directional complements
   * phrases with grammatical relation *predc* for predicative complements
@@ -71,7 +115,7 @@ The main characteristics are:
 * **Adverbs**: Words that are traditionally classified as adverbs are either adjectives or (*adj*) or adverbs (*bw*) in Alpino. The main rule is that an adverb that is also an adjective is treated as an *adj*, other adverbs are treated as *bw*. Adverbial pronouns (*ervan*, *hierover*, etc) are also considered adverbs, and treated as  single word in the grammar (and not as two words which happen to be written together). There is no special property for R-words. R-words can function as an adverb or as pronoun. R-words are always treated as pronouns (*vnw*).
 
 
-Not all these characteristics are due to Alpino. Alpino itself often yields slightly different structures, but the Alpino-structures are adapted to conform to the conventions agreed upon in the consortia that created the Spoken Dutch Corpus and the Lassy treebanks. Alpino syntactic structures have often kept information about the original Alpino structure. For example, in Alpino structures,  single word phrases do have a phrasal node in the structure. The category of this node is indicated in the structures in the attribute *lcat*. For other examples of Alpino propertie in the syntactic structures, see :ref:`Alpinoproperties`.
+As stated before, not all these characteristics are due to Alpino. Alpino itself often yields slightly different structures, but the Alpino-structures are adapted to conform to the conventions agreed upon in the consortia that created the Spoken Dutch Corpus and the Lassy treebanks. Alpino syntactic structures have often kept information about the original Alpino structure. For example, in Alpino structures,  single word phrases do have a phrasal node in the structure. The category of this node is indicated in the structures in the attribute *lcat*. For other examples of Alpino properties in the syntactic structures, see :ref:`Alpinoproperties`.
 
 Grammatical Properties
 ----------------------
@@ -91,7 +135,7 @@ General properties of nodes
 All nodes have the following attributes:
 
 * **id**: a unique identifier for that node within in the current structure.
-* **rel**: the grammatical relation the node bears. Even the *top* node has this property. Conceptually, a grammatical relation is  a property between nodes, either between a node for a word and a node for  another word,  or between a node for a word and  its parent node, but in Alpino it has been implemented as a property of a node. A full list of the possible values for this attribute and explanation of their interpretation can be found in https://paqu.let.rug.nl:8068/info.html#rel . A list of possible values is given here (taken from the module treebankfunctions.py)::
+* **rel**: the grammatical relation the node bears. Even the *top* node has this property. Conceptually, a grammatical relation is  a property between nodes, either between a node for a word and a node for  another word,  or between a node for a word and  its parent node. However, in Alpino it has been implemented as a property of a node. A full list of the possible values for this attribute and explanation of their interpretation can be found in https://paqu.let.rug.nl:8068/info.html#rel . A list of possible values is given here (taken from the module treebankfunctions.py)::
 
     allrels = ['hdf', 'hd', 'cmp', 'sup', 'su', 'obj1', 'pobj1', 'obj2',
                'se', 'pc', 'vc', 'svp', 'predc', 'ld', 'me',
@@ -100,10 +144,12 @@ All nodes have the following attributes:
                'top', 'mwp', 'dlink', '--']
                
                
-And all nodes can have the attribute *index* (but they do not have to):
+All nodes can have the attribute *index* (but they do not have to):
 
 * **index**: an identifier to relate one node to another node. Indexes are present on "empty" nodes (see above) and their antecedent to accommodate phrases and words that play multiple roles in a sentence.
- 
+* **begin**: to indicate the begin  surface position of the node
+* **end**: to indicate the end surface position of the node
+
 General properties for nodes for words
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -112,7 +158,7 @@ The general properties for nodes for words are:
 * **lemma** : for the lemma of the word occurrence
 * **word**: for the actual word form of the word occurrence. This retains case, accents and other diacritics
 
-In general, almost all conditions in queries must be formulated in terms of the attribute *lemma* in order to take into account different case variants (*Een*, *EEN*, *een*), different accent variants (*héél*, *heel*), repeated vowels (*heeeeeel*, *heel*) and reduced and emphatic variants (*ik*, *'k*, *k*, *ikke*). If one really is interested in a particular word form, one has to deal with case variants oneself.
+In general, almost all conditions in queries must be formulated in terms of the attribute *lemma* in order to take into account different case variants (*Een*, *EEN*, *een*), different accent variants (*héél*, *heel*), repeated vowels (*heeeeeel*, *heel*) and reduced and emphatic variants (*ik*, *'k*, *k*, *ikke*). If one really is interested in a particular word form, one has to deal with case and diacritic variants oneself.
 
 
 D-COI properties
@@ -201,9 +247,9 @@ Phrases have the the property *cat*
 Alpino properties
 ^^^^^^^^^^^^^^^^^   
 
-Alpino retains Alpino properties in automatically parsed syntactic structures. One  needs these only rarely. Some that have been used so far are *frame*, *lcat*, *special*, *stype*...@@
+Alpino retains Alpino properties in automatically parsed syntactic structures. One  needs these only rarely. Some that have been used so far are *frame*, *lcat*, *special*, and *stype*.
 
-This is a list of the Alpino attributes:
+This is a list of the Alpino attributes and an indication of the possible values (derived by querying the automatically parsed Van Kampen corpus in GrETEL and  for some attributes the automatically parsed Lassy-Groot in PaQu):
 
 * **aform**: *base*, *compar*, *super*
 * **case**: *both*, *dat_acc*, *gen*, *no_obl*, *nom*, *obl*
@@ -212,27 +258,27 @@ This is a list of the Alpino attributes:
 * **frame**: more than 2400 different values for frame.
 * **gen**: *both*, *de*, *het*, *sg*
 * **iets**: (can an adjective in the *s*-form co-occur with *iets*: *true* (or absent)
-* **infl**:
+* **infl**: at least 40 different values to indicate the inflectional properties of a word
 * **lcat**: value taken from *cat* for the category of the phrasal node for a single word phrase
 * **neclass**: named entity class: *LOC*, *MISC*, *ORG*, *PER*
 * **num**: *bare_meas*, *both*, *de*, *meas*, *pl*, *sg*
-* **per**:
-* **pos**:
-* **pron**:
-* **refl**:
-* **rnum**:
-* **root**:
-* sc**: subcategorisation patterns, over 450 different values
-* **sense**:
-* **special**: *a_noun*, aanhaal_both, aanhaal_links, aanhaal_rechts, anders, cleft_het, comp, dir, dubb_punt, eenmaal, enumeration, er, er_loc, ge_v_noun, gen, het, hoe, hoofd, iets, intensifier, komma, left, loc, me_intensifier, meas_mod, mod, name, np, nparg, num_predm, post, post_n_n, post_wh, postadj, postadv, postlocadv, postn, postnp, postp, pre_det_quant, pre_num_adv, predm, punt, rang, sentence, strpro, tmp, uitroep, v_noun, vraag, waar, wkpro	
+* **per**: for *person*, mainly occurring in pronouns, with values such as *fir*, *inv*, *je*, *thi*, *u*, *u_thi*
+* **pos**: Alpino-internal attribute for part of speech. Values: *--*, *adj*, *adv*, *comp*, *comparative*, *det*, *fixed*, *name*, *noun*, *num*, *part*, *pp*, *prep*, *pron*, *punct*, *tag*, *verb*, *vg*.
+* **pron**: only has the value *true*, and is present on possessive pronouns and genitive nouns (**mama's** *huis*)
+* **refl**: only has the value *refl*, and is present on reflexive pronouns (without *zelf*)
+* **rnum**: Values are *sg* and *pl*, usage not fully clear to me.
+* **root**: in most cases equal to the *lemma*, but not in the case of diminutives (suffix *_DIM* added to the lemma), verbs (equal to stem, plus separable prefix if any, separated by underscore).
+* **sc**: subcategorisation patterns, over 450 different values
+* **sense**: often equal to *root*, but adds e.g. a particular preposition if this yields a different sense (e.g. *klaar-met*, *kapot-van*, zich-trek_aan-van)
+* **special**: *a_noun*, *aanhaal_both*, *aanhaal_links*, *aanhaal_rechts*, *anders*, *cleft_het*, *comp*, *dir*, *dubb_punt*, *eenmaal*, *enumeration*, *er*, *er_loc*, *ge_v_noun*, *gen*, *het*, *hoe*, *hoofd*, *iets*, *intensifier*, *komma*, *left*, *loc*, *me_intensifier*, *meas_mod*, *mod*, *name*, *np*, *nparg*, *num_predm*, *post*, *post_n_n*, *post_wh*, *postadj*, *postadv*, *postlocadv*, *postn*, *postnp*, *postp*, *pre_det_quant*, *pre_num_adv*, *predm*, *punt*, *rang*, *sentence*, *strpro*, *tmp*, *uitroep*, *v_noun*, *vraag*, *waar*, *wkpro*.     
 * **status**: different forms of a word: *vol*, *nadr*, *red*
 * **stype**: describe the sentence type in an attribute of the verb: *declarative*, *imparative* [sic!], *topic_drop*, *whquestion*, *ynquestion*
-* **tense**:
-* **vform**:
-* **wh**:
-* **wk**:
+* **tense**: for the tense of verbs: *present*, *past*
+* **vform**: *gerund* for present participles, *psp* for past participles. For other words the value appears to be *adj* in all cases
+* **wh**: whether a word is a wh-word or not: Value are *nwh*, *rel* (e.g. *dat*, *die*), *rwh* (*welk*, *wiens*), *wh* (*wat*), and *ywh* (*wie*, *waarom*). Distinction between *wh* and *ywh* is not clear.
+* **wk**: Value: *yes*, for weak variants of words, e.g. *es* instead of *eens*.
 
-Some of these areexplained in https://urd2.let.rug.nl/~vannoord/DCOI/AnnotationGuide.html
+Some of these are explained in https://urd2.let.rug.nl/~vannoord/DCOI/AnnotationGuide.html
 
 
 
@@ -252,7 +298,7 @@ Finite clauses can have any of the following values for the attribute *cat*:
   * main clause imperative, e.g., **kom hier**
   * main clause declarative clause with topic drop: **weet ik niet meer** (*dat* omitted)
   * body part of a **whq** phrase (see above), e.g., *hoe* **doe je dat dan**
-  * main clause wh-question with an omitted wh-phrase:, e.g. **is dat?** (*wat* omitted), **is ie nou?** (*waar*) omitted
+  * main clause wh-question with an omitted wh-phrase:, e.g. **is dat?** (*wat* omitted), **is ie nou?** (*waar* omitted)
 
 * **cp**: for subordinate clauses introduced by a subordinate conjunction, e.g. *dan zei ik* **dat ik kan vliegen**, **toen ik klaar was** *gingen we naar oma*.  The cp contains the conjunction with relation *cmp* and an *ssub* clause with relation *body*. Note that cp is also used for nonclausal expressions introduced by a subordinate conjunction, e.g. **net als je grote broer**
 * **rel** for relative clauses introduced by a relative pronoun or phrase, e.g. *een jongen* **die ook Maria heet**, *de man* **wiens vrouw ziek is**. A *rel* clause consists of a relative pronoun or phrase  with relation *rhd* and a *body* part of category *ssub*. Note that main clauses that start with a pronoun that can be a relative pronoun (*die*, *dat* ) are sometimes incorrectly analysed as involving a relative clause (e.g. *die zijn van mama*)
@@ -276,4 +322,7 @@ Nonfinite clauses can have any of the following values for the attribute *cat*:
 * **ti**: for infinitival phrase introduced by *te*, e.g. *hij heeft geprobeerd* **een boek te lezen**, even when the phrase is discontinuous as in *hij heeft* **een boek** *proberen/geprobeerd* **te lezen**. Such phrases consist of  the adposition *te* (pt=vz) with relation *cmp* and a body clause with cat= inf. 
 * **oti**: for infinitival phrases introduced by *om* and *te*, e.g. *hij heeft geprobeerd* **om een boek te lezen**. Such phrases consist of  the  adposition *om* (pt=vz) with relation *cmp* and a body clause with cat= ti. 
 * **ahi**: for infinitival phrases introduce by *aan het*, e.g. *Hij is* **een boek aan het lezen**. Such phrases consist of  the multiword unit (mwu) *aan het* with relation *cmp* and a body clause with cat= inf.
+* **ppart**: for past participle phrases: *hij heeft* **een boek gelezen**, **door mensen gekochte** *spullen*
+* **ppres**: for present participle phrases: **goed werkende** *praktijkvoorbeelden*, **uitgaande van de beschikbare gegevens** …, *deze processen-verbaal zijn*  **geldend tot het bewijs van het tegendeel**. 
+
 

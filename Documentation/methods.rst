@@ -1,9 +1,9 @@
 Methods
 =======
 
-SASTA supports multiple methods, and has concrete implementations for TARSP, STAP (Van Ierland et al. 2008, Verbeek et al 2007), and ASTA.
+SASTA supports multiple methods, and has concrete implementations for TARSP, STAP [Van Ierland et al. 2008, Verbeek et al 2007)], and ASTA.
 
-Some of these methods have variants, in particular for TARSP there are TARSP2005 (Schlichting 2005),  TARSP2017_1-4, and TARSP2017_4-6 (Schlichting 2017); for ASTA there is ASTABasic (Boxum et al. 2013, ASTA Appendix), and ASTAExtended (Boxum et al. 2019). [#f1]_
+Some of these methods have variants, in particular for TARSP there are TARSP2005 [Schlichting 2005],  TARSP2017_1-4, and TARSP2017_4-6 [Schlichting 2017]; for ASTA there is ASTABasic [Boxum et al. 2013, ASTA Appendix], and ASTAExtended [Boxum et al. 2019]. [#f1]_
 
 Currently SASTA only supports one variant for each method, viz. TARSP2005 and ASTAExtended.  Support for the other variants requires some extensions, both to describe them as variants, and for implementing them (esp. TARSP2017).
 
@@ -26,7 +26,7 @@ SASTA outputs only codes for  language measures that are included in the method-
 
 The TARSP language measures for ‘Zinsdelen’ are Ond, W, VC, and B. Of these, only W occurs in the form.
 
-There are a lot of language measures in TARSP that have a code that combines Ond, W, VC and or B, e.g. OndWVC, BWOndBB, etc. These are all included in the form. Many annotators split up codes such as OndWVC into three codes Ond, W and VC and align these to the relevant words. This is e.g. the case in Schlichting’s (2005, 2017) appendix. It was also the case in many of the data supplied by the VKL members. However, this is not the way it should be done. One always has to specify codes such as OndWVC, BWOndBB, etc. as a single code either unaligned, or under the first word where it applies. 
+There are a lot of language measures in TARSP that have a code that combines Ond, W, VC and/or B, e.g. OndWVC, BWOndBB, etc. These are all included in the form. Many annotators split up codes such as OndWVC into three codes Ond, W and VC and align these to the relevant words. This is e.g. the case in Schlichting’s (2005, 2017) appendix. It was also the case in many of the data supplied by the VKL members. However, this is not the way it should be done. One always has to specify codes such as OndWVC, BWOndBB, etc. as a single code either unaligned, or under the first word where it applies. 
 
 These codes have a different meaning than the separate codes,e.g.:
 
@@ -38,7 +38,7 @@ These codes have a different meaning than the separate codes,e.g.:
 
 One can also specify the individual codes Ond, B, and VC, but that is not obligatory. W, however, should be specified. If none of the individual codes Ond, B, VC and W are annotated, one should use the -i (implies) option of sastadev. 
 
-The imply method currently does not work properly for codes such as Hww i, HwwZ, and HwwVd. If we mark them to imply the code W, we will get too many W codes if e.g. OndWVC is also present; if we do not mark them as such, we will miss cases where Hww i occurs but no OndWVC or similar code (this is currently the case). We should introduce a different coding for such cases. And then adapt the imply method.
+**Remark** The imply method currently does not work properly for codes such as Hww i, HwwZ, and HwwVd. If we mark them to imply the code W, we will get too many W codes if e.g. OndWVC is also present; if we do not mark them as such, we will miss cases where Hww i occurs but no OndWVC or similar code (this is currently the case). We should introduce a different coding for such cases. And then adapt the imply method.
 
 .. rubric:: Footnotes
 .. [#f1] The labels for these variants are not standard and have been invented here.
