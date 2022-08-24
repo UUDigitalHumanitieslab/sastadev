@@ -54,6 +54,12 @@ metatemplate = '##META {} {} = {}'
 slash = '/'
 space = ' '
 
+#: The constant *disambiguationdict* contains words that should be replaced by a
+#: different word to avoid unwanted readings of the original word. It is filled by a
+#: call to the function *getdisambiguationdict* from the module *basicreplacements*.
+#:
+#: .. autofunction:: basicreplacements::getdisambiguationdict
+#:
 disambiguationdict = getdisambiguationdict()
 
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
@@ -633,6 +639,21 @@ def oldgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
 
 
 def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
+    '''
+
+    :param uttmd: the list of tokens in the utterance with its metadata
+    :return: zero or more alternative lists of tokens with metadata
+
+    The function *getexpansions* generates alternative tokenlists plus metadata for
+    words that are contractions and must be expanded into a sequence of multiple tokens.
+    It checks whether a word is a contraction by checking whether it occurs in the
+    dictionary *basicexpansions* from the module *basicreplacements*
+
+        .. autodata:: basicreplacements::basicexpansions
+            :no-value:
+
+    '''
+
     expansionfound = False
     newtokens = []
     tokenctr = 0

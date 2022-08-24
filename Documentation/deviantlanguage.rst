@@ -67,6 +67,21 @@ The string *moe* must sometimes be interpreted literally  as *moe* (tired), some
 
 **Remark** This should be generalised, because *moe* that should be interpreted as *moet* sometimes does have grammatical relations with other words
 
+Basic Replacements
+""""""""""""""""""
+
+For an utterance that contains a word that occurs with a deviant spelling (e.g. *as* instead of *als*) an alternative variant is generated containing the correct spelling ("als") and with metadata about this replacement. This is done in function *getalternativetokenmds* in the module *corrector* by checking whether the word occurs in the dictionary *basicreplacements*:
+
+.. autodata:: basicreplacements::basicreplacements
+   :no-value:
+   
+Basic Expansions
+""""""""""""""""
+For an utterance that contains a contracted word (e.g. *das* instead of *dat is*) an alternative variant is generated containing the expansion ("dat is") and with metadata about this replacement. This is done in function *getalternatives* in the module *corrector* by applying the function *getexpansions*:
+
+.. autofunction:: corrector::getexpansions
+
+
 Verb form + *ie* written as one word
 """"""""""""""""""""""""""""""""""""
 
@@ -162,6 +177,18 @@ For more details, see the module  :ref:`deregularise`.
 
 Disambiguating words
 ^^^^^^^^^^^^^^^^^^^^
+
+Certain words are ambiguous but have one reading that is most plausible or even the only one possible for young children. For example, the word *dicht* can be an adjective ('closed') for an inflected form of the word *dichten* ('to write poetry'). 
+
+We gathered a list of words with such ambiguities, and manually selected the most plausible one. We later checked that these words  indeed do not occur in the top 3000 words used by young children under their less plausible reading.
+
+In order to prevent an analysis with the less plausible reading by Alpino we replace the relevant words by a diferent non-ambiguous word with the same grammatical properties as the word under the most plausible reading. For example, the word *dicht* is replaced by the word *mooi*, which is also an adjective but has no verbal (or other) reading. Since this lack of ambiguity is typical for young children, this replacement is only done for the methods TARSP and STAP.
+
+The replacement is carried out in the function *getalternativetokenmds* of module *corrector* by checking whether the word occurs in the *disambiguationdict* and replacing it by the replacement specified there.
+
+.. autodata:: corrector::disambiguationdict
+    :no-value:
+ 
 
 .. _limitationsofalpino:
 

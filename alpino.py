@@ -7,6 +7,7 @@ it provides the function *getdehetwordinfo*:
   .. autofunction:: alpino::getdehetwordinfo
 
 '''
+#from __future__ import annotations
 
 import lexicon
 import treebankfunctions
