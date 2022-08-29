@@ -200,6 +200,8 @@ Limitations of Alpino
 Small clauses
 """""""""""""
 
+.. automodule:: smallclauses
+
 .. vz+defdet:
 
 Adposition plus demonstrative pronoun
