@@ -222,6 +222,6 @@ Examples:
 
 * For the utterance *is helemaal veilig bij* **dat** *varken* an alternative is generated *is helemaal veilig bij* **hem** *varken* but that sentence gets a worse parse than the original utterance, so this proposed correction is rejected.
 
-These replacemenrts are done in the function *getalternatives* from the module *corrector* by a call to the function *correctPdit*.
+These replacements are done in the function *getalternatives* from the module *corrector* by a call to the function *correctPdit*.
 
 .. autofunction:: corrector::correctPdit
