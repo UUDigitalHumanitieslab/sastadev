@@ -8,6 +8,9 @@ from tokenmd import TokenListMD
 from treebankfunctions import (copymodifynode, find1, getattval, getdetof,
                                getheadof, getlemma, indextransform, inverted,
                                lbrother, nominal, rbrother, simpleshow, showtree)
+from typing import List
+from sastatypes import SynTree, UttId
+
 
 debug = False
 
@@ -376,7 +379,23 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
     return results
 
 
-def getsvacorrections(tokensmd, rawtree, uttid):
+def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    '''
+
+    :param tokensmd: the inpu sequencxe of tokens plus metadata
+    :param rawtree: the syntacti structuire of the original utterance
+    :param uttid: the identifier of the utterance
+    :return: a list of pairs (token sequence , metadata)
+
+    The function *getsvacorrections* generates alternative token sequences plus associated metadata for an input token
+    sequence with associated metadata for an utternace with id *uttid* and (inflated) syntactic structure *rawtree*.
+
+    The function performs the following steps:
+    * It transforms all index nodes in the syntactic structure to nodes of their antecedents
+    (except for the *rel* attribute) by means of the function *indextransform* from the module *treebankfunctons*. See  :ref:`indexnodeexpansion`.
+    * It looks up all finite verb forms in the structure by means of the function *getpvs*
+
+    '''
     debug = False
     if debug:
         showtree(rawtree, text='rawtree')
