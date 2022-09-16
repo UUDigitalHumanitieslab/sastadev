@@ -510,8 +510,7 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
             newaltuttmds.append(newaltuttmd)
 
     # basic expansions
-
-    allalternativemds = newaltuttmds
+    allalternativemds = newaltuttmds # put off, taken care of in getvalidalternatives:  + [tokensmd]
 
     newresults = []
     for uttmd in allalternativemds:
@@ -597,48 +596,9 @@ def mkuttwithskips(tokens: List[Token], delete: bool = True) -> Tuple[str, List[
     return result, tokenposlist
 
 
-def oldgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
-    newtokens = []
-    tokenctr = 0
-    newtokenctr = 0
-    tokenposlist = []
-    newmd = uttmd.metadata
-    for token in uttmd.tokens:
-        if token.word.lower() in basicexpansions:
-            expansionfound = True
-            for (rlist, c, n, v) in basicexpansions[token.word.lower()]:
-                for rw in rlist:
-                    newtoken = Token(rw, newtokenctr)
-                    newtokens.append(newtoken)
-                    tokenposlist.append(token.pos)
-                    newtokenctr += 1
-                    nwt = Token(space.join(rlist), token.pos)
-                meta1 = mkSASTAMeta(token, nwt, n, v, c, subcat=None, penalty=defaultpenalty,
-                                    backplacement=bpl_none)
-                newmd.append(meta1)
-
-        else:
-            newtoken = Token(token.word, newtokenctr)
-            newtokens.append(newtoken)
-            tokenposlist.append(token.pos)
-            tokenctr += 1
-            newtokenctr += 1
-
-    # adapt the metadata
-    if expansionfound:
-        meta2 = Meta('OrigCleanTokenPosList', tokenposlist, annotatedposlist=[],
-                     annotatedwordlist=[], annotationposlist=tokenposlist,
-                     annotationwordlist=[], cat='Tokenisation', subcat=None, source=SASTA, penalty=defaultpenalty,
-                     backplacement=bpl_none)
-        newmd.append(meta2)
-        result = [TokenListMD(newtokens, newmd)]
-    else:
-        result = []
-
-    return result
 
 
-def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
+def OLDgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     '''
 
     :param uttmd: the list of tokens in the utterance with its metadata
@@ -694,6 +654,148 @@ def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
         result = []
 
     return result
+
+
+def getsingleitemexpansions(token: Token, intokenposlist) -> List[Tuple[TokenListMD, List[int]]]:
+    lcword = token.word.lower()
+    outtokenposlist = copy.copy(intokenposlist)
+    if lcword in basicexpansions:
+        results = []
+        for (rlist, c, n, v, p) in basicexpansions[lcword]:
+            outtokenposlist = copy.copy(intokenposlist)
+            newtokens = []
+            newmd = []
+            for rlisttokenctr, rw in enumerate(rlist):
+
+                if rlisttokenctr == 0:
+                    newtoken = Token(rw, token.pos)
+                else:
+                    newtoken = Token(rw, token.pos, subpos=rlisttokenctr)
+                newtokens.append(newtoken)
+                outtokenposlist.append(token.pos)
+                nwt = Token(space.join(rlist), token.pos)
+            meta1 = mkSASTAMeta(token, nwt, n, v, c, subcat=None, penalty=p,
+                                backplacement=bpl_none)
+            newmd.append(meta1)
+            result = (TokenListMD(newtokens, newmd), outtokenposlist)
+            results.append(result)
+    else:
+        outtokenposlist.append(token.pos)
+        results = [(TokenListMD([token], []), outtokenposlist)]
+
+    return results
+
+def combine(headresult: Tuple[TokenListMD, List[int]], tailresult: Tuple[TokenListMD, List[int]]) \
+        -> Tuple[TokenListMD, List[int]]:
+    '''
+
+    :param headresult: an  expansion result for the head
+    :param tailresult: an expansion result for the tail
+    :return: the combination of the head result and the tailresult
+
+    The function *combine* combines a result for the head of an input token list with a result of the tail of
+    the input token list.
+    It simply concatenates the token lists of the results, and the metadata of the results,
+    and generates the tokenposlist for their combination.
+
+    '''
+    newtokens = headresult[0].tokens + tailresult[0].tokens
+    newmd = headresult[0].metadata + tailresult[0].metadata
+    newtokenposlist = tailresult[1]
+    result = (TokenListMD(newtokens, newmd), newtokenposlist)
+    return result
+
+
+def getexpansions2(tokenlist: List[Token], intokenposlist: List[int]) -> List[Tuple[TokenListMD, List[int]]]:
+    '''
+
+    :param tokenlist: the list of tokens in the utterance
+    :param intokenposlist: the list of token positions so far, initially the empty list
+    :return: zero or more alternative lists of tuples of
+       * tokens with metadata
+       * accumulated list of token positions
+
+    The function *getexpansions2* generates alternative tokenlists plus metadata for
+    words that are contractions and must be expanded into a sequence of multiple tokens.
+    It applies the function *getsingleitemexpansions* to the head (first) element of the *tokenlist* and
+    recursively applies itself to the tail of *intokenlist*, after which it combines the results by the *combine* function.
+
+        .. autofunction::  corrector::getsingleitemexpansions
+
+        .. autofunction:: corrector::combine
+
+    It checks whether a word is a contraction by checking whether it occurs in the
+    dictionary *basicexpansions* from the module *basicreplacements*
+
+        .. autodata:: basicreplacements::basicexpansions
+            :no-value:
+
+    '''
+    finalresults = []
+    if tokenlist == []:
+        outtokenposlist = copy.copy(intokenposlist)
+        finalresults = [(TokenListMD([],[]), outtokenposlist)]
+    else:
+        headresults = getsingleitemexpansions(tokenlist[0], intokenposlist)
+        for headresult in headresults:
+            tailresults  = getexpansions2(tokenlist[1:], headresult[1])
+            results = [combine(headresult, tailresult) for tailresult in tailresults]
+            finalresults += [(TokenListMD(result[0].tokens, result[0].metadata), result[1]) for result in results]
+    return finalresults
+
+
+def gettokenyield(tokens: List[Token]) -> str:
+    words = [token.word for token in tokens]
+    result = space.join(words)
+    return result
+
+def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
+    '''
+
+    :param uttmd: the list of tokens in the utterance with its metadata
+    :return: a possibly empty list of alternative lists of tokens with metadata
+
+    The function *getexpansions* generates alternative tokenlists plus metadata for
+    words that are contractions and must be expanded into a sequence of multiple tokens.
+
+    It does so by a call to the function *getexpansions2*, which recursively generates all alternatives with expansions:
+
+    .. autofunction:: corrector::getexpansions2
+
+    '''
+    newtokenmds = []
+
+    results = getexpansions2(uttmd.tokens, [])
+    for result in results:
+        result0yield = gettokenyield(result[0].tokens)
+        uttmdyield = gettokenyield(uttmd.tokens)
+        if result0yield != uttmdyield:  # otherwise we get unnecessary and undesired duplicates
+            tokenposlist = result[1]
+            meta2 = Meta('OrigCleanTokenPosList', tokenposlist, annotatedposlist=[],
+                         annotatedwordlist=[], annotationposlist=tokenposlist,
+                         annotationwordlist=[], cat='Tokenisation', subcat=None, source=SASTA, penalty=0,
+                         backplacement=bpl_none)
+            newmd = result[0].metadata
+            newmd.append(meta2)
+            newtokenmd = TokenListMD(result[0].tokens, newmd)
+            newtokenmds.append(newtokenmd)
+
+    return newtokenmds
+
+
+
+    # adapt the metadata
+    # finalresults = []
+    # for result in results:
+    #     meta2 = Meta('OrigCleanTokenPosList', tokenposlist, annotatedposlist=[],
+    #                  annotatedwordlist=[], annotationposlist=tokenposlist,
+    #                  annotationwordlist=[], cat='Tokenisation', subcat=None, source=SASTA, penalty=defaultpenalty,
+    #                  backplacement=bpl_none)
+    #     newmd = result.metadata
+    #     newmd.append(meta2)
+    #     finalresult = [TokenListMD(result.tokens, newmd)]
+    #     finalresults.append(finalresult)
+
 
 
 def lexcheck(intokensmd: TokenListMD, allalternativemds: List[TokenListMD]) -> List[TokenListMD]:
@@ -867,10 +969,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     # basic replacements replace as by als, isse by is
     # here come the replacements
     if token.word.lower() in basicreplacements:
-        for (r, c, n, v) in basicreplacements[token.word.lower()]:
+        for (r, c, n, v, p) in basicreplacements[token.word.lower()]:
             newwords = [r]
             newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-                                            name=n, value=v, cat=c, backplacement=bpl_word)
+                                            name=n, value=v, cat=c, backplacement=bpl_word, penalty=p)
 
     moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%) and (@rel="--" or @rel="dp" or @rel="predm" or @rel="nucl")]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
@@ -948,7 +1050,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                             cat='Pronunciation', backplacement=bpl_word)
 
     # e-> e(n)
-    enexceptions = {'inne'}
+    enexceptions = {'inne', 'mette', 'omme', 'oppe','vanne'}
     if not known_word(
             token.word) and token.word.lower() not in basicreplacements and token.word.lower() not in enexceptions:
         if endsinschwa(token.word) and not monosyllabic(token.word):
@@ -986,8 +1088,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
 def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) -> List[TokenMD]:
     validnewtokenmds = [tokenmd for tokenmd in newtokenmds if known_word(tokenmd.token.word)]
-    if validnewtokenmds == []:
-        validnewtokenmds = [tokenmd]
+    # and now we add the original tokenmd
+    validnewtokenmds += [tokenmd]
     return validnewtokenmds
 
 
@@ -1130,7 +1232,7 @@ def correctPdit(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[Toke
                     newtoken = Token('hem', token.pos, subpos=token.subpos)
                     bpl = bpl_indeze if indezemwp else bpl_node
                     meta = mkSASTAMeta(token, newtoken, name='parsed as', value='hem', cat='AlpinoImprovement',
-                                       backplacement=bpl)
+                                       backplacement=bpl, penalty=15)
                     metadata.append(meta)
                     newtokens.append(newtoken)
                     correctiondone = True

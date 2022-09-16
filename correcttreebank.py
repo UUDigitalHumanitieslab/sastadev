@@ -23,6 +23,7 @@ from metadata import insertion
 from sastatoken import inflate, deflate, tokeninflate, insertinflate
 from CHAT_Annotation import omittedword
 from cleanCHILDEStokens import cleantext
+from macros import expandmacros
 
 from typing import Dict, List, Optional, Set, Sequence, Tuple, Union
 from sastatypes import AltId, CorrectionMode, ErrorDict, UttId, MetaElement, MethodName, Penalty, Position, PositionStr, \
@@ -36,6 +37,7 @@ validcorroptions = [corr0, corr1, corrn]
 space = ' '
 origuttxpath = './/meta[@name="origutt"]/@value'
 uttidxpath = './/meta[@name="uttid"]/@value'
+dezebwxpath = './/node[@pt="bw" and @lemma="deze"]'
 metadataxpath = './/metadata'
 dezeAVntemplate = '<node begin="{begin}" buiging="met-e" end="{end}" frame="determiner(de,nwh,nmod,pro,nparg)" ' \
                   'id="{id}" infl="de" lcat="np" lemma="deze" naamval="stan" npagr="rest" pdtype="det" pos="det" ' \
@@ -44,26 +46,31 @@ dezeAVntemplate = '<node begin="{begin}" buiging="met-e" end="{end}" frame="dete
 
 contextualproperties = ['rel', 'index', 'positie']
 
+ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
+TupleNint = Tuple[19 * (int,)]
+
+altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'dimcount', 'compcount', 'supcount',
+                       'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'badcatcount',
+                       'hyphencount', 'basicreplaceecount', 'ambigcount', 'subjunctivecount', 'unknownnouncount',
+                       'unknownnamecount', 'dezebwcount']
+
 errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
-                ['altid', 'altsent', 'score', 'penalty', 'dpcount', 'dhyphencount', 'dimcount', 'compcount', 'supcount',
-                 'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'goodcatcount',
-                 'hyphencount', 'basicreplaceecount']
-
-ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
-Tuple15int = Tuple[int, int, int, int, int, int, int, int, int, int, int, int, int, int, int]
+                ['altid', 'altsent', 'score'] + \
+                altpropertiesheader
 
 
 class Alternative():
-    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount,
-                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, goodcatcount,
-                 hyphencount, basicreplaceecount, ambigcount):
+    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
+                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, badcatcount,
+                 hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount, dezebwcount):
         self.stree: SynTree = stree
         self.altid: AltId = altid
         self.altsent: str = altsent
         self.penalty: Penalty = int(penalty)
         self.dpcount: int = int(dpcount)
         self.dhyphencount: int = int(dhyphencount)
+        self.complsucount: int = int(complsucount)
         self.dimcount: int = int(dimcount)
         self.compcount: int = int(compcount)
         self.supcount: int = int(supcount)
@@ -72,10 +79,14 @@ class Alternative():
         self.sucount: int = int(sucount)
         self.svaok: int = int(svaok)
         self.deplusneutcount: int = int(deplusneutcount)
-        self.goodcatcount: int = int(goodcatcount)
+        self.badcatcount: int = int(badcatcount)
         self.hyphencount: int = int(hyphencount)
         self.basicreplaceecount: int = int(basicreplaceecount)
         self.ambigcount: int = int(ambigcount)
+        self.subjunctivecount = int(subjunctivecount)
+        self.unknownnouncount = int(unknownnouncount)
+        self.unknownnamecount = int(unknownnamecount)
+        self.dezebwcount = int(dezebwcount)
 
     def alt2row(self, uttid: UttId, base: str, user1: str = '', user2: str = '', user3: str = '',
                 bestaltids: List[AltId] = [],
@@ -88,11 +99,13 @@ class Alternative():
         if self.altsent == origsent:
             scores.append('IDENTICAL')
         score = ampersand.join(scores)
-        part4 = list(map(str, [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount,
-                               self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount,
-                               self.sucount,
-                               self.svaok, self.deplusneutcount, self.goodcatcount, self.hyphencount,
-                               self.basicreplaceecount]))
+        part4 = list(
+            map(str, [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount, self.complsucount,
+                      self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount,
+                      self.sucount,
+                      self.svaok, self.deplusneutcount, self.badcatcount, self.hyphencount,
+                      self.basicreplaceecount, self.ambigcount, self.subjunctivecount, self.unknownnouncount,
+                      self.unknownnamecount, self.dezebwcount]))
         therow: list = [base, user1, user2, user3] + \
                        ['Alternative', uttid] + 2 * [''] + part4
 
@@ -517,7 +530,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         # parse the corrections
         if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
             correction, tokenposlist = mkuttwithskips(correctiontokenlist)
-            cwmdmetadata += [Meta('parsed_as', correction, cat='Correction', source='SASTA')]
+            cwmdmetadata += [Meta('parsed_as', correction, cat='Correction', source='SASTA', penalty=0)]
             reducedcorrectiontokenlist = [token for token in correctiontokenlist if not token.skip]
             fatnewstree = fatparse(correction, reducedcorrectiontokenlist)
             debugb = False
@@ -764,10 +777,12 @@ def getorigutt(stree: SynTree) -> Optional[str]:
     return origutt
 
 
-def scorefunction(obj: Alternative) -> Tuple15int:
-    return (-obj.unknownwordcount, -obj.dpcount, -obj.dhyphencount, obj.goodcatcount,
-            -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount, obj.dimcount, obj.compcount, obj.supcount,
-            obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount, -obj.penalty)
+def scorefunction(obj: Alternative) -> TupleNint:
+    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.dpcount, -obj.dhyphencount,
+            -obj.complsucount, -obj.badcatcount, -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
+            -obj.subjunctivecount, obj.dimcount,
+            obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount,
+            -obj.dezebwcount, -obj.penalty)
 
 
 def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
@@ -798,10 +813,11 @@ def getdeplusneutcount(nt: SynTree) -> int:
     counter = 0
     for i in range(ltheyield - 1):
         node1 = theyield[i]
-        if getattval(node1, 'lemma') in dets[de]:
+        word1 = getattval(node1, 'word').lower()
+        if word1 in dets[de]:
             node2 = theyield[i + 1]
-            word = getattval(node2, 'word')
-            parsedwordtree = PARSE_FUNC(word)
+            word2 = getattval(node2, 'word').lower()
+            parsedwordtree = PARSE_FUNC(word2)
             parsedwordnode = find1(parsedwordtree, './/node[@pt]')
             if parsedwordnode is not None and getattval(parsedwordnode, 'genus') == 'onz' and \
                     getattval(parsedwordnode, 'getal') == 'ev':
@@ -809,7 +825,7 @@ def getdeplusneutcount(nt: SynTree) -> int:
     return counter
 
 
-validwords = {"z'n"}
+validwords = {"z'n", 'dees', 'cool'}
 punctuationsymbols = """.,?!:;"'"""
 
 
@@ -828,6 +844,13 @@ def countambigwords(stree: SynTree) -> int:
     leaves = getnodeyield(stree)
     ambignodes = [leave for leave in leaves if getattval(leave, 'word').lower() in disambiguationdict]
     result = len(ambignodes)
+    return result
+
+
+def getunknownwordcount(nt: SynTree) -> int:
+    words = [w for w in nt.xpath('.//node[@pt!="tsw"]/@word')]
+    unknownwords = [w for w in words if not (isvalidword(w.lower()) or isvalidword(w.title()))]
+    result = len(unknownwords)
     return result
 
 
@@ -850,27 +873,53 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         compcount = countav(nt, 'graad', 'comp')
         supcount = countav(nt, 'graad', 'sup')
         compoundcount = getcompoundcount(nt)
-        unknownwordcount = len([w for w in nt.xpath('.//node[@pt!="tsw"]/@lemma') if not (isvalidword(w))])
+        unknownwordcount = getunknownwordcount(nt)
         sucount = countav(nt, 'rel', 'su')
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
-        goodcatcount = len([node for node in nt.xpath('.//node[@cat and (@cat!="du")]')])
+        badcatcount = len([node for node in nt.xpath('.//node[@cat and (@cat="du")]')])
         hyphencount = len([node for node in nt.xpath('.//node[contains(@word, "-")]')])
         basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
                                   if getattval(node, 'word').lower() in basicreplacements])
         ambigwordcount = countambigwords(nt)
-        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, dimcount, compcount, supcount,
-                          compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, goodcatcount,
-                          hyphencount, basicreplaceecount, ambigwordcount)
+        subjunctivecount = len([node for node in nt.xpath('.//node[@pvtijd="conj"]')])
+        unknownnouncount = len([node for node in nt.xpath('.//node[@pt="n" and @frame="noun(both,both,both)"]')])
+        unknownnamecount = len([node for node in nt.xpath('.//node[@pt="n" and @frame="proper_name(both)"]')])
+        complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and 
+                                                     @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and  
+                                               not(node[%Rpronoun%])]""")
+        complsucount = len([node for node in nt.xpath(complsuxpath)])
+        dezebwcount = len([node for node in nt.xpath(dezebwxpath)])
+        # overregcount but these will mostly be unknown words
+        # mwunamecount well maybe unknownpropernoun first
+
+        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount, compcount,
+                          supcount,
+                          compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, badcatcount,
+                          hyphencount, basicreplaceecount, ambigwordcount, subjunctivecount, unknownnouncount,
+                          unknownnamecount, dezebwcount)
         alts[altid] = alt
         altid += 1
     orandalts = OrigandAlts(orig, alts)
 
     if corr == corr1:
         orandalts.selected = altid - 1
-    else:
+    elif corr == corrn:
         # @@to be implemented@@
-        orandalts.selected = altid - 1
+        bestaltids = getbestaltids(alts)
+        if bestaltids != []:
+            bestaltid = bestaltids[0]  # or perhaps better the last one?
+        else:
+            # should never occur
+            theyield: List[str] = getyield(stree)
+            utt: str = space.join(theyield)
+            SDLOGGER.error(f'No alternatives for {utt}')
+            exit(-1)
+        orandalts.selected = bestaltid
+    else:
+        # should never occur
+        SDlogger.error(f'Illegal correction value: {corr}')
+        exit(-1)
 
     result = ptmds[orandalts.selected]
     return result, orandalts
