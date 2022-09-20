@@ -12,7 +12,7 @@ Each language measure has the following properties:
 * **Subcat**: Each language measure can belong to a subcategory, e.g. Vragen, Mededelende Zinnen in TARSP.
 * **Level**: Each language measure can belong to a level. In Tarsp this is usually an abbreviation for the Category property, e.g. Zc, Sz, VVW.
 * **Item**: the code to use to annotate the language measure, e.g. Avn, BBX in TARSP, M, N, LEX in ASTA, VT, VN, SGG in STAP. Case is never significant in codes.
-* **Altitems**: alternative codes that one can use to annotate the language measure, e.g. hwwi next to hww i, hww Z next to hwwZ (TARSP), del lidwoord next to dellid (ASTA), . In this way we are robust to variant notations and frequently made typo’s (e.g., BIJZ, BIJZN, BIJZIJN for BIJZIN in ASTA)
+* **Altitems**: alternative codes that one can use to annotate the language measure, e.g. hwwi next to hww i, hww Z next to hwwZ (TARSP), del lidwoord next to dellid (ASTA), etc. In this way we are robust to variant notations and frequently made typo’s (e.g., BIJZ, BIJZN, BIJZIJN for BIJZIN in ASTA)
 * **Implies**: Especially relevant in TARSP to cover specific ways of coding. Using a particular code implies that some other codes are also implicitly coded. See below for explanation. Example: coding OndWB implies coding Ond, W and B.
 * **Original**: Possible values are yes or no. We sometimes make language measures that are not original to the method, for research or development purposes. For example, in TARSP we defined a language measure for verb-initial utterances (T054, Sv1) and for utterances without a finite verb (T122, PV-loos). This property is used to distinguish these from original language measures
 * **Pages**: mentions the pages in the book or article that describes the method where this language measure is described.
@@ -69,7 +69,7 @@ This is an example of an Xpath query, it is the query for the language measure T
 		node[@rel="mod" and @pt="adj"] and
 		node[@rel="hd" and @pt="n"]]
 
-It searches for a node (*node*) anywhere in the structure (*//*) where attribute (*@*) *cat* (category) has the value (*=*)  *np* (“*np*”, noun phrase), and that contains (at least) three nodes:
+It searches for a node (*node*) anywhere in the structure (*//*) where attribute (*@*) *cat* (category) has the value (*=*)  *np* (“*np*”, noun phrase), and that contains (at least) three nodes as its children:
 
 * A node with attribute *rel* set to *det* (determiner)
 * A node with attribute *rel* set to *mod* (modifier) and attribute *pt* (part of speech) set to *adj* (adjective)

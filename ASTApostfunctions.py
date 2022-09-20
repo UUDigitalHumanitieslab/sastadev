@@ -4,8 +4,9 @@ from stringfunctions import realwordstring
 from copy import deepcopy
 from lexicon import getwordposinfo, getwordinfo
 
-from typing import List
-from sastatypes import SynTree
+from typing import List, Optional, Tuple
+from sastatypes import SynTree, QId, UttId
+from allresults import AllResults
 
 lpad = 3
 zero = '0'
@@ -76,6 +77,9 @@ def sempar(stree: SynTree) -> List[SynTree]:
     The function *sempar* identifies the nodes for which the CHAT error marking "[*
     s]"  applies. It uses the function *mdbasedquery* to achieve this.
 
+    .. autofunction:: ASTApostfunctions::mdbasedquery
+
+
     '''
     results = mdbasedquery(stree, errormarking, "['s']")
     return results
@@ -86,7 +90,7 @@ def phonpar(stree: SynTree) -> List[SynTree]:
     The function *phonpar* identifies the nodes for which the CHAT error marking "[*
     p]"  applies. It uses the function *mdbasedquery* to achieve this.
 
-
+    .. autofunction:: ASTApostfunctions::mdbasedquery
 
     '''
     results = mdbasedquery(stree, errormarking, "['p']")
@@ -182,11 +186,26 @@ def getlemmas(allresults, _):
 
 
 def getnounlemmas(allresults, _):
+    '''
+    The function *getnounlemmas* uses the function *getposlemmas* applied to
+    *allresults* and the query identifier for nouns to obtain the lemmas
+    for nouns.
+
+    .. autofunction:: ASTApostfunctions::getposlemmas
+
+    '''
     result = getposlemmas(allresults, nounqid)
     return result
 
 
 def getlexlemmas(allresults, _):
+    '''
+    The function *getlexlemmas* uses the function *getposlemmas* applied to
+    *allresults* and the query identifier for lexical verbs to obtain the lemmas
+    for lexical verbs.
+
+    .. autofunction:: ASTApostfunctions::getposlemmas
+    '''
     result = getposlemmas(allresults, lexqid)
     return result
 
@@ -277,7 +296,14 @@ def getposfromqid(qid):
     return pos
 
 
-def getposlemmas(allresults, posqid):
+def getposlemmas(allresults: AllResults, posqid: QId) -> List[Tuple[str, UttId]]:
+    '''
+    The function *getposlemmas* obtains the lemmas from *allresults* that have been
+    found by a query with identifier *posqid*.
+
+    The lemma is obtained from the parse tree if there is one, otherwise (in case the
+    input was an annotation form) from the lexicon (CELEX).
+    '''
     result = Counter()
     if allresults.annotationinput:
         for (uttid, position) in allresults.exactresults[posqid]:
@@ -297,7 +323,7 @@ def getposlemmas(allresults, posqid):
     return result
 
 
-def bgetlemma(word, pos=None):
+def bgetlemma(word: str, pos: Optional[str]=None):
     if pos is None:
         wordinfos = getwordinfo(word)
         if wordinfos == []:

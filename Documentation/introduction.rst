@@ -1,11 +1,15 @@
 Introduction
 ============
-This is the documentation for SASTA dev, a set of python scripts useful during development of new versions of SASTA.
 
-The SASTAdev modules can be found in the  git repository: https://github.com/UUDigitalHumanitieslab/sastadev.
+This is the documentation for SASTAdev, a set of python scripts useful for the development of new versions of SASTA.
+
+**Warning** The writing of ths documentation is **WORK IN PROGRESS**, so parts are still lacking or are incomplete
+
+The SASTAdev modules can be found in the  git repository https://github.com/UUDigitalHumanitieslab/sastadev.
 
 
-There is also a whole range of scripts that are usful in developing SASTA, with separate documentation, which can be found here: https://github.com/UUDigitalHumanitieslab/sasta-scripts.
+There is also a whole range of scripts that are useful in developing SASTAdev but that are not part of it. It has separate documentation, which can be found here: https://github.com/UUDigitalHumanitieslab/sasta-scripts.
 
-The documentation is a work in progress, and can not be considered as final.
-SASTADEV is under active development.
+Data for the development of SASTA and SASTdev are maintained in the git repository https://github.com/UUDigitalHumanitieslab/sasta-datasets.
+
+The SASTA application itself is maintained in the git repository https://github.com/UUDigitalHumanitieslab/sasta.

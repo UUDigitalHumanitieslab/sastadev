@@ -3,8 +3,8 @@ The external_functions module creates the link between a function mentioned in t
 A function mentioned in a pre or core language measure takes as input a syntactic structure and
 yields a list of nodes  as output.
 
-A function mentioned in a post or form query takes as input an AllResults object and a syntactic strucure and
-yields  a rersult of any type as output
+A function mentioned in a post or form query takes as input an AllResults object and a
+syntactic structure and yields  a result of any type as output.
 
 If the function is defined in some other module, it must be imported here.
 The name of the function must be added to one of the variables

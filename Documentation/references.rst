@@ -17,12 +17,19 @@ References
 
 [MacWhinney 2000] MacWhinney, B. (2000). The CHILDES Project: Tools for analyzing talk. Third Edition. Mahwah, NJ: Lawrence Erlbaum Associates.
 
-[MacWhinney 2015]
+[MacWhinney 2015] Brian MacWhinney. 2015. The CHILDES Project. Tools for Analyzing Talk – Electronic Edition. Part 1: The CHAT Transcription Format. Carnegie Mellon University. Version of April 21, 2015
 
-[MacWhinney 2020]
+[MacWhinney 2020] Brian MacWhinney. 2015. The CHILDES Project. Tools for Analyzing Talk – Electronic Edition. Part 1: The CHAT Transcription Format. Carnegie Mellon University. Version of June 19, 2020.
+
+
+[Pollard & Sag 1987] Carl Pollard & Ivan A. Sag. 1987. *Information-based Syntax and Semantics. Volume I, Fundamentals*. CSLI lecture Notes 13. Stanford.
+
+[Pollard & Sag 1994] Carl Pollard & Ivan A. Sag. 1994. *Head-Driven Phrase Structure Grammar*. Studies in Contemporay Linguistics.  University of Chicago Press, Chicago.
 
 [Schlichting2005] Liesbeth Schlichting. 2005. TARSP: Taal Analyse Remedi¨ering en Screening Procedure. Taalontwikkelingsschaal van Nederlandse kinderen van 1-4 jaar. Pearson, Amsterdam, 7th edition.
 
 [Schlichting2017] Liesbeth Schlichting. 2017. TARSP: Taalontwikkelingsschaal van Nederlandse kinderen van 1-4 jaar met aanvullende structuren tot 6 jaar. Pearson, Amsterdam, 8th edition.
+
+[Van Eynde 2005] Frank Van Eynde. 2005. Part Of Speech Tagging En Lemmatisering Van Het D-Coi Corpus. http://www.let.rug.nl/~vannoord/Lassy/POS_manual.pdf 
 
 [Verbeek et al.2007] Jeannette Verbeek, Leen van den Dungen, and Anne Baker. 2007. Spontane Taal Analyse Protocol. Verantwoording van het STAP-instrument, ontwikkeld door Margreet van Ierland. UvA.

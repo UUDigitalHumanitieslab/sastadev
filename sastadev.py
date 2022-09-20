@@ -43,7 +43,8 @@ Here is the help for this module (python sastadev.py -h)::
 
 
 
-By using the preferred file and folder structure, the number parameters to be specified is minimal.
+By using the preferred file and folder structure, the number of parameters to be
+specified is minimal.
 
 The preferred file and folder structure is as follows:
 
@@ -93,7 +94,7 @@ are generated as output:
   * TSV format: Tarsp_10_analysis.tsv.txt
   * XLSX format: Tarsp_10_analysis.xlsx
 
-* Error related files:
+* Grammatical Error related files:
 
   * Corrected treebank: Tarsp_10_corrected.xml
   * Error Logging: Tarsp_10_errorlogging.xlsx

@@ -24,10 +24,20 @@ positionatt = 'end'
 xmetaxpath = './/xmeta'
 
 samplesizemdvalues = {repeatedjaneenou, shortrep, intj, unknownsymbol, filled_pause}
-mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou, fstoken}
+mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou,
+               fstoken}
+
+from typing import Callable, List, Tuple
+from sastatypes import SynTree, Nort
 
 
 class DupInfo:
+    '''
+    The class *DupInfo* defines objects for storing information about duplicate and
+    partially duplicate words, both for long duplications (>=50%) and for short
+    duplications (<50%). In addition it contains a list of words in incomplete sentences
+    '''
+
     def __init__(self, longdups=dict(), shortdups=dict(), icsws=[]):
         self.longdups = longdups
         self.shortdups = shortdups
@@ -38,6 +48,11 @@ class DupInfo:
         return result
 
     def merge(self, dupinfo):
+        '''
+        The method *merge* merges two DupInfo objects by dictmerging their longdups
+        dictionaries, their shortdups dictionaries, and by concatenating the lists of
+        words form incomplete sentences.
+        '''
         newdupinfo = deepcopy(self)
         newdupinfo.longdups = dictmerge(self.longdups, dupinfo.longdups)
         newdupinfo.shortdups = dictmerge(self.shortdups, dupinfo.shortdups)
@@ -55,13 +70,22 @@ class DupInfo:
 
 
 def dictmerge(dict1, dict2):
+    '''
+    The function *dictmerge* merges two dictionaries dict1 and dict2 into a new
+    dictionary, but only for non-conflicting and non-identical key-value pairs.
+    '''
     newdict = deepcopy(dict1)
     for el in dict2:
         if el in newdict:
             if newdict[el] != dict2[el]:
-                SDLOGGER.error('Conflicting values for {}: {}: {} not included'.format(el, newdict[el], dict2[el]))
+                SDLOGGER.error('Conflicting values for {}: {}: {} not included'.format(el,
+                                                                                       newdict[
+                                                                                           el],
+                                                                                       dict2[
+                                                                                           el]))
             else:
-                SDLOGGER.warning('Duplicate values for {}: {} = {}'.format(el, newdict[el], dict2[el]))
+                SDLOGGER.warning(
+                    'Duplicate values for {}: {} = {}'.format(el, newdict[el], dict2[el]))
         else:
             newdict[el] = dict2[el]
     return newdict
@@ -69,6 +93,8 @@ def dictmerge(dict1, dict2):
 
 normalisedict = {'c': 'k'}
 
+#: The constant *unwantedtokenlist* contains symbols and symbol sequences that should
+#: be ignored for the sample size
 unwantedtokenlist = ['-', '--', '#', '–', '\u2013', '\u2014', '\u2015']
 
 incomplete_zijn = '''
@@ -91,6 +117,14 @@ incomplete_eentw = '''
 //node[node[(@rel!="det" and @rel!="hd" and @rel!="mwp" and @rel!="--") and @lemma="één"] and not(node[@lemma="er"])]
 '''
 
+#: The variable *incompletexpaths* contains Xpath queries to identify incomplete
+#: phrases in an utterance. It currently contains 3 such queries:
+#:
+#:   * one for clauses headed by *hebben*
+#:   * one for clauses headed by *zijn*
+#:   * one for incomplete noun phrases just consisting of *een* (often wrongly interpreted
+#:     by Alpino as a full NP consisting of the numeral *één*.)
+#:
 incompletexpaths = [incomplete_hebben, incomplete_zijn, incomplete_eentw]
 
 space = ' '
@@ -145,7 +179,14 @@ def incomplete(stree):
     return result
 
 
-def incompletetreeleaves(stree):
+def incompletetreeleaves(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *incompletetreeleaves returns a list of all nodes for words that are
+    part of an incomplete sentence. A sentence is incomplete if it matches a query from the list of queries in the variable *incompletexpaths*.
+
+    .. autodata:: dedup::incompletexpaths
+
+    '''
     results = []
     for query in incompletexpaths:
         allmatches = stree.xpath("." + query)
@@ -173,22 +214,47 @@ def isxxx(node):
     return result
 
 
-def isfilledpausenort(nort):
+def isfilledpausenort(nort: Nort) -> bool:
+    '''
+    The function *isfilledpausenort* returns the result of the function *isfilledpause* applied to the *word* of *nort*.
+
+      * .. autofunction:; dedup::isfilledpause
+    '''
+
     theword = getword(nort)
     result = isfilledpause(theword)
     return result
 
 
-def getfilledpauses(nortlist):
+def getfilledpauses(nortlist: List[Nort]) -> List[Nort]:
+    '''
+    The function *getfilledpauses returns Norts that are in nortlist for which the
+    function *isfilledpausenort* yields True.
+
+      * .. autofunction:: dedup::isfilledpausenort
+
+    '''
     resultlist = [tok for tok in nortlist if isfilledpausenort(tok)]
     return resultlist
 
 
-def infilledpauses(word):
+def infilledpauses(word: str) -> bool:
     return (word in filledpauseslexicon)
 
 
-def isfilledpause(word):
+def isfilledpause(word: str) -> bool:
+    '''
+    The function *isfilledpause* determines whether *word* is a filled pause. This is
+    the case if
+
+    * the lower case variant of *word* is contained in the *filledpauseslexicon*
+    * or else if a deduplicated version of the lower case variant of *word* is contained in the *filledpauseslexicon*
+
+    Otherwise the function returns False.
+
+    Deduplication is achived by the function *deduplicate* from the module *stringfunctions*
+
+    '''
     lcword = word.lower()
     if infilledpauses(lcword):
         result = True
@@ -219,7 +285,8 @@ def remove_duplicates(wl):
     tobedeleted = []
     for curlen in range(ml, 0, -1):
         for startpos in range(0, lwl - 2 * curlen + 1, 1):
-            if isduplicate(wl[startpos:startpos + curlen], wl[startpos + curlen:startpos + 2 * curlen]):
+            if isduplicate(wl[startpos:startpos + curlen],
+                           wl[startpos + curlen:startpos + 2 * curlen]):
                 newwl = wl[:startpos] + wl[startpos + curlen:]
                 result = remove_duplicates(newwl)
                 stop = True
@@ -238,7 +305,13 @@ def isnortsubstring(n1, n2):
     return result
 
 
-def find_substringduplicates2(wl):
+def find_substringduplicates2(wl: List[Nort]) -> Tuple[List[Nort], DupInfo]:
+    '''
+    The function *find_substringduplicates2* finds nodes with words that are a
+    substring of the word  of the successor node, and it creates a DupInfo object that
+    contains a dictionary  with <position substring word, position successor word> items.
+
+    '''
     dupmapping = dict()
     result = []
     lwl = len(wl)
@@ -260,7 +333,14 @@ def find_simpleduplicates(wl):
     return result
 
 
-def find_simpleduplicates2(wl):
+def find_simpleduplicates2(wl: List[Nort]) -> Tuple[List[Nort], DupInfo]:
+    '''
+    The function *find_simpleduplicates2* identifies each Nort that is a duplicate of
+    its successor. It returns a list of these Norts and a dictionary of
+    <position of the duplicate: position of its successor> items as the longdups part in
+    a DupInfo object.
+
+    '''
     dupmapping = dict()
     result = []
     lwl = len(wl)
@@ -288,7 +368,16 @@ def find_duplicates(wl):
     return result
 
 
-def find_duplicates2(wl):  # applies to a sequence of Lassy word nodes or token nodes
+# applies to a sequence of Lassy word nodes or token  nodes (Nort)
+def find_duplicates2(wl: List[Nort]) -> Tuple[List[Nort], DupInfo]:
+    '''
+    The function *find_duplicates2* identifies each Nort sequence  that is a duplicate of
+    its successor Nort sequence. It returns a list of these Norts and a dictionary of  the
+    position of the duplicate and the positions of its successor items as the longdups
+    part in a DupInfo  object.
+
+    '''
+
     dupmapping = dict()
     alldupinfo = DupInfo()
     stop = False
@@ -298,8 +387,10 @@ def find_duplicates2(wl):  # applies to a sequence of Lassy word nodes or token 
     result = []
     for curlen in range(ml, 1, -1):  # minimum length is 2
         # for startpos in range(0, lwl-2*curlen+1,1):
-        for startpos in range(lwl - 2 * curlen, -1, -1):   # find dup seqeunces starting at the rightmost position
-            if isnortduplicate(wl[startpos:startpos + curlen], wl[startpos + curlen:startpos + 2 * curlen]):
+        for startpos in range(lwl - 2 * curlen, -1,
+                              -1):  # find dup seqeunces starting at the rightmost position
+            if isnortduplicate(wl[startpos:startpos + curlen],
+                               wl[startpos + curlen:startpos + 2 * curlen]):
                 result = [wl[p] for p in range(startpos, startpos + curlen)]
                 for p in range(startpos, startpos + curlen):
                     duppos = getposition(wl[p])
@@ -341,12 +432,30 @@ def find_janeenouduplicates2(wl):
     return resultlist, dupinfo
 
 
-def normalisestring(str1):
+def normalisestring(str1: str) -> str:
+    '''
+    The function *normalisestring* carries out normalisation by means of the function
+    *phoneticise* from the *phonetics* module:
+
+    .. autofunction:: phonetics::phoneticise
+
+    '''
     result = phoneticise(str1)
     return result
 
 
-def isnortduplicate(tlist1, tlist2):
+def isnortduplicate(tlist1: List[Nort], tlist2: List[Nort]) -> bool:
+    '''
+    The function *isnortduplicate* determines whether tlist1 is a duplicate of tlist2,
+    which is the case if the lists have equal length and each normalised word of
+    tlist1 is equal to or a prefix of the corresponding normalised word in tlist2.
+
+    Normalisation is carried out to be robust against certain spelling variations and
+    is taken care of by the function *normalisestring*:
+
+    *  .. autofunction:: dedup::normalisestring
+
+    '''
     result = True
     ltlist1 = len(tlist1)
     ltlist2 = len(tlist2)
@@ -372,15 +481,17 @@ def nextnode(node, nodes):
 
 def nodesfindjaneenou(nodes):
     janees = [n for n in nodes if getattval(n, 'lemma') in {'ja', 'nee'}]
-    nous = [n for n in nodes if getattval(n, 'lemma') == 'nou' and (getattval(n, 'rel') in {'mwp', 'tag', 'cnj'}
-                                                                    or getattval(nextnode(n, nodes), 'lemma') in {'ja', 'nee'})]
+    nous = [n for n in nodes if getattval(n, 'lemma') == 'nou' and (
+                getattval(n, 'rel') in {'mwp', 'tag', 'cnj'}
+                or getattval(nextnode(n, nodes), 'lemma') in {'ja', 'nee'})]
     results = janees + nous
     return results
 
 
 def treefindjaneenou(stree):
     janees = stree.xpath('.//node[@lemma="ja" or @lemma="nee"]')
-    nous = stree.xpath('.//node[@lemma="nou" and (@rel="mwp" or @rel="tag" or @rel="cnj" )] ')
+    nous = stree.xpath(
+        './/node[@lemma="nou" and (@rel="mwp" or @rel="tag" or @rel="cnj" )] ')
     results = janees + nous
     return results
 
@@ -436,12 +547,68 @@ def correct(stree):
     return results
 
 
-def mlux(stree):
+def mlux(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *mlux* determines which nodes for word in *stree* should be included
+    for the computation of the mean length utterance (mlu) by applying the function
+    *mlux2* to *stree*. The latter function returns a node list and metadata on the
+    excluded word nodes.
+
+    .. autofunction:: dedup::mlux2
+
+    '''
     result, _ = mlux2(stree)
     return result
 
 
-def mlux2(stree):
+def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
+    '''
+    The function *mlux2* returns a tuple consisting of a list of nodes for words that
+    should be included in computing the mean length utterance (mlu), and information
+    about duplications in a DupInfo object.
+
+    * It first obtains a list of nodes for words, in the right surface order, of *stree*
+    * It filters those nodes that are found by *samplesize* (:ref:`A045_X`)
+    * The function maintains two variables:
+
+      * **cleantokennodelist**: the list of nodes still in the utterance
+      * **resultnodelist**: the list of nodes that are in the result of this function
+      * Each node that is added to the resultnodelist is removed from the cleantokennodelist
+
+    * It updates these variables for  all nodes  if any of the nodes has *word* equal to *xxx*,  *yyy* or  *www*
+    * It updates these variables for nodes that have been found by an earlier correction process: these are listed in the metadata.
+    * it updates these variables for nodes for  unknown words that are of an open class part of speech
+    * it updates these variables for nodes for nodes for the words *ja*, *nee*, *nou*
+    * it updates these variables for nodes for interjections (*pt=tsw*)
+    * it updates these variables for nodes for filledpauses as found in the :ref:`filledpauseslexicon`
+    * it updates these variables for nodes for words and word sequences that are duplicated, using the function *find_simpleduplicates2*:
+
+       * .. autofunction:: dedup::find_simpleduplicates2
+
+    * it updates these variables for nodes for word sequences that are duplicated, using the function *find_duplicates2*:
+
+       * .. autofunction:: dedup::find_duplicates2
+
+    * it updates these variables for nodes for words the prefix of which is a repetition of its successor, where the prefix is larger than 50% of the length of its successor (long duplications). It does so by means of the function *getprefixwords2*:
+
+       * .. autofunction:: dedup::getprefixwords2
+
+   * it updates these variables for nodes for unknown words that are a substring of their successor. It does so using the function  *find_substringduplicates2*:
+
+       * .. autofunction:: dedup::find_substringduplicates2
+
+   * it updates these variables for nodes for words that consist of consonants only
+   * it updates these variables for nodes for words in incomplete sentences.
+   Determining the incompleteness of a sentence is very difficult and is so far only done for a limited number of sentence types. It uses the function *incompletetreeleaves* for this purpose:
+
+      * .. autofunction:: dedup::incompletetreeleaves
+
+   The function does not (yet) deal with:
+    *  false starts, e.g. word + *nee* / *eh* word;  w of pos1 w of pos1
+    * the sequence *of nee*
+    * *dus* als stopwoordje
+
+    '''
     debug = False
     if debug:
         etree.dump(stree)
@@ -473,7 +640,9 @@ def mlux2(stree):
                     if newnode is not None:
                         mdnodes.append(newnode)
                     else:
-                        SDLOGGER.error('Metadata node not found in tree: md.begin={}'.format(tokenbegin))
+                        SDLOGGER.error(
+                            'Metadata node not found in tree: md.begin={}'.format(
+                                tokenbegin))
                         etree.dump(stree)
         excludednodes += mdnodes
         cleantokennodelist = [n for n in cleantokennodelist if n not in excludednodes]
@@ -481,7 +650,7 @@ def mlux2(stree):
 
     # remove unknown words if open class
     unknown_words = [n for n in cleantokennodelist if getattval(n, 'pt') in openclasspts
-                     and not(asta_recognised_wordnode(n))]
+                     and not (asta_recognised_wordnode(n))]
     resultnodelist += unknown_words
     cleantokennodelist = [n for n in cleantokennodelist if n not in unknown_words]
 
@@ -502,7 +671,8 @@ def mlux2(stree):
     cleantokennodelist = [n for n in cleantokennodelist if n not in tswnodes]
 
     # remove other filled pauses
-    fpnodes = [n for n in cleantokennodelist if getattval(n, 'lemma') in filledpauseslexicon]
+    fpnodes = [n for n in cleantokennodelist if
+               getattval(n, 'lemma') in filledpauseslexicon]
     resultnodelist += fpnodes
     cleantokennodelist = [n for n in cleantokennodelist if n not in fpnodes]
 
@@ -520,7 +690,9 @@ def mlux2(stree):
     cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
 
     # find prefix herhalingen >= 50%
-    def cond(x, y): return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) > 0.5
+    def cond(x, y):
+        return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) > 0.5
+
     prefixnodes, dupinfo = getprefixwords2(cleantokennodelist, cond)
     resultnodelist += prefixnodes
     alldupinfo = alldupinfo.merge(dupinfo)
@@ -541,7 +713,7 @@ def mlux2(stree):
     # remove dus als stopwoordje
 
     # remove words that consist of consonants only
-    resultnodelist = [n for n in resultnodelist if not(all_lower_consonantsnode(n))]
+    resultnodelist = [n for n in resultnodelist if not (all_lower_consonantsnode(n))]
 
     # remove words in incomplete sentences
     isws = incompletetreeleaves(stree)
@@ -600,7 +772,15 @@ def getprefixwords(wlist, cond):
     return result
 
 
-def getprefixwords2(wlist, cond):
+def getprefixwords2(wlist: List[Nort],
+                    cond: Callable[[Nort, Nort], bool]) \
+                  -> Tuple[List[Nort], DupInfo]:
+    '''
+    The function *getprefixwords2* finds nodes with words that are a prefix of the word
+    of the successor node, and it creates a DupInfo object that contains a dictionary
+    with <position prefixword, position successor word> items.
+
+    '''
     resultlist = []
     dupmapping = dict()
     lwlist = len(wlist) - 1
@@ -656,21 +836,31 @@ wordxpath = './/node[@pt and @pt!="let"]'
 def neologisme(stree):
     results = []
     thecompounds = stree.xpath(compoundxpath)
-    unknowncompounds = [c for c in thecompounds if getattval(c, 'word') not in compounds.compounds]
+    unknowncompounds = [c for c in thecompounds if
+                        getattval(c, 'word') not in compounds.compounds]
 
     results += unknowncompounds
 
     # exclude filledpauses, exclude names, misspellings, deviant pronunciations, ......
     allwordnodes = stree.xpath(wordxpath)
-    wordnodes = [wn for wn in allwordnodes if len(getattval(wn, 'word')) > 5 and (not isnamenort(wn))]
-    unknownwordnodes = [wn for wn in wordnodes if not informlexicon(getattval(wn, 'word').lower())]
+    wordnodes = [wn for wn in allwordnodes if
+                 len(getattval(wn, 'word')) > 5 and (not isnamenort(wn))]
+    unknownwordnodes = [wn for wn in wordnodes if
+                        not informlexicon(getattval(wn, 'word').lower())]
 
     results += unknownwordnodes
 
     return results
 
 
-def getunwantedtokens(nortlist):
+def getunwantedtokens(nortlist: List[Nort]) -> List[Nort]:
+    '''
+    The function *getunwantedtokens* returns nodes for tokens that are to be discarded
+    for sample size as defined in the constant *unwantedtokenlist*
+
+       * .. autodata:: dedup::unwantedtokenlist
+
+    '''
     results = []
     for nort in nortlist:
         nortword = getword(nort)
@@ -679,16 +869,49 @@ def getunwantedtokens(nortlist):
     return results
 
 
-def samplesize(stree):
+def samplesize(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *samplesize* yields the tokens to be excluded from the samplesize. It does so by applying the function
+    *samplesize2* and ignoring the DupInfo object that is returned in the tuple.
+
+    .. autofunction:: dedup::samplesize2
+
+    '''
     result, _ = samplesize2(stree)
     return result
 
 
-def samplesize2(stree):
-    ''''
-    yields the tokens to be excluded from the samplesize
-    based on ASTA4 eVersie sec 3, p. 7-8
-    plus a dupinfo containing a duplicate mapping word in pos x is a repeat of the word in position y
+def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
+    '''
+    The function *samplesize2* yields the tokens to be excluded from the samplesize
+    (based on ASTA4 eVersie sec 3, p. 7-8)
+    plus a DupInfo object containing a duplicate mapping with items word in pos x is a
+    repeat of the     word in position y.
+
+    It maintains two variables for lists of nodes for tokens:
+
+    * **tokennodelist**: the list of nodes for tokens that should be kept, (in their
+    original  order), initially all tokens from the yield of *stree*
+    * **resultlist**: a list of nodes that should be excluded
+
+      **Remark** there is also a variable *excludednodes*, whose function is not fully
+    clear. it might be redundant
+
+    * The function first adds nodes to the *resultlist* that have been found by the *reduce* function in the correction module and that are represented in the metadata.
+    * It next adds nodes for symbols that should be discarded. It obtains these nodes via the function *getunwantedtokens*
+
+        * .. autofunction:: dedup::getunwantedtokens
+
+
+    * It adds nodes for interjections and filledpauses to the resultlist via the function *getfilledpauses*
+
+        * .. autofunction:: dedup::getfilledpauses
+
+    * It adds duplicates of the words *ja*, *nee*, *nou*
+    * It adds short repetitions in the tokenlist with *ja*, *nee*, *nou* removed by applying the function *getprefixwords2*
+
+        * .. autofunction:: dedup::getprefixwords2
+
     '''
 
     resultlist = []
@@ -713,7 +936,8 @@ def samplesize2(stree):
                 if newnode is not None:
                     mdnodes.append(newnode)
                 else:
-                    SDLOGGER.error('Metadata node not found in tree: md.begin={}'.format(tokenbegin))
+                    SDLOGGER.error(
+                        'Metadata node not found in tree: md.begin={}'.format(tokenbegin))
                     etree.dump(stree)
     excludednodes += mdnodes
     tokennodelist = [n for n in tokennodelist if n not in excludednodes]
@@ -740,7 +964,9 @@ def samplesize2(stree):
     temptokennodelist = [n for n in tokennodelist if n not in janeenoutokens]
 
     # find prefix herhalingen < 50%
-    def cond(x, y): return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) <= 0.5
+    def cond(x, y):
+        return len(cleanwordofnort(x)) / len(cleanwordofnort(y)) <= 0.5
+
     prefixnodes, dupinfo = getprefixwords2(temptokennodelist, cond)
     resultlist += prefixnodes
     tokennodelist = [n for n in tokennodelist if n not in prefixnodes]
@@ -751,7 +977,8 @@ def samplesize2(stree):
 
 # initialize filledpauseslexicon
 filledpauseslexicon = set()
-filledpausesfilename = os.path.join(SD_DIR, 'filledpauseslexicon', 'filledpauseslexicon.txt')
+filledpausesfilename = os.path.join(SD_DIR, 'filledpauseslexicon',
+                                    'filledpauseslexicon.txt')
 filledpausesfile = open(filledpausesfilename, 'r', encoding='utf8')
 for word in filledpausesfile:
     cleanword = word.strip()
