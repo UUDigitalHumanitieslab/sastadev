@@ -92,9 +92,9 @@ Explanation:
 
 *Wh*-questions are defined as follows::
 
-    Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub"))"""
+    Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub") or (@cat="whrel" and @rel="--"))"""
     
-covering both main clauses (*whq*) and subordinate clauses (*whsub*).
+covering both main clauses (*whq*) and subordinate clauses (*whsub*), but also clauses that have been analysed by Alpino as independent (relation="--" ) relative clauses, which usually are actually wh-questions.
 
 
 .. _imperatives:
@@ -241,10 +241,12 @@ Language measures such as *WBVC*, *OndVC*, *OndW*, *OndWB*, *OndWBVC*, and sever
     
   where::
     
-        subject = """(@rel="su")"""
+        subject = """(@rel="su" and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
 
+Here we only count as subjects those nodes (full or index nodes) that have a finite clause node as parent. 
+Overt subjects never occur in nonfinite clauses, and subject index nodes should not be counted inside nonfinite clauses. Subject index nodes do occur in finite clauses, e.g., as the "trace" of a wh-movement. 
 
-It differs from the definition of :ref:`T063_Ond` because T063 has to exclude subjects of nonfinite nodes (which is covered in the composed language measures by the conditions on mood) and to cover an additional case (existential *er* as a subject (though maybe that should be included here as well) 
+It differs from the definition of :ref:`T063_Ond` because T063 has to cover an additional case (existential *er* as a subject (though maybe that should be included here as well) 
    
 * **Tarsp_B**: see :ref:`T007_B`
 * **Tarsp_VC**: is defined as follows::
@@ -435,16 +437,23 @@ T006: Avn
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[@pt="vnw"  and @vwtype="aanw" and @lemma!="hier" and @lemma!="daar" and @lemma!="er" and 
-    @rel!="det" and (not(@positie) or @positie!="prenom") ]
+    AVn = """(%coreavn% or %avnrel%)"""" 
+    coreavn = """(@pt="vnw"  and @vwtype="aanw" and @lemma!="hier" and @lemma!="daar" and @lemma!="er" and @rel!="det" and (not(@positie) or @positie!="prenom") )"""
+    avnrel = """(%diedatrel% and parent::node[@cat="rel" and @rel!="mod"])"""
+    diedatrel = """(@pt="vnw" and @vwtype="betr" and @rel="rhd" and (@lemma="die" or @lemma="dat"))"""
 
+The query for *AVn* consists of two subcases: the core case, and the case of *die* and * dat* incorrectly analysed as a relative pronoun in an independent relative clause.
 
-* The query with pt equal to *vnw* and vwtype equal to *aanw* selects demonstrative pronouns, but
+The core case (*coreavn*):
+
+* which has pt equal to *vnw* and vwtype equal to *aanw* selects demonstrative pronouns, but
 * these include R-pronouns, so they are explicitly excluded
 * the relation must not be *det* (otherwise the pronouns are not used independently)
 * and if a *position* attribute is present it should not have the value *prenom* (otherwise it is not used independently)
 
-* **Schlichting**: "Aanwijzend Voornaamwoord: 'die', 'dit', 'deze', 'dat' zelfstandig gebruikt." fully covered.
+The relative case (*avnrel*) covers the relative pronouns *die* and *dat* (*diedatrel*) in an independent relative clause (i.e. *rel* is not equal to *mod*).  
+
+* **Schlichting**: "Aanwijzend Voornaamwoord: 'die', 'dit', 'deze', 'dat' zelfstandig gebruikt." Fully covered.
 
 
 .. _T007_B:
@@ -2052,18 +2061,17 @@ T063: Ond
 
 Here, **FullOnd** is defined as::
 
-    """((%subject% and (@pt or @cat) ) or %erx%)"""
+    FullOnd = """(%subject% or %erx%)"""
 
 
-where **subject** and **erx** are defined as::
+where **subject** (see :ref:`zinsdelen`) and **erx** are defined as::
 
-    subject = """(@rel="su")"""
+    subject = """(@rel="su" and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
     erx = """((@rel="mod" and @lemma="er" and ../node[@rel="su" and @begin>=../node[@rel="mod" and @lemma="er"]/@end]) or
               (@rel="mod" and @lemma="er" and ../node[@rel="su" and not(@pt) and not(@cat)])
              )
           """
           
-The condition on the presence of *pt* or *cat* is present to exclude (empty) subject of infinitives and participle clauses, e.g. in *Hij heeft gezwommen* *hij* is an antecedent of an (empty) node acting as the subject of the past participle *gezwommen*, and we do not want to include that.
 
 The **erx** macro is to ensure that so-called *expletive er* also counts a subject. We implemented this in the following manner: *er* is considered (also) expletive (and thus must count as a subject):
 
@@ -2071,7 +2079,6 @@ The **erx** macro is to ensure that so-called *expletive er* also counts a subje
 * if there is an empty subject, to cover cases such as *wie zwom* **er**. Note that in *wie heeft* **er** gezwommen* this *er* is considered a subject because of the empty subject of the participial clause, which is perhaps not what we want.
  
 
-**Remark**: The condition on the presence of *pt* or *cat* incorrectly excludes *wie* in *wie doet dat*, *wie heeft dat gedaan*: *wie* is a *whd* an an antecedent to  an index node with grammatical relation *su* (see e.g. VKLTarsp, sample 3, utterance 25 *weet ik niet* **wie** *daarin zit*. It has no consequences for the scores because *Ond* is not in the form and because in language measures such as OndWB etc a different definition of subject is used. It probably is better to replace the condition on *pt* and *cat* by a condition on the parent node, viz. that it must have as value for the *cat* attribute from one of the values from *smain*, *sv1*, or *ssub* (categories for finite clauses or finite clause bodies).
 
 
 * **Schlichting**: "Dit is de persoon of de zaak die de handeling van het werkwoord uitvoert. Wanneer het onderwerp van een zin in het meervoud staat, staat de persoonsvorm van die zin ook in het meervoud."
@@ -2402,7 +2409,7 @@ Straightforward implementation::
     Tarsp_OndW = """(%declarative% and 
                     %Ond% and  
                     (%Tarsp_W%  or node[%Tarsp_onlyWinVC%]) and 
-                    %realcomplormodnodecount% = 0 )"""
+                    %realcomplormodnodecount% = 1 )"""
 
 See section :ref:`composedmeasures` for details.
 
@@ -3604,6 +3611,7 @@ T110: Vr
 
 This language measure actually does not exist. It has been included and implemented because the code *Vr* occurs in the Schlichting appendix  (example 20, p. 91, and example 22, p. 92). Example 20 should have been annotated as *Vr(XY)*, and example 22 as *Vr4*.
 
+.. _VrXY:
 
 T111: Vr(XY)
 """"""""""""
@@ -3624,13 +3632,14 @@ T111: Vr(XY)
 
 Straightforward implementation::
 
-    Tarsp_VrXY = """(%Tarsp_whq% and 
-                     node[@rel="whd"] and
-                     node[@cat="sv1" and 
-                          @rel="body"  and 
-                          %realcomplormodnodecount% = 1
-                         ])"""
+    Tarsp_VrXY = """(%Tarsp_whq% and
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%   and %realcomplormodnodecount% <= 1])"""
 
+where *Tarsp_whqhead* and *whqbody* cover both wh-questions (main and subordinate) and independent relatives::
+
+    Tarsp_whqhead = """(@rel="whd" or @rel="rhd") """
+    whqbody = """((@cat="sv1" or @cat="ssub") and @rel="body")"""
 
 See section :ref:`composedmeasures` for details.
 
@@ -3662,12 +3671,10 @@ T112: Vr4
 Straightforward implementation::
 
     Tarsp_Vr4 = """(%Tarsp_whq% and
-                    node[@rel="whd"] and
-                    node[@cat="sv1" and 
-                         @rel="body"  and 
-                         %realcomplormodnodecount% = 2
-                        ])"""
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%  and %realcomplormodnodecount% = 2])"""
 
+For *Tarsp_whqhead* and *whqbody*, see :ref:`VrXY`
 
 
 See section :ref:`composedmeasures` for details.
@@ -3694,13 +3701,12 @@ T113: Vr5+
 Straightforward implementation::
 
     Tarsp_Vr5plus = """(%Tarsp_whq% and
-                        node[@rel="whd"] and
-                        node[@cat="sv1" and 
-                             @rel="body"  and 
-                             %realcomplormodnodecount% > 2
-                            ])"""
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%  and %realcomplormodnodecount% > 2])"""
 
 
+
+For *Tarsp_whqhead* and *whqbody*, see :ref:`VrXY`
 
 See section :ref:`composedmeasures` for details.
 

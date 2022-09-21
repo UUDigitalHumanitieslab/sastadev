@@ -179,6 +179,17 @@ singlewordbw = """ (@pt="bw" or %Rpronoun% or %adjadv%)
 """
 
 
+diedatrel = """(@pt="vnw" and @vwtype="betr" and @rel="rhd" and (@lemma="die" or @lemma="dat"))"""
+
+avnrel = """(%diedatrel% and parent::node[@cat="rel" and @rel!="mod"])"""
+
+v2problem = """//node[@pt="ww" and @wvorm="pv" and 
+       @begin != parent::node[@cat="ssub"]/parent::node[@cat="rel" and @rel!="mod"]/node[%diedatrel% ]/@end
+      ]"""
+
+coreavn = """(@pt="vnw"  and @vwtype="aanw" and @lemma!="hier" and @lemma!="daar" and @lemma!="er" and @rel!="det" and (not(@positie) or @positie!="prenom") )"""
+
+AVn = """(%coreavn% or %avnrel%)"""" 
 
 corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
