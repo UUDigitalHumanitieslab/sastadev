@@ -1,5 +1,9 @@
 from macros import expandmacros
-from treebankfunctions import get_left_siblings, getattval, parent
+from treebankfunctions import get_left_siblings, getattval, parent, find1, adjacent
+
+from typing import Callable, List
+from sastatypes import SynTree
+
 
 nietxpath = './/node[@lemma="niet"]'
 wordxpath = './/node[@pt]'
@@ -10,6 +14,16 @@ vzn2xpath = './/node[node[@lemma="in" and @rel="mwp"] and node[@lemma="deze" and
 vzn3xpath = './/node[@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @begin>=../node[@pt="vz"]/@end and count(node)<=3] ]'
 #vzn4basexpath = './/node[node[@pt="vz" and @rel="hd" and ../node[%Rpronoun% and @rel="obj1" and @end <= ../node[@rel="hd"]/@begin]]]'
 #vzn4xpath = expandmacros(vzn4basexpath)
+
+
+voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and 
+            node[@rel="obj1" and 
+                 ((@index and not(@word or @cat)) or
+                  (%Rpronoun%)
+                 )]]""")
+vobijxpath = expandmacros('.//node[%Vobij%]')
+
+notadjacent = lambda n1, n2, t: not adjacent(n1, n2, t)
 
 
 def xneg(stree):
@@ -52,4 +66,32 @@ def VzN(stree):
     results += stree.xpath(vzn2xpath)
     results += stree.xpath(vzn3xpath)
     #results += stree.xpath(vzn4xpath) # does not belong here after all, these will be scored under Vo/Bij
+    return results
+
+def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]):
+    RPnodes = stree.xpath(voslashbijxpath)
+    results = []
+    for RPnode in RPnodes:
+        # find the head node
+        headnode = find1(RPnode, 'node[@rel="hd"]')
+
+        # find the obj1node
+        obj1node = find1(RPnode, 'node[@rel="obj1"]')
+
+        # check if they are adjacent
+        if headnode is not None and obj1node is not None:
+            if pred(headnode, obj1node, stree):
+                results.append(RPnode)
+    return results
+
+
+def vobij(stree: SynTree) -> List[SynTree]:
+    results1 = stree.xpath(vobijxpath)
+    results2 = auxvobij(stree, adjacent)
+    results = results1 + results2
+    return results
+
+
+def voslashbij(stree: SynTree) -> List[SynTree]:
+    results = auxvobij(stree, notadjacent)
     return results

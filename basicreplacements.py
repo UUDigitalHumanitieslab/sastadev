@@ -139,14 +139,24 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                         ('aleen', 'alleen', orth, typo, typorepl.format(wrong='alleen', correct='alleen'), dp),
                         ('heef', 'heeft', pron, infpron, codared, dp),
                         ('saan', 'staan', pron, wrongpron, onsetred, dp),
+                        ('saan', 'gaan', pron, wrongpron, wrongpron, dp+2),
+                        ('jerke', 'werken', pron, wrongpron, wrongpron, dp),
                         ('taan', 'staan', pron, wrongpron, onsetred, dp),
                         ("a'maal", 'allemaal', pron, infpron, redpron, dp),
                         ('taan', 'staan', pron, wrongpron, onsetred, dp),
                         ('beurt', 'gebeurt', pron, wrongpron, prefixdrop, dp),
                         ('dahaar', 'daar', pron, emphasis, voweldup, dp),
                         ('desu', 'deze', pron, infpron, vzdevoicing, dp),
+                        ('tan', 'dan', pron, infpron, initdev, dp),
+                        ('tat', 'dat', pron, infpron, initdev, dp),
+                        ('tit', 'dit', pron, infpron, initdev, dp),
+                        ('lape', 'slapen', pron, infpron, f'{onsetred}+{fndrop}', dp),
+                        ('vas', 'vast', pron, infpron, codared, dp),
+                        ('datte', 'dat', pron, infpron, emphasis, dp),
+                        ('omdatte', 'dat', pron, infpron, emphasis, dp),
+                        ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp)
 
-                       ] + \
+                                                ] + \
                        ervzvariants + \
                        innereplacements + \
                        innureplacements
@@ -217,10 +227,12 @@ basicexpansionlist: List[BasicExpansion] = \
                       ('of-t-ie', ['of', 'ie'], pron, infpron, t_ie, dp),
                       ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
                       ("dit's", ["dit", "is"], pron, infpron, contract, dp),
-                      ("dat's", ["dat", "is"], pron, infpron, contract, dp)
+                      ("dat's", ["dat", "is"], pron, infpron, contract, dp),
+                      ("datte", ['dat', 'ie'], pron, infpron, contract, dp+2),
+                      ("omdatte", ['omdat', 'ie'], pron, infpron, contract, dp+2)
                       ] + \
-                     closesyllshortprepexpansions + \
-                     innuclosedsyllshortprepexpansions
+                     closesyllshortprepexpansions
+                     # + innuclosedsyllshortprepexpansions # put off does not lead to improvement
 
 
 #: The dictionary *basicexpansions* maps a contracted word form to a list of 4-tuples
@@ -288,7 +300,8 @@ disambiguation_replacements: List[Tuple[List[str], str]] = \
                                  'wieken', 'paarden', 'stoelen', 'ramen', 'strepen', 'planten', 'groeten',
                                  'flessen', 'boeren', 'punten', 'tranen'], 'teilen'),
                                (['snel', 'wit', 'kort', 'dicht'], 'mooi'),
-                               (['witte'], 'mooie')
+                               (['witte'], 'mooie'),
+                               (['wel', 'niet'], 'ietsjes')  #find a different adverb that does not get inside constituents (ietsjes?)
                                ]
 
 

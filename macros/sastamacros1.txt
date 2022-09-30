@@ -34,6 +34,9 @@ JO_kijken_naar = """        parent::node[@cat="pp" and
               ]
 """
 
+PQ_e = """@end"""
+PQ_b = """@begin"""
+
 robusttopicdrop = """(@cat="sv1" and ../node[@lemma="."])"""
 
 Tarsp_hww = """

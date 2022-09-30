@@ -104,6 +104,56 @@ countattvalxpathtemplate = 'count(.//node[@{att}="{val}"])'
 countcompoundxpath = 'count(.//node[contains(@lemma, "_")])'
 
 
+def adjacent(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
+    '''
+    :param node1:
+    :param node2:
+    :param stree: syntactic structure containing *node1* and *node2*
+    :return: True if *node1* is adjacent to *node2* in *stree*, False otherwise
+
+    The function *adjacent* determines whether *node1* is adjacent to *node1* in syntactic structure *stree*,
+    and it works correctly in inflated syntactic structures. The two nodes must be nodes for words.
+    '''
+    yieldnodes = getnodeyield(stree)
+    for i, n in enumerate(yieldnodes):
+        if yieldnodes[i] == node1:
+            prec = yieldnodes[i-1] if i > 0 else None
+            succ = yieldnodes[i+1] if i < len(yieldnodes) - 1 else None
+            result = prec == node2 or succ == node2
+            return result
+    return False
+
+
+def immediately_precedes(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
+    '''
+    :param node1:
+    :param node2:
+    :param stree: syntactic structure containing *node1* and *node2*
+    :return: True if *node1* immediately precedes *node2* in *stree*, False otherwise
+
+    The function *immediately_precedes* determines whether *node1* immediately precedes *node1* in syntactic structure *stree*,
+    and it works correctly in inflated syntactic structures. The two nodes must be nodes for words.
+    '''
+    yieldnodes = getnodeyield(stree)
+    for i, n in enumerate(yieldnodes):
+        if yieldnodes[i] == node1:
+            succ = yieldnodes[i+1] if i < len(yieldnodes) - 1  else None
+            result = succ == node2
+            return result
+    return False
+
+def immediately_follows(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
+    '''
+    :param node1:
+    :param node2:
+    :param stree: syntactic structure containing *node1* and *node2*
+    :return: True if *node1* immediately follows *node2* in *stree*, False otherwise
+
+    The function *immediately_follows* determines whether *node1* immediately follows *node1* in syntactic structure *stree*,
+    and it works correctly in inflated syntactic structures. The two nodes must be nodes for words.
+    '''
+    return immediately_precedes(node2, node1, stree)
+
 def countav(stree: SynTree, att: str, val: str) -> int:
     countattvalxpath = countattvalxpathtemplate.format(att=att, val=val)
     result = stree.xpath(countattvalxpath)
@@ -1467,18 +1517,42 @@ def getspan(node: SynTree) -> Span:
     return nodespan
 
 
-def lbrother(node: SynTree, tree: SynTree) -> SynTree:
+def lbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     nodebegin = getattval(node, 'begin')
     condition = lambda n: getattval(n, 'end') == nodebegin
     result = findfirstnode(tree, condition)
     return result
 
 
-def rbrother(node: SynTree, tree: SynTree) -> SynTree:
+def rbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     nodeend = getattval(node, 'end')
     condition = lambda n: getattval(n, 'begin') == nodeend
     result = findfirstnode(tree, condition)
     return result
+
+def infl_lbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
+    '''
+    :param node: the node for the relevant word
+    :param tree: the syntactic structure that contains *node*
+    :return: The function *infl_lbrother* returns the node for the word that immediately precedes the word for *node* if there is one, otherwise None
+    '''
+    nodeyield = getnodeyield(tree)
+    for i, n in enumerate(nodeyield):
+        if nodeyield[i] == n and i > 0:
+            return nodeyield[i-1]
+    return None
+
+def infl_rbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
+    '''
+    :param node: the node for the relevant word
+    :param tree: the syntactic structure that contains *node*
+    :return: The function *infl_lbrother* returns the node for the word that immediately follows the word for *node* if there is one, otherwise None
+    '''
+    nodeyield = getnodeyield(tree)
+    for i, n in enumerate(nodeyield):
+        if nodeyield[i] == n and i < len(nodeyield) - 1:
+            return nodeyield[i+1]
+    return None
 
 
 def findfirstnode(tree: SynTree, condition: Callable[[SynTree], bool]) -> SynTree:
