@@ -15,12 +15,28 @@ vzn3xpath = './/node[@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @b
 #vzn4basexpath = './/node[node[@pt="vz" and @rel="hd" and ../node[%Rpronoun% and @rel="obj1" and @end <= ../node[@rel="hd"]/@begin]]]'
 #vzn4xpath = expandmacros(vzn4basexpath)
 
-
+#: The constant *voslahbijxpath* selects nodes (PPs) that contain an adposition and an R-pronoun or a index node
+#: coindexed with an R-pronoun.
+#:
+#: **Remark** It is not actually checked whether the indexed node has an R-pronoun as its antecedent
+#:
+#: **Remark** We may have to do something special for *pobj1*
+#:
 voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and 
             node[@rel="obj1" and 
                  ((@index and not(@word or @cat)) or
                   (%Rpronoun%)
                  )]]""")
+
+#: The constant *vobijxpath* uses the macro *Vobij* to identify adverbial pronouns.
+#: The macro **Vobij** is defined as follows::
+#:
+#:   Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or @lemma="daarom") and
+#:               @lemma!="er" and @lemma!="daar" and @lemma!="hier" and @lemma!="waar" and
+#:               (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or
+#                 starts-with(@lemma, 'hier') or starts-with(@lemma, 'waar'))
+#:              )"""
+#:
 vobijxpath = expandmacros('.//node[%Vobij%]')
 
 notadjacent = lambda n1, n2, t: not adjacent(n1, n2, t)
@@ -68,7 +84,21 @@ def VzN(stree):
     #results += stree.xpath(vzn4xpath) # does not belong here after all, these will be scored under Vo/Bij
     return results
 
-def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]):
+def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) -> List[SynTree]:
+    '''
+
+    :param stree: the syntactic structure to be analysed
+    :param pred: a predicate that the results found must satisfy
+    :return: a list of matching nodes
+
+    The function *auxvobij* finds nodes that are found by the *voslashbijxpath* and selects from these those
+    that satisfy the predicate *pred*. It is used to distinguish cases of R-pronoun + adposition that are *adjacent*
+    (which should be analysed as TARSP *Vobij*) from those that are not adjacent (which should be analysed as TARSP
+    Vo/Bij).
+
+    .. autodata:: queryfunctions::voslashbijxpath
+
+    '''
     RPnodes = stree.xpath(voslashbijxpath)
     results = []
     for RPnode in RPnodes:
@@ -86,6 +116,22 @@ def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]):
 
 
 def vobij(stree: SynTree) -> List[SynTree]:
+    '''
+
+    :param stree: syntactic structure to be analysed
+    :return: List of matching nodes
+
+    The function *vobij* uses the Xpath expression *vobijxpath* and the function *auxvobij* to obtain its resulting nodes:
+
+    * The *vobijxpath* expression matches with so-called adverbial pronouns:
+
+      .. autodata:: queryfunctions::vobijxpath
+
+    * The function *auxvobij*  finds adjacent R-pronoun + adposition cases:
+
+      .. autofunction:: queryfunctions::auxvobij
+
+    '''
     results1 = stree.xpath(vobijxpath)
     results2 = auxvobij(stree, adjacent)
     results = results1 + results2
@@ -93,5 +139,17 @@ def vobij(stree: SynTree) -> List[SynTree]:
 
 
 def voslashbij(stree: SynTree) -> List[SynTree]:
+    '''
+
+    :param stree: syntactic structuire to be analysed
+    :return: List of matching nodes
+
+    The function *voslashbij* uses the function *auxvobij* to find non-adjacent R-pronoun + adposition cases:
+
+    .. autofunction:: queryfunctions::auxvobij
+          :noindex:
+
+
+    '''
     results = auxvobij(stree, notadjacent)
     return results

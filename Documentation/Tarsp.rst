@@ -3488,28 +3488,16 @@ T106: Vo/bij
 * **Original**: yes
 * **In form**: yes
 * **Page**: 71
-* **Implementation**: Xpath with macros
+* **Implementation**: Python function
 * **Query** defined as::
 
-    //node[node[@pt="vz" and @rel="hd"] and 
-           node[@rel="obj1" and 
-                 ((@index and not(@pt or @cat)) or
-                  (@end < ../node[@rel="hd"]/@begin)
-                 )]]
-
-
-The query searches for a node 
-
-* containing a head adposition node, and
-* containing a node with grammatical relation *obj1*
-
-    * which is an "empty" node
-    * and which precedes the head adposition
+    voslashbij
+ 
+.. autofunction:: queryfunctions::voslashbij
 
 * **Schlichting**: "Voornaamwoordelijk bijwoord, gesplitst. Het gesplitste voornaamwoordelijk bijwoord behoeft niet gescoord te worden bij Vobij, kolom Voornaamwoorden in Fase IV, alleen hier bij de Woordgroepen in Fase V."
 
-* **Remark** Schlichting only gives examples with nonadjacent Rpronouns and adpositions. We agreed with Rob Zwitserlood that adjacent R-pronoun + adposition, even if written separately, is to be counted under *Vobij*. However, the notion "adjacent" is not so easy to define in  inflated tree structure. This still has to be done.
-* **Remark** The condition *@index and not(@pt or @cat)* is better replaced by a macro defined as *@index and not(@word or @cat)*.
+* **Remark** Schlichting only gives examples with nonadjacent Rpronouns and adpositions. We agreed with Rob Zwitserlood that adjacent R-pronoun + adposition, even if written separately, is to be counted under *Vobij*. However, the notion "adjacent" is not so easy to define in  inflated tree structures. This has been done in a python function *adjacent* in the module treebankfunctions, and for this reason this query must also be defined as a python function.
 
 
 
@@ -3525,24 +3513,20 @@ T107: Vobij
 * **Original**: yes
 * **In form**: yes
 * **Page**: 80
-* **Implementation**: Xpath with macros
+* **Implementation**: Python function
 * **Query** defined as::
 
-    //node[%Vobij%]
+    vobij
+	
+.. autofunction:: queryfunctions::vobij
     
-the macro **Vobij** is defined as follows::
-
-   Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or @lemma="daarom") and 
-               @lemma!="er" and @lemma!="daar" and @lemma!="hier" and 
-               (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or starts-with(@lemma, 'hier'))
-              )"""
 
 
 
 * **Schlichting**: "Voornaamwoordelijk bijwoord. Het voornaamwoordelijk bijwoord is een combinatie van 'er', 'daar', 'hier', 'waar' met een voorzetsel (bijv. 'aan', 'bij', 'voor') of een bijwoord ('af', 'heen', 'toe')"
 
+* **Remark** Separately wiritten but adjacen R-pronoun + adposition cases are also considered *Vobij*
 * **Remark** Alpino considers words such as 'af', 'heen', and 'toe' as postpositions, not as adverbs.
-* **Remark** *waar* is lacking. It does not occur in the VKLtarsp data, in the Auris data only *waarom* occurs.
 
 
 
