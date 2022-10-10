@@ -973,6 +973,15 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
             newwords = [r]
             newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                             name=n, value=v, cat=c, backplacement=bpl_word, penalty=p)
+    # next replaced by conditions in basicreplacements.py
+    # if token.word.lower() in {'wel', 'niet'}:
+    #     beginval = str(token.pos)
+    #     wordnode = find1(tree, f'.//node[@pt="ww" and @begin="{beginval}"]')
+    #     if wordnode is not None:
+    #         newwords = ['ietsjes']
+    #         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+    #                                         name='Disambiguation', value='Avoid unknown reading',
+    #                                         cat='Lexicon', backplacement=bpl_wordlemma)
 
     moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%) and (@rel="--" or @rel="dp" or @rel="predm" or @rel="nucl")]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
@@ -1068,10 +1077,11 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     # replaceambiguous words with one reading not known by the child by a nonambiguous word with the same properties
     if method in {'tarsp', 'stap'}:
         if token.word.lower() in disambiguationdict:
-            newword = disambiguationdict[token.word.lower()]
-            newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
-                                            name='Disambiguation', value='Avoid unknown reading',
-                                            cat='Lexicon', backplacement=bpl_wordlemma)
+            cond, newword = disambiguationdict[token.word.lower()]
+            if cond(token, tree):
+                newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                                name='Disambiguation', value='Avoid unknown reading',
+                                                cat='Lexicon', backplacement=bpl_wordlemma)
 
     # ...en -> e: groten  -> grote (if adjective); goten -> grote
 

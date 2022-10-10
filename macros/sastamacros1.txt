@@ -511,7 +511,7 @@ robustdelpv = """(not(@rel="dp" and @begin > ancestor::node[@cat="top"]/descenda
 
 delpv = """(%coredelpv% and %robustdelpv%)"""
 
-Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or @lemma="daarom") and 
+Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or contains(@frame, "waar_adverb") or @lemma="daarom") and 
 @lemma!="er" and @lemma!="daar" and @lemma!="hier" and @lemma!="waar" and (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or starts-with(@lemma, 'hier') or starts-with(@lemma, 'waar')))"""
 
 Tarsp_VzN = """(%vzn1xpath% or %vzn2xpath% ) """

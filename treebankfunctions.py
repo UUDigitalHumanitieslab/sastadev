@@ -1159,6 +1159,8 @@ def uniquenodes(nodelist: List[SynTree]) -> List[SynTree]:
     return resultlist
 
 
+# this does not take into account that the antecedent itself can contain an indexed node,
+# which must be replaced by an antecedent that may itself contain an index node, etc.
 def getindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
     indexednodes = {}
     if stree is not None:
@@ -1167,6 +1169,8 @@ def getindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
                 theindex = node.attrib['index']
                 indexednodes[theindex] = node
     return indexednodes
+
+
 
 
 def nodecopy(node: SynTree) -> SynTree:
@@ -1204,7 +1208,9 @@ def indextransform(stree: SynTree) -> SynTree:
     '''
 
     indexednodesmap = getindexednodesmap(stree)
-
+    # for ind, tree in indexednodesmap.items():
+        # print(ind)
+        #etree.dump(tree)
     result = indextransform2(stree, indexednodesmap)
     return result
 
@@ -1767,7 +1773,7 @@ def deletewordnodes2(tree: SynTree, begins: List[Position]) -> SynTree:
             childbeginint  = int(childbegin)
             if childbeginint in begins and childless(child):
                 tree.remove(child)
-            if 'cat' in child.attrib and childless(child):  # if its children have been deleted earlier
+            elif 'cat' in child.attrib and childless(child):  # if its children have been deleted earlier
                 tree.remove(child)
      # tree  begin en end bijwerken
     if tree. tag == 'node':
