@@ -21,3 +21,16 @@ Deregularise
 ------------
 
 .. automodule:: deregularise
+
+.. _treebankfunctions:
+
+Treebankfunctions
+-----------------
+
+.. _indextransform:
+
+Expansion of bare index nodes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: treebankfunctions::indextransform
+

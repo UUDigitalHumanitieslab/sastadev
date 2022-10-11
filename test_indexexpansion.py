@@ -1,6 +1,8 @@
 from lxml import etree
-from treebankfunctions import indextransform
+from treebankfunctions import indextransform, getstree
+import os
 
+bareindexnodexpath = './/node[@index and not(@cat) and not(@word)]'
 
 streestrings = {}
 streestrings[1] = """
@@ -61,14 +63,36 @@ streestrings[1] = """
 strees = {i: etree.fromstring(streestrings[i]) for i in streestrings}
 
 
+
+
 def test():
     for i in strees:
-        newtree = indextransform(strees[i])
+        idxnodes = strees[i].xpath(bareindexnodexpath)
+        if idxnodes == []:
+            print('No bare index nodes in tree {i}')
+        newtree = newindextransform(strees[i])
         etree.dump(newtree)
 
 
+def testwholelassy():
+    lassykleinpath = r'D:\Dropbox\various\Resources\LASSY\LASSY-Klein\Lassy-Klein\Treebank'
+    for root, dirs, files in os.walk(lassykleinpath):
+        print(f'Processing {root}...')
+        for filename in files:
+            base, ext = os.path.splitext(filename)
+            if ext == '.xml':
+                fullname = os.path.join(root, filename)
+                fullstree = getstree(fullname)
+                stree = fullstree.getroot()
+                expansion = indextransform(stree)
+                if expansion.xpath(bareindexnodexpath) != []:
+                    print(fullname)
+                    etree.dump(stree)
+                    etree.dump(expansion)
+
 def main():
     test()
+    #testwholelassy()
 
 if __name__ == '__main__':
     main()

@@ -1161,7 +1161,7 @@ def uniquenodes(nodelist: List[SynTree]) -> List[SynTree]:
 
 # this does not take into account that the antecedent itself can contain an indexed node,
 # which must be replaced by an antecedent that may itself contain an index node, etc.
-def getindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
+def oldgetindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
     indexednodes = {}
     if stree is not None:
         for node in stree.iter():
@@ -1170,12 +1170,82 @@ def getindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
                 indexednodes[theindex] = node
     return indexednodes
 
+def getindexednodesmap(basicdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
+    """
+
+    :param basicdict: dictionary of index - SynTree items in which the syntactic structure can contain bare index nodes
+    :return: a dictionary for each item in  *basicdict* in which the bare index nodes have been replaced by their antecedents
+
+    The function *getindexednodesmap* creates a new dictionary for each item in *basicdict* in which the bare index nodes have been replaced by
+    their antecedents by applying the function *expandtree*:
+
+    .. autofunction:: treebankfunctions::expandtree
+
+    """
+    newdict  = {}
+    for i, tree in basicdict.items():
+        newdict[i] = expandtree(tree, basicdict, newdict)
+    return newdict
+
+def expandtree(tree: SynTree, basicdict:Dict[str, SynTree],  newdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
+    """
+
+    :param tree: input syntactic structure
+    :param basicdict: dictionary with index - SynTree items where the syntactic structure can contain bare index nodes
+    :param newdict: a dictionary, initially empty, that is filled by this function with index - SynTree items where the syntactic structure does not contain any bare index nodes
+    :return: a syntactic structure based on *tree* in which all bare index nodes have been replaced by their antecedents that do not contain any bare index nodes.
+
+    The function *expandtree* expands a syntactic structure as follows:
+
+    * if the top node is a bare index node with index *theindex*:
+
+       * it is replaced by the newdict[theindex] if *theindex* is in *newdict*
+       * it is replaced by the expansion of basicdict[theindex] otherwise. This is a recursive call.
+       This recursion cannot go on forever since a node with index *idx* cannot contain a node with index *idx*
+       (the underlying type is a directed **acyclic** graph). Once this expansion has been created,
+       the expansion is assigned to newdict[idx]
+
+    * otherwise the function is called recursively to all children of the top node, creating a new child list, which is
+      appended to a copy if the top node.
+
+    """
+    if bareindexnode(tree):
+        theindex = getattval(tree, 'index')
+        if theindex in newdict:
+            result = newdict[theindex]
+        else:
+            result = expandtree(basicdict[theindex], basicdict, newdict)
+            newdict[theindex] = result
+    else:
+        newtree = nodecopy(tree)
+        for child in tree:
+            newchild = expandtree(child, basicdict, newdict)
+            newtree.append(newchild)
+        result = newtree
+    return result
+def getbasicindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
+    """
+
+    :param stree: input syntactic structure
+    :return: dictionary with index - SynTree items in which each SynTree is the antecedent for bare
+     index  nodes with this index. These antecedents can contain bare index nodes themselves.
+
+    The function *getbasicindexednodesmap* simply assigns a node that is not a bare index node with index *theindex* to
+    the resulting dictionary *indexednodes* at key *theindex*.
+    """
+    indexednodes = {}
+    if stree is not None:
+        for node in stree.iter():
+            if 'index' in node.attrib and not bareindexnode(node):
+                theindex = node.attrib['index']
+                indexednodes[theindex] = node
+    return indexednodes
 
 
 
 def nodecopy(node: SynTree) -> SynTree:
     '''
-    copies a node without its children
+    The function *nodecopy* copies a node without its children
     :param node: node, an lxml.etree Element
     :return: a node with no children, otherwise a copy of the input node
     '''
@@ -1189,8 +1259,8 @@ def nodecopy(node: SynTree) -> SynTree:
 
 
 def bareindexnode(node: SynTree) -> bool:
-    result = terminal(
-        node) and 'index' in node.attrib and 'postag' not in node.attrib and 'cat' not in node.attrib and 'pt' not in node.attrib and 'pos' not in node.attrib
+    result = node.tag == 'node' and terminal(node) and 'index' in node.attrib and \
+             'word' not in node.attrib and 'cat' not in node.attrib
     # print(props2str(get_node_props(node)), result, file=sys.stderr)
     return (result)
 
@@ -1200,7 +1270,7 @@ def terminal(node: SynTree) -> bool:
     return result
 
 
-def indextransform(stree: SynTree) -> SynTree:
+def oldindextransform(stree: SynTree) -> SynTree:
     '''
     produces a new stree in which all index nodes are replaced by their antecedent nodes
     :param stree: input stree
@@ -1214,10 +1284,52 @@ def indextransform(stree: SynTree) -> SynTree:
     result = indextransform2(stree, indexednodesmap)
     return result
 
+def indextransform(stree: SynTree) -> SynTree:
+    '''
+    :param stree: input stree
+    :return: stree with all index nodes replaced by the nodes of their antecedents
+
+    The function *indextransform* produces a new stree in which all index nodes are replaced by their antecedent nodes.
+    It first gathers the antecedents of bare index nodes in a dictionary (*basicindexednodesmap*) of index-SynTree
+    items by means of the function *getbasicindexednodesmap*.
+
+    .. autofunction:: treebankfunctions::getbasicindexednodesmap
+
+    The antecedents can contain bare index nodes themselves. So, in a second step, each antecedent is expanded
+    so that bare index nodes are replaced by their antecedents. This is done by the function *getindexednodesmap*,
+    which creates a new dictionary of index-SynTree items called *indexnodesmap*
+
+    .. autofunction:: treebankfunctions::getindexednodesmap
+
+    Finally, the input tree is transformed by the function *indextransform2*, which uses  *indexnodesmap*:
+
+    .. autofunction:: treebankfunctions::indextransform2
+
+    '''
+
+    basicindexednodesmap = getbasicindexednodesmap(stree)
+    # for ind, tree in indexednodesmap.items():
+        # print(ind)
+        #etree.dump(tree)
+    indexnodesmap = getindexednodesmap(basicindexednodesmap)
+    result = indextransform2(stree, indexnodesmap)
+    return result
+
+
 
 ##deze robuust maken tegen andere nodes dan node (metadata, alpino_ds etc)
 ## waarschijnlijk is node.tag == 'node'in baseindexnode voldoende
 def indextransform2(stree: SynTree, indexednodesmap: Dict[str, SynTree]) -> SynTree:
+    """
+    The function *indextransform2* takes as input a syntactic structure *stree* and an index-SynTree dictionary.
+    It creates a new tree in which each bare index node in *stree* with index *i* is replaced by its antecedent
+    (i.e. indexednodesmap[i]), except for the grammatical relation attribute *rel*.
+
+    :param stree: input syntactic structure
+    :param indexednodesmap: dictionary with index - SynTree items. No bare index nodes occur in the syntactic structures
+    :return:  new tree in which each bare index node in *stree* with index *i* is replaced by its antecedent (i.e. indexednodesmap[i]), except for the grammatical relation attribute *rel*.
+
+    """
     if stree is None:
         return None
     else:
@@ -1903,7 +2015,7 @@ def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
 
 def updateindexnodes(stree: SynTree) -> SynTree:
     #presupposes that the non bareindex nodes have been adapted already
-    indexednodesmap = getindexednodesmap(stree)
+    indexednodesmap = getbasicindexednodesmap(stree)
     newstree = deepcopy(stree)
     for node in newstree.iter():
         if node.tag == 'node':
