@@ -63,12 +63,14 @@ allrels = ['hdf', 'hd', 'cmp', 'sup', 'su', 'obj1', 'pobj1', 'obj2', 'se', 'pc',
 
 allcats = ['smain', 'np', 'ppart', 'ppres', 'pp', 'ssub', 'inf', 'cp', 'du', 'ap', 'advp', 'ti', 'rel', 'whrel',
            'whsub', 'conj', 'whq', 'oti', 'ahi', 'detp', 'sv1', 'svan', 'mwu', 'top', 'cat', 'part']
+#part occurs but is not official
 
 allpts = ['let', 'spec', 'bw', 'vg', 'lid', 'vnw', 'tw', 'ww', 'adj', 'n', 'tsw', 'vz']
 
 openclasspts = ['bw', 'ww', 'adj', 'n']
 
 clausecats = ['smain', 'ssub', 'inf', 'cp', 'ti', 'rel', 'whrel', 'whsub', 'whq', 'oti', 'ahi', 'sv1', 'svan']
+clausebodycats = ['smain', 'ssub', 'inf', 'sv1', 'ppart', 'ppres']
 
 trueclausecats = ['smain', 'cp', 'rel', 'whrel', 'whsub', 'whq', 'sv1', 'svan']
 
@@ -1211,11 +1213,15 @@ def expandtree(tree: SynTree, basicdict:Dict[str, SynTree],  newdict: Dict[str, 
     """
     if bareindexnode(tree):
         theindex = getattval(tree, 'index')
+        therel = getattval(tree, 'rel')
         if theindex in newdict:
-            result = newdict[theindex]
+            result = deepcopy(newdict[theindex])
+            result.attrib['rel'] = therel
         else:
-            result = expandtree(basicdict[theindex], basicdict, newdict)
-            newdict[theindex] = result
+            result1 = expandtree(basicdict[theindex], basicdict, newdict)
+            newdict[theindex] = result1
+            result = deepcopy(newdict[theindex])
+            result.attrib['rel'] = therel
     else:
         newtree = nodecopy(tree)
         for child in tree:
@@ -1223,6 +1229,7 @@ def expandtree(tree: SynTree, basicdict:Dict[str, SynTree],  newdict: Dict[str, 
             newtree.append(newchild)
         result = newtree
     return result
+
 def getbasicindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
     """
 
@@ -1260,7 +1267,7 @@ def nodecopy(node: SynTree) -> SynTree:
 
 def bareindexnode(node: SynTree) -> bool:
     result = node.tag == 'node' and terminal(node) and 'index' in node.attrib and \
-             'word' not in node.attrib and 'cat' not in node.attrib
+             'word' not in node.attrib and 'lemma'  not in node.attrib and 'cat' not in node.attrib
     # print(props2str(get_node_props(node)), result, file=sys.stderr)
     return (result)
 
@@ -1542,6 +1549,11 @@ def testindextransform() -> None:
         simpleshow(stree)
         newstree = indextransform(stree)
         simpleshow(newstree)
+
+def getyieldstr(stree:SynTree) -> str:
+    theyield = getyield(stree)
+    theyieldstr = space.join(theyield)
+    return theyieldstr
 
 
 def adaptsentence(stree: SynTree) -> SynTree:
