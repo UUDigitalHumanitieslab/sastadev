@@ -34,7 +34,7 @@ The module initialises the dictionary *correction* by reading in the file with t
 import csv
 import re
 import os
-from typing import Dict, List, Tuple
+from typing import cast, Dict, List, Optional, Tuple
 from config import SD_DIR
 
 tab = '\t'
@@ -49,6 +49,14 @@ nog = 'Prefix ge without onset'
 wrongovergen = 'Wrong Overgeneralisation'
 wrongen = 'Wrong -en suffix'
 nolabel = 'Correct'
+
+chat_errors = {
+    'Overgeneralisation': 'm',
+    'Lacking ge prefix': 'm',
+    'Prefix ge without onset': 'm',
+    'Wrong Overgeneralisation': 'm',
+    'Wrong -en suffix': 'm'
+}
 
 metaarr = {}
 metaarr['ge'] = ''
@@ -96,6 +104,34 @@ def correctinflection(word: str) -> List[Tuple[str, str]]:
 
     result = getcorrections(word, correction)
     return result
+
+
+def map_error(error_type: str) -> str:
+    try:
+        return chat_errors[error_type]
+    except KeyError:
+        return error_type
+
+
+def detect_error(original: str, correction: str) -> Tuple[int, Optional[str]]:
+    """Detects an error comparing a text with a correction and returns
+    the desired editing distance and the CHAT error code
+
+    Args:
+        original (str): transcribed text
+        correction (str): correction
+
+    Returns:
+        Tuple[int, Optional[str]]: editing distance and error code
+    """
+    error = None
+    for candidate, candidate_error in correctinflection(original):
+        if candidate == correction:
+            error = map_error(candidate_error)
+    if error is not None:
+        return 1, cast(str, error)
+    else:
+        return 0, None
 
 
 def alt(thestr):

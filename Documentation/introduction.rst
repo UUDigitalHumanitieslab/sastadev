@@ -12,4 +12,4 @@ There is also a whole range of scripts that are useful in developing SASTAdev bu
 
 Data for the development of SASTA and SASTdev are maintained in the git repository https://github.com/UUDigitalHumanitieslab/sasta-datasets.
 
-The SASTA application itself is maintained in the git repository https://github.com/UUDigitalHumanitieslab/sasta. 
+The SASTA application itself is maintained in the git repository https://github.com/UUDigitalHumanitieslab/sasta.
