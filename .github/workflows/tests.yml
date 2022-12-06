@@ -32,12 +32,6 @@ jobs:
       run: |
         cd pypi
         ./prepare.sh
-        mypy sastadev
-    # - name: mypy
-    #   run: |
-    #     pip install mypy
-    #     cd pypi
-    #     mypy sastadev
     - name: Lint with flake8
       run: |
         flake8  $(cat pypi/include.txt | grep \.py\$) --count --max-complexity=12 --max-line-length=127 --statistics
