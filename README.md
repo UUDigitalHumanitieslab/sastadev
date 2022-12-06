@@ -1,6 +1,6 @@
 # Sastadev
 
-[![Actions Status](https://github.com/UUDigitalHumanitieslab/auchann/workflows/Unit%20tests/badge.svg)](https://github.com/UUDigitalHumanitieslab/auchann/actions)
+[![Actions Status](https://github.com/UUDigitalHumanitieslab/sastadev/workflows/Unit%20tests/badge.svg)](https://github.com/UUDigitalHumanitieslab/sastadev/actions)
 
 [pypi sastadev](https://pypi.org/project/sastadev)
 
