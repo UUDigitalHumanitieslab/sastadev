@@ -2,8 +2,8 @@
 This module contains definitions of types used in multiple modules
 '''
 
-from typing import Dict, List, Any, Tuple, Callable, Pattern, Optional, NewType, Union
-from lxml import etree # type: ignore
+from typing import Dict, List, Tuple, Callable, Optional, Union
+from lxml import etree  # type: ignore
 from collections import Counter
 from query import Query
 from sastatoken import Token
@@ -18,7 +18,7 @@ FirstName = str
 LocationName = str
 DCOIPt = str
 DeHet = str
-CELEX_INFL =str
+CELEX_INFL = str
 DCOITuple = Tuple
 Lemma = str
 CorrectionMode = str  # Literal['0','1','n']
@@ -72,6 +72,3 @@ WordInfo = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], 
 #CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 #PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]
 #QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
-
-
-
