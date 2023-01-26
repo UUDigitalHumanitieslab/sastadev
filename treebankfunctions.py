@@ -3,9 +3,9 @@ various treebank functions
 
 '''
 
-import sys
+# import sys
 import re
-import logging
+# import logging
 from copy import copy, deepcopy
 from lxml import etree
 from config import SDLOGGER
@@ -16,7 +16,7 @@ from config import PARSE_FUNC
 
 from sastatoken import Token
 from metadata import Meta
-from typing import Any, AnyStr, Callable, Dict, List, Match, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sastatypes import FileName, OptPhiTriple, PhiTriple, Position, PositionMap, PositionStr, Span, SynTree, UttId
 
@@ -38,6 +38,7 @@ class Metadata:
     def md2XMLElement(self):
         result = etree.Element('meta', type=self.type, name=self.name, value=self.value)
         return result
+
 
 #: The constant *min_sasta_length* sets the minimum length a word must have to count as
 #: a real, though unknown, word
@@ -119,8 +120,8 @@ def adjacent(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     yieldnodes = getnodeyield(stree)
     for i, n in enumerate(yieldnodes):
         if yieldnodes[i] == node1:
-            prec = yieldnodes[i-1] if i > 0 else None
-            succ = yieldnodes[i+1] if i < len(yieldnodes) - 1 else None
+            prec = yieldnodes[i - 1] if i > 0 else None
+            succ = yieldnodes[i + 1] if i < len(yieldnodes) - 1 else None
             result = prec == node2 or succ == node2
             return result
     return False
@@ -139,10 +140,11 @@ def immediately_precedes(node1: SynTree, node2: SynTree, stree: SynTree) -> bool
     yieldnodes = getnodeyield(stree)
     for i, n in enumerate(yieldnodes):
         if yieldnodes[i] == node1:
-            succ = yieldnodes[i+1] if i < len(yieldnodes) - 1  else None
+            succ = yieldnodes[i + 1] if i < len(yieldnodes) - 1 else None
             result = succ == node2
             return result
     return False
+
 
 def immediately_follows(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     '''
@@ -155,6 +157,7 @@ def immediately_follows(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     and it works correctly in inflated syntactic structures. The two nodes must be nodes for words.
     '''
     return immediately_precedes(node2, node1, stree)
+
 
 def countav(stree: SynTree, att: str, val: str) -> int:
     countattvalxpath = countattvalxpathtemplate.format(att=att, val=val)
@@ -193,6 +196,7 @@ def getmeta(syntree: SynTree, attname: str, treebank: bool = True) -> Optional[s
     thequery = prefix + metaquerytemplate.format(attname)
     result = getqueryresult(syntree, xpathquery=thequery)
     return result
+
 
 def normalizedword(stree: SynTree) -> Optional[str]:
     if stree is None:
@@ -330,7 +334,7 @@ def lastconstituentof(stree: SynTree) -> SynTree:
     return result
 
 
-def getsentence(syntree: SynTree, treebank: bool =True) -> Optional[str]:
+def getsentence(syntree: SynTree, treebank: bool = True) -> Optional[str]:
     prefix = "." if treebank else ""
     thequery = prefix + sentencexpathquery
     result = getqueryresult(syntree, xpathquery=thequery)
@@ -457,7 +461,7 @@ def getconjphi(node: SynTree) -> OptPhiTriple:
     conjs = node.xpath('node[@rel="cnj"]')
     conjphis = [getphi(conj) for conj in conjs]
     startphi = ('3', 'getal', 'genus')
-    curphi:  OptPhiTriple = startphi
+    curphi: OptPhiTriple = startphi
     for conjphi in conjphis:
         curphi = merge(curphi, conjphi)
     if curphi is not None:
@@ -562,8 +566,8 @@ def number2intstring(numberstr: str) -> str:
     return result
 
 
-def getqueryresult(syntree: SynTree, xpathquery: Optional[str] =None, \
-                   noxpathquery: Callable[[SynTree], List[str]] =None) -> Optional[str]:
+def getqueryresult(syntree: SynTree, xpathquery: Optional[str] = None,
+                   noxpathquery: Callable[[SynTree], List[str]] = None) -> Optional[str]:
     if syntree is None:
         result = None
     else:
@@ -811,6 +815,7 @@ def sasta_long(node: SynTree) -> bool:
     result = len(word) >= min_sasta_length
     return result
 
+
 def spec_noun(node: SynTree) -> bool:
     '''
     The function *spec_noun* checks whether the node is node of *pt* *spec* which is a
@@ -969,6 +974,7 @@ def short_nucl_n(node: SynTree) -> bool:
     result = pt == 'n' and rel == 'nucl' and sasta_short(word)
     return result
 
+
 #: The constant *sasta_pseudonyms* list the strings that replace names for
 #: pseudonymisation purposes.
 sasta_pseudonyms = ['NAAM', 'VOORNAAM', 'ACHTERNAAM', 'ZIEKENHUIS', 'STRAAT', 'PLAATS', 'PLAATSNAAM', 'KIND', 'BEROEP',
@@ -1029,7 +1035,7 @@ def recognised_wordnodepos(node: SynTree, pos: str) -> bool:
     word = getattval(node, 'word')
     lcword = word.lower()
     result = lex.informlexiconpos(word, pos) or lex.informlexiconpos(lcword, pos) or \
-             iscompound(node) or isdiminutive(node) or lex.isa_namepart_uc(word)
+        iscompound(node) or isdiminutive(node) or lex.isa_namepart_uc(word)
     return result
 
 
@@ -1091,6 +1097,7 @@ nodeformat = '{}/{}{}'
 nodeformatplus = nodeformat + '['
 
 ##@@need to add a variant that returns a string
+
 
 def simpleshow(stree: SynTree, showchildren: bool = True, newline: bool = True) -> None:
     simpleshow2(stree, showchildren)
@@ -1172,6 +1179,7 @@ def oldgetindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
                 indexednodes[theindex] = node
     return indexednodes
 
+
 def getindexednodesmap(basicdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
     """
 
@@ -1184,12 +1192,13 @@ def getindexednodesmap(basicdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
     .. autofunction:: treebankfunctions::expandtree
 
     """
-    newdict  = {}
+    newdict = {}
     for i, tree in basicdict.items():
         newdict[i] = expandtree(tree, basicdict, newdict)
     return newdict
 
-def expandtree(tree: SynTree, basicdict:Dict[str, SynTree],  newdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
+
+def expandtree(tree: SynTree, basicdict: Dict[str, SynTree], newdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
     """
 
     :param tree: input syntactic structure
@@ -1230,6 +1239,7 @@ def expandtree(tree: SynTree, basicdict:Dict[str, SynTree],  newdict: Dict[str, 
         result = newtree
     return result
 
+
 def getbasicindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
     """
 
@@ -1249,7 +1259,6 @@ def getbasicindexednodesmap(stree: SynTree) -> Dict[str, SynTree]:
     return indexednodes
 
 
-
 def nodecopy(node: SynTree) -> SynTree:
     '''
     The function *nodecopy* copies a node without its children
@@ -1267,11 +1276,13 @@ def nodecopy(node: SynTree) -> SynTree:
 
 def bareindexnode(node: SynTree) -> bool:
     result = node.tag == 'node' and terminal(node) and 'index' in node.attrib and \
-             'word' not in node.attrib and 'lemma'  not in node.attrib and 'cat' not in node.attrib
+        'word' not in node.attrib and 'lemma' not in node.attrib and 'cat' not in node.attrib
     # print(props2str(get_node_props(node)), result, file=sys.stderr)
     return (result)
 
 ##herdefinieren want met UD hebben terminale nodes wel children (maar geen children met tag=node)
+
+
 def terminal(node: SynTree) -> bool:
     result = isinstance(node, etree._Element) and node is not None and len(node) == 0
     return result
@@ -1286,10 +1297,11 @@ def oldindextransform(stree: SynTree) -> SynTree:
 
     indexednodesmap = getindexednodesmap(stree)
     # for ind, tree in indexednodesmap.items():
-        # print(ind)
-        #etree.dump(tree)
+    # print(ind)
+    #etree.dump(tree)
     result = indextransform2(stree, indexednodesmap)
     return result
+
 
 def indextransform(stree: SynTree) -> SynTree:
     '''
@@ -1316,16 +1328,15 @@ def indextransform(stree: SynTree) -> SynTree:
 
     basicindexednodesmap = getbasicindexednodesmap(stree)
     # for ind, tree in indexednodesmap.items():
-        # print(ind)
-        #etree.dump(tree)
+    # print(ind)
+    #etree.dump(tree)
     indexnodesmap = getindexednodesmap(basicindexednodesmap)
     result = indextransform2(stree, indexnodesmap)
     return result
 
 
-
-##deze robuust maken tegen andere nodes dan node (metadata, alpino_ds etc)
-## waarschijnlijk is node.tag == 'node'in baseindexnode voldoende
+# deze robuust maken tegen andere nodes dan node (metadata, alpino_ds etc)
+# waarschijnlijk is node.tag == 'node'in baseindexnode voldoende
 def indextransform2(stree: SynTree, indexednodesmap: Dict[str, SynTree]) -> SynTree:
     """
     The function *indextransform2* takes as input a syntactic structure *stree* and an index-SynTree dictionary.
@@ -1374,7 +1385,7 @@ def getstree(fullname: FileName) -> SynTree:
     except OSError as e:
         SDLOGGER.error('OS Error: {}; file: {}'.format(e, fullname))
         return None
-    except:
+    except Exception:
         SDLOGGER.error('Error: Unknown error in file {}'.format(fullname))
         return None
 
@@ -1550,7 +1561,8 @@ def testindextransform() -> None:
         newstree = indextransform(stree)
         simpleshow(newstree)
 
-def getyieldstr(stree:SynTree) -> str:
+
+def getyieldstr(stree: SynTree) -> str:
     theyield = getyield(stree)
     theyieldstr = space.join(theyield)
     return theyieldstr
@@ -1634,7 +1646,7 @@ def get_parentandindex(node: SynTree, stree: SynTree) -> Optional[Tuple[SynTree,
             return (stree, idx)
         else:
             chresult = get_parentandindex(node, child)
-            if chresult != None:
+            if chresult is not None:
                 return chresult
         idx += 1
     return None
@@ -1649,16 +1661,17 @@ def getspan(node: SynTree) -> Span:
 
 def lbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     nodebegin = getattval(node, 'begin')
-    condition = lambda n: getattval(n, 'end') == nodebegin
+    def condition(n): return getattval(n, 'end') == nodebegin
     result = findfirstnode(tree, condition)
     return result
 
 
 def rbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     nodeend = getattval(node, 'end')
-    condition = lambda n: getattval(n, 'begin') == nodeend
+    def condition(n): return getattval(n, 'begin') == nodeend
     result = findfirstnode(tree, condition)
     return result
+
 
 def infl_lbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     '''
@@ -1669,8 +1682,9 @@ def infl_lbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     nodeyield = getnodeyield(tree)
     for i, n in enumerate(nodeyield):
         if nodeyield[i] == n and i > 0:
-            return nodeyield[i-1]
+            return nodeyield[i - 1]
     return None
+
 
 def infl_rbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     '''
@@ -1681,7 +1695,7 @@ def infl_rbrother(node: SynTree, tree: SynTree) -> Optional[SynTree]:
     nodeyield = getnodeyield(tree)
     for i, n in enumerate(nodeyield):
         if nodeyield[i] == n and i < len(nodeyield) - 1:
-            return nodeyield[i+1]
+            return nodeyield[i + 1]
     return None
 
 
@@ -1754,7 +1768,7 @@ def find1(tree: SynTree, xpathquery: str) -> SynTree:
     return result
 
 
-def getxmetatreepositions(tree: SynTree, xmetaname: str, poslistname: str ='annotationposlist') -> List[PositionStr]:
+def getxmetatreepositions(tree: SynTree, xmetaname: str, poslistname: str = 'annotationposlist') -> List[PositionStr]:
     query = ".//xmeta[@name='{}']".format(xmetaname)
     xmeta = find1(tree, query)
     if xmeta is None:
@@ -1872,16 +1886,20 @@ def olddeletewordnodes(tree: SynTree, begins: List[Position]) -> SynTree:
         return newtree
 
 ##redefine: no children with tag == 'node'  (because of UD extensions )
+
+
 def childless(node: SynTree):
     children = [ch for ch in node]
     result = children == []
     return result
+
 
 def deletewordnodes(tree: SynTree, begins: List[Position]) -> SynTree:
     newtree = deepcopy(tree)
     newtree = deletewordnodes2(newtree, begins)
     newtree = adaptsentence(newtree)
     return newtree
+
 
 def deletewordnodes2(tree: SynTree, begins: List[Position]) -> SynTree:
     if tree is None:
@@ -1894,12 +1912,12 @@ def deletewordnodes2(tree: SynTree, begins: List[Position]) -> SynTree:
     for child in tree:
         if child.tag == 'node':
             childbegin = getattval(child, 'begin')
-            childbeginint  = int(childbegin)
+            childbeginint = int(childbegin)
             if childbeginint in begins and childless(child):
                 tree.remove(child)
             elif 'cat' in child.attrib and childless(child):  # if its children have been deleted earlier
                 tree.remove(child)
-     # tree  begin en end bijwerken
+    # tree  begin en end bijwerken
     if tree. tag == 'node':
         newchildren = [n for n in tree]
         if newchildren != []:
@@ -1992,6 +2010,7 @@ def updatetokenpos(stree: SynTree, tokenposdict: PositionMap) -> SynTree:
 
     return finaltree
 
+
 def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
     if node is None:
         return node
@@ -2024,7 +2043,6 @@ def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
     return node
 
 
-
 def updateindexnodes(stree: SynTree) -> SynTree:
     #presupposes that the non bareindex nodes have been adapted already
     indexednodesmap = getbasicindexednodesmap(stree)
@@ -2038,6 +2056,7 @@ def updateindexnodes(stree: SynTree) -> SynTree:
                 node.attrib['begin'] = newbegin
                 node.attrib['end'] = newend
     return newstree
+
 
 def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     resulttree = deepcopy(thetree)

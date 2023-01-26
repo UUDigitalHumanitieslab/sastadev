@@ -19,7 +19,6 @@ from lxml import etree  # type: ignore
 from memoize import memoize
 
 import logging
-from typing import Optional
 #from sastatypes import SynTree, URL
 
 #from config import SDLOGGER
@@ -90,6 +89,8 @@ def parse(origsent: str, escape: bool = True):
             return None
 
 #def previewurl(stree: SynTree) -> URL:
+
+
 def previewurl(stree):
     '''
     The function *previewurl* returns the URL to preview the input SynTree *stree* in the GreTEL application.
@@ -122,9 +123,9 @@ def escape_alpino_input(instr: str) -> str:
     result = ''
     for c in instr:
         if c == '[':
-            newc = '\['
+            newc = '\\['
         elif c == ']':
-            newc = '\]'
+            newc = '\\]'
         else:
             newc = c
         result += newc

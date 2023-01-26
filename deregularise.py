@@ -303,11 +303,11 @@ def CV(thestr):
 
 
 def dup(thestr):
-    return(thestr + thestr)
+    return thestr + thestr
 
 
 def endsin(stem, thechar):
-    return(stem[-1] == thechar)
+    return stem[-1] == thechar
 
 
 def startswithprefix(stem):
@@ -486,7 +486,7 @@ def getstems(el):
         takesge = False
     else:
         takesge = True
-    return(stem, stemFS, takesge)
+    return stem, stemFS, takesge
 
 
 def makepastpartwithe(stem, stemFS, takesge, prefix='ge'):
@@ -627,7 +627,7 @@ def makeparadigm(word, forms):
 #: two strings (corrected form, metadata) as value. This dictionary is filled by
 #: reading from the file with the name in the constant *correctionfilename* upon
 #: initialisation of the module *deregularise*
-correction: Dict[str, Tuple[str,str]] = {}
+correction: Dict[str, Tuple[str, str]] = {}
 correctionfile = open(os.path.join(SD_DIR, correctionfilename), 'r', encoding='utf8')
 myreader = csv.reader(correctionfile, delimiter=tab)
 for row in myreader:

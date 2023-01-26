@@ -9,7 +9,7 @@ slash = '/'
 tab = '\t'
 comma = ','
 
-csvre = "'[^']+'|[^,' ]+"  #for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
+csvre = "'[^']+'|[^,' ]+"  # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
 csvpat = re.compile(csvre)
 
 wpat = r'^.*\w.*$'
