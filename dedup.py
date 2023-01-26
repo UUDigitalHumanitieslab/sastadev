@@ -13,9 +13,11 @@ from metadata import (filled_pause, fstoken, intj, janeenou, longrep, repeated,
                       substringrep, unknownsymbol, unknownword)
 from sastatoken import Token
 from stringfunctions import deduplicate, string2list
+from tblex import asta_recognised_wordnode
 from treebankfunctions import (all_lower_consonantsnode,
-                               asta_recognised_wordnode, find1, getattval,
+                               find1, getattval,
                                getnodeyield, lastmainclauseof, openclasspts)
+
 
 nodetype = etree._Element
 

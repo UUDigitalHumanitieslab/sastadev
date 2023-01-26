@@ -4,9 +4,9 @@ from macros import expandmacros
 from metadata import (longrep, repeated, repeatedseqtoken, repetition,
                       substringrep)
 from stringfunctions import string2list
-from treebankfunctions import (asta_recognised_lexnode,
-                               asta_recognised_nounnode, clausecats, find1,
-                               getattval, getnodeyield, getyield, showtns)
+from tblex import asta_recognised_lexnode, asta_recognised_nounnode
+from treebankfunctions import (clausecats, find1, getattval,
+                               getnodeyield, getyield, showtns)
 
 from typing import Callable, Dict, List
 from sastatypes import SynTree
@@ -24,7 +24,6 @@ astacoredelpvquery = './/node[%coredelpv%]'
 expandedastacoredelpvquery = expandmacros(astacoredelpvquery)
 
 dpancestorsquery = 'ancestor::node[@rel="dp"] | self::node[@rel="dp" or @rel="--"]'
-
 
 
 def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
@@ -46,8 +45,8 @@ def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
 
 
 def asta_noun(
-              stree: SynTree) \
-              -> List[SynTree]:
+        stree: SynTree) \
+        -> List[SynTree]:
     '''The function *asta_noun* uses the function *asta_x* with parameters *stree*,
     *expanded_noun_path* and the function *asta_recognised_nounnode*.
 
@@ -128,7 +127,7 @@ def asta_delpv(stree: SynTree) -> List[SynTree]:
 
 def asta_x(stree: SynTree,
            xpathexpr: str,
-           recognized_x_f: Callable[[SynTree], bool]) -> List [ SynTree]:
+           recognized_x_f: Callable[[SynTree], bool]) -> List[SynTree]:
     theyield = getyield(stree)   # for debugging purposes
     thenodeyield = getnodeyield(stree)
     cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(repeated, repeatedseqtoken, longrep, substringrep)
@@ -284,7 +283,7 @@ def asta_bijzin(stree: SynTree) -> List[SynTree]:
     else:
         result = sortedclausenodes[1:] + okptnodes
 
-   #ad hoc statement to ensure that there are no None matches should not happen anymore
+    # ad hoc statement to ensure that there are no None matches should not happen anymore
     result = [el for el in result if el is not None]
     return result
 
