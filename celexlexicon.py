@@ -5,7 +5,7 @@ The CELEX lexicon consists of 3 backslash-separated value files:
 * DML (dmlcd.txt): lemmas and their morphological properties
 * DSL (dslcd.txt): lemmas and their syntactic properties
 
-These files can be found in the folder celexlexicon/dutch in the code folder.
+These files can be found in the folder celexlexicondata/dutch in the code folder.
 
 We store these in the celexlexicon module in python dictionaries:
 
@@ -52,7 +52,7 @@ logfile = sys.stderr
 
 # initialisation
 # read the celex lexicon
-inputfolder = os.path.join(SD_DIR, 'celexlexicon', 'dutch')
+inputfolder = os.path.join(SD_DIR, 'celexlexicondata', 'dutch')
 
 dmwfilename = 'DMWCDOK.txt'
 dmwfullname = os.path.join(inputfolder, dmwfilename)
