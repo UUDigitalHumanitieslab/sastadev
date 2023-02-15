@@ -5,7 +5,7 @@ The CELEX lexicon consists of 3 backslash-separated value files:
 * DML (dmlcd.txt): lemmas and their morphological properties
 * DSL (dslcd.txt): lemmas and their syntactic properties
 
-These files can be found in the folder celexlexicon/dutch in the code folder.
+These files can be found in the folder celexlexicondata/dutch in the code folder.
 
 We store these in the celexlexicon module in python dictionaries:
 
@@ -41,7 +41,6 @@ pospattern = r'^.*\[(?P<pos>.)\]$'
 posre = re.compile(pospattern)
 
 
-
 # dml columns
 IdNum, Head, Inl, MorphStatus, MorphCnt, DerComp, Comp, Def, Imm, \
     ImmSubCat, ImmAllo, ImmSubst, StrucLab, StrucAllo, StrucSubst, Sepa = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
@@ -53,7 +52,7 @@ logfile = sys.stderr
 
 # initialisation
 # read the celex lexicon
-inputfolder = os.path.join(SD_DIR, 'celexlexicon', 'dutch')
+inputfolder = os.path.join(SD_DIR, 'celexlexicondata', 'dutch')
 
 dmwfilename = 'DMWCDOK.txt'
 dmwfullname = os.path.join(inputfolder, dmwfilename)
@@ -151,21 +150,21 @@ def dcoiphi2celexpv(thesubj: SynTree, thepv: SynTree, inversion: bool) -> str:
 
 
 celex2dcoimap: Dict[str, Dict[str, str]] =\
-                {'te1': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
-                 'te2': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
-                 'te2t': {'pvtijd': 'tgw', 'pvagr': 'met-t', 'wvorm': 'pv'},
-                 'te3': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
-                 'te3t': {'pvtijd': 'tgw', 'pvagr': 'met-t', 'wvorm': 'pv'},
-                 'te2I': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
-                 'tm': {'pvtijd': 'tgw', 'pvagr': 'mv', 'wvorm': 'pv'},
-                 've': {'pvtijd': 'verl', 'pvagr': 'ev', 'wvorm': 'pv'},
-                 'vm': {'pvtijd': 'verl', 'pvagr': 'mv', 'wvorm': 'pv'},
-                 'i': {'wvorm': 'inf', 'positie': 'vrij', 'buiging': 'zonder'},
-                 'pv': {'wvorm': 'vd', 'positie': 'vrij', 'buiging': 'zonder'},
-                 'pt': {'wvorm': 'td', 'positie': 'vrij', 'buiging': 'zonder'},
-                 'pvE': {'wvorm': 'vd', 'buiging': 'met-e', 'positie': 'prenom'},
-                 'ptE': {'wvorm': 'td', 'buiging': 'met-e', 'positie': 'prenom'}
-                 }
+    {'te1': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
+     'te2': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
+     'te2t': {'pvtijd': 'tgw', 'pvagr': 'met-t', 'wvorm': 'pv'},
+     'te3': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
+     'te3t': {'pvtijd': 'tgw', 'pvagr': 'met-t', 'wvorm': 'pv'},
+     'te2I': {'pvtijd': 'tgw', 'pvagr': 'ev', 'wvorm': 'pv'},
+     'tm': {'pvtijd': 'tgw', 'pvagr': 'mv', 'wvorm': 'pv'},
+     've': {'pvtijd': 'verl', 'pvagr': 'ev', 'wvorm': 'pv'},
+     'vm': {'pvtijd': 'verl', 'pvagr': 'mv', 'wvorm': 'pv'},
+     'i': {'wvorm': 'inf', 'positie': 'vrij', 'buiging': 'zonder'},
+     'pv': {'wvorm': 'vd', 'positie': 'vrij', 'buiging': 'zonder'},
+     'pt': {'wvorm': 'td', 'positie': 'vrij', 'buiging': 'zonder'},
+     'pvE': {'wvorm': 'vd', 'buiging': 'met-e', 'positie': 'prenom'},
+     'ptE': {'wvorm': 'td', 'buiging': 'met-e', 'positie': 'prenom'}
+     }
 
 
 def celexpv2dcoi(word: str, infl: str, lemma: str) -> Dict[str, str]:

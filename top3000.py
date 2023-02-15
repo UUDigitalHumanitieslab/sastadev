@@ -42,6 +42,7 @@ import os
 from typing import Dict, List, Tuple
 from sastatypes import SynTree, DCOIPt
 
+
 def ishuman(node: SynTree) -> bool:
     '''
     The function ishuman determines whether the node node is human
@@ -49,10 +50,11 @@ def ishuman(node: SynTree) -> bool:
     lemma = getattval(node, 'lemma')
     pt = getattval(node, 'pt')
     vwtype = getattval(node, 'vwtype')
-    result = (lemma, pt ) in semlexicon and 'human' in semlexicon[(lemma, pt)]
+    result = (lemma, pt) in semlexicon and 'human' in semlexicon[(lemma, pt)]
     result = result or vwtype == 'pers'
     result = result or namepart_isa_namepart(lemma)
     return result
+
 
 def isanimate(node: SynTree) -> bool:
     '''
@@ -61,7 +63,7 @@ def isanimate(node: SynTree) -> bool:
 
     lemma = getattval(node, 'lemma')
     pt = getattval(node, 'pt')
-    result = (lemma, pt ) in semlexicon and 'animate' in semlexicon[(lemma, pt)]
+    result = (lemma, pt) in semlexicon and 'animate' in semlexicon[(lemma, pt)]
     return result
 
 
@@ -71,14 +73,16 @@ def transitivity(node: SynTree, tr: str) -> bool:
     '''
     lemma = getattval(node, 'lemma')
     pt = getattval(node, 'pt')
-    result = (lemma, pt ) in semlexicon and tr in trlexicon[(lemma, pt)]
+    result = (lemma, pt) in semlexicon and tr in trlexicon[(lemma, pt)]
     return result
+
 
 def transitive(node: SynTree) -> bool:
     '''
     The function transitive determines whether node is transitive
     '''
     return transitivity(node, 'tr')
+
 
 def pseudotr(node: SynTree) -> bool:
     '''
@@ -93,9 +97,10 @@ def intransitive(node: SynTree) -> bool:
     '''
     return transitivity(node, 'intr')
 
+
 semicolon = ';'
 
-filename = os.path.join(SD_DIR, r'top3000\Woordenlijsten Current.xlsx')
+filename = os.path.join(SD_DIR, 'top3000', 'Woordenlijsten Current.xlsx')
 
 
 lexiconheader, lexicondata = getxlsxdata(filename)

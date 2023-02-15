@@ -13,8 +13,8 @@ import celexlexicon
 import treebankfunctions
 from namepartlexicon import namepart_isa_namepart, namepart_isa_namepart_uc
 
-from typing import Any, Dict, List, Optional, Tuple
-from sastatypes import CELEXPosCode, CELEX_INFL, DCOITuple, DeHet, Lemma, SynTree, WordInfo
+from typing import Any, Dict, List, Optional
+from sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
 
 space = ' '
 
@@ -39,7 +39,6 @@ dets[de] = ['de', 'die', 'deze', 'onze', 'welke', 'iedere', 'elke', 'zulke']
 dets[het] = ['het', 'dat', 'dit', 'ons', 'welk', 'ieder', 'elk', 'zulk']
 
 
-
 def isa_namepart(word: str) -> bool:
     '''
     is the word a name part
@@ -56,8 +55,6 @@ def isa_namepart_uc(word: str) -> bool:
     :return:
     '''
     return namepart_isa_namepart_uc(word)
-
-
 
 
 def lookup(dct: Dict[str, Any], key: str) -> str:

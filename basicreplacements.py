@@ -2,7 +2,9 @@ from collections import defaultdict
 from metadata import bpl_word, bpl_node, defaultpenalty
 from deregularise import correctinflection
 from typing import Dict, List, Tuple
-from sastatypes import ReplacementMode
+from sastatypes import ReplacementMode, TokenTreePredicate, SynTree
+from sastatoken import Token
+from treebankfunctions import find1
 
 BasicExpansion = Tuple[str, List[str], str, str, str, int]
 BasicReplacement = Tuple[str, str, str, str, str, int]
@@ -139,14 +141,24 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                         ('aleen', 'alleen', orth, typo, typorepl.format(wrong='alleen', correct='alleen'), dp),
                         ('heef', 'heeft', pron, infpron, codared, dp),
                         ('saan', 'staan', pron, wrongpron, onsetred, dp),
+                        ('saan', 'gaan', pron, wrongpron, wrongpron, dp+2),
+                        ('jerke', 'werken', pron, wrongpron, wrongpron, dp),
                         ('taan', 'staan', pron, wrongpron, onsetred, dp),
                         ("a'maal", 'allemaal', pron, infpron, redpron, dp),
                         ('taan', 'staan', pron, wrongpron, onsetred, dp),
                         ('beurt', 'gebeurt', pron, wrongpron, prefixdrop, dp),
                         ('dahaar', 'daar', pron, emphasis, voweldup, dp),
                         ('desu', 'deze', pron, infpron, vzdevoicing, dp),
+                        ('tan', 'dan', pron, infpron, initdev, dp),
+                        ('tat', 'dat', pron, infpron, initdev, dp),
+                        ('tit', 'dit', pron, infpron, initdev, dp),
+                        ('lape', 'slapen', pron, infpron, f'{onsetred}+{fndrop}', dp),
+                        ('vas', 'vast', pron, infpron, codared, dp),
+                        ('datte', 'dat', pron, infpron, emphasis, dp),
+                        ('omdatte', 'dat', pron, infpron, emphasis, dp),
+                        ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp)
 
-                       ] + \
+                                                ] + \
                        ervzvariants + \
                        innereplacements + \
                        innureplacements
@@ -217,10 +229,12 @@ basicexpansionlist: List[BasicExpansion] = \
                       ('of-t-ie', ['of', 'ie'], pron, infpron, t_ie, dp),
                       ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
                       ("dit's", ["dit", "is"], pron, infpron, contract, dp),
-                      ("dat's", ["dat", "is"], pron, infpron, contract, dp)
-                      ] + \
-                     closesyllshortprepexpansions + \
-                     innuclosedsyllshortprepexpansions
+                      ("dat's", ["dat", "is"], pron, infpron, contract, dp),
+                      ("datte", ['dat', 'ie'], pron, infpron, contract, dp+2),
+                      ("omdatte", ['omdat', 'ie'], pron, infpron, contract, dp+2)
+                      ]
+                     # + closesyllshortprepexpansions # put off does not lead to improvement
+                     # + innuclosedsyllshortprepexpansions # put off does not lead to improvement
 
 
 #: The dictionary *basicexpansions* maps a contracted word form to a list of 4-tuples
@@ -258,6 +272,20 @@ def getmeta4CHATreplacements(wrongword: str, correctword: str) -> KnownReplaceme
                       bpl_word)
     return result
 
+#: dttp = default token tree predicate
+dtp = lambda token, tree: True
+
+def welnietttp(token: Token, stree: SynTree) -> bool:
+    """
+    The function *welniettp* checks whether *token* has been analysed as a verb in *stree*
+    :param token: input token
+    :param stree: input syntactic structure
+    :return: True if *token* has been analysed as a verb in *stree*, False otherwise.
+    """
+    beginval = str(token.pos)
+    wordnode = find1(stree, f'.//node[@pt="ww" and @begin="{beginval}"]')
+    result = wordnode is not None
+    return result
 
 # keer removed
 #: The constant *disambiguation_replacements* contains a list of tuples. Each tuple
@@ -271,12 +299,13 @@ def getmeta4CHATreplacements(wrongword: str, correctword: str) -> KnownReplaceme
 #: * plural nouns that can also be a verb (e.g. *planten*) are replaced by the word *teilen*, which is only a noun;
 #: * adjectives without an *-e* ending that can also be a verb (e.g. *dicht*) are replaced by the word *mooi*, which is only an adjective;
 #: * adjectives with an *-e* ending that can also be a verb (*e.g. witte*) are replaced by the word *mooie*, which is only an adjective.
+#: * the words *wel* and *niet* are replaced by a nonambiguous adverb (*ietsjes*) if they are parsed as a verb in the original parse
 #:
 #: **Remark** Currently no distinction is made between singular *count* and singular *mass* nouns: they are both replaced by the same word. This may have to be adapted.
-disambiguation_replacements: List[Tuple[List[str], str]] = \
-                              [(['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
+disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
+                              [(dtp, ['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
                                  'kwartet', 'kruis'], 'gas'),
-                               (['toren', 'fiets', 'puzzel', 'boom', 'vis', 'melk', 'zon', 'pot', 'klok',
+                               (dtp, ['toren', 'fiets', 'puzzel', 'boom', 'vis', 'melk', 'zon', 'pot', 'klok',
                                  'school', 'boer', 'lepel', 'jas', 'tuin', 'fles', 'lucht', 'emmer', 'maan', 'kachel',
                                  'kwak', 'verf', 'hop', 'kam', 'spiegel', 'klap', 'stal', 'lijm', 'lift', 'kat',
                                  'wagen', 'schep', 'kus', 'wind', 'borstel', 'duim', 'strik', 'klik', 'pleister',
@@ -284,26 +313,27 @@ disambiguation_replacements: List[Tuple[List[str], str]] = \
                                  'punt', 'post', 'gom', 'tap', 'kraanwagen', 'drup', 'wieg', 'kriebel', 'pit', 'zaag',
                                  'slof', 'deuk', 'hark', 'jeuk', 'stift', 'aard', 'hamster', 'kiek', 'haak', 'schroef',
                                  'tape', 'vorm', 'klem', 'mot', 'druppel'], 'teil'),
-                               (['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',
+                               (dtp, ['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',
                                  'wieken', 'paarden', 'stoelen', 'ramen', 'strepen', 'planten', 'groeten',
                                  'flessen', 'boeren', 'punten', 'tranen'], 'teilen'),
-                               (['snel', 'wit', 'kort', 'dicht'], 'mooi'),
-                               (['witte'], 'mooie')
+                               (dtp, ['snel', 'wit', 'kort', 'dicht'], 'mooi'),
+                               (dtp, ['witte'], 'mooie'),
+                               (welnietttp, ['wel', 'niet'], 'ietsjes')  #find a different adverb that does not get inside constituents (ietsjes?)
                                ]
 
 
-def getdisambiguationdict() -> Dict[str, str]:
+def getdisambiguationdict() -> Dict[str, Tuple[TokenTreePredicate, str]]:
     '''
-    :return: a dictionary with word:replacement items (both of type string)
+    :return: a dictionary with words as key and a tuple of a condition and a replacement as values
 
-    The function *getdisambiguationdict* creates a dictionary with word:replacement
+    The function *getdisambiguationdict* creates a dictionary with word:(cond, replacement)
     items. It selects its content from the constant *disambiguation_replacements*:
 
     .. autodata:: basicreplacements::disambiguation_replacements
          :no-value:
     '''
     disambiguationdict = {}
-    for ws, repl in disambiguation_replacements:
+    for cond, ws, repl in disambiguation_replacements:
         for w in ws:
-            disambiguationdict[w] = repl
+            disambiguationdict[w] = cond, repl
     return disambiguationdict

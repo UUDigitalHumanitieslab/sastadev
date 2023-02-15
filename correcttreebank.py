@@ -778,7 +778,7 @@ def getorigutt(stree: SynTree) -> Optional[str]:
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
-    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.dpcount, -obj.dhyphencount,
+    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount, -obj.dhyphencount,
             -obj.complsucount, -obj.badcatcount, -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
             -obj.subjunctivecount, obj.dimcount,
             obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount,

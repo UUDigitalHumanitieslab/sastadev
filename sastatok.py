@@ -1,6 +1,9 @@
 import re
 
-from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
+
+
+import CHAT_Annotation as sastachat
+#from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
 from sastatoken import stringlist2tokenlist
 
 
@@ -20,7 +23,7 @@ def alts(pats, grouping=False):
 
 #interpunction = r'[!\?\.,;]'  # add colon separated by spaces
 #word = r'[^!\?;\.\[\]<>\s]+'
-word = wordpat
+word = sastachat.wordpat
 scope = r'<.+?>'
 scopeorword = alts([scope, word])
 myrepetition = r'\[x\s*[0-9]+\s*\]'
@@ -39,13 +42,13 @@ whitespace = r'\s+'
 
 
 #sastaspecials = [r'\[::', r'\[=', r'\[:', r'\[=\?', r'\[x', r'\<', r'\>', r'\[\?\]', r'\[/\]', r'\[//\]', r'\[///\]', r'\[%', r'\]']
-sastaspecials = list(CHAT_patterns)
-sastapatterns = sorted(sastaspecials, key=lambda x: len(x), reverse=True) + [word, interpunction]
+sastaspecials = list(sastachat.CHAT_patterns)
+sastapatterns = sorted(sastaspecials, key=lambda x: len(x), reverse=True) + [word, sastachat.interpunction]
 fullsastapatterns = alts(sastapatterns)
 fullsastare = re.compile(fullsastapatterns)
 
 allpatterns = [realwordreplacement, replacement, myrepetition, alternativetranscription, commentonmainline, bestguess, retracing]
-sortedallpatterns = sorted(allpatterns, key=lambda x: len(x), reverse=True) + [word, interpunction]
+sortedallpatterns = sorted(allpatterns, key=lambda x: len(x), reverse=True) + [word, sastachat.interpunction]
 fullpattern = alts(sortedallpatterns)
 #print(fullpattern)
 fullre = re.compile(fullpattern)
