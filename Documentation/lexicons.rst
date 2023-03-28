@@ -16,19 +16,19 @@ The predicate ‘is contained in the Alpino-lexicon’ is also not easy to defin
 Gertjan van Noord wrote to me about this::
 
 	als je Alpino hebt, gaat het zo
-	 
+
 	Alpino
 	p lex_all
-	 
+
 	en nu kun je per regel een zin (of een woord) ingeven. Alpino toont vervolgens alle categorieën die het woord heeft gekregen. Vb:
-	 
+
 	1 |: p lex_all
 	1 |: de autootje
 	[... debug info ...]
 	TAG#0|1|de|determiner(de)|normal(normal)|de|0.0
 	TAG#1|2|autootje|noun(het,count,sg)|diminutive|auto_DIM|0.6931471805599453
 	TAG#1|2|autootje|noun(het,count,sg)|normal(normal)|auto_DIM|0.6931471805599453
-	 
+
 	de regels die met TAG beginnen zijn relevant. En die hebben velden, gescheiden door | veld 4 is de woordsoort, veld 5 is de naam van de heuristiek die is gebruikt. Als die naam met 'normal(' begint, zou je kunnen zeggen dat het woord gewoon in het woordenboek staat.
 
 .. _CELEX:
@@ -59,14 +59,11 @@ Names very often consist of multiple words.
 For individual words it is therefore important to check whether they can be a part of a (possibly multiword) name.
 The relevant module is the namepartlexicon module.
 
-.. automodule:: namepartlexicon
-
 The dictionary with nameparts has been derived by the SASTA script getnamepartslexicon:
 
-.. automodule:: getnamepartslexicon
-.. automodule:: namelexicons
+.. automodule:: namepartlexicon
 
- 
+
 .. _filledpauseslexicon:
 
 Filled pauses lexicon
@@ -87,8 +84,8 @@ Compounds
 .. _exceptionslists:
 
 Exception Lists
---------------- 
+---------------
 
-There are several  lists of words in SASTA for a variety of reasons. 
+There are several  lists of words in SASTA for a variety of reasons.
 At the moment they are distributed over multiple files. But it would be a good idea to put them all together in  a single module.
 We will call this module (that does not exist yet) exceptionlists.py.

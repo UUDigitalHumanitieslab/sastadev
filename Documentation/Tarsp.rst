@@ -1,7 +1,7 @@
 TARSP Language Measures
 -----------------------
 
-We will describe here all Tarsp language measures, in the order of the identifiers assigned to them. However, a few language measures are special in that they systematically composed out of recurring macros. See  :ref:`TarspAnnotation` for more on these language measures, which we will call *composed language measures*. We will discuss the most important macros that are used in the queries for such language measures first, in section :ref:`composedmeasures`. 
+We will describe here all Tarsp language measures, in the order of the identifiers assigned to them. However, a few language measures are special in that they systematically composed out of recurring macros. See  :ref:`tarspannotations` for more on these language measures, which we will call *composed language measures*. We will discuss the most important macros that are used in the queries for such language measures first, in section :ref:`composedmeasures`.
 
 
 .. _composedmeasures:
@@ -43,8 +43,8 @@ Declaratives
 
 Declarative clauses are identified by the macro **declarative**::
 
-    declarative = """(@cat="smain" or 
-                     (@cat="ssub" and not(%partofwhquestion%)) or 
+    declarative = """(@cat="smain" or
+                     (@cat="ssub" and not(%partofwhquestion%)) or
                      (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
 
 
@@ -58,8 +58,8 @@ For the definition of the macro **basicimperative**, see :ref:`imperatives`, for
 
 The macro **partofwhquestion** is defined as follows::
 
-   partofwhquestion = """((@cat="sv1" or @cat="ssub") and 
-                          @rel="body" and 
+   partofwhquestion = """((@cat="sv1" or @cat="ssub") and
+                          @rel="body" and
                           parent::node[@cat="whq" or @cat="whsub" ]) """
 
 
@@ -72,14 +72,14 @@ Yes-no questions are identified by the macro **ynquery**::
 
    ynquery = """@cat="sv1" and
              (@rel="--" or @rel="dp") and
-             not(%topcontainsperiodmark%) and 
-              not(%topcontainsexclamationmark%) and 
-             node[@rel="hd" and @pt="ww" and @pvtijd !="conj" and 
+             not(%topcontainsperiodmark%) and
+              not(%topcontainsexclamationmark%) and
+             node[@rel="hd" and @pt="ww" and @pvtijd !="conj" and
                   (@stype="ynquestion" or %topcontainsquestionmark% ) ] and
              (node[@rel="su"] or %topcontainsquestionmark%)    and
-             (not(%impmodfound%) or %topcontainsquestionmark% )             
-            """     
-            
+             (not(%impmodfound%) or %topcontainsquestionmark% )
+            """
+
 Explanation:
 
 * Tarsp does not mark subordinate yes-no question (introduced by the subordinate conjunction *of*) in any special way, so we only deal with main clauses
@@ -93,7 +93,7 @@ Explanation:
 *Wh*-questions are defined as follows::
 
     Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub") or (@cat="whrel" and @rel="--"))"""
-    
+
 covering both main clauses (*whq*) and subordinate clauses (*whsub*), but also clauses that have been analysed by Alpino as independent (relation="--" ) relative clauses, which usually are actually wh-questions.
 
 
@@ -105,14 +105,14 @@ Imperatives
 Imperatives are identified by the macro **basicimperative**::
 
     basicimperative = """(%normalimp% or %bareverbimp% )"""
-    
+
 Here the macro **normalimp** is defined as follows::
 
     normalimp = """(@cat="sv1" and
-                    not(%topcontainsquestionmark%) and     
-                    (not(%topcontainsperiodmark%) or %impmodfound%) and     
+                    not(%topcontainsquestionmark%) and
+                    (not(%topcontainsperiodmark%) or %impmodfound%) and
                     %imprelok% and
-                    %impsubjectok% and 
+                    %impsubjectok% and
                     node[%wwimpok%]
                 )"""
 
@@ -134,21 +134,21 @@ Explanation:
 
 * There are restrictions on subjects in imperative clauses, expressed by the macro **impsubjectok**::
 
-    impsubjectok = """(not(%Ond%) or 
-                       (node[%subject% and 
-                        %impsubject%] and 
+    impsubjectok = """(not(%Ond%) or
+                       (node[%subject% and
+                        %impsubject%] and
                         (%impmodfound%  or %topcontainsexclamationmark%)
                        )
                       )"""
     impsubject = """(@rel="su" and (@word="jij" or @word="u"))"""
 
   Explanation:
-  
+
     * there either is no subject, or
     * there is a subject but
-    
+
       * it is *jij* or *u* (**impsubject**) and
-      * either a imperative modifier is found (**impmodfound**) or the utterance contains an exclamation mark      
+      * either a imperative modifier is found (**impmodfound**) or the utterance contains an exclamation mark
 
 * there are restrictions on the verb in an imperative clause, expressed by the macro **wwimpok**::
 
@@ -157,23 +157,23 @@ Explanation:
                    %zijnimpok%       and
                    %potentialimpverb%
               )"""
-            
+
 * These restrictions concern:
 
    * conditions on the verbal properties (**wwimpfeatok**). The verb must be a finite present tense singular form (**wwimpfin**), or an infinitive (**wwimpinf**)::
-   
+
         wwimpfeatok = """(%wwimpfin% or %wwimpinf%)"""
         wwimpfin = """(@rel="hd" and @pt="ww" and @pvtijd="tgw" and @pvagr="ev" and @wvorm="pv") """
         wwimpinf = """(@rel="hd" and @pt="ww" and @wvorm="inf") """
-        
+
    * the verb must not be a modal verb (**not(%modalframe%)**)::
-   
+
         modalframe = """(contains(@frame,"modal"))"""
-        
+
    * if the lemma of the verb is *zijn*, the form must be *wees* or *weest*::
-   
+
         zijnimpok = """(not(@lemma="zijn") or @word="wees" or @word="weest")"""
-        
+
    * the verb must be able to form an imperative. This is defined by the macro **potentialimpverb**, which basically excludes a list of verbs that have no imperative::
 
         potentialimpverb = """(not(contains(@lemma,"moeten") or contains(@lemma,"hoeven") or
@@ -181,13 +181,13 @@ Explanation:
                       contains(@lemma,"mogen") or @lemma="hebben" or contains(@lemma, "_hebben") or contains(@lemma, "weten")
                      )
                  )"""
-     
+
 The macro **bareverbimp** is defined as follows::
 
-    bareverbimp = """(%wwimpok% and  
-                      %imprelok%  and 
-                      parent::node[@cat="top"] and 
-                      not(%topcontainsquestionmark%) and 
+    bareverbimp = """(%wwimpok% and
+                      %imprelok%  and
+                      parent::node[@cat="top"] and
+                      not(%topcontainsquestionmark%) and
                       not(%topcontainsperiodmark%)) """
 
 
@@ -203,10 +203,10 @@ It is intended for single verb utterances:
 * **Remark** We must allow other case forms for *jij* en *u* as subjects in imperatives (but not the reduced variant *je*)
 * **remark** There surely is overlap betwen the condition on modal verbs and the conditions imposed by **potentialimpverb**.
 
-* **Schlichting** (p. 62) 
+* **Schlichting** (p. 62)
 
   "De kenmerken van de Gebiedende Wijs zijn in het kader van TARSP:
-     
+
      1. de zin moet altijd beginnen met een werkwoord; dat werkwoord staat meestal in de vorm van de stam van het werkwoord, een enkele maal vinden we Stam+t of de infinitief. (covered except Stam+t)
      2. Er is altijd een niet-vragende intonatie (covered by disallowing a question mark)
      3. Er is vaak een tweede of derde woord in de zin, bijvoorbeeld 'maar', 'even', 'eens'. Covered
@@ -225,39 +225,39 @@ The 'zinsdelen' are *B*, *Ond*, *VC* and *W* and they correspond to some extent 
 * T120: W, verb / predicate (see :ref:`T120_W`)
 
 
-But the correspondence is only perfect for *B*. 
+But the correspondence is only perfect for *B*.
 
-* **Remark** For *Ond* the definitions are different, but it is not clear whether that cannot be avoided. 
-* **Remark** For *VC* the definitions are also different but perhaps they should be identical. 
+* **Remark** For *Ond* the definitions are different, but it is not clear whether that cannot be avoided.
+* **Remark** For *VC* the definitions are also different but perhaps they should be identical.
 * **Remark** For *W* there is no immediately obvious correspondence, but perhaps there should be. It looks as if the necessary restrictions have been implemented independently twice.
 
-Out of these language measures, only T120/W occurs in the form ('profielkaart'). 
+Out of these language measures, only T120/W occurs in the form ('profielkaart').
 
 Language measures such as *WBVC*, *OndVC*, *OndW*, *OndWB*, *OndWBVC*, and several others are defined  by combinations of the definitions of recurring macros for 'zinsdelen' (and some others conditions). For such language measures, special macros for *Ond*, *VC* and *W* have been defined:
 
 * **Ond**: has a simple definition::
 
         Ond = """node[%subject%]"""
-    
+
   where::
-    
+
         subject = """(@rel="su" and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
 
-Here we only count as subjects those nodes (full or index nodes) that have a finite clause node as parent. 
-Overt subjects never occur in nonfinite clauses, and subject index nodes should not be counted inside nonfinite clauses. Subject index nodes do occur in finite clauses, e.g., as the "trace" of a wh-movement. 
+Here we only count as subjects those nodes (full or index nodes) that have a finite clause node as parent.
+Overt subjects never occur in nonfinite clauses, and subject index nodes should not be counted inside nonfinite clauses. Subject index nodes do occur in finite clauses, e.g., as the "trace" of a wh-movement.
 
-It differs from the definition of :ref:`T063_Ond` because T063 has to cover an additional case (existential *er* as a subject (though maybe that should be included here as well) 
-   
+It differs from the definition of :ref:`T063_Ond` because T063 has to cover an additional case (existential *er* as a subject (though maybe that should be included here as well)
+
 * **Tarsp_B**: see :ref:`T007_B`
 * **Tarsp_VC**: is defined as follows::
 
-    Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or 
-                    @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or 
-                    %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz")) and 
+    Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or
+                    @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or
+                    %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz")) and
                    not(%Tarsp_B%) )"""
-    
+
   So, it covers:
-  
+
     * direct objects (*obj1*)
     * prepositional complements that are not **Tarsp_pc_vc_exception** (*pc*)
     * predicative complements (*predc*)
@@ -266,15 +266,15 @@ It differs from the definition of :ref:`T063_Ond` because T063 has to cover an a
     * finite verbal complements (macro **Tarsp_finvc**)
     * pronouns with relation *vc*, this is for sluiced subordinate clauses as in *ik weet* **wat**, *effe kijken* **waar**
     * separable particles of a verb that are not adpositions (*svp*)
-    
+
     and we exclude all cases that can be analysed as an adverbial modifier (**Tarsp_B**, see :ref:`T007_B`)
-    
+
     The macro **Tarsp_pc_vc_exception** is generated in the *generatemacros* module on the basis of a list of  pairs (verb, adposition), e.g. (*slaan*, *op*) in which Alpino analyzes the adposition as the head of a prepositional complement (pc), but where it should be considered the head of a modifier. See :ref:`generatemacros` for more details.
-    
-* **Tarsp_W**: It is defined as:: 
+
+* **Tarsp_W**: It is defined as::
 
     Tarsp_W = """node[@rel="hd" and @pt="ww"]"""
-    
+
   Nonfinite verbs are not excluded by this definition but they are excluded by the mood conditions. For language measure T120, *W*, the macro **Tarsp_coreW** is used.
 
 
@@ -283,7 +283,7 @@ Macros for Counts of 'zinsdelen'
 
 Many composed language measures differ only in the number of complements or adverbial modifiers required. For example *Tarsp_OndWB* and *Tarsp_OndWBB* differ only in the number of adverbial modifiers that should be present (one, resp, two).
 This requires conditions on the number of such complements or modifiers.
-Note that one cannot simply include two expressions joined by *and* in an Xpath query (e.g. *%Tarsp_B% and %Tarsp_B%*) to cover the *BB* part of the language measure *Tarsp_OndWBB*. The reason is that in XPath such a query will then still match with  a structure containing a single adverbial modifier. We therefore use the Xpath function *count* in composed language measures. 
+Note that one cannot simply include two expressions joined by *and* in an Xpath query (e.g. *%Tarsp_B% and %Tarsp_B%*) to cover the *BB* part of the language measure *Tarsp_OndWBB*. The reason is that in XPath such a query will then still match with  a structure containing a single adverbial modifier. We therefore use the Xpath function *count* in composed language measures.
 
 Adverbial modifiers and complements can occur not only under the node where the subject and verb occur but also inside a nonfinite verbal complement, so we gather both in a node set, union (|) these node sets and count the number of elements in the union. This leads to the following formulations::
 
@@ -297,12 +297,12 @@ We must also have counts for the overall number of "zinsdelen" in the clause. Th
 
     realcomplormodnodecount = """count(%realcomplormodnode% | node[%nonfinvc%]/%realcomplormodnode%)"""
     realcomplormodnode = """node[%realcomplormod%]"""
-    
+
 The macro **realcomplormod** is defined as follows::
 
     realcomplormod = """(not(%particlesvp%) and not(%indexnode%) and not(%nonfinvc%) and not(@rel="hd"))"""
-    
-    
+
+
 Here we exclude:
 
 * adpositional separable verb particles (**particlesvp**). These are considered to be part of the verb::
@@ -322,10 +322,10 @@ Concrete Example: **Tarsp_OndWBB**
 
 Given all of the above, it should be clear why the definition of **Tarsp_OndWBB** is as follows::
 
-    Tarsp_OndWBB = """(%declarative% and 
-                      %Ond% and 
-                      %Tarsp_W% and 
-                      %Tarsp_B_X_count% = 2 and 
+    Tarsp_OndWBB = """(%declarative% and
+                      %Ond% and
+                      %Tarsp_W% and
+                      %Tarsp_B_X_count% = 2 and
                       %realcomplormodnodecount% = 3)"""
 
 
@@ -349,7 +349,7 @@ T001: (Vr)WOnd+
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Vraagwoordzin waarbij het vraagwoord is weggelaten. Het werkwoord +, meestal, het Onderwerp zijn gerealiseerd. Daarna kunnen nog één of meer Zinsdelen volgen."
@@ -391,7 +391,7 @@ T004: Aan/uit
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: "Soms wordt een zinsdeel aan het begin of aan het einde van de zin met andere woorden herhaald. Die herhaling noemen we ‘Aanloop’ aan het begin van een zin en ‘Uitloop’ aan het einde van de zin."
 
@@ -404,12 +404,12 @@ T005: als
 
 * **Name**: als.
 * **Category**: Verbindingswoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
 * **Page**: 77
-* **Implementation**: Xpath 
+* **Implementation**: Xpath
 * **Query** defined as::
 
     //node[@lemma="als" and @pt="vg"]
@@ -429,7 +429,7 @@ T006: Avn
 
 * **Name**: Avn. (Aanwijzend Voornaamwoord als nomen)
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -437,7 +437,7 @@ T006: Avn
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    AVn = """(%coreavn% or %avnrel%)"""" 
+    AVn = """(%coreavn% or %avnrel%)""""
     coreavn = """(@pt="vnw"  and @vwtype="aanw" and @lemma!="hier" and @lemma!="daar" and @lemma!="er" and @rel!="det" and (not(@positie) or @positie!="prenom") )"""
     avnrel = """(%diedatrel% and parent::node[@cat="rel" and @rel!="mod"])"""
     diedatrel = """(@pt="vnw" and @vwtype="betr" and @rel="rhd" and (@lemma="die" or @lemma="dat"))"""
@@ -451,7 +451,7 @@ The core case (*coreavn*):
 * the relation must not be *det* (otherwise the pronouns are not used independently)
 * and if a *position* attribute is present it should not have the value *prenom* (otherwise it is not used independently)
 
-The relative case (*avnrel*) covers the relative pronouns *die* and *dat* (*diedatrel*) in an independent relative clause (i.e. *rel* is not equal to *mod*).  
+The relative case (*avnrel*) covers the relative pronouns *die* and *dat* (*diedatrel*) in an independent relative clause (i.e. *rel* is not equal to *mod*).
 
 * **Schlichting**: "Aanwijzend Voornaamwoord: 'die', 'dit', 'deze', 'dat' zelfstandig gebruikt." Fully covered.
 
@@ -464,7 +464,7 @@ T007: B
 
 * **Name**: B. (Bijwoordelijke Bepaling)
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -473,16 +473,16 @@ T007: B
 * **Query** defined as::
 
     //node[%Tarsp_B%]
-    
+
 The definition of this macro is as follows::
 
     Tarsp_B = """(
                   ((((@rel="mod" or @rel="ld" or @rel="predm") and
                      (not(@cat) or @cat!="conj") and
                      (not(@pt) or @pt!="tsw")
-                    )or 
+                    )or
                     (%predcB%)
-                   ) and 
+                   ) and
                    (../node[@pt="ww" and @rel="hd"])
                   ) or
                   ((@pt="vz" or @pt="bw" or %Rpronoun%) and (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and %notonlyrealnode%) or
@@ -496,14 +496,14 @@ The definition of this macro is as follows::
 
 Explanation: Adverbial modifiers are:
 
-* Case 1: 
+* Case 1:
 
     * Nodes with grammatical relation  *mod*, *ld* or *predm*
         * but if the node is a phrase, it should not have the value *conj* for the attribute *cat*. In a conjunction the whole conjunction is not considered an adverbial modifier. The individual conjuncts are, see below.
         * if the node is a word, it should not be an interjection
-        
+
     * Nodes that meet the conditions of the macro **predcB**. This macro is defined below.
-      
+
   but only if they modify a verb
 * Case 2: adpositions, adverbs and R-pronouns that bear one of the relations *dp*, *--*, *nucl* or *body*, if they are not the only real node in the structure. The macro **notonlyrealnode** is defined below.
 * Case 3: adpositional phrases with grammatical relation *dp* or *--* if they are not the only realnode
@@ -511,24 +511,24 @@ Explanation: Adverbial modifiers are:
 * Case 5: A conjunct if its parent node has a grammatical relation from *mod*, *ld* or *predm*
 * Case 6: adverbs that are a modifier inside an NP. Probably because Alpino analyses ambiguous cases by including the adverb in the NP.
 * Case 7: nodes that meet the requirements of the macro **Tarsp_nonmodadvcp**.
-* Case 8: nodes that meet the conditions of the macro **tarsp_pc_vc_exception**. See section :ref:`generatemacros` 
+* Case 8: nodes that meet the conditions of the macro **tarsp_pc_vc_exception**. See section :ref:`generatemacros`
 
 
 
 
 The macro **predcB** is defined as follows::
-    
-    predcB = """(@rel="predc" and 
+
+    predcB = """(@rel="predc" and
                  (@pt="adj" or @pt="bw" or @cat="ap" or @cat="advp") and
                  ../node[@rel="obj1"]
                 )"""
 
 The idea is that *predc* nodes that do not occur with a copula are covered here.
-    
+
 The macro **notonlyrealnode** is defined as follows::
 
     notonlyrealnode = """(parent::node[count(node[%realnode%])>1])"""
-    
+
 where **realnode** excludes interpunction signs, interjections, or nodes without any pos or category label:
 
     realnode = """((not(@pt) or (@pt!="let" and @pt!="tsw")) and (not(@postag) or @postag!="NA()"))"""
@@ -536,23 +536,23 @@ where **realnode** excludes interpunction signs, interjections, or nodes without
 
 The macro **locverb** is defined as follows::
 
-   locverb = """(@lemma="staan" or @lemma="zitten" or @lemma="rijden" or 
-                 @lemma="vallen" or @lemma="doen" or @lemma="gaan" or 
+   locverb = """(@lemma="staan" or @lemma="zitten" or @lemma="rijden" or
+                 @lemma="vallen" or @lemma="doen" or @lemma="gaan" or
                  @lemma="komen" or @lemma="zijn"  or %locmodalverb% )"""
-   locmodalverb = """ (@lemma="kunnen" or @lemma="moeten" or 
-                       @lemma="hoeven" or @lemma="willen" or 
+   locmodalverb = """ (@lemma="kunnen" or @lemma="moeten" or
+                       @lemma="hoeven" or @lemma="willen" or
                        @lemma="mogen")"""
 
 The macro **Tarsp_nonmodadvcp** is defined as follows::
 
-  Tarsp_nonmodadvcp = """(@cat="cp" and 
-                          (@rel="dp" or @rel="--") and 
-                          node[@pt="vg" and @conjtype="onder" and 
+  Tarsp_nonmodadvcp = """(@cat="cp" and
+                          (@rel="dp" or @rel="--") and
+                          node[@pt="vg" and @conjtype="onder" and
                                fBas@lemma!="dat" and @lemma!="of" ] )"""
-                          
-covering cp-nodes that could not be integrated in the whole structure (hence relation *dp* or *--*) and contain a subordinate conjunction other than *dat* or *of*. 
 
-                 
+covering cp-nodes that could not be integrated in the whole structure (hence relation *dp* or *--*) and contain a subordinate conjunction other than *dat* or *of*.
+
+
 * **Schlichting**: "De bijwoordelijke bepaling zegt iets over de hele inhoud van de zin of iets over het werkwoord, een bijwoord of een bijvoeglijk naamwoord. Een zin kan meer dan één bijwoordelijke bepaling hebben." Basically covered.
 
 * **Remark** The **locverb** macro very probably has overlap with or is subsumed by the generated macro **Tarsp_pc_vc_exception**
@@ -570,7 +570,7 @@ T010: BBBv
 * **Original**: yes
 * **In form**: no
 * **Page**: 70
-* **Implementation**: Xpath 
+* **Implementation**: Xpath
 * **Query** defined as::
 
     //node[@cat="ap" and
@@ -599,8 +599,8 @@ T011: Bbijzin
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[@rel="mod"and 
-           @cat="cp" and 
+    //node[@rel="mod"and
+           @cat="cp" and
            node[@rel="body" and node[@pt="ww" and @pvagr and @rel="hd"]]]
 
 
@@ -616,7 +616,7 @@ T012: BBv/B
 
 * **Name**: BBv/B.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -625,7 +625,7 @@ T012: BBv/B
 * **Query** defined as::
 
     //node[(node[@rel="mod" and %adjoradv%] and
-       node[@rel="hd"  and %adjoradv%])     
+       node[@rel="hd"  and %adjoradv%])
    ]
 
 This query is straightforward implementation of an adverb modifying an adjective or adverb functioning as a head. It makes use of the macro *adjoradv* (twice), which is defined as follows:
@@ -651,7 +651,7 @@ T013: BBvZn
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Bijwoord + Bijvoeglijk woord + Zelfstandig naamwoord"
@@ -679,13 +679,13 @@ T014: BBX
 The macro **Tarsp_BBX** is defined as follows::
 
     Tarsp_BBX = """((@cat="top" and
-                     count(.//node[@pt!='let' and @pt!='vg'])=3 and 
-                     count(.//node[@special="er_loc" or @pt="bw" or 
-                                   @pt="vz" or (@pt="adj" and @rel="dp" ) ])=2 and 
+                     count(.//node[@pt!='let' and @pt!='vg'])=3 and
+                     count(.//node[@special="er_loc" or @pt="bw" or
+                                   @pt="vz" or (@pt="adj" and @rel="dp" ) ])=2 and
                           .//node[@pt="n" or (@pt="vnw" and not(@special="er_loc")) ]
                     ) or
-                    ((@cat="sv1" or @cat="smain") and not(%basicimperative%) and 
-                      not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and 
+                    ((@cat="sv1" or @cat="smain") and not(%basicimperative%) and
+                      not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and
                       count(.//node[%Tarsp_B%]) = 2 and %realcomplormodnodecount% = 2
                     )
                    )"""
@@ -717,7 +717,7 @@ T015: BepBvZn
 
 * **Name**: BepBvZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -735,7 +735,7 @@ T015: BepBvZn
 Straightforward implementation of noun phrase with a determiner, a modifying adjective and a head noun
 
 * **Schlichting**: "Bepaler + Bijvoeglijk woord + Zelfstandig naamwoord"
- 
+
 * **Remark**: does not cover numerals, which also fall under "bijvoeglijk". Probably best to make a macro for "bijvoeglijk woord"
 * **Remark**: restrict this to exactly 3 nodes under NP.
 
@@ -760,7 +760,7 @@ T016: BepZnBv
 
 
 * **Schlichting**: "Bepaler + Zelfstandig naamwoord + Bijvoeglijk woord. Soms vindt men een Zn op de plaats van de Bv: *een heleboel water*"
- 
+
  The current query covers both adjectives and adverbs. Unclear whether that is necessary or desired.
 
 * **Remark**: The  example **een heleboel water** is not covered by this query
@@ -773,7 +773,7 @@ T017: BezZn
 
 * **Name**: BezZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -796,12 +796,12 @@ T018: Bijvoeglijke Bijzin
 
 
 * **Name**: Bijvoeglijke Bijzin.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath
 * **Query** defined as::
 
@@ -820,7 +820,7 @@ T019: Bijwoordelijke bepalingwoordgroep
 
 * **Name**: Bijwoordelijke bepalingwoordgroep.
 * **Category**: Uitbreiding Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -828,7 +828,7 @@ T019: Bijwoordelijke bepalingwoordgroep
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Bijwoordelijke bepalingwoordgroep"
@@ -850,7 +850,7 @@ T020: Bijzin z Verb
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Bijzin zonder verbindingswoord. De bijzinnen kunnen Bijwoordelijke bijzinnen zijn, VC bijzinnen of Bijvoeglijke bijzinnen."
@@ -864,7 +864,7 @@ T023: Bv/B
 
 * **Name**: Bv/B.
 * **Category**: Eenwoordzin
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -872,9 +872,9 @@ T023: Bv/B
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@cat="top" and node[@pt='adj' or @pt='bw' or @pt='vz'] and 
+    //node[@cat="top" and node[@pt='adj' or @pt='bw' or @pt='vz'] and
          count(.//node[%realnode%])=1]
-  
+
 These are single word utterances consisting of an adjective or an adverb, and based on the examples that Schlichting gives (such as *uit*, *op*) adpositions should be included as well. (*uit* is parsed as an adverb by Alpino, but *op* as an adposition).
 
 The condition to restrict it to single word utterances uses the macro *realnode*, which is defined as follows::
@@ -896,7 +896,7 @@ T024: Bv z e
 
 * **Name**: Bv z e.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -907,8 +907,8 @@ T024: Bv z e
 
 It is not clear whether predicative adjectives should be covered by this as well. We assume not. Schlichting only discusses attributive uses and only gives examples of attributive uses. A query could be::
 
-    //node[@pt="adj" and @buiging="zonder" and  
-           (@rel="mod" and 
+    //node[@pt="adj" and @buiging="zonder" and
+           (@rel="mod" and
            parent::node[@cat="np" and node[@rel="hd" and (@pt="n" or(@pt="adj" and @positie="nom"))]])]
 
 covering attributive adjectives modifying a noun or a substantivised adjective.     The phenomenon  occurs only once in the VKLTarsp dataset (sample 6, utterance 25) but it has not been annotated as such. It does not occur in [Schlichting 2017].
@@ -925,7 +925,7 @@ T025: BvBepZn
 
 * **Name**: BvBepZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -933,9 +933,9 @@ T025: BvBepZn
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[@cat="np" and 
-           node[@rel="det"] and 
-           node[@rel="mod" and @pt="bw" and (not(@special) or @special!="er")] and 
+    //node[@cat="np" and
+           node[@rel="det"] and
+           node[@rel="mod" and @pt="bw" and (not(@special) or @special!="er")] and
            count(node)=3]
 
 
@@ -956,7 +956,7 @@ T027: BvZn
 
 * **Name**: BvZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -968,7 +968,7 @@ T027: BvZn
 
 
 * **Schlichting**: "Bijvoeglijk woord + Zelfstandig naamwoord. Onder een Bijvoeglijk woord (nota bene niet een ‘bijvoeglijk naamwoord’) verstaan we woorden die een eigenschap of een hoeveelheid aangeven:
- 
+
 1.    Bijvoeglijke naamwoordem, bijv. ‘grote’, ‘andere’
 2.    Telwoorden, bijvoeglijk gebruikt, bijv. ‘twee’, ‘eerste’
 3.    Bijvoeglijke woorden die een hoeveelheid aangeven, bijvoorbeeld ‘meer’, ‘veel’. Ook ‘nog’ wordt tot deze groep van bijvoeglijke woorden gerekend, namelijk dan wanneer het gevolgd kan worden door een telwoord: ‘nog auto’ is dus BvZn"
@@ -976,10 +976,10 @@ T027: BvZn
 The query is defined using the macro *BvZn*, which is defined as follows::
 
       BvZn = """ (count(node)=2 and
-                  (  (%headn% and (%coreadjmod% or %corevnwmod% or %corebwmod%)) 
+                  (  (%headn% and (%coreadjmod% or %corevnwmod% or %corebwmod%))
 
                   )
-                 )    
+                 )
              """
 
 
@@ -992,16 +992,16 @@ in which four other macros are used:
 * **coreadjmod**: adjective or numerals as modifier (note that ordinal numerals are analysed as adjectives by Alpino)::
 
      coreadjmod = """ (node[@rel="mod" and ( @pt="adj" or @pt="tw")] and not(node[@rel="det"])) """
-  
+
 * **corevnwmod**: indefinite pronouns acting as determiner, excluding genitives such as *iemands*, and  *geen*::
 
-    corevnwmod = """ (node[@rel="det" and 
+    corevnwmod = """ (node[@rel="det" and
                      (@pt="tw" or (@pt="vnw" and @vwtype="onbep" and @naamval!="gen" and @lemma!="geen"))] )"""
-    
+
 * **corebwmod**: basically any modifying adverb that is quantificational in nature (by the macro **qbwlemma** (so far only *nog*)::
 
     corebwmod = """ (node[@rel="mod" and @pt="bw" and %qbwlemma%]) """
-    
+
     qbwlemma = """ (@lemma="nog" ) """
 
 
@@ -1028,11 +1028,11 @@ T029: BWondBB
 
 
 * **Schlichting**: "Onderwerp + Werkwoord + drie Bijwoordelijke bepalingen."
- 
+
  Straigthforward implementation using of the macro **Tarsp_BWOndBB**, which is defined as follows::
- 
-    Tarsp_BWOndBB = """(%declarative% and %Ond% and 
-                       %Tarsp_W% and %Tarsp_B_X_count% = 3 and 
+
+    Tarsp_BWOndBB = """(%declarative% and %Ond% and
+                       %Tarsp_W% and %Tarsp_B_X_count% = 3 and
                        %realcomplormodnodecount% = 4)"""
 
 
@@ -1069,55 +1069,55 @@ Explanation: Alpino cannot deal very well with such structures. If there are add
 * Case 1: a match is found with a node with *cat* = *top* that does not contain a finite verb (**pv**) nor the word *niet* (*niet* is covered by a different language measure), and that does not contain at any depth a node with relation *dlink*: if such a node is present a full phrase or clause is present as well. If these conditions are met, several subcases are distinguished one of which must evaluate to True:
 
     * there must be exactly one  node anywhere in the structure with *cat* = *du*, containing exactly 2 realnodes (macro **realnode**), one of which is a single adverb (macro **singlewordbw**, see below)* and the other is a single word or a **corephrase**.  (example: *daar auto*), The macro **corephrase** is defined as follows::
-        
+
         corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
-        
+
     * there is a child node that meets the requirements of the macro **bxnp1**::
-    
-        bxnp1 = """(@cat="np" and count(node)=2 and 
-                    node[@rel="hd" and @pt="ww"] and 
+
+        bxnp1 = """(@cat="np" and count(node)=2 and
+                    node[@rel="hd" and @pt="ww"] and
                     node[@rel="mod" and @pt])"""
-        
+
       i.e. a NP that contains a verb as a head and a word that modifies it, and nothing else (example: *even pakken .*).
     * there is  a node with *cat* = *du* that contains exactly one  **realnode** that meets the requirements of the macro **bxnp1**
     * there is a child node that meets the requirements of the macro **bxnp2**, i.e. a noun phrase consisting of a head and a single word  modifier, and nothing else (example: *die hier*)::
-        
+
         bxnp2 = """(@cat="np" and count(node)=2 and node[@rel="hd"] and node[@rel="mod" and %singlewordbw%])"""
-        
+
     * there is a node with *cat* = *du* that contains exactly one  **realnode** that meets the requirements of the macro **bxnp2**
 
 
 * Case 2: the node meets the requirements of the macro **Tarsp_bnonfin**::
 
-    Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and 
-                        @rel="vc" and 
-                        parent::node[@cat="smain" and count(node)=1] and 
-                        node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and 
+    Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and
+                        @rel="vc" and
+                        parent::node[@cat="smain" and count(node)=1] and
+                        node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and
                         count(node[%realcomplormod%])=1 )"""
 
   This covers cases where a nonfinite verbal complement is the only child of an *smain* category and contains only a head verb and an adverbial modifier (defined by macro **Tarsp_B**, see :ref:`T007_B`). Such structures can only arise after correction through the *smallclauses* module. (See :ref:`smallclauses`).
 
 The macro **singlewordbw** is defined as follows::
-      
+
     singlewordbw = """ (@pt="bw" or %Rpronoun% or %adjadv%)"""
     adjadv = """(@pt='adj' and (@lemma='wel'))"""
 
 The macro **Rpronoun** simply lists all R-pronouns in a disjunction, and the **adjadv** macro is intended for words that are adverbs but analysed by Alpino (in some cases) as an adjective. So far, we only encountered this for *wel* (or was the **adjoradv** macro intended here?.
 
 
-* **Schlichting**: "Bijwoordelijke bepaling + een ander Zinsdeel. Dit andere Zinsdeel kan zijn een W, een VC of een B. BW, BVC en BB staan namelijk niet apart op de profielkaart. In de praktijk worden hier ook zinnen gescoord met een B en een ander zinsdeel waarvan men niet weet of het een onderwerp of een VC is. De zin ‘die ook’ bijvoorbeeld, kan betekenen ‘die moet ook’ of ‘die moet je ook daar doen’. Zulke twijfelgevallen kunnen we hier dus ook scoren." 
+* **Schlichting**: "Bijwoordelijke bepaling + een ander Zinsdeel. Dit andere Zinsdeel kan zijn een W, een VC of een B. BW, BVC en BB staan namelijk niet apart op de profielkaart. In de praktijk worden hier ook zinnen gescoord met een B en een ander zinsdeel waarvan men niet weet of het een onderwerp of een VC is. De zin ‘die ook’ bijvoorbeeld, kan betekenen ‘die moet ook’ of ‘die moet je ook daar doen’. Zulke twijfelgevallen kunnen we hier dus ook scoren."
    * Basically covered. if noun or pronoun precedes the adverb SASTA analyses the utterance as a *OndB*, not as a *BX*. That corresponded best to the actual practice in the annotated data received.
 
 
 
-T031: C 
+T031: C
 """"""""
 
 
 * **Name**: C .
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -1125,10 +1125,10 @@ T031: C
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: "Complement. Een aanvulling van het gezegde. Het Complement kan zijn:
- 
+
 1.    Naamwoordelijk deel van het gezegde. Het naamwoordelijk gezegde bestaat uit een koppelwerkwoord en (meestal) een zelfstandig naamwoord of bijvoeglijk naamwoord. Voorbeelden Zij is *mijn zusje*, Ben je *moe*, Dat is *van hem*
 2.    Bepaling van gesteldheid. Deze zegt iets van het werkwoord en van het lijdend voorwerp of het onderwerp. De bepaling van gesteldheid wordt ook wel ‘dubbelverbonden bepaling’ genoemd. Voorbeelden: Die ga ik *groen* kleuren, Dat vind ik *lekker*, hij heeft het *kapot* gemaakt, ik kan dat *alleen*
 
@@ -1145,7 +1145,7 @@ T032: de
 
 * **Name**: de.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1153,8 +1153,8 @@ T032: de
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@cat="np" and 
-           node[@rel="det" and @lemma="de"] and 
+    //node[@cat="np" and
+           node[@rel="det" and @lemma="de"] and
            count(node)=2]
 
 
@@ -1169,7 +1169,7 @@ T033: die/dezeZn
 
 * **Name**: die/dezeZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1177,11 +1177,11 @@ T033: die/dezeZn
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@cat="np" and 
-           node[@pt="n" and @rel="hd"] and 
-           node[@pt="vnw" and @vwtype="aanw" and 
-                @rel="det" and 
-                (@lemma="die" or @lemma="deze")] and 
+    //node[@cat="np" and
+           node[@pt="n" and @rel="hd"] and
+           node[@pt="vnw" and @vwtype="aanw" and
+                @rel="det" and
+                (@lemma="die" or @lemma="deze")] and
            count(node)=2]
 
 
@@ -1197,7 +1197,7 @@ T034: dit/datZn
 
 * **Name**: dit/datZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1205,11 +1205,11 @@ T034: dit/datZn
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@cat="np" and 
-           node[@pt="n" and @rel="hd"] and 
-           node[@pt="vnw" and @vwtype="aanw" and 
-                @rel="det" and 
-                (@lemma="dit" or @lemma="dat")] and 
+    //node[@cat="np" and
+           node[@pt="n" and @rel="hd"] and
+           node[@pt="vnw" and @vwtype="aanw" and
+                @rel="det" and
+                (@lemma="dit" or @lemma="dat")] and
            count(node)=2]
 
 
@@ -1226,7 +1226,7 @@ T035: een
 
 * **Name**: een.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1249,7 +1249,7 @@ T036: en
 
 * **Name**: en.
 * **Category**: Verbindingswoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1260,7 +1260,7 @@ T036: en
     //node[@pt="vg" and @lemma="en" and @rel="dlink"]
 
 This query is self-explanatory. The condition on *rel* excludes *en* in conjunctions.
- 
+
 
 * **Schlichting**: "Het verbindingswoord ‘en’ wordt in deze Fase gebruik om een zinsdeel of een zin te introduceren. In Fase VI wordt ‘en’ gebruikt om twee hoofdzinnen met elkaar te verbinden."
 
@@ -1273,7 +1273,7 @@ T037: er
 
 * **Name**: er.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1297,7 +1297,7 @@ T038: geen X
 
 * **Name**: geen X.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1345,7 +1345,7 @@ T040: hem
 
 * **Name**: hem.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1355,24 +1355,24 @@ T040: hem
 
     //node[@lemma="hem" and @pt="vnw"]
 
-The query is self-explanatory. It is crucial that the formulation is in terms of *lemma* (and not *word*), otherwise we will miss cases where the word is written with an initial capital (*Hem*) and reduced forms (*'m*). 
+The query is self-explanatory. It is crucial that the formulation is in terms of *lemma* (and not *word*), otherwise we will miss cases where the word is written with an initial capital (*Hem*) and reduced forms (*'m*).
 
 * **Schlichting**: "Het persoonlijk voornaamwoord ‘hem’, gebruikt als voorwerp.". Covered.
 
 
 
-T041: het 
+T041: het
 """"""""""
 
 
 * **Name**: het .
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
 * **Page**: 80
-* **Implementation**: Xpath 
+* **Implementation**: Xpath
 * **Query** defined as::
 
     //node[@lemma="het" and @pt='vnw' ]
@@ -1390,7 +1390,7 @@ T042: hetZn
 
 * **Name**: hetZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1402,7 +1402,7 @@ T042: hetZn
            node[@pt="lid" and @rel="det" and @lemma="het"] and
            node[@rel="hd" and @pt="n"]]
 
-The query is self-explanatory. 
+The query is self-explanatory.
 * **Remark** We shoud add a condition so that only these two elements are allowed inside the NP.
 
 * **Schlichting**: "Bepaald lidwoord + onzijdig Zelfstandig naamwoord. Ook onjuist gebruik mag gescoord worden. De constructie ‘naar het strand’ wordt gescoord bij VzbepZn èn bij hetZn."
@@ -1415,7 +1415,7 @@ T043: hij
 
 * **Name**: hij.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1424,7 +1424,7 @@ T043: hij
 * **Query** defined as::
 
     //node[@lemma="hij" and @pt="vnw"]
-    
+
 The query is self-explanatory. The condition formulated in ters of *lemma* allows reduced forms (*ie*, even *tie* and *-ie*) and occurrences with capital letters (*Hij*)
 
 
@@ -1439,7 +1439,7 @@ T044: Hww i
 
 * **Name**: Hww i.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1448,7 +1448,7 @@ T044: Hww i
 * **Query** defined as::
 
     //node[%Tarsp_Hwwi%]
-    
+
 The macro **Tarsp_Hwwi** is defined as follows::
 
     Tarsp_Hwwi = """(( @pt="ww" and @rel="hd" and @wvorm="pv" and
@@ -1457,9 +1457,9 @@ The macro **Tarsp_Hwwi** is defined as follows::
                         (parent::node[node[@pt="ww" and @rel="vc" and @wvorm="inf"]])
                        )
                       ) or
-                      %robusthwwi%   
+                      %robusthwwi%
                     )"""
-                    
+
 Explanation:
 
 The core case can be described as follows:
@@ -1470,16 +1470,16 @@ The core case can be described as follows:
 
 There is also a second case, for robustness (i.e. if Alpino misanalysed), with the macro **robusthwwi**, defined as follows::
 
-    robusthwwi = """ (@cat="top" and 
+    robusthwwi = """ (@cat="top" and
                       .//node[@pt="ww" and %Tarsp_hww% and @wvorm="pv" and (@rel="--" or @rel="dp")] and
                       .//node[@pt="ww" and @wvorm="inf" and (@rel="--" or @rel="dp")]
                      )"""
- 
+
 This macro searches for a misanalysed (*rel* equal to *--* or *dp*) finite auxiliary verb anywhere in the structure, in combination with a misanalysed infinitive verb anywhere in the structure.
 
 
 * **Schlichting**: "Hulpwerkwoord gevolgd door een infinitief oftewel het hele werkwoord. De volgende werkwoorden rekenen we tot de hulpwerkwoorden; enkele worden verschillende malen genoemd:
- 
+
 1.    Hebben, zijn, zullen (hulpww van tijd|)
 2.    Gaan, komen, zijn, blijven, zitten, liggen lopen, staan (aspect)
 3.    Worden, zijn (lijdende vorm)
@@ -1501,7 +1501,7 @@ T045: Hww Vd
 
 * **Name**: Hww Vd.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1509,7 +1509,7 @@ T045: Hww Vd
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[(@pt="ww" and @rel="hd" and 
+    //node[(@pt="ww" and @rel="hd" and
            (@lemma="hebben" or @lemma="worden" or @lemma="zijn") and
        parent::node[node[@rel="vc" and (@cat="ppart" or (@pt="ww" and @wvorm="vd"))]
        ]) or %robusthwwvd%]
@@ -1518,13 +1518,13 @@ The core case of the query searches for one of the verbs *hebben*, *worden* or *
 
 There is also a robust case (macro **robusthwwvd**)::
 
-    robusthwwvd = """ (@cat="top" and 
+    robusthwwvd = """ (@cat="top" and
                        .//node[@pt="ww" and %vdhwws% and @wvorm="pv" and (@rel="--" or @rel="dp")] and
                        .//node[@pt="ww" and @wvorm="vd" and (@rel="--" or @rel="dp")]
                       )"""
 
 This macro searches for a misanalysed (*rel* equal to *--* or *dp*) finite auxiliary verb that takes a participial clause (macro **vdhwws**) anywhere in the structure, in combination with a misanalysed participial verb anywhere in the structure. The macro **vdhwwws** is defined as follows::
-    
+
     vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")"""
 
 
@@ -1542,7 +1542,7 @@ T046: HwwZ
 
 * **Name**: HwwZ.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1556,13 +1556,13 @@ T046: HwwZ
 
 The macro **Tarsp_HwwZ** is defined as follows::
 
-    Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and 
-                     ((%Tarsp_hww% or @lemma = "hebben") and 
+    Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and
+                     ((%Tarsp_hww% or @lemma = "hebben") and
                       not(%Tarsp_vc_sibling%)
                      ) or
                      (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
                     )"""
-                    
+
 The query searches for finite forms of a head verb and distinguishes two subcases:
 
 * the finite form is a form of one of the auxiliary verbs that take an infinitival complement, or of the verb *hebben*: in this case no *vc* complement should be present, which is achieved by negting the **Tarsp_vc_sibling** macro, defined as follows::
@@ -1570,14 +1570,14 @@ The query searches for finite forms of a head verb and distinguishes two subcase
     Tarsp_vc_sibling = """parent::node[ node[@rel="vc"]]"""
 
 * the finite form is a form of the verb *zijn*: in this case a *vc* complement must be absent but an *ld* sibling must be present. This has been done to exclude regular copular uses of the verb *zijn* (when combined with an adjective (phrase) or noun (phrase) predicate. The presence of the *ld* sibling is ensured by the **Tarsp_ld_sibling** macro::
-    
+
     Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
 
 
 * **Schlichting**: "Hulpwerkwoord Zelfstandig gebruikt. De eerste persoonsvorm die door de kinderen na het koppelwerkwoord geleerd wordt is de tegenwoordige tijd enkelvoud van het hulpwerkwoord, 'zelfstandig' gebruikt, 'Zelfstandig' betekent in dit verband dat het hulpwerkwoord niet gevolgd wordt door een hoofdwerkwoord. Tot deze 'zelfstandig' gebruikte hulpwerkwoorden rekenen we: *blijven, doen, gaan, hebben, hoeven, horen, komen, kunnen, laten, liggen, lopen, moeten, mogen, staan, willen, worden, zijn, zitten, zullen*". The list provided here is identical to the list provided under T044 (see :ref:`T044_Hwwi`),  except that *behoren* is not explicitly mentioned, plus the auxiliaries *hebben*, *zijn* en *worden*." Covered.
    * "Wanneer het hulpwerkwoord wordt gevolgd door een onbepaalde wijs (bijvoorbeeld; 'ik wil fietsen') of door een onvoltooid deelwoord (bijvoorbeeld: 'ze heeft geroepen') wordt het hier niet gescoord (zie Hww i, Fase III en Hww Vd, Fase IV)." Covered
    * "Wanneer het 'zelfstandig'gebruikte hulpwerkwoord in het meervoud staat (bijvoorbeeld: 'nou gaan we') wordt het niet hier gescoord maar bij het Meervoud van de Tegenwoordige Tijd." Not covered
-   * "Wanneer het 'zelfstandig' gebruikte hulpwerkwoord in de verleden tijd staat (bijvoorbeedl: 'dat deed jij') wordt het niet hier gescoord maar bij de Verleden tijd." Not Covered 
+   * "Wanneer het 'zelfstandig' gebruikte hulpwerkwoord in de verleden tijd staat (bijvoorbeedl: 'dat deed jij') wordt het niet hier gescoord maar bij de Verleden tijd." Not Covered
    * "De hulpwerkwoorden die hier gescoord worden, behoeven niet gescoord te worden bij Stam of Stam + t."See under *Stam* and *Stam + t*
 
 * **Remark** the uncovered cases can be improved by adding the following condition: @pvagr!="mv" and @pvtijd!="verl"
@@ -1589,7 +1589,7 @@ T047: ik
 
 * **Name**: ik.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1619,7 +1619,7 @@ T048: Into
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 Though it is trivial to implement this by looking for the presence of a question mark or exclamation mark, the use of these annotations by annotators appears to be qufaantekeninite inconsistent.
 
 
@@ -1645,13 +1645,13 @@ T049: Inv
 
     //node[(((@cat="sv1" and not(parent::node[@cat="whq"])) or
              (@cat="smain" )
-            ) and 
-            node[@pt="ww" and @rel="hd" and (not(@stype) or @stype!="imparative") ] and 
+            ) and
+            node[@pt="ww" and @rel="hd" and (not(@stype) or @stype!="imparative") ] and
             node[@rel="su" and number(@end)>../node[@rel="hd"]/@end]
-           ) or 
+           ) or
            %robustinversion%]
 
-The core case of this query looks for 
+The core case of this query looks for
 
 * *sv1* nodes not dominated by a *whq* node or *smain* node
 * that are not imperatives
@@ -1659,19 +1659,19 @@ The core case of this query looks for
 
 The robust case has been implemented by the macro **robustinversion**, defined as follows::
 
-   robustinversion = """(@cat="top" and 
+   robustinversion = """(@cat="top" and
                          .//node[@pt="ww"  and @wvorm="pv" and  @rel!="hd" and
-        						 (not(@stype) or @stype!="imparative")] and 
+        						 (not(@stype) or @stype!="imparative")] and
                          .//node[@pt="vnw" and @naamval="nomin" and @rel!="su" and
                                  @end>..//node[@pt="ww" and @wvorm="pv"]/@end])"""
-                         
+
 It searches for wrongly analyzed structures  (cf. the conditions on the grammatical relations) that contain:
 
 * anywhere a non-head finite verb that is not marked for *stype* = *imparative* (Alpino  indeed uses this misspelling of *imperative* as value)
 * anywhere a non-subject nominative pronoun
 * where the pronoun precedes the verb
 
-* **Schlichting**: 
+* **Schlichting**:
     "Hiermee wordt bedoeld de inversie of omkering van persoonsvorm en onderwerp. In de eerste constructie met onderwerp en persoonsvorm die zij leren, gebruiken de kinderen de volgorde onderwerp - persoonsvorm. heel spoedig daarna leren ze de inversievolgorde"
 
     Inversie hoeft in principe niet elke keer dat het voorkomt gescoord te worden. Het is van belang dat men bij elke leerling die in de Grammaticale Ontwikkelingsfase III of hoger valt controleert dat het kind twee- of driemaal de inversievolgorde gebruikt. Fouten tegen de regel van inversie worden apart genoteerd, bijvoorbeeld achterop de profielkaart. Het is waarschijnlijk dat in Zuid-Nederland deze Inversie wat later wordt geleerd dan in Noord-Nederland"
@@ -1687,7 +1687,7 @@ T050: jij
 
 * **Name**: jij.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1695,7 +1695,7 @@ T050: jij
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[@lemma="jij" or 
+    //node[@lemma="jij" or
           (@lemma="je"  and (@vwtype="pr" or @vwtype="pers") and (@rel="su" ))]
 
 The reduced form *je* does not have *jij* as its lemma, probably because it is also a reduced form of *jou* and *jouw*. Its lemma is *je*.
@@ -1711,7 +1711,7 @@ T051: jou
 
 * **Name**: jou.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1719,11 +1719,11 @@ T051: jou
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[(@lemma="je" or @lemma="jou") and 
-           (@vwtype="pr" or @vwtype="pers") and 
+    //node[(@lemma="je" or @lemma="jou") and
+           (@vwtype="pr" or @vwtype="pers") and
            (@rel="obj1" or @rel="obj2")]
 
-The query is self-explanatory. 
+The query is self-explanatory.
 
 * The lemma differs for *jou* and *je*, see also :ref:`T050_jij`
 * The *vwtype* for *je* and *jou* differs, so both options must be allowed
@@ -1758,8 +1758,8 @@ The macro **Tarsp_Kop** is defined as follows::
     Tarsp_Kop = """(   @pt="ww" and @rel="hd" and not(%Tarsp_hww%) and
 
                      ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or
-                      (@lemma="zijn" and not(%Tarsp_vc_sibling%) 
-					   and not(%Tarsp_ld_sibling%) and 
+                      (@lemma="zijn" and not(%Tarsp_vc_sibling%)
+					   and not(%Tarsp_ld_sibling%) and
 					   not(%Tarsp_onlymodR_sibling%))
                      )
                    )"""
@@ -1769,7 +1769,7 @@ Explanation: a node is a copular verb if it is a verb acting as a head but not a
 
    * either it has a *predc* sibling (**tarsp_predc_sibling**) but no direct object (*obj1*) sibling (**Tarsp_obj1_sibling**), or
    * the lemma equals *zijn* and it has no *vc* sibling (**Tarsp_vc_sibling**), no *ld* sibling, and no Rpronoun as modifier if no predicate is present (**Tarsp_onlymodR_sibling**)
-   
+
 The *sibling* macros are defined as follows::
 
     Tarsp_vc_sibling = """parent::node[ node[@rel="vc"]]"""
@@ -1783,17 +1783,17 @@ The *sibling* macros are defined as follows::
 The definition of *zijn* as a copula does not require the presence of a predicate, it rather excludes complements and modifiers that indicate a  different usage of *zijn* (e.g., as an auxiliary verb, or as an independent verb of location). This has been done because in incomplete sentences or misanalysed sentences containing *zijn*, the most probable interpretation of *zijn* is  in most cases as a copula (with a left-out or unpronounced predicate).
 
 The query does not list the copulas explicitly because there are many more copulas than traditionally assumed and also many more than [Schlichting 2005:47] mentions for child language (e.g. *gaan*, *aanvoelen*, *raken*, etc).
- 
-  
+
+
 
 * **Schlichting**: "Koppelwerkwoord. We onderscheiden twee soorten gezegdes:"
 
     1. "Werkwoordelijke, bijvoorbeeld 'zij *werkt* 's morgens'"
     2. "Naamwoordelijke gezegdes, bijvoorbeeld 'hij *is tuinman*' en 'jij *bent moe*'."
-    
+
        "Naamwoordelijke gezegdes bestaan uit een koppelwerkwoord en een naamwoordelijk deel van  het gezegde. Het koppelwerkwoord heeft niet veel betekenis van zichzelf. het vormt de koppeling tussen het onderwerp en het naamwoordelijk deel van het gezegde. Het meest gebruikte koppelwerkwoord, ook in de kindertaal, is 'zijn'. Andere voorkomende koppelwerkwoorden zijn 'worden', 'blijven' en 'lijken'.
-    
-       "Aanvankelijk wordt alleen de vorm 'is' nog gebruikt. Het Koppelwerkwoord wordt geanalyseerd als speciaal Zinsdeel 'W-Kop'en wordt apart bij de Zinsdelen in Fase II gescoord."       
+
+       "Aanvankelijk wordt alleen de vorm 'is' nog gebruikt. Het Koppelwerkwoord wordt geanalyseerd als speciaal Zinsdeel 'W-Kop'en wordt apart bij de Zinsdelen in Fase II gescoord."
 
 * **Note** In Sasta a copular verb is annotated by the code *Kop*, **not** by *W-Kop*. Since it is also a verb, two codes are used: *W,Kop*
 
@@ -1803,7 +1803,7 @@ T053: maar
 
 * **Name**: maar.
 * **Category**: Verbindingswoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1811,7 +1811,7 @@ T053: maar
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@lemma="maar" and 
+    //node[@lemma="maar" and
        ((@pt="vg") or
         (@pt="bw" and parent::node[@cat="smain"] and @begin=parent::node/@begin))
       ]
@@ -1827,12 +1827,12 @@ T054: Sv1
 
 
 * **Name**: Sv1.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: no
 * **In form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1858,7 +1858,7 @@ T055: Mededelende Zin
 * **Implementation**: none
 * **Query** defined as: **not implemented**
 
-    
+
 This is not really a language measure, but rather a class of language measures that apply to declarative sentences.
 
 
@@ -1871,7 +1871,7 @@ T056: mij
 
 * **Name**: mij.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1879,7 +1879,7 @@ T056: mij
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[(@lemma="me" or @lemma="mij") and 
+    //node[(@lemma="me" or @lemma="mij") and
            (@vwtype="pr" or @vwtype="pers")]
 
 * The lemma differs for *mij* and *me*, see also :ref:`T050_jij`
@@ -1899,7 +1899,7 @@ T057: MvTT
 
 * **Name**: MvTT.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1922,7 +1922,7 @@ T058: MvZn
 
 * **Name**: MvZn.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -1946,7 +1946,7 @@ T059: Nabep
 
 * **Name**: Nabep.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -1954,8 +1954,8 @@ T059: Nabep
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    // node[@rel="mod" and 
-            (not(@lemma) or (@lemma!="ook" and @lemma!="dan")) and 
+    // node[@rel="mod" and
+            (not(@lemma) or (@lemma!="ook" and @lemma!="dan")) and
             parent::node[@cat="np" and node[@rel="hd" and @pt!="ww"]] and
             @begin >= ../node[@rel="hd"]/@end]
 
@@ -1963,7 +1963,7 @@ Explanation:
 
 * the node must be a modifier, and either a phrase, or if it is a single word it should not be *ook* or *dan*
 * it must modify a head that is not a verb inside an NP
-* the node must follow the head 
+* the node must follow the head
 
 * **Schlichting**: "In 'de grote plant' zijn 'de' en 'grote' bepalende woorden bij 'plant', in 'de plant met de grote bladeren'is 'met de grote bladeren'een bepaling bij 'plant, maar deze bepaling staat na het kernwoord. Dit noemen we een 'nabepaling'."
 
@@ -1986,7 +1986,7 @@ T060: Nevens
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[node[@rel="cnj" and (@cat="smain" or @cat="sv1")] and 
+    //node[node[@rel="cnj" and (@cat="smain" or @cat="sv1")] and
            node[@rel="crd" ]]
 
 
@@ -2012,10 +2012,10 @@ T061: Nevenschikkende
 * **Original**: yes
 * **In form**: no
 * **Page**: 54
-* **Implementation**: Xpath 
+* **Implementation**: Xpath
 * **Query** defined as: **not implemented yet**
 
-This is actually not a language measure but  subclass of "samengestelde zinnen".    
+This is actually not a language measure but  subclass of "samengestelde zinnen".
 
 
 
@@ -2027,7 +2027,7 @@ T062: Ombep
 
 * **Name**: Ombep.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -2049,7 +2049,7 @@ T063: Ond
 
 * **Name**: Ond.
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -2071,13 +2071,13 @@ where **subject** (see :ref:`zinsdelen`) and **erx** are defined as::
               (@rel="mod" and @lemma="er" and ../node[@rel="su" and not(@pt) and not(@cat)])
              )
           """
-          
+
 
 The **erx** macro is to ensure that so-called *expletive er* also counts a subject. We implemented this in the following manner: *er* is considered (also) expletive (and thus must count as a subject):
 
 * if it precedes the subject  (as in **er** *kwam iemand binnen*), or
 * if there is an empty subject, to cover cases such as *wie zwom* **er**. Note that in *wie heeft* **er** gezwommen* this *er* is considered a subject because of the empty subject of the participial clause, which is perhaps not what we want.
- 
+
 
 
 
@@ -2104,9 +2104,9 @@ T064: OndB
 
 Straightforward implementation::
 
-    Tarsp_OndB = """(%Ond% and  
-                     node[%Tarsp_Basic_B%]  and 
-                     count(node) = 2)"""    
+    Tarsp_OndB = """(%Ond% and
+                     node[%Tarsp_Basic_B%]  and
+                     count(node) = 2)"""
 
 See :ref:`smallclauses` for details.
 
@@ -2134,9 +2134,9 @@ T065: OndBVC
 Straightforward implementation::
 
 
-    Tarsp_OndBVC = """(%Ond% and 
-                       node[%Tarsp_Basic_B%]  and 
-                       node[%Tarsp_Basic_VC%]  and 
+    Tarsp_OndBVC = """(%Ond% and
+                       node[%Tarsp_Basic_B%]  and
+                       node[%Tarsp_Basic_VC%]  and
                        count(node) = 3) """
 
 See :ref:`smallclauses` for details.
@@ -2159,7 +2159,7 @@ T066: Onderbr
 * **Query** defined as: **not implemented yet**
 
 This is not really a language measure. It is rather an indication of how sentences containing an interruption by another sentence or phrase should be analysed.
-    
+
 
 * **Schlichting**: "Soms wordt de zin onderbroken met een korte zin of een Zinsdeel. Beide zinnen worden ook apart geanalyseerd"
 
@@ -2185,12 +2185,12 @@ T067: Onderschikkend: B
                    ((((@rel="mod" or @rel="ld" or @rel="predm") and
                       (not(@cat) or @cat!="conj") and
                       (not(@pt) or @pt!="tsw")
-                     )or 
+                     )or
                      (%predcB%)
-                    ) and 
+                    ) and
                     (../node[@pt="ww" and @rel="hd"])
                    ) or
-                   ((@pt="vz" or @pt="bw" or %Rpronoun%) and 
+                   ((@pt="vz" or @pt="bw" or %Rpronoun%) and
                     (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and
                     %notonlyrealnode%) or
                    (@cat="pp" and (@rel="--" or @rel="dp") and %notonlyrealnode%) or
@@ -2200,9 +2200,9 @@ T067: Onderschikkend: B
                    %Tarsp_nonmodadvcp% or
                    %Tarsp_pc_vc_exception%
                   )
-     
+
                """
-               
+
 The query distinguishes several subcases as alternatives (joined by *or*):
 
 * Any node with one of the grammatical relations *mod*, *ld* or *predm* provided:
@@ -2213,15 +2213,15 @@ The query distinguishes several subcases as alternatives (joined by *or*):
 
 * Any adverbial predicate that has a head verb as sibling. Adverbial predicates are defined by the macro **predcB**::
 
-    predcB = """(@rel="predc" and 
+    predcB = """(@rel="predc" and
                  (@pt="adj" or @pt="bw" or @cat="ap" or @cat="advp") and
                  ../node[@rel="obj1"]
-                )"""  
-    
+                )"""
+
   so these are *predc* nodes with a direct object as sibling
 
 * **Remark** We now miss cases where the object is absent due to  Topic drop (e.g. *vind ik goed*). Maybe replace it by disallowing real copulas.
-    
+
 * Any adpositon, adverb or Rpronoun not in a core grammatical relation but with any of the relations *dp*, *--*, *nucl*, *body* provided that they are not the only  realnode present, where a real node is any node that is not a interjection, interpunction sign or of unknown part of speech tag::
 
     realnode = """((not(@pt) or (@pt!="let" and @pt!="tsw")) and (not(@postag) or @postag!="NA()"))"""
@@ -2233,13 +2233,13 @@ The query distinguishes several subcases as alternatives (joined by *or*):
 * Any adverb inside an NP with relation *mod*. This is especially for adverbs such as *ook*, *nog*, *niet*, *alleen*, but also for adverbs inside NPs with a substantivised verb as a head (e.g. *even pakken*).
 * Adverbial clauses that occur independently (e.g. *als mama thuiskomt*), as defined by the macro **Tarsp_nonmodadvcp**::
 
-      Tarsp_nonmodadvcp = """(@cat="cp" and (@rel="dp" or @rel="--") and 
-                              node[@pt="vg" and @conjtype="onder" and 
+      Tarsp_nonmodadvcp = """(@cat="cp" and (@rel="dp" or @rel="--") and
+                              node[@pt="vg" and @conjtype="onder" and
                               @lemma!="dat" and @lemma!="of" ] )"""
 
-* **remark** I am not sure that this should be kept. Maybe move it to Bbijzin 
+* **remark** I am not sure that this should be kept. Maybe move it to Bbijzin
 
-* Adpositional complements that should have been analysed as adverbial modifiers. Achieved by the macro **Tarsp_pc_vc_exception**, explained elsewhere (see section :ref:`generatemacros`). 
+* Adpositional complements that should have been analysed as adverbial modifiers. Achieved by the macro **Tarsp_pc_vc_exception**, explained elsewhere (see section :ref:`generatemacros`).
      * **Remark** There is overlap with the condition on locative verbs above. It has to be found out how big the overlap is, and whether this can be simplified.
 
 * **Schlichting**: "De bijwoordelijke bepaling zegt iets over de hele inhoud van de zin of iets over het werkwoord, een bijwoord of bijvoeglijk naamwoord. Een zin kan meer dan één bijwoordelijke bepaling hebben"
@@ -2263,22 +2263,22 @@ T068: Onderschikkend: VC
 * **Query** defined as::
 
     //node[%complement% and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub" or @cat="inf" or @cat="ppart") ]]
-    
+
 This is not a language measure that occurs in the form. The macro **complement** is defined as follows::
 
-    complement = """((@rel="obj1" or @rel="obj2") or 
+    complement = """((@rel="obj1" or @rel="obj2") or
                  (@rel="predc" and not(%predcB%)) or
                  (@rel="pobj1" and not(%pobj1B%) ) or
                  %verbalcomplement%
                 )"""
-                
+
     verbalcomplement = """(@rel="vc" and (@cat="cp" or @cat="whq" or @cat="whsub"))"""
-         
-    predcB = """(@rel="predc" and 
+
+    predcB = """(@rel="predc" and
                (@pt="adj" or @pt="bw" or @cat="ap" or @cat="advp") and
                ../node[@rel="obj1"]
              )"""
-         
+
     pobj1B = """(@rel="pc" and ../node[@rel="hd" and %locverb%])"""
 
 * **Remark** The differences with **Tarsp_VC** (see :ref:`zinsdelen`) should be studied, and we should probably make them equal. T068 has not been maintained systematically, so very likely **Tarsp_VC** is the best one.
@@ -2309,7 +2309,7 @@ T069: Onderschikkende
 
 This is mot really a query, but rather a class of clauses: subordinate clauses.
 
-    
+
 
 
 * **Schlichting**: "Bijzinnen horen meestal bij een hoofdzin. Men kan een bijzin herkennen aan de plaats waar de persoonsvorm staat, dat is namelijk helemaal of bijna helemaal achteraan in de zin."
@@ -2323,7 +2323,7 @@ T070: Onderwerpswoordgroep
 
 * **Name**: Onderwerpswoordgroep.
 * **Category**: Uitbreiding Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -2336,7 +2336,7 @@ T070: Onderwerpswoordgroep
 
 * **Schlichting**: " Bij het behandelen van de Woordgroepen hebben we gezien dat een zinsdeel uitgebreid kan zijn tot een woordgroep."
 
-* **Remark** We currently do not underline these phrases, nor do we circle the utterance id in the form. 
+* **Remark** We currently do not underline these phrases, nor do we circle the utterance id in the form.
 
 
 
@@ -2360,18 +2360,18 @@ T071: OndVC
 Straightforward implementation::
 
 
-    Tarsp_OndVC = """(%Ond% and  
-                       node[%Tarsp_Basic_VC%]  and 
+    Tarsp_OndVC = """(%Ond% and
+                       node[%Tarsp_Basic_VC%]  and
                        count(node) = 2) """
 
 
 
 where::
 
-    Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and 
-                         node[%Tarsp_Basic_VC%] and 
+    Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and
+                         node[%Tarsp_Basic_VC%] and
                          count(%fillednode%)=2)"""
-                         
+
 See section :ref:`smallclauses` for details.
 
 
@@ -2406,9 +2406,9 @@ T072: OndW
 
 Straightforward implementation::
 
-    Tarsp_OndW = """(%declarative% and 
-                    %Ond% and  
-                    (%Tarsp_W%  or node[%Tarsp_onlyWinVC%]) and 
+    Tarsp_OndW = """(%declarative% and
+                    %Ond% and
+                    (%Tarsp_W%  or node[%Tarsp_onlyWinVC%]) and
                     %realcomplormodnodecount% = 1 )"""
 
 See section :ref:`composedmeasures` for details.
@@ -2442,10 +2442,10 @@ T073: OndWB
 
 Straightforward implementation::
 
-    Tarsp_OndWB = """(%declarative% and 
-                      %Ond% and  
-                      %Tarsp_W% and 
-                      %Tarsp_B_X%  and 
+    Tarsp_OndWB = """(%declarative% and
+                      %Ond% and
+                      %Tarsp_W% and
+                      %Tarsp_B_X%  and
                       %realcomplormodnodecount% = 2 )"""
 
 See section :ref:`composedmeasures` for details.
@@ -2473,10 +2473,10 @@ T074: OndWBB
 Straightforward implementation::
 
 
-    Tarsp_OndWBB = """(%declarative% and 
-                       %Ond% and 
-                       %Tarsp_W% and 
-                       %Tarsp_B_X_count% = 2 and 
+    Tarsp_OndWBB = """(%declarative% and
+                       %Ond% and
+                       %Tarsp_W% and
+                       %Tarsp_B_X_count% = 2 and
                        %realcomplormodnodecount% = 3)"""
 
 
@@ -2505,11 +2505,11 @@ T075: OndWBVC
 Straightforward implementation::
 
 
-    Tarsp_OndWBVC = """(%declarative% and 
-                        %Ond% and  
-                        %Tarsp_W% and 
-                        %Tarsp_B_X% and 
-                        %Tarsp_VC_X% and 
+    Tarsp_OndWBVC = """(%declarative% and
+                        %Ond% and
+                        %Tarsp_W% and
+                        %Tarsp_B_X% and
+                        %Tarsp_VC_X% and
                         %realcomplormodnodecount% = 3 )"""
 
 
@@ -2539,10 +2539,10 @@ T076: OndWVC
 
 Straightforward implementation::
 
-    Tarsp_OndWVC = """(%declarative% and 
-                       %Ond% and  
-                       %Tarsp_W%  and 
-                       %Tarsp_VC_X% and 
+    Tarsp_OndWVC = """(%declarative% and
+                       %Ond% and
+                       %Tarsp_W%  and
+                       %Tarsp_VC_X% and
                        %realcomplormodnodecount% = 2 )
                    """
 
@@ -2571,10 +2571,10 @@ T077: OndWVCVC(X)
 
 Straightforward implementation::
 
-    Tarsp_OndWVCVCX = """(%declarative% and 
-                          %Ond% and 
-                          %Tarsp_W% and 
-                          %Tarsp_VC_X_count% = 2  and 
+    Tarsp_OndWVCVCX = """(%declarative% and
+                          %Ond% and
+                          %Tarsp_W% and
+                          %Tarsp_VC_X_count% = 2  and
                           %realcomplormodnodecount% <= 4 )"""
 
 
@@ -2598,7 +2598,7 @@ T078: Ov2
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: " "
 
@@ -2623,11 +2623,11 @@ T079: Ov3
     //node[%Tarsp_Ov3%]
 
 
-    Tarsp_Ov3 = """(%declarative% and 
-                   not(%Tarsp_OndWVC%) and 
-                   not(%Tarsp_OndWB%) and 
-                   not(%Tarsp_BBX%)and 
-                   not(%Tarsp_WBVC%) and 
+    Tarsp_Ov3 = """(%declarative% and
+                   not(%Tarsp_OndWVC%) and
+                   not(%Tarsp_OndWB%) and
+                   not(%Tarsp_BBX%)and
+                   not(%Tarsp_WBVC%) and
                    not(%Tarsp_OndB%) and
                    not(%Tarsp_OndVC%) and
                    %realcomplormodnodecount% = 2) """
@@ -2655,10 +2655,10 @@ T080: Ov7
 * **Original**: yes
 * **In form**: yes
 * **Page**: 58
-* **Implementation**: Xpath 
+* **Implementation**: Xpath
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: " "
 
@@ -2672,7 +2672,7 @@ T081: OvWg7
 
 * **Name**: OvWg7.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -2680,7 +2680,7 @@ T081: OvWg7
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: " "
@@ -2694,7 +2694,7 @@ T082: OvVerb6
 
 * **Name**: OvVerb6.
 * **Category**: Verbindingswoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -2702,7 +2702,7 @@ T082: OvVerb6
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: " "
 
@@ -2729,10 +2729,10 @@ T083: Ov4
 The macro **Tarsp_Ov4** is defined as follows::
 
 
-    Tarsp_Ov4 = """(%declarative% and 
-                   %realcomplormodnodecount% = 3 and 
-                   not(%Tarsp_OndWBVC%) and 
-                   not(%Tarsp_OndWBB%) and 
+    Tarsp_Ov4 = """(%declarative% and
+                   %realcomplormodnodecount% = 3 and
+                   not(%Tarsp_OndWBVC%) and
+                   not(%Tarsp_OndWBB%) and
                    not(%Tarsp_OndWVCVCX%))"""
 
 
@@ -2761,15 +2761,15 @@ T084: Ov5
 * **Query** defined as::
 
     //node[%Tarsp_Ov5%]
-    
+
 The macro **Tarsp_Ov5** is defined as follows::
 
 
-    Tarsp_Ov5 = """(%declarative% and %realcomplormodnodecount% = 4 and 
-                    not(%Tarsp_VCWOndBB%) and 
-                    not(%Tarsp_OndWVCVCX%) and 
+    Tarsp_Ov5 = """(%declarative% and %realcomplormodnodecount% = 4 and
+                    not(%Tarsp_VCWOndBB%) and
+                    not(%Tarsp_OndWVCVCX%) and
                     not(%Tarsp_BWOndBB%) )"""
-    
+
 The definition is straightforward:
 
 * declarative clauses
@@ -2787,7 +2787,7 @@ T085: Overige
 
 * **Name**: Overige.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -2795,12 +2795,12 @@ T085: Overige
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@lemma="alles"  or 
-           @lemma="niets" or 
-           @lemma="niks" or 
-           (@lemma="wat" and @vwtype= "onbep") or 
-           @lemma="u" or 
-           @lemma="ons"  or 
+    //node[@lemma="alles"  or
+           @lemma="niets" or
+           @lemma="niks" or
+           (@lemma="wat" and @vwtype= "onbep") or
+           @lemma="u" or
+           @lemma="ons"  or
            @lemma="zelf"]
 
 
@@ -2817,7 +2817,7 @@ T086: SamZn
 
 * **Name**: SamZn.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -2862,7 +2862,7 @@ New versions of Alpino may treat these words differently.
 However, not all words that are a compound are marked as such  in the Alpino lexicon (e.g. *tafelkleed*). Therefore we also use a list of compounds derived from CELEX.
 
 The language measure T086 has been implemented by the Python function getcompounds from the compounds module, which has been described :ref:`here <getcompounds-label>`.
-  
+
 
 * **Schlichting**: " "
 
@@ -2875,7 +2875,7 @@ T087: Stam
 
 * **Name**: Stam.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -2888,7 +2888,7 @@ T087: Stam
            not(%Tarsp_hww% or
                @lemma = "hebben" or
                @lemma = "worden" or
-               @lemma = "zijn"   
+               @lemma = "zijn"
               )
            and @pvagr="ev"  ]
 
@@ -2896,15 +2896,15 @@ T087: Stam
 
 * **Schlichting**: "Stam van het zelfstandig werkwoord (uitgezonderd die in de gebiedende Wijs)"
 
-* the stem of the verb is identical to the present tense singular form first person: in DCOI features: @pvtijd="tgw" and @pvagr="ev" 
+* the stem of the verb is identical to the present tense singular form first person: in DCOI features: @pvtijd="tgw" and @pvagr="ev"
 * we must exclude auxiliary verbs that are scored under Hww i (p. 65), Hww Vd (p. 69) or Hww Z (p. 85)
 * we must exclude the use of *kijk* as a V.U. We do so though the macro **Tarsp_kijkVU**. it basically allows any occurrence of *kijk* that does not have a PP complement or modifier, nor a *vc* complement::
 
-    Tarsp_kijkVU = """(@pt="ww" and 
-                       @lemma="kijken" and 
-                       @wvorm="pv" and 
-                       @pvagr="ev" and 
-                       @pvtijd="tgw" and 
+    Tarsp_kijkVU = """(@pt="ww" and
+                       @lemma="kijken" and
+                       @wvorm="pv" and
+                       @pvagr="ev" and
+                       @pvtijd="tgw" and
                        not(../node[%Tarsp_pporvc%]))"""
 
     Tarsp_pporvc = """ (((@rel="pc" or @rel="mod" or @rel="ld") and @cat="pp")  or @rel="vc")"""
@@ -2918,7 +2918,7 @@ T088: Stam+t
 
 * **Name**: Stam+t.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -2926,12 +2926,12 @@ T088: Stam+t
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@pt="ww" and @pvagr="met-t" and 
+    //node[@pt="ww" and @pvagr="met-t" and
            not(%Tarsp_hww% or
                @lemma = "hebben" or
                @lemma = "worden" or
-               @lemma = "zijn"   
-              ) 
+               @lemma = "zijn"
+              )
           ]
 
 
@@ -2950,18 +2950,18 @@ T089: Sz2+
 
 
 * **Name**: Sz2+.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-       //node[@cat="top" and 
-	          count(.//node[@cat="smain" or @cat="cp" or @cat="whsub" or 
-			                @cat="rel" or @cat="whrel"  or @cat="whq" or @cat="whsub" or 
+       //node[@cat="top" and
+	          count(.//node[@cat="smain" or @cat="cp" or @cat="whsub" or
+			                @cat="rel" or @cat="whrel"  or @cat="whq" or @cat="whsub" or
                             ( @cat="sv1" and not(parent::node[@cat="whq"]))
                            ]
                     ) >= 2]
@@ -2987,9 +2987,9 @@ T090: Sz3+
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-       //node[@cat="top" and 
-	          count(.//node[@cat="smain" or @cat="cp" or @cat="whsub" or 
-			        @cat="rel" or @cat="whrel"  or @cat="whq" or @cat="whsub" or 
+       //node[@cat="top" and
+	          count(.//node[@cat="smain" or @cat="cp" or @cat="whsub" or
+			        @cat="rel" or @cat="whrel"  or @cat="whq" or @cat="whsub" or
                     ( @cat="sv1" and not(parent::node[@cat="whq"]))
                              ]
                    ) >= 3]
@@ -3007,7 +3007,7 @@ T091: V (lijdend)
 
 * **Name**: V (lijdend).
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -3017,7 +3017,7 @@ T091: V (lijdend)
 
 Not implemented because they are subsumed under *VC*
 
-* **Schlichting**: "Het lijdend voorwerp van een zin kan meestal gevonden worden door een vraag te stellen met 'wat' betreffende het onderwerp en het werkwoord van de zin. [...] Het lijdend voorwerp van de bedrijvende vorm wordt het onderwerp van dezelfde zin in de lijdende vorm." 
+* **Schlichting**: "Het lijdend voorwerp van een zin kan meestal gevonden worden door een vraag te stellen met 'wat' betreffende het onderwerp en het werkwoord van de zin. [...] Het lijdend voorwerp van de bedrijvende vorm wordt het onderwerp van dezelfde zin in de lijdende vorm."
 
 
 
@@ -3029,7 +3029,7 @@ T092: V (meewerkend)
 
 * **Name**: V (meewerkend).
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -3051,7 +3051,7 @@ T093: V (Voorzetselvoorwerp)
 
 * **Name**: V (Voorzetselvoorwerp).
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -3071,7 +3071,7 @@ T094: V.U. Divers
 
 * **Name**: V.U. Divers.
 * **Category**: V.U.
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -3079,33 +3079,33 @@ T094: V.U. Divers
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[ (@lemma!="ja" and @lemma!="nee" and @word!="xxx" and 
-	         @lemma != "mama" and @word!="xx" and 
+    //node[ (@lemma!="ja" and @lemma!="nee" and @word!="xxx" and
+	         @lemma != "mama" and @word!="xx" and
              ((@pt="tsw" and @lemma!="hè") or
-              (@pt="tsw" and @lemma="hè" and @rel="tag" 
+              (@pt="tsw" and @lemma="hè" and @rel="tag"
 			   and number(@end)<=number(../node[@rel="nucl"]/@begin)) or
-               ((@lemma="au" or @lemma="hoepla" or @lemma="dag" or 
+               ((@lemma="au" or @lemma="hoepla" or @lemma="dag" or
 			     @lemma="kijk" or @lemma="hap" or @lemma="aai" ) and
                  (@rel="--" or @rel="sat" or @rel="tag")
-			   )           
-             ) 
-            )    or  
-            %Tarsp_kijkVU%  or 
+			   )
+             )
+            )    or
+            %Tarsp_kijkVU%  or
             %Tarsp_hehe%
           ]
 
 The query distinguishes three subcases:
 
-* **Case 1**: interjections or otherwise specifically mentioned extragrammatical words 
+* **Case 1**: interjections or otherwise specifically mentioned extragrammatical words
     * It excludes 'ja'and 'nee' (these fall under T150) and the CHAT code 'xxx' and the (wrong) CHAT code 'xx, as well as the lemma 'mama'
     * the word must be a 'tsw' but not 'hè', or
     * the word must be a 'tsw' with lemma= 'hè', provided that this *hè* occurs as a tag to the left of a nucleus
 * **Case 2**: the word 'kijk' as a VU. This is achieved by the macro **Tarsp_kijkVU**, defined in :ref:`T087_Stam`.
 * **Case 3**: the combination of words *hè, hè*, defined by the macro **Tarsp_hehe**, which basically searches for the bigram *hè hè*::
 
-    Tarsp_hehe = """ (@lemma="hè" and 
+    Tarsp_hehe = """ (@lemma="hè" and
                       @end = ancestor::node[@cat="top"]/descendant::node[@lemma="hè"]/@begin)"""
- 
+
 
 * **Schlichting**: "Diverse Sociale Uitdrukkingen. hieronder vallen de uitingen die in het sociale verkeer veel gebruikt worden zoals 'dag', 'hallo', 'goedemorgen', 'au', 'hoepla' etc. Ook 'hoor'('die is van mij, hoor'), 'kijk' ('kijk, dat is hem') en 'hè' in de betekenis van 'wat zeg je'of 'hè, hè' worden hier gescoord. Verder vinden we in deze categorie de klanknabootsingen als 'boem' en 'tingeling'"
 
@@ -3120,7 +3120,7 @@ T095: V.U. Soc. AangP
 
 * **Name**: V.U. Soc. AangP.
 * **Category**: V.U.
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -3142,7 +3142,7 @@ T096: V.U. Ster
 
 * **Name**: V.U. Ster.
 * **Category**: V.U.
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -3150,14 +3150,14 @@ T096: V.U. Ster
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 
 * **Schlichting**: "Hieronder verstaan we uitingen die in hun geheel worden geleerd, zoals:
 
-    1. Spreekwoorden en uitdrukkingen, bijvoorbeeld 'bezint eer ge begint' en regels uit versjes of liedjes, bijv. 'alle eendjes zwemmen in het water' 
-    2. Ook gewone spreektaalzinnen die het kind in zijn geheel leert scoren we hier en verder niet meer. Nemen we bijvoorbeeld de uiting 'weet ik niet'. Wanneer we deze uiting vinden in een taalsample waarin verder geen 'ik' wordt gebruikt, of geen inversie van onderwerp en persoonsvorm voorkomt, dan is de zin waarschijnlijk als Stereotiepe Uitdrukking geleerd. 
+    1. Spreekwoorden en uitdrukkingen, bijvoorbeeld 'bezint eer ge begint' en regels uit versjes of liedjes, bijv. 'alle eendjes zwemmen in het water'
+    2. Ook gewone spreektaalzinnen die het kind in zijn geheel leert scoren we hier en verder niet meer. Nemen we bijvoorbeeld de uiting 'weet ik niet'. Wanneer we deze uiting vinden in een taalsample waarin verder geen 'ik' wordt gebruikt, of geen inversie van onderwerp en persoonsvorm voorkomt, dan is de zin waarschijnlijk als Stereotiepe Uitdrukking geleerd.
     3. Opsommingen, bijv. 'een, twee, drie, vier, vijf.'
     4. Zelfherhalingen. Men scoort hier wanneer een kind een uiting van zichzelf onmiddellijk herhaalt met precies dezelfde woorden.
 
@@ -3170,8 +3170,8 @@ T097: VC
 
 
 * **Name**: VC.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -3179,15 +3179,15 @@ T097: VC
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[%complement% and 
-	       parent::node[(@cat="smain" or @cat="sv1" or 
-		                 @cat="ssub" or @cat="inf" or 
+    //node[%complement% and
+	       parent::node[(@cat="smain" or @cat="sv1" or
+		                 @cat="ssub" or @cat="inf" or
 						 @cat="ppart") ]]
 
 
 Here the macro **complement** is defined as follows::
 
-    complement = """((@rel="obj1" or @rel="obj2") or 
+    complement = """((@rel="obj1" or @rel="obj2") or
                      (@rel="predc" and not(%predcB%)) or
                      (@rel="pobj1" and not(%pobj1B%) ) or
                      %verbalcomplement%
@@ -3203,44 +3203,44 @@ So, it covers:
 
 The latter is defined as follows::
 
-                
+
     verbalcomplement = """(@rel="vc" and (@cat="cp" or @cat="whq" or @cat="whsub"))"""
-    
+
 So it excludes nonfinite verbal complements such as *inf*, *teinf*, *ppart*, etc.
 
 Predicates that cooccur with a transitive verb are considered modifiers in Tarsp. We exclude them by checking for the presence of a direct object::
 
-    predcB = """(@rel="predc" and 
+    predcB = """(@rel="predc" and
                (@pt="adj" or @pt="bw" or @cat="ap" or @cat="advp") and
                ../node[@rel="obj1"]
              )"""
-             
+
 * **Remark** that fails if the direct object is left out (e.g. by topic drop).
 
 Prepositional complements should be considered modifiers if they cooccur with a verb that can also take locative or directional complements. This has been implemented by **pob1B**::
-             
+
     pobj1B = """(@rel="pc" and ../node[@rel="hd" and %locverb%])"""
-    locverb = """(@lemma="staan" or @lemma="zitten" or @lemma="rijden" or 
-	              @lemma="vallen" or @lemma="doen" or @lemma="gaan" or 
+    locverb = """(@lemma="staan" or @lemma="zitten" or @lemma="rijden" or
+	              @lemma="vallen" or @lemma="doen" or @lemma="gaan" or
 				  @lemma="komen" or @lemma="zijn"  or %locmodalverb% )"""
 
-    locmodalverb = """ (@lemma="kunnen" or @lemma="moeten" or 
-	                    @lemma="hoeven" or @lemma="willen" or 
+    locmodalverb = """ (@lemma="kunnen" or @lemma="moeten" or
+	                    @lemma="hoeven" or @lemma="willen" or
 						@lemma="mogen")"""
 
 
 
-* **Remark** This language measure is not in the form and has not been kept up to date. In particular, it should be investigated to what extent it differs from the macro **Tarsp_VC** used in the composed language measures. See :ref:`composedmeasures`. 
+* **Remark** This language measure is not in the form and has not been kept up to date. In particular, it should be investigated to what extent it differs from the macro **Tarsp_VC** used in the composed language measures. See :ref:`composedmeasures`.
 
 * **Schlichting** discusses several cases of  "Voorwerpen" and "Complementen" separately:
 
  * "**Lijdend Voorwerp**. Het lijdend voorwerp kan meestal gevonden worden door een vraag te stellen met 'wat' betreffende het onderwerp en het werkwoord van de zin. [...] Het lijdend voorwerp van bedrijvende vorm wordt het onderwerp van dezelfde zin in de lijdende vorm." Covered
  * "**Meewerkend Voorwerp**. Het meewerkend voorwerp kan bijna altijd voorafgegaan worden door 'aan' of 'voor'. Dit 'voor' kan altijd vervangen worden door 'ten behoeve van'. Het meewerkend voorwerp komt niet zo veel voor. Het wordt gebruikt bij werkwoorden als 'geven' en 'kopen', en 'schrijven' of 'mededelen'. Covered
- * "**Voorzetselvoorwerp**. Wanneer een werkwoord gebruikt wordt met een vast voorzetsel is het zinsdeel dat begin met dat voorzetsel het voorzetselvoorwerp. Ook een werkwoordelijke uitdrukking kan gebruikt worden met een voorzetselvoorwerp (*een hekel hebben aan*)." Covered. 
+ * "**Voorzetselvoorwerp**. Wanneer een werkwoord gebruikt wordt met een vast voorzetsel is het zinsdeel dat begin met dat voorzetsel het voorzetselvoorwerp. Ook een werkwoordelijke uitdrukking kan gebruikt worden met een voorzetselvoorwerp (*een hekel hebben aan*)." Covered.
  * "**Complement**. Een aanvulling van het gezegde. het complement kan  zijn:
     1. naamwoordelijk deel van het gezegde. Het naamwoordelijk gezegde bestaat uit een koppelwerkwoord en (meestal) een zelfstandig naamwoord of bijvoeglijk naamwooord." (maar ook een voorbeeld met een PP wordt gegeven). Covered
     2. Bepaling van gesteldheid. Deze zegt iets van het werkwoord en van het onderwerp of lijdend voorwerp. de bepaling van gesteldheid wordt ook wel 'dubbelverbonden bepaling' genoemd." This covers primary predicates (which Alpino consideres *predc*) but also *secondary predicates* (in Alpino: *predm*, e.g in *ik kan dat* **alleen**). Mostly covered.
-    
+
 * **Remark** we do not treat secondary predicates  such as *ik kan dat* **alleen** as complements, but as adverbial modifiers.
 
 T098: Vcbijzin
@@ -3258,22 +3258,22 @@ T098: Vcbijzin
 * **Query** defined as::
 
     //node[((@rel="vc" or @rel="su") and (@cat="cp" or @cat="whsub")) or %directerede_vcbijzin%]
-    
-Alpino does not have clauses with grammatical relation *obj1* or *obj2*: instead clause have the grammatical relation *vc*. 
+
+Alpino does not have clauses with grammatical relation *obj1* or *obj2*: instead clause have the grammatical relation *vc*.
 
 A clause acting as an adpositional complement also has the grammatical relation *vc*, so is also covered.
 
 The macro **directerede_vcbijzin** is used as weel, but I do not understand or remember why. (was it intended for ASTA?). It is defined as follows::
 
-    directerede_vcbijzin = """( %clausecat% and not(@rel="cnj") and 
-                                (preceding-sibling::node[%metasmain%] or 
+    directerede_vcbijzin = """( %clausecat% and not(@rel="cnj") and
+                                (preceding-sibling::node[%metasmain%] or
                                  following-sibling::node[%metasv1%]))"""
 
 and it uses several other macros::
 
     clausecat = """(@cat="smain" or @cat="whq" or %baresv1% )"""
-    metaverb = """(@lemma="zeggen" or @lemma="denken" or 
-	               @lemma="vinden" or @lemma="vragen" or 
+    metaverb = """(@lemma="zeggen" or @lemma="denken" or
+	               @lemma="vinden" or @lemma="vragen" or
 				   @lemma="schreeuwen" or @lemma="fluisteren" )"""
     metasmain = """(@cat="smain" and not(@rel="cnj") and node[@rel="hd" and %metaverb%]) """
     metasv1 = """(@cat="sv1" and not(@rel="cnj") and node[@rel="hd" and %metaverb%]) """
@@ -3283,7 +3283,7 @@ and it uses several other macros::
 
 * **Schlichting**: "Ondergeschikte zin die in de hoofdzin de functie heeft van een lijdend voorwerp, een voorzetselvoorwerp of meewerkend voorwerp of een complementsbijzin: deze laatste heeft de functie van een naamwoordelijk deel van het gezegde of van een bepaling van gesteldheid."
 
-* **Remark** A clause with grammatical relation *predc* does occur, but is currently not covered. 
+* **Remark** A clause with grammatical relation *predc* does occur, but is currently not covered.
 * **Remark** Nodes with category *cp* are not necessarily clauses. That is only so if they also contain a *ssub* node. This should be adapted. It is especially important for *cp* with grammatical relation *predc*.
 
 T099: VCW
@@ -3328,11 +3328,11 @@ T100: VCWOndBB
 
 Straightforward implementation::
 
-    Tarsp_VCWOndBB = """(%declarative% and 
-                         %Ond% and 
-                         %Tarsp_W% and 
-                         %Tarsp_B_X_count% = 2 and 
-                         %Tarsp_VC_X% and 
+    Tarsp_VCWOndBB = """(%declarative% and
+                         %Ond% and
+                         %Tarsp_W% and
+                         %Tarsp_B_X_count% = 2 and
+                         %Tarsp_VC_X% and
                          %realcomplormodnodecount% = 4)"""
 
 
@@ -3346,7 +3346,7 @@ T101: VCWoordgroep
 
 * **Name**: VCWoordgroep.
 * **Category**: Uitbreiding Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -3354,13 +3354,13 @@ T101: VCWoordgroep
 * **Implementation**: Xpath
 * **Query** defined as::
 
-    //node[@cat and 
+    //node[@cat and
 	       ((@rel="obj1" or @rel="obj2" or @rel="pc" or
-		     @rel="predc" or @rel="ld" or 
-			 (@rel="vc" and (@cat="cp" or @cat="whq" or @cat="whsub")) 
-			) and 
-			parent::node[(@cat="smain" or @cat="sv1" or 
-			              @cat="ssub" or @cat="inf" or 
+		     @rel="predc" or @rel="ld" or
+			 (@rel="vc" and (@cat="cp" or @cat="whq" or @cat="whsub"))
+			) and
+			parent::node[(@cat="smain" or @cat="sv1" or
+			              @cat="ssub" or @cat="inf" or
 						  @cat="ppart") ])]
 
 
@@ -3378,8 +3378,8 @@ T102: Verb Ov
 
 
 * **Name**: Verb Ov.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -3387,7 +3387,7 @@ T102: Verb Ov
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[((@pt="vg" and 
+    //node[((@pt="vg" and
             (@lemma="dat" or @lemma="of" or @lemma="toen")
             ) or
             (@pt="vnw" and @vwtype="vb")
@@ -3398,7 +3398,7 @@ T102: Verb Ov
 The query selects
 
 *  the conjunctions *dat*, *of*, *toen*, and
-*  wh-pronouns 
+*  wh-pronouns
 
 provided that they are dominated by a clause that does not bear the grammatical relation 'nucl'
 
@@ -3414,7 +3414,7 @@ T103: Vergr trap
 
 * **Name**: Vergr trap.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -3422,9 +3422,9 @@ T103: Vergr trap
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**, but it could be //node[@graad="comp"]
 
- 
 
- 
+
+
 In the VKLTarsp dataset this only occurs with *meer*, mostly  in a combination with a negative word (*niet meer*, *nergens meer*, *geen  ... meer*), but also  in *nog meer kindjes*. Should these be included?
 No annotations for this measure occur in the Auris TD and DTD data. The language measure is absent in [Schlichting 2017].
 
@@ -3438,7 +3438,7 @@ T104: Verkl
 
 * **Name**: Verkl.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -3461,7 +3461,7 @@ T105: Verl Tijd
 
 * **Name**: Verl Tijd.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -3483,7 +3483,7 @@ T106: Vo/bij
 
 * **Name**: Vo/bij.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -3492,7 +3492,7 @@ T106: Vo/bij
 * **Query** defined as::
 
     voslashbij
- 
+
 .. autofunction:: queryfunctions::voslashbij
 
 * **Schlichting**: "Voornaamwoordelijk bijwoord, gesplitst. Het gesplitste voornaamwoordelijk bijwoord behoeft niet gescoord te worden bij Vobij, kolom Voornaamwoorden in Fase IV, alleen hier bij de Woordgroepen in Fase V."
@@ -3508,7 +3508,7 @@ T107: Vobij
 
 * **Name**: Vobij.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -3517,9 +3517,9 @@ T107: Vobij
 * **Query** defined as::
 
     vobij
-	
+
 .. autofunction:: queryfunctions::vobij
-    
+
 
 
 
@@ -3538,7 +3538,7 @@ T108: Volt dw
 
 * **Name**: Volt dw.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -3560,7 +3560,7 @@ T109: Voltd fg
 
 * **Name**: Voltd fg.
 * **Category**: Woordstructuur
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -3568,7 +3568,7 @@ T109: Voltd fg
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 * **Schlichting**: "Voltooid deelwoord, fout gevormd. In deze Fase (VII) beginnen de kinderen de regel voor het maken van een voltooid deelwoord door te krijgen. Dit blijkt uit het gebruik van fout gevormde voltooide deelwoorden. Natuurlijk komt deze constructie nooit als leerdoel in een behandelingsplan."
 
 * **Remark** Can  be dealt with via the module *deregularise*.
@@ -3581,13 +3581,13 @@ T110: Vr
 
 
 * **Name**: Vr.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
-* **Page**: 
-* **Implementation**: Xpath 
+* **Page**:
+* **Implementation**: Xpath
 * **Query** defined as::
 
     //node[ @cat="whq"]
@@ -3628,7 +3628,7 @@ where *Tarsp_whqhead* and *whqbody* cover both wh-questions (main and subordinat
 See section :ref:`composedmeasures` for details.
 
 * **Schlichting**
- 
+
     * "Vraagwoord (+ een of twee Zinsdelen)."Covered
     * Het Vraagwoord zonder meer, of gevolgd door één Zinsdeel komt niet vaak voor. We vinden meestal Vr + X + Y." **Not currently covered**
     * "'Wat is dat?' is bij sommige kinderen als Vaste Uitdrukking geleerd. We scoren deze dan bij Stereotiepe Uitdrukkingen". **Not covered**
@@ -3705,7 +3705,7 @@ T114: VzB
 
 * **Name**: VzB.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -3713,19 +3713,19 @@ T114: VzB
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[node[@rel="hd" and @pt="vz"] and 
-           node[@rel="obj1" and 
-                ( (@pt="vz" or @pt="bw") or 
+    //node[node[@rel="hd" and @pt="vz"] and
+           node[@rel="obj1" and
+                ( (@pt="vz" or @pt="bw") or
                   (%Rpronoun% and @begin=../node[@rel="hd"]/@end)
-                ) 
+                )
                ]
           ]
 
-The query selects a node that contains 
+The query selects a node that contains
 
-* an adposition as head, and 
+* an adposition as head, and
 * a direct object, which can be
-    * an adposition, or 
+    * an adposition, or
     * an adverb, or
     * an Rpronoun, provided that it follows the adposition (so *van hier* is ok, *hier van* not)
 
@@ -3739,7 +3739,7 @@ T115: VzBepBvZn
 
 * **Name**: VzBepBvZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -3747,7 +3747,7 @@ T115: VzBepBvZn
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Voorzetsel + Bepaler + Bijvoeglijk woord + Zelfstandig naamwoord."
@@ -3761,7 +3761,7 @@ T116: VzBepZn
 
 * **Name**: VzBepZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -3784,7 +3784,7 @@ T117: VzN
 
 * **Name**: VzN.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -3798,13 +3798,13 @@ The macro **Tarsp_VzN** is defined as follows::
 
     Tarsp_VzN = """(%vzn1xpath% or %vzn2xpath% ) """
 
-    vzn1xpath = """(@cat="pp" and 
-                   (node[@pt="vz"] and 
-                    node[(@pt="n" or @pt="vnw") and 
-                    not (%Rpronoun%) and @rel="obj1"] and 
+    vzn1xpath = """(@cat="pp" and
+                   (node[@pt="vz"] and
+                    node[(@pt="n" or @pt="vnw") and
+                    not (%Rpronoun%) and @rel="obj1"] and
                     not(node[@pt="vz" and @vztype="fin"])
                    ))"""
-    vzn2xpath = """(node[@lemma="in" and @rel="mwp"] and 
+    vzn2xpath = """(node[@lemma="in" and @rel="mwp"] and
                    node[@lemma="deze" and @rel="mwp"])"""
 
 
@@ -3832,7 +3832,7 @@ T118: VzZnAz
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: "Voorzetsel + Zelfstandig naamwoord + achterzetsel"
 
@@ -3846,7 +3846,7 @@ T119: S1W
 
 * **Name**: S1W.
 * **Category**: Eenwoordzin
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -3869,7 +3869,7 @@ T120: W
 
 * **Name**: W.
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -3881,27 +3881,27 @@ T120: W
 
 The macro **Tarsp_coreW** is defined as follows::
 
-    Tarsp_coreW = """ ( @pt="ww" and 
-                       (@wvorm="pv" or parent::node[@rel!="vc"] or %Tarsp_BarenonfinW%) and 
+    Tarsp_coreW = """ ( @pt="ww" and
+                       (@wvorm="pv" or parent::node[@rel!="vc"] or %Tarsp_BarenonfinW%) and
                        not(%Tarsp_kijkVU%) and
                        not((@lemma="zijn" or @lemma="worden") and parent::node[node[@rel="vc"]]) )"""
- 
+
 
 The query selects:
 
 * nodes with *pt* equal to *ww** (verbs)
-* that are 
-    * finite (*@wvorm* equal to *pv*), or 
+* that are
+    * finite (*@wvorm* equal to *pv*), or
     * whose parent node does not bear the grammatical relation *vc* (because then a higher verb should count as *W*), or
     * or whose parent node does bear the grammtical relation *vc* but that parent is the only node under an smain node. This is for utterance that contain an infiitive or past particple only (e.g. *boekje lezen*). See the module :ref:`smallclauses`. This is achieved by the macro **Tarsp_BarenonfinW**::
-    
-        Tarsp_BarenonfinW = """parent::node[@rel="vc" and  
+
+        Tarsp_BarenonfinW = """parent::node[@rel="vc" and
                                             parent::node[@cat="smain" and count(node)=1]]"""
 
-    
+
 * that is not a VU *kijk*, by the macro **tarsp_kijkVU**, defined under @@, and
 * that is not a form  of 'zijn' or 'worden' with a *vc*-sibling. I think that this is to exclude *zijn* as a W in e.g. *hij kan gekomen zijn*. In *hij is gekomen*, *is* does count because it is finite.
-        
+
 
 
 
@@ -3929,7 +3929,7 @@ T121: W(X)
 
 
 
-It has been implemented by means of a Python function **wx**. 
+It has been implemented by means of a Python function **wx**.
 
 
 .. autofunction:: imperatives::wx
@@ -3938,7 +3938,7 @@ In a later stage  a query with macros was defined for it, but  the Python functi
 
 The query has a straightforward implementation::
 
-    wx = """(%basicimperative% and 
+    wx = """(%basicimperative% and
              %realcomplormodnodecount% <= 1)"""
 
 See section :ref:`composedmeasures` for details.
@@ -3954,12 +3954,12 @@ T122: PV-loos
 
 
 * **Name**: PV-loos.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: no
 * **In form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -3976,16 +3976,16 @@ T123: waarschijnlijk fout geanalyseerde nevenschikking
 
 
 * **Name**: waarschijnlijk fout geanalyseerde nevenschikking.
-* **Category**: 
-* **Subcat**: 
+* **Category**:
+* **Subcat**:
 * **Level**: Zc
 * **Original**: no
 * **In form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 This is not a language measure but has been added for development purposes.
 
@@ -3999,7 +3999,7 @@ T124: want
 
 * **Name**: want.
 * **Category**: Verbindingswoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -4034,10 +4034,10 @@ T125: WBVC
 
 Straightforward implementation::
 
-    Tarsp_WBVC = """(%declarative%  and  
-                     %Tarsp_W% and 
-                     %Tarsp_B_X% and 
-                     %Tarsp_VC_X% and 
+    Tarsp_WBVC = """(%declarative%  and
+                     %Tarsp_W% and
+                     %Tarsp_B_X% and
+                     %Tarsp_VC_X% and
                      %realcomplormodnodecount% = 2 )"""
 
 
@@ -4051,7 +4051,7 @@ T126: Wdeel
 
 * **Name**: Wdeel.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -4074,7 +4074,7 @@ T127: Werkwoordswoordgroep
 
 * **Name**: Werkwoordswoordgroep.
 * **Category**: Uitbreiding Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -4098,7 +4098,7 @@ T128: wij
 
 * **Name**: wij.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -4135,11 +4135,11 @@ T129: Wond(X)
 
 Straightforward implementation::
 
-    Tarsp_WOndX = """(%ynquery% and 
-                      not(%basicimperative%) and 
-                      %topcontainsquestionmark% and 
-                      %Tarsp_W% and 
-                      %Ond% and 
+    Tarsp_WOndX = """(%ynquery% and
+                      not(%basicimperative%) and
+                      %topcontainsquestionmark% and
+                      %Tarsp_W% and
+                      %Ond% and
                       %realcomplormodnodecount% <= 2)"""
 
 See section :ref:`composedmeasures` for details.
@@ -4166,11 +4166,11 @@ T130: WOnd4
 
 Straightforward implementation::
 
-    Tarsp_WOnd4 = """(%ynquery% and 
-                      not(%basicimperative%) and 
-                      %topcontainsquestionmark% and 
-                      %Tarsp_W% and 
-                      %Ond% and 
+    Tarsp_WOnd4 = """(%ynquery% and
+                      not(%basicimperative%) and
+                      %topcontainsquestionmark% and
+                      %Tarsp_W% and
+                      %Ond% and
                       %realcomplormodnodecount% = 3)"""
 
 See section :ref:`composedmeasures` for details.
@@ -4195,11 +4195,11 @@ T131: WOnd5+
 
 Straightforward implementation::
 
-    Tarsp_WOnd5plus = """(%ynquery% and 
-                          not(%basicimperative%) and 
-                          %topcontainsquestionmark% and 
-                          %Tarsp_W% and 
-                          %Ond% and 
+    Tarsp_WOnd5plus = """(%ynquery% and
+                          not(%basicimperative%) and
+                          %topcontainsquestionmark% and
+                          %Tarsp_W% and
+                          %Ond% and
                           %realcomplormodnodecount% =4)"""
 
 See section :ref:`composedmeasures` for details.
@@ -4215,7 +4215,7 @@ T132: woordgroep(onderstrepen)
 
 * **Name**: woordgroep(onderstrepen).
 * **Category**: Zinsdelen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: no
@@ -4223,7 +4223,7 @@ T132: woordgroep(onderstrepen)
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[(@cat="ap" or @cat="advp" or @cat="np" or @cat="pp" or 
+    //node[(@cat="ap" or @cat="advp" or @cat="np" or @cat="pp" or
        node[@rel="vc" and (@cat="inf" or @cat="ppart")]) and parent::node[count(node[@cat or @pt!="let"])>1]]
 
 
@@ -4238,7 +4238,7 @@ T133: WVz
 
 * **Name**: WVz.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -4260,7 +4260,7 @@ T134: WW
 
 * **Name**: WW.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -4268,7 +4268,7 @@ T134: WW
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 * **Schlichting**: "Werkwoord + Werkwoord. Deze constructie omvat een hulpwerkwoord + twee infinitieven. Ook werkwoordelijke uitdrukkingen zoals 'nodig hebben', 'het koud hebben'worden hier gescoord"
 
@@ -4294,7 +4294,7 @@ T135: WXY
 
 Straightforward implementation::
 
-    wxy = """(%basicimperative% and  
+    wxy = """(%basicimperative% and
               %realcomplormodnodecount% = 2)"""
 
 See section :ref:`composedmeasures` for details.
@@ -4320,7 +4320,7 @@ T136: WXYZ
 
 Straightforward implementation::
 
-    wxyz = """(%basicimperative% and  
+    wxyz = """(%basicimperative% and
                %realcomplormodnodecount% = 3)"""
 
 See section :ref:`composedmeasures` for details.
@@ -4346,7 +4346,7 @@ T137: WXYZ5*
 
 Straightforward implementation::
 
-    wxyz5 = """(%basicimperative% and  
+    wxyz5 = """(%basicimperative% and
                 %realcomplormodnodecount% = 4)"""
 
 
@@ -4364,7 +4364,7 @@ T138: X en X (en X)
 
 * **Name**: X en X (en X).
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -4396,7 +4396,7 @@ T139: X(W)deel
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "De X kan hier elk willekeurig Zinsdeel zijn behalve de W. De X is dus een Ond, een VC, of een B. (W)deel is het scheidbare deel van een samengesteld werkwoord. In 'Ik doe de jas uit' is 'uit' het scheidbare deel van het samengestelde werkwoord 'uitdoen'. In de (W)deelconstructies zien we wel het scheidbare deel maar niet het werkwoord. daarom staat de W tussen haakjes. "
@@ -4420,10 +4420,10 @@ T140: Xneg
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[(@rel='--' or @rel="nucl") and 
-           count(node) = 2 and 
-           node[ @lemma!="niet"] and 
-           (node[@lemma="niet" ] or 
+    //node[(@rel='--' or @rel="nucl") and
+           count(node) = 2 and
+           node[ @lemma!="niet"] and
+           (node[@lemma="niet" ] or
             node[@cat="advp" and node[@lemma="niet"]]
            )
           ]
@@ -4453,7 +4453,7 @@ T141: XY(W)deel
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Deze constructie bestaat uit twee Zinsdelen + het 'deeltje' van een scheidbaar samengesteld werkwoord (e.g. *Marije strijkbout vast*"
@@ -4467,7 +4467,7 @@ T142: ze
 
 * **Name**: ze.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -4493,11 +4493,11 @@ T143: zelf
 * **Level**: VVW
 * **Original**: yes
 * **In form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
  *zelf* is mentioned on p.82 under *Overige*, together with *niets* and *niks*. It should be covered there.
 
 * **Schlichting**: " "
@@ -4511,7 +4511,7 @@ T144: zij
 
 * **Name**: zij.
 * **Category**: Voornaamwoorden
-* **Subcat**: 
+* **Subcat**:
 * **Level**: VVW
 * **Original**: yes
 * **In form**: yes
@@ -4519,11 +4519,11 @@ T144: zij
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    
-        //node[@pt="vnw"  and @vwtype="pers" and 
-               @getal="ev" and @genus="fem"  and 
+
+        //node[@pt="vnw"  and @vwtype="pers" and
+               @getal="ev" and @genus="fem"  and
                @pdtype="pron"]
-        
+
 The query allows *zij* and *ze*, but also *zijzelf* (though I believe that is a misspelling for *zij zelf*)
 
 * **Schlichting**: "Persoonlijk voornaamwoord derde persoon enkelvoud, vrouwelijk"
@@ -4539,7 +4539,7 @@ T145: Zn
 
 * **Name**: Zn.
 * **Category**: Eenwoordzin
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -4547,17 +4547,17 @@ T145: Zn
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@cat="top" and 
-           (node[@pt="n" or 
-                 (@pt="tw" and @numtype="hoofd") or 
+    //node[@cat="top" and
+           (node[@pt="n" or
+                 (@pt="tw" and @numtype="hoofd") or
                  (@lemma="paar" and @pt="lid")
-                ] or 
-            node[@cat="du" and 
-                 node[@pt="n" or 
-                 (@pt="tw" and @numtype="hoofd") or 
+                ] or
+            node[@cat="du" and
+                 node[@pt="n" or
+                 (@pt="tw" and @numtype="hoofd") or
                  (@lemma="paar" and @pt="lid")]
                 ]
-            ) and 
+            ) and
             count(.//node[%realnode%])=1
            ]
 
@@ -4584,7 +4584,7 @@ T147: ZnZn
 
 * **Name**: ZnZn.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: yes
@@ -4592,7 +4592,7 @@ T147: ZnZn
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
-    //node[@cat="top" and 
+    //node[@cat="top" and
            .//node[node[@pt="n" and @rel="hd"] and node[@pt="n" and not(@rel="hd")] ] or
            node[@cat="du" and count(node[@rel="dp" and @pt="n"])>=2]
           ]
@@ -4615,7 +4615,7 @@ T148: Znx
 
 * **Name**: Znx.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Wg
 * **Original**: yes
 * **In form**: no
@@ -4623,7 +4623,7 @@ T148: Znx
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Hiertoe worden gerekend de zelfstandige naamwoorden, de eigennnamen, en de getalsnamen wanneer ze zelfstandig gebruikt worden, dus bijvoorbeeld: 'boek', 'oma', 'Jantien', 'twee'"
@@ -4634,7 +4634,7 @@ T150: V.U. Nee/ja
 
 * **Name**: V.U. Nee/ja.
 * **Category**: V.U.
-* **Subcat**: 
+* **Subcat**:
 * **Level**: Zc
 * **Original**: yes
 * **In form**: yes
@@ -4658,8 +4658,8 @@ T151: V.U. Totaal
 
 * **Name**: V.U. Totaal.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 39
@@ -4682,8 +4682,8 @@ T152: G Totaal
 
 * **Name**: G Totaal.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 20
@@ -4711,8 +4711,8 @@ T153: G.O Fase
 
 * **Name**: G.O Fase. (Grammaticale Ontwikkelingsfase)
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 20
@@ -4720,7 +4720,7 @@ T153: G.O Fase
 * **Query** defined as::
 
     gofase
-    
+
 .. autofunction:: TARSPpostfunctions::gofase
 
 * **Schlichting**: Eerst wordt *G totaal* berekend. Zie hiervoor :ref:`G_Totaal`. "We berekenen hoeveel Zinsconstructies per Fase zijn gescoord. We letten hiervoor uitsluitend op de vakken van de Zinsconstructies: Mededelende zin, Vraag, en Gebiedende wijs. Per Fase noteren we het aantal Zinsconstructies in de eerste kolom bóven de Fase-aanduiding (niet meegeteld worden Intonatie en Koppelwerkwoord in Fase II, en 'hè' en Inversie in Fase III). Bij een bepaald percentage Zinsconstructies kunnen we zeggen dat het kind zich in die Fase aan het ontwikkelen is. De regel is dat 5% van de Analyse-eenheden van het taalsample in een Fase bij de Zinsconstructies gescoord moet zijn om het kind in die Fase te kunnen plaatsen.
@@ -4735,8 +4735,8 @@ T154: PFII
 
 * **Name**: PFII.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4760,8 +4760,8 @@ T155: PFIII
 
 * **Name**: PFIII.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4785,7 +4785,7 @@ T156: OvZnBv4
 
 * **Name**: OvZnBv4.
 * **Category**: Woordgroepen
-* **Subcat**: 
+* **Subcat**:
 * **Level**: WG
 * **Original**: yes
 * **In form**: yes
@@ -4793,7 +4793,7 @@ T156: OvZnBv4
 * **Implementation**: Xpath with macros
 * **Query** defined as: **not implemented yet**
 
-    
+
 
 
 * **Schlichting**: "Overige Zn- en Bv-woordgroepen Fase IV"
@@ -4807,8 +4807,8 @@ T157: Screening
 
 * **Name**: Screening.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: no
 * **In form**: no
 * **Page**: 94-97
@@ -4829,8 +4829,8 @@ T158: PFIV
 
 * **Name**: PFIV.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4854,8 +4854,8 @@ T159: PFV
 
 * **Name**: PFV.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4863,7 +4863,7 @@ T159: PFV
 * **Query** defined as::
 
     pf5
-    
+
 .. autofunction:: TARSPpostfunctions::pf5
 
 
@@ -4879,8 +4879,8 @@ T160: PFVI
 
 * **Name**: PFVI.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4904,8 +4904,8 @@ T161: PFVII
 
 * **Name**: PFVII.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4928,8 +4928,8 @@ T162: PF
 
 * **Name**: PF.
 * **Category**: Aggregate
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 23
@@ -4953,8 +4953,8 @@ T165: Formulier
 
 * **Name**: Formulier.
 * **Category**: Forms
-* **Subcat**: 
-* **Level**: 
+* **Subcat**:
+* **Level**:
 * **Original**: yes
 * **In form**: yes
 * **Page**: 31-36

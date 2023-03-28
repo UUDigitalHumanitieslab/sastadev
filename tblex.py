@@ -144,11 +144,11 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
 
     * or the node meets the conditions of *recognised_wordnodepos*
 
-       .. autofunction:: treebankfunctions::recognised_wordnodepos
+       .. autofunction:: recognised_wordnodepos
 
     * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
 
-       .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
+       .. autofunction:: recognised_lemmanodepos(node, pos)
 
     However, the node should:
 

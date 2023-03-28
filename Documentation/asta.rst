@@ -34,25 +34,25 @@ The macro **asta_adj** is defined as follows::
      %attributive_presp% or
      %simplepredicative_adj% or
      %simplepredicative_adjinadjp% or
-     %indefdet% 
+     %indefdet%
     )
     """
-    
+
 It joins a lot of macros als alternatives (joined by *or*). We will discuss each of them:
 
 * **ASTA_geboren**. According to ASTA, the word *geboren* must be considered an adjective ("Alle vormen van geboren en geleden worden gezien als bijvoeglijk naamwoord in combinatie met een koppelwerkwoorden", [ASTA Appendix, p. 3]). The consensus is that it is a verb despite the absence of other forms, and Alpino analyses it as a verb . So, special measures are needed to identify *geboren* as an adjective. The macro **ASTA_geboren** is defined very simple, as follows::
 
         ASTA_geboren = """ (@word="geboren") """
-        
+
   * **Remark** We  do not cover *geleden* yet, which Alpino analyses as an adverb (*bw*).
 
-* **attributive_adj**: for bare attributive adjectives. The macro is defined as follows::           
+* **attributive_adj**: for bare attributive adjectives. The macro is defined as follows::
 
 
-        attributive_adj = """ 
-            (@pt="adj" and 
-             (@rel="mod" and 
-              parent::node[@cat="np"] and 
+        attributive_adj = """
+            (@pt="adj" and
+             (@rel="mod" and
+              parent::node[@cat="np"] and
               ../node[@rel="hd" and (@pt="n" or @pt="vnw" or @cat="mwu")] and
               (not(@begin < ../node[@rel="det" and (@pt="lid" or @pt="vnw")]/@begin) or @lemma='heel' or @lemma='geheel')
              )
@@ -60,22 +60,22 @@ It joins a lot of macros als alternatives (joined by *or*). We will discuss each
         """
 
   It requires that a node is an *adjective*, with relation *mod*, inside an *NP* that has a *noun*, *vnw*, or *mwu* head. It must not precede a determiner unless it is *heel* or *geheel* .
-  
+
   * **Remark** We must check why only *heel* and *geheel* can precede a determiner. Possibly to exclude *al* (*al het water*)? but indefinite pronouns should be included
-  
+
 * **attributive_adjinadjp**: for adjectives in attributively used *AP*'s. It is defined as::
 
         attributive_adjinadjp = """
            (@pt="adj" and
             (@rel="hd" and
-             parent::node[@cat="ap" and parent::node[@cat="np"] and 
+             parent::node[@cat="ap" and parent::node[@cat="np"] and
              ../node[@rel="hd" and (@pt="n" or @pt="vnw" or @cat="mwu")]]
              )
             )
         """
 
   It is analogous to the **attributive_adj** macro, though now the adjective is the head in an *ap* that modifies a nominal element.
-  
+
   * **Remark** The condition on the relation (*mod*) is lacking here.
 
 * **rangtw**: Cardinal numerals count as an adjective. The macro is defined as follows::
@@ -86,7 +86,7 @@ It joins a lot of macros als alternatives (joined by *or*). We will discuss each
 
 * **substantivisedadj** A substantivised adjective counts as an adjective. The macro definition is self-explanatory::
 
-        substantivisedadj = """ 
+        substantivisedadj = """
            (@pt="adj" and @rel="hd" and parent::node[@cat="np"])
         """
 
@@ -95,7 +95,7 @@ It joins a lot of macros als alternatives (joined by *or*). We will discuss each
         substantivisedrangtw = """
             (%rangtw% and @positie = "nom" )
         """
-        
+
 
 * **attributive_pastp** for attributively used past participles. The macro definition is self-explanatory::
 
@@ -117,12 +117,12 @@ It joins a lot of macros als alternatives (joined by *or*). We will discuss each
         predicative = """ (@rel="predc" or @rel="predm" ) """
 
   The macro **basickopww** is defined as follows::
-   
-        ASTA_basickopww = """ (@pt="ww" and @rel="hd" and 
-                               @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and 
-                                 (contains(@frame, "copula") or not(@stype="topic_drop")) and 
-                               parent::node[node[@rel="predc"] and 
-                               not(node[@rel="obj1"]) ] )""" 
+
+        ASTA_basickopww = """ (@pt="ww" and @rel="hd" and
+                               @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and
+                                 (contains(@frame, "copula") or not(@stype="topic_drop")) and
+                               parent::node[node[@rel="predc"] and
+                               not(node[@rel="obj1"]) ] )"""
 
   It requires:
     * the node to be verb
@@ -130,8 +130,8 @@ It joins a lot of macros als alternatives (joined by *or*). We will discuss each
     * that contains a copula frame or it does not contain the value *topic_drop* for the attribute *stype*
     * that has a *predc* sibling
     * but not an *obj1* sibling
-   
-* **simplepredicative_adjinadjp**. for adjectives as a head of a predicative *AP*. The definition of the macro is self-explanatory:: 
+
+* **simplepredicative_adjinadjp**. for adjectives as a head of a predicative *AP*. The definition of the macro is self-explanatory::
 
         simplepredicative_adjinadjp = """
              (@pt="adj" and @rel="hd" and parent::node[@cat="ap" and %simplepredicative%])
@@ -186,13 +186,13 @@ A003: BIJZIN
 The macro *ASTA_bijzin* is defined as follows::
 
     ASTA_Bijzin = """
-	 (        
+	 (
 			 ((@cat="ssub" and @rel="cnj" and not(%firstssubconjunct%) and not(%ASTA_CBijzinzin%)) or
 			  (@cat="whrel" or @cat="rel" or @cat="whsub") or
 			  ((@cat="smain" or @cat="sv1")and @rel="--") or
-			  (@cat="cp" and node[@cat="ssub" or @cat="conj"])	or	  
-			  (@cat="sv1" and (@rel="mod" or @rel="cnj") ) or 
-			  (@cat="smain" and (@rel="cnj" or @rel="body" or @rel="nucl" or @rel="dp") and 
+			  (@cat="cp" and node[@cat="ssub" or @cat="conj"])	or
+			  (@cat="sv1" and (@rel="mod" or @rel="cnj") ) or
+			  (@cat="smain" and (@rel="cnj" or @rel="body" or @rel="nucl" or @rel="dp") and
 			    not(%ASTA_CBijzinzin%)) or
 			  (@cat="oti") or
 			   %ASTA_CBijzin% or
@@ -200,10 +200,10 @@ The macro *ASTA_bijzin* is defined as follows::
 			   (@pt="vg" and @conjtype="onder" and @rel="--"  ) or
 			   ((@pt="bw" or @pt="vnw") and @rel="vc" and @wh="ywh")
 			  )
-	 
+
 	 )
 	"""
-	
+
 Many subcases are distinguished:
 
 * **ssub** if it has relation *cnj* but is not the first ssub conjunct (the *cp* dominating it will count in that case):
@@ -212,7 +212,7 @@ Many subcases are distinguished:
 
   It should also not meet the requirements of the macro *ASTA_CBijzinzin*. This macro finds clauses introduced by the words *maar*, *want* and *dus*, and require special treatment (see below).
 
-	
+
 * **relative clauses** and **subordinate wh-questions** count as *bijzin*:
 
   * het gaat hier over de mensen **die opgeleid worden** om uhm les
@@ -225,24 +225,24 @@ Many subcases are distinguished:
   * **weet ik niet**
 
   Most of these will be discarded if they are the leftmost *bijzin* in the function *asta_bijzin*
-  
+
 
 * **subordinate clauses introduced by a conjunction** (*cp*) if they contain an *ssub* or coordinated structure (*conj*) as a child, e.g.
 
   * en sindsdien weet ik niks van **tot ik** uh **bijkwam** hierzo
   * en uh **als er problemen zijn** kan een klant ook bij mij komen
   * dus in allerlei afleiding of allerlei opleidingen die op verschillende manieren uh ertoe bijdragen **dat je een verhoor goed kunt vastleggen**  uh en kunt  uh voeren
-  
+
   **Remark** the *conj* case allows too much, e.g.:
 
   * niemand **behalve mijn zusje en mijn vader**
- 
+
 
 * **adverbial or conjunct** *sv1*:
 
   * oke je was aan het tennissen en **ben je toen gevallen** ?
 
-* **smain with relation cnj, body, nucl, or dp**: 
+* **smain with relation cnj, body, nucl, or dp**:
 
   * en **dat was de slokdarm** (*nucl*)
   * oke **je was aan het tennissen**  en ben je toen gevallen ? (*cnj*)
@@ -265,13 +265,13 @@ Many subcases are distinguished:
          (%ASTA_wantmaarbijzin% or
 		  %ASTA_dusbijzin%)
 	"""
-   
-  
+
+
   The definitions of *ASTA_wantmaarbijzin* and *ASTA_dusbijzin* are as follows::
-  
+
 	ASTA_wantmaarbijzin = """
 	   ((@word="want" or @word="maar") and @rel="crd" and @pt="vg" and
-		../node[((@cat="smain" or @cat="ssub" or (@cat="du" and node[@cat="smain" and @rel="nucl"]))) and 
+		../node[((@cat="smain" or @cat="ssub" or (@cat="du" and node[@cat="smain" and @rel="nucl"]))) and
 		@begin  >=../node[(@word="want" or @word="maar")]/@end]
 	   )
 	"""
@@ -291,7 +291,7 @@ Many subcases are distinguished:
 
 	ASTA_wantmaarbijzinzin = """
 		   ( (@cat="smain" or @cat= "ssub" or (@cat="du" and node[@cat="smain" and @rel="nucl"])) and
-			 ../node[(@word="want" or @word="maar") and @rel="crd" and @pt="vg"] and 
+			 ../node[(@word="want" or @word="maar") and @rel="crd" and @pt="vg"] and
 			 @begin  >=../node[(@word="want" or @word="maar")]/@end
 		   )
 	"""
@@ -304,14 +304,14 @@ Many subcases are distinguished:
 
 * **Direct speech** (Directe rede) is dealt with by the macro *directerede_vcbijzin*, which identifies a main clause  immediately preceded or followed by a main clause (*smain*, or *sv1*, resp.) with a metaverb (verb of saying) as its head::
 
-	directerede_vcbijzin = """( %clausecat% and not(@rel="cnj") and 
-	                           (preceding-sibling::node[%metasmain%] or 
+	directerede_vcbijzin = """( %clausecat% and not(@rel="cnj") and
+	                           (preceding-sibling::node[%metasmain%] or
 							    following-sibling::node[%metasv1%])
 							  )"""
 
 
 	clausecat = """(@cat="smain" or @cat="whq" or %baresv1% )"""
-	metaverb = """(@lemma="zeggen" or @lemma="denken" or @lemma="vinden" 
+	metaverb = """(@lemma="zeggen" or @lemma="denken" or @lemma="vinden"
 	              or @lemma="vragen" or @lemma="schreeuwen" or @lemma="fluisteren" )"""
 	metasmain = """(@cat="smain" and not(@rel="cnj") and node[@rel="hd" and %metaverb%]) """
 	metasv1 = """(@cat="sv1" and not(@rel="cnj") and node[@rel="hd" and %metaverb%]) """
@@ -339,15 +339,15 @@ Many subcases are distinguished:
 * Het voegwoord /dus/: hierbij geldt de volgende afspraak:
 
   * *Dus* markeert een nieuwe uiting als de woordvolgorde na /dus/ die van een hoofdzin is (**dealt with correctly, though SASTA marks no new utterances**):
-  
+
     * Ik voel me niet zo lekker dus ik blijf thuis = 2 uitingen
-	  
+
   * *Dus* markeert het begin van een bijzin als de woordvolgorde na /dus/ die van een bijzin is (**Covered**):
-  
+
     * Ik voel me niet zo lekker dus blijf ik thuis = 1 uiting met een bijzin
-	
+
 * Let op: een beknopte bijzin is geen bijzin. Daarom wordt deze niet meegeteld bij de bijzinnen (**covered**)
-* Bijzin: Een zinsdeel of zinsdeelstuk dat zelf weer een zin is. Voorbeeld: 
+* Bijzin: Een zinsdeel of zinsdeelstuk dat zelf weer een zin is. Voorbeeld:
 
   * *dat het gaat vriezen*, is nu wel duidelijk.
 
@@ -396,10 +396,10 @@ A006: ell
 ---------------
 
 * **Name**: ell  (ellips)
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -419,10 +419,10 @@ A007: Finietheidsindex
 * **Original**: yes
 * **In Form**: yes
 * **Page**: 11
-* **Implementation**: 
+* **Implementation**:
 * **Query** defined as:
 
- 
+
 This has been implemented in a function used in the creation of the ASTA form.
 
 
@@ -438,7 +438,7 @@ A008: FONPAR
 * **Level**: Taalmaat
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Python function
 * **Query** defined as::
 
@@ -454,10 +454,10 @@ A009: DEL PV
 ------------------
 
 * **Name**: DEL PV
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -545,10 +545,10 @@ The macro *ASTA_kopww* is defined as follows::
 
 It uses two macros. The macro *ASTA_basickopww* is defined as follows::
 
-    ASTA_basickopww = """ (@pt="ww" and @rel="hd" and 
-                           @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and 
-                           (contains(@frame, "copula") or not(@stype="topic_drop")) and 
-                           parent::node[node[@rel="predc"] and not(node[@rel="obj1"]) ] )""" 
+    ASTA_basickopww = """ (@pt="ww" and @rel="hd" and
+                           @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and
+                           (contains(@frame, "copula") or not(@stype="topic_drop")) and
+                           parent::node[node[@rel="predc"] and not(node[@rel="obj1"]) ] )"""
 
 This defines copulas as verbs other than a few listed exceptions that have a *predc* sibling but not an *obj1* sibling and  either  have the string *copula* in their *frame* attribute, or the value of the attribute *stype* is not equal to *topic_drop*.  The condition on the *stype* attribute is needed to exclude analysing a verb as *vind* as a copula as in *vind ik goed*, with a topic-dropped direct object.
 
@@ -566,10 +566,10 @@ The macro *ASTA_geboren_kopww* is needed because *geboren* is considered an adje
 **Remark**: the condition should be reformulated with *@lemma="geboren"* instead of *@word="geboren"* to deal properly with case variants.
 
 
-**Handleiding** 
-  * /zijn/, /worden/, /blijven/, /blijken/, /lijken/ /schijnen/, /heten/, /dunken/ en /voorkomen/ als koppelwerkwoord tellen met in acht neming van de regels. (Zie E-ANS : www.ans.ruhosting.nl voor de uitleg wanneer deze woorden daadwerkelijk koppelwerkwoorden zijn).  (**covered** except for *heten*, which has been excluded because all sample annotate it as a lexical verb, and  Elsbeth and Nina conformed that they consider it a lexical verb).  
+**Handleiding**
+  * /zijn/, /worden/, /blijven/, /blijken/, /lijken/ /schijnen/, /heten/, /dunken/ en /voorkomen/ als koppelwerkwoord tellen met in acht neming van de regels. (Zie E-ANS : www.ans.ruhosting.nl voor de uitleg wanneer deze woorden daadwerkelijk koppelwerkwoorden zijn).  (**covered** except for *heten*, which has been excluded because all sample annotate it as a lexical verb, and  Elsbeth and Nina conformed that they consider it a lexical verb).
   * Houd er rekening mee dat ook andere werkwoorden zich soms kunnen gedragen als een koppelwerkwoord ( ze zijn dan te vervangen door de koppelwerkwoorden zijn of worden) (all **covered**)
-  
+
     * *De man raakte (werd) uitgeput*
       *Raken* = koppelwerkwoord
     * *Die opmerking viel (was)verkeerd*
@@ -584,42 +584,42 @@ The macro *ASTA_geboren_kopww* is needed because *geboren* is considered an adje
       Deze hulpwerkwoorden worden binnen de ASTA niet geteld als hulpwerkwoord of lexicaal werkwoord, enkel als persoonsvorm c.q. koppelwerkwoord. (** The formulation here is ambiguous. In any case, passive auxiliaries should be considered auxiliaries and thus never be annotated. **COVERED**)
 
     * NB1: De koppelwerkwoorden *voorkomen*, *dunken*, *lijken*, *schijnen* en *blijken* kunnen soms als hulpwerkwoorden van modaliteit fungeren. Tel deze dan bij de modale (hulp)werkwoorden. (**covered**)
-        * *Het bleek een infarct te zijn* 
-        
+        * *Het bleek een infarct te zijn*
+
     * **Blijken**
-    
+
        * In de uitingen: ‘Het was een infarct. Dat bleek pas veel later’ is /was/ een koppelwerkwoord en /bleek/ een lexicaal werkwoord (in de betekenis van duidelijk zijn). (In principle **covered**, but Alpino analyses *pas veel later* as  a *predc* instead of as a *mod*.)
        * In de uiting: ‘Het bleek dat het een infarct was’ is /bleek/ een lexicaal werkwoord (in de betekenis van duidelijk zijn) en /was/ een koppelwerkwoord. (**covered**)
        * In de uiting: ‘Het bleek een infarct’ is /bleek/ een koppelwerkwoord. (**covered**)
        * In de uiting: ‘Het bleek een infarct te zijn’ is /bleek/ hulpwerkwoord van modaliteit en /zijn/ een koppelwerkwoord. (**covered**)
 
     * **Blijven**
-    
+
         * In de uiting: ‘Maar ik blijf er wel bij’ is /blijf erbij/ een lexicaal werkwoord. (**covered**)
         * In de uiting: ‘Ik blijf hier nog een tijdje oefenen’ is /blijf/ hulpwerkwoord van aspect en wordt dus bij de lexicale werkwoorden gerekend. (**covered**)
         * In de uiting: ‘Ik blijf thuis’ is /blijf/ geen koppelwoord maar een lexicaal werkwoord (in de betekenis van niet van plaats veranderen). (**covered**)
         * In de uiting: ‘Ik blijf bakker’ is /blijf/ een koppelwerkwoord. (**covered**)
 
     * **Geboren**
-    
+
         * In de uitingen: ‘Ik ben geboren in Groningen’ en ‘Gisteren is mijn kleindochtertje geboren’ is /geboren/ een bijvoeglijk naamwoord en zijn /ben/ en /is/ koppelwerkwoorden. (**covered**)
-        
+
     * **Geleden**
-    
+
         * In de uiting: ‘Het is al even geleden’ is /is/ een koppelwerkwoord en /geleden/ een bijvoeglijk naamwoord (**Covered** for /is/ but **not** for /geleden/)
-        
+
     * **Raken**
-    
+
         * In de uiting: ‘Hij raakte uitgeput’ is /raakte/ een koppelwerkwoord (**Covered**)
-        
+
     * **Worden**
-    
+
         * In de uiting: ‘Ik ben beroerd geworden’ is /worden/ het koppelwerkwoord (en /ben/ het hulpwerkwoord van tijd). (**Covered**)
-        
+
     * **Zijn**
-    
+
        * In onderstaande uitingen is het werkwoord /zijn/ een koppelwerkwoord:8 (all **covered** except where indicated otherwise)
-       
+
             * Daar ben je druk mee
             * Het is voorbij
             * Ik ben toe aan revalidatie (**not covered**)
@@ -643,8 +643,8 @@ The macro *ASTA_geboren_kopww* is needed because *geboren* is considered an adje
             * Ik ben de oudste van vier jongens
 
         * /Zijn/ is geen koppelwerkwoord in: (all **covered** except where indicated otherwise)
-        
-            * Dat is er met mij aan de hand 
+
+            * Dat is er met mij aan de hand
             * En die vroeg aan mij hoe het was (in de betekenis van ‘hoe gaat het?’) (**not covered**)
             * Ik ben hier
             * Met mij is het goed. (**not covered**)
@@ -659,7 +659,7 @@ A014: PV FOUT
 * **Level**: Taalmaat
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -675,10 +675,10 @@ A015: DEL VNW
 -------------------
 
 * **Name**: DEL VNW
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -694,10 +694,10 @@ A016: EENWOORDSUITING
 ---------------------------
 
 * **Name**: EENWOORDSUITING
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -713,10 +713,10 @@ A017: ONVOL
 -----------------
 
 * **Name**: ONVOL
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -755,7 +755,7 @@ A020: M
 * **Level**: Taalmaat
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -765,8 +765,8 @@ A020: M
 The macro *ASTA_modalww* has a very simple definition::
 
 
-    ASTA_modalww = """  (@lemma="zullen" or @lemma="willen" or 
-                         @lemma="moeten" or @lemma="mogen" or 
+    ASTA_modalww = """  (@lemma="zullen" or @lemma="willen" or
+                         @lemma="moeten" or @lemma="mogen" or
                          @lemma="kunnen" or @lemma="hoeven") """
 
 
@@ -782,15 +782,15 @@ The macro *ASTA_modalww* has a very simple definition::
     * Ik zal vertrekken
     * Hij wil naar huis (maar ook: hij wil naar huis fietsen)
     * Ik moet naar huis (maar ook: ik moet dat doen)
-    * Het schaap mag de wei in 
+    * Het schaap mag de wei in
     * De leerlingen kunnen lezen
     * De man hoeft niets
 
   Het maakt niet uit of bovenstaande woorden daadwerkelijk als hulpwerkwoord gebruikt zijn of als een zelfstandig gebruikt werkwoord, ze worden altijd meegeteld bij de maat: modale (hulp)werkwoorden. (**covered**)
 
    NB1: De koppelwerkwoorden voorkomen, dunken, lijken, schijnen en blijken kunnen soms als hulpwerkwoorden van modaliteit fungeren. Tel deze dan bij de modale (hulp)werkwoorden. (**not covered**)
-   
-   * Het bleek een infarct te zijn 
+
+   * Het bleek een infarct te zijn
 
    NB2: het modale (hulp)werkwoorden hoeven is de handleiding van 2013 niet opgenomen als modaal. Het is echter wel degelijk een modaal (hulp)werkwoord. (**covered**)
 
@@ -859,7 +859,7 @@ A025: relevantie van het antwoord
 ---------------------------------------
 
 * **Name**: relevantie van het antwoord
-* **Level**: 
+* **Level**:
 * **Original**: yes
 * **In Form**: ignore
 * **Page**: new:36
@@ -881,7 +881,7 @@ A026: SEMPAR
 * **Level**: Taalmaat
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Python function
 * **Query** defined as::
 
@@ -898,7 +898,7 @@ A027: stereotypen
 -----------------------
 
 * **Name**: stereotypen
-* **Level**: 
+* **Level**:
 * **Original**: yes
 * **In Form**: ignore
 * **Page**: new:36
@@ -939,7 +939,7 @@ A029: MLU/X
 * **Level**: MLU
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -950,11 +950,11 @@ A029: MLU/X
 
 **Handleiding**
 
-* Streep de volgende woorden weg binnen de zojuist bepaalde uitingsgrenzen. 
+* Streep de volgende woorden weg binnen de zojuist bepaalde uitingsgrenzen.
   * minimale responsen ( /ja/ /nee/ /nou/ (tenzij gebruikt in de betekenis van /nu/)) (**covered**, though *nou* might be removed too often.)
   * iedere herhaling (**covered**, including many but not all partial repetitions)
   * iedere echolalie (**covered partially**)
-  * iedere mislukte poging om te komen tot realisatie van het doelwoord (** covered partially**) 
+  * iedere mislukte poging om te komen tot realisatie van het doelwoord (** covered partially**)
     * Ik ging zitten op de kast, nee stoel, nee bank Aantal woorden voor bepalen samplegrootte = 10, MLU=6
 * Streep /hé/, /goh/, /och/ etc. weg. (**covered**)
 * Uitingen die deels onverstaanbaar zijn worden in hun geheel weggelaten (eventuele lexicale maten zijn dan al wel geteld) (**covered**)
@@ -975,10 +975,10 @@ A030: SUBVZ
 -----------------
 
 * **Name**: SUBVZ
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -994,10 +994,10 @@ A031: DELVZ
 -----------------
 
 * **Name**: DELVZ
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1013,10 +1013,10 @@ A032: SUBPV
 -----------------
 
 * **Name**: SUBPV
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1032,10 +1032,10 @@ A033: DELPV
 -----------------
 
 * **Name**: DELPV
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1051,10 +1051,10 @@ A034: SUBLID
 ------------------
 
 * **Name**: SUBLID
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1070,10 +1070,10 @@ A035: DELLID
 ------------------
 
 * **Name**: DELLID
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1089,10 +1089,10 @@ A036: DELS
 ----------------
 
 * **Name**: DELS
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1108,10 +1108,10 @@ A037: MULFOUT
 -------------------
 
 * **Name**: MULFOUT
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1127,10 +1127,10 @@ A038: ONVERST
 -------------------
 
 * **Name**: ONVERST
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1146,10 +1146,10 @@ A039: VOLGFOUT
 --------------------
 
 * **Name**: VOLGFOUT
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1165,10 +1165,10 @@ A040: DELO
 ----------------
 
 * **Name**: DELO
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1184,10 +1184,10 @@ A041: PVTIJDFOUT
 ----------------------
 
 * **Name**: PVTIJDFOUT
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: no
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1203,10 +1203,10 @@ A042: SEMFOUT
 -------------------
 
 * **Name**: SEMFOUT
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: no
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1222,10 +1222,10 @@ A043: SUBVW
 -----------------
 
 * **Name**: SUBVW
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: no
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1241,10 +1241,10 @@ A044: paragrammatisch
 ---------------------------
 
 * **Name**: paragrammatisch
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: no
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1263,7 +1263,7 @@ A045: SampleGrootte/X
 * **Level**: SampleGrootte
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1295,7 +1295,7 @@ A046: nounlemma
 * **Level**: lemma
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1305,16 +1305,16 @@ A046: nounlemma
 .. autofunction:: ASTApostfunctions::getnounlemmas
 
 
-.. _A047_ASTA_form: 
+.. _A047_ASTA_form:
 
 A047: ASTA form
 ----------------
 
-* **Name**: 
+* **Name**:
 * **Level**: Formulier
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1333,7 +1333,7 @@ A048: BW
 * **Level**: Taalmaat
 * **Original**: no
 * **In Form**: no
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1352,7 +1352,7 @@ A049: verblemma
 * **Level**: lemma
 * **Original**: yes
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
@@ -1369,10 +1369,10 @@ A050: pvgetalfout
 -----------------------
 
 * **Name**: pvgetalfout
-* **Level**: QA
+* **Level**: Grammaticale fout
 * **Original**: no
 * **In Form**: yes
-* **Page**: 
+* **Page**:
 * **Implementation**: Xpath with macros
 * **Query** defined as::
 
