@@ -2,7 +2,7 @@ import re
 
 from sastadev import cleanCHILDEStokens
 from sastadev.conf import settings
-from sastadev.metadata import Meta, bpl_delete
+from sastadev.metadata import Meta, bpl_delete, bpl_replacement
 from sastadev.sastatoken import Token, show
 
 CHAT = 'CHAT'
@@ -205,6 +205,54 @@ class CHAT_SimpleRegex(CHAT_Regex):
 
         return (newtokens, metadata)
 
+
+class CHAT_NoncompletionRegex(CHAT_Regex):
+    def __init__(self, regex, replacement, original):
+        self.regex = regex
+        self.replacement = replacement
+        self.original = original
+        self.compiledre = re.compile(refunction(self.regex))
+
+    def apply(self, tokens, annotation, repkeep):
+        newtokens = []
+        metadata = []
+        insidebrackets, outsidebrackets = 0, 1
+        state = outsidebrackets
+        for token in tokens:
+            if self.compiledre.search(token.word):
+                if state == outsidebrackets:
+                    if self.replacement == keep:
+                        newtoken = token
+                        newtokens.append(newtoken)
+                    elif callable(self.replacement):
+                        newtokenword = self.replacement(token.word)
+                        newtoken = Token(newtokenword, token.pos)
+                        newtokens.append(newtoken)
+                    elif isinstance(self.replacement, str):
+                        newtokenword = self.compiledre.sub(self.replacement, token.word)
+                        if newtokenword != '':
+                            newtoken = Token(newtokenword, token.pos)
+                            newtokens.append(newtoken)
+                        else:
+                            pass  # token is removed
+                    else:
+                        pass  # token is removed
+                    if isinstance(self.original, str):
+                        originalword = self.compiledre.sub(self.original, token.word)
+
+                    metadata.append(annotation.metadatafunction(annotation, newtoken.word, newtoken.pos, originalword))
+                else:
+                    newtokens.append(token)
+            elif isopenbracket(token.word):
+                state = insidebrackets
+                newtokens.append(token)
+            elif isclosebracket(token.word):
+                state = outsidebrackets
+                newtokens.append(token)
+            else:
+                newtokens.append(token)
+
+        return (newtokens, metadata)
 
 class CHAT_SimpleScopedRegex(CHAT_Regex):
     def __init__(self, regex, replacement, scoped, arity):
@@ -456,11 +504,14 @@ def simplemetafunction(f):
                                     source=CHAT)
 
 
-def simple_bpldel_metafunction(f):
-    return lambda ann, pos, w: Meta(ann.name, [f(w)],
-                                    annotatedposlist=[pos],
-                                    annotatedwordlist=[w], source=CHAT,
-                                    backplacement=bpl_delete)
+def noncompletionmetafunction(ann, annotationword, annotationpos, annotatedword):
+    return Meta(ann.name, annotationwordlist=[annotationword], annotationposlist=[annotationpos],
+                  annotatedwordlist=[annotatedword], annotatedposlist=[annotationpos], value=annotationword,
+                source=CHAT, backplacement=bpl_replacement)
+
+def simple_bpldel_metafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos],
+                                                                   annotatedwordlist=[w], source=CHAT,
+                                                                   backplacement=bpl_delete)
 
 
 def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
@@ -473,6 +524,10 @@ def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedword
     return Meta(ann.name, annotationwordlist,
                 annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
                 annotatedposlist=annotatedposlist, source=CHAT)
+
+def complexmetafunction_replbpl(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
+    Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
+         annotatedposlist=annotatedposlist, source=CHAT, backplacement=bpl_replacement)
 
 
 def charmetafunction(ann, annotationcharlist, annotatedcharlist, annotationcharposlist, annotatedcharposlist):
@@ -554,7 +609,7 @@ annotations = [
     CHAT_Annotation('Phonological Coding', '6.4:41', '8.4:47', CHAT_SimpleRegex(r'yyy', keep, False),
                     simplemetafunction(epsf)),
     CHAT_Annotation('Noncompletion of a Word', '6.5:43', '8.5:48',
-                    CHAT_InWordRegex(r'\(([-\w\']*)\)', r'\1'), charmetafunction),
+                    CHAT_NoncompletionRegex(r'(.*)\((\w*)\)(.*)', r'\1\2\3', r'\1\3'), noncompletionmetafunction),
     CHAT_Annotation(omittedword, '6.5:43', '8.5:48-49',
                     CHAT_SimpleRegex(r'0[\w:]+', dropzero, False), simple_bpldel_metafunction(dropzero)),
     CHAT_Annotation('Satellite at End', '7.4:58', '9.2:59-60',
@@ -658,7 +713,7 @@ annotations = [
                     complexmetafunction),
     CHAT_Annotation('Replacement', '8.3:69', '10.3:73',
                     CHAT_ComplexRegex((r'\[:\s', r'([^\]]+)', r'\]'), (eps, keep), True, containswords=True),
-                    complexmetafunction),
+                    complexmetafunction_replbpl),
     CHAT_Annotation('Replacement of Real Word', '8.3:70', '10.3:73',
                     CHAT_ComplexRegex((r'\[::', r'([^\]]+)', r'\]'), (eps, keep), True), complexmetafunction),
     CHAT_Annotation('Alternative Transcription', '8.3:70', '10.3:74',
@@ -816,6 +871,8 @@ def get_CHATpatterns(annotations):
             openbrackets = openbrackets.union({theregex.compiledrebegin})
             closebrackets = closebrackets.union({theregex.compiledreend})
         elif isinstance(theregex, CHAT_InWordRegex):
+            newpats = {}
+        elif isinstance(theregex, CHAT_NoncompletionRegex):
             newpats = {}
         else:
             settings.LOGGER.error('Unknown Regex type: {}'.format(theregex))

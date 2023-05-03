@@ -9,10 +9,11 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.lexicon import de, dets, known_word
+from sastadev.lexicon import de, dets, getwordinfo, known_word
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
-                               bpl_none, bpl_word, bpl_wordlemma, insertion)
+                               bpl_none, bpl_replacement, bpl_word,
+                               bpl_wordlemma, insertion)
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
@@ -607,8 +608,11 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     thetree = treewithtokenpos(thetree, correctiontokenlist)
     if debug:
         showtree(thetree, text='thetree after treewithtokenpos')
+    if debug:
+        showtree(fatstree, text='fatstree')
     for meta in thecorrection[2]:
-        if meta.backplacement == bpl_node:
+        curbackplacement = meta.backplacement
+        if curbackplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
             oldnode = myfind(fatstree, './/node[@pt and @end="{}"]'.format(nodeend))
@@ -616,7 +620,26 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 # adapt oldnode1 for contextual features
                 contextoldnode = contextualise(oldnode, newnode)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
-        elif meta.backplacement == bpl_word or meta.backplacement == bpl_wordlemma:
+        elif curbackplacement == bpl_replacement:
+            nodeend = meta.annotationposlist[-1] + 1
+            newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [] else None
+            if newnode is None:
+                settings.LOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+
+            if newnode is not None and oldword is not None:
+                wproplist = getwordinfo(oldword)
+                wprop = wproplist[0] if wproplist != [] else None
+                # (pt, dehet, infl, lemma)
+                newnode.attrib['word'] = oldword
+                if wprop is None:
+                    newnode.attrib['lemma'] = oldword
+                else:
+                    newnode.attrib['lemma'] = wprop[3]
+
+
+
+        elif curbackplacement in [bpl_word,  bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
             nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(nodeend - 1, nodeend)
             newnode = myfind(thetree, nodexpath)
@@ -632,7 +655,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                     if 'word' not in newnode.attrib:
                         settings.LOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
                         simpleshow(oldnode, showchildren=False)
-            if meta.backplacement == bpl_wordlemma:
+            if curbackplacement == bpl_wordlemma:
                 if newnode is not None and oldnode is not None:
                     if 'lemma' in newnode.attrib and 'lemma' in oldnode.attrib:
                         newnode.attrib['lemma'] = oldnode.attrib['lemma']
@@ -646,12 +669,12 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                                 'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid, newnode))
                             simpleshow(oldnode, showchildren=False)
 
-        elif meta.backplacement == bpl_none:
+        elif curbackplacement == bpl_none:
             pass
-        elif meta.backplacement == bpl_delete:
+        elif curbackplacement == bpl_delete:
             orignodebegin = str(meta.annotatedposlist[-1])
             nodes2deletebegins.append(orignodebegin)  # just gather the begin sof the nodes to be deleted
-        elif meta.backplacement == bpl_indeze:
+        elif curbackplacement == bpl_indeze:
             nodebegin = meta.annotatedposlist[-1]
             nodeend = nodebegin + 1
             oldnode = myfind(fatstree, './/node[@pt and @end="{}"]'.format(nodeend))

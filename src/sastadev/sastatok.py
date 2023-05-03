@@ -1,4 +1,10 @@
 import re
+from sastatypes import SynTree
+from typing import List, Tuple
+from treebankfunctions import find1
+import cleanCHILDEStokens
+from sastatoken import Token
+from metadata import Meta
 
 import sastadev.CHAT_Annotation as sastachat
 #from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
@@ -64,3 +70,14 @@ def sasta_tokenize(instring):
     tokenstring = fullsastare.findall(instring)
     result = stringlist2tokenlist(tokenstring, start=10, inc=10)
     return result
+
+def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
+    '''
+    converts the origutt into  list of xmeta elements
+    :param tree: input tree
+    :return: list of xmeta elements
+    '''
+    origutt = find1(tree, './/meta[@name="origutt"]/@value')
+    tokens1 = sasta_tokenize(origutt)
+    tokens2, metadata = cleanCHILDEStokens.cleantokens(tokens1, repkeep=False)
+    return tokens2, metadata

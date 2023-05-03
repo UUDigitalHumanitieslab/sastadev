@@ -621,7 +621,7 @@ def getnodeyield(syntree: SynTree) -> List[SynTree]:
         return []
     else:
         for node in syntree.iter():
-            if 'pt' in node.attrib or 'pos' in node.attrib:
+            if node.tag in ['node'] and 'pt' in node.attrib or 'pos' in node.attrib:
                 resultlist.append(node)
         sortedresultlist = sorted(resultlist, key=lambda x: int(getattval_fallback(x, 'end', '9999')))
         return sortedresultlist
