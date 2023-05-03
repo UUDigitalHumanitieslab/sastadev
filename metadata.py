@@ -1,11 +1,15 @@
 from lxml import etree
 from typing import List
+import re
 
-bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma = tuple(range(7))
+bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma, \
+bpl_cond, bpl_replacement = tuple(range(9))
 defaultpenalty = 10
 defaultbackplacement = bpl_none
 
 SASTA = 'SASTA'
+space = ' '
+metakw = '##META'
 
 xmlformat = '''
 <xmeta name="{name}" type="{atype}" value= "{value}" annotationwordlist="{annotationwordlist}"
@@ -15,6 +19,30 @@ xmlformat = '''
 />\n
 '''
 
+# MetaValue class for simple PaQu style metadata copied from chamd
+class MetaValue:
+    def __init__(self, el, value_type, text):
+        self.value_type = value_type
+        self.text = text
+        self.uel = despace(el)
+
+    def __str__(self):
+        return space.join([metakw, self.value_type, self.uel, "=", self.text])
+
+    def metavalue2xml(self):
+        meta = etree.Element('meta')
+        meta.set('name', self.uel)
+        meta.set('type', self.value_type)
+        meta.set('value', self.text)
+        return meta
+
+# copied from chamd
+def despace(str):
+    # remove leading and trailing spaces
+    # replace other sequences of spaces by underscore
+    result = str.strip()
+    result = re.sub(r' +', r'_', result)
+    return(result)
 
 class Meta:
     def __init__(self, name, value, annotationwordlist=[], annotationposlist=[], annotatedposlist=[],

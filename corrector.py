@@ -8,7 +8,7 @@ import re
 from alpino import getdehetwordinfo
 from basicreplacements import (basicexpansions, basicreplacements,
                                getdisambiguationdict)
-from cleanCHILDEStokens import cleantokens
+from cleanCHILDEStokens import cleantokens, cleantext
 from config import PARSE_FUNC, SDLOGGER
 from dedup import (cleanwordofnort, find_duplicates2, find_janeenouduplicates,
                    find_simpleduplicates, find_substringduplicates2,
@@ -32,11 +32,12 @@ import sys
 # from alternative import Alternative, Replacement, Metadata, Meta
 from metadata import Meta, defaultbackplacement, defaultpenalty, bpl_node, bpl_none, bpl_word, bpl_indeze, \
     bpl_wordlemma, mkSASTAMeta, janeenou, shortrep, longrep, repeatedseqtoken, intj, unknownword, unknownsymbol, \
-    filled_pause, repeatedjaneenou, repeated, substringrep, fstoken, falsestart
+    filled_pause, repeatedjaneenou, repeated, substringrep, fstoken, falsestart, MetaValue
 from alpinoparsing import parse, escape_alpino_input
 from expandquery import expandmacros
 from find_ngram import Ngram, findmatches, ngram1, ngram2, ngram7, ngram10, ngram11, ngram16, ngram17
 from smallclauses import smallclauses
+from sasta_explanation import finaltokenmultiwordexplanation, explanationasreplacement
 
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from sastatypes import BackPlacement, MethodName, Nort, Penalty, Position, SynTree, UttId
@@ -448,6 +449,10 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
     allmetadata += metadata
     tokensmd = TokenListMD(tokens, [])
 
+    # check whether there is a utterance final multiword explanation, and if so, align it with the utterance
+    # use this aligned utterance as the correction, clean it, parse it
+
+
     # reducedtokens, allremovedtokens, metadata = reduce(tokens)
     reducedtokens, metadata = reduce(tokens, tree)
     reducedtokensmd = TokenListMD(reducedtokens, [])
@@ -473,6 +478,28 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
     tokensmd = explanationasreplacement(origtokensmd, tree)
     if tokensmd is None:
         tokensmd = origtokensmd
+
+
+    alignment = finaltokenmultiwordexplanation(tokensmd,tree)
+    if alignment is not None:
+        # make the realoriguttmetadata @@todo@@
+        origuttel = find1(tree, '//meta[@name="origutt"]')
+        realoriguttmd = MetaValue('realorigutt', 'text', origuttel.attrib['value'])
+        realoriguttel = realoriguttmd.metavalue2xml()
+        neworiguttmd = MetaValue('origutt', 'text', alignment)
+        neworiguttel = neworiguttmd.metavalue2xml()
+        treemetadata = find1(tree, '//metadata')
+        treemetadata.append(realoriguttel)
+        treemetadata.remove(origuttel)
+        treemetadata.append(neworiguttel)
+
+        #clean the alignment
+        cleanutttokens, chatmetadata = cleantext(alignment, False, tokenoutput=True)
+
+        newmetadata = tokensmd.metadata + chatmetadata
+        tokensmd = TokenListMD(cleanutttokens, newmetadata)
+
+
 
     tokens = tokensmd.tokens
     allmetadata = tokensmd.metadata
@@ -842,16 +869,7 @@ def updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newwords: List[s
     return newtokenmds
 
 
-def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
-    '''
-    converts the origutt into  list of xmeta elements
-    :param tree: input tree
-    :return: list of xmeta elements
-    '''
-    origutt = find1(tree, './/meta[@name="origutt"]/@value')
-    tokens1 = sasta_tokenize(origutt)
-    tokens2, metadata = cleantokens(tokens1, repkeep=False)
-    return tokens2, metadata
+# def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]: moved to sastatok.py
 
 
 def findxmetaatt(xmetalist: List[Meta], name: str, cond: MetaCondition = lambda x: True) -> Optional[Meta]:
@@ -863,43 +881,9 @@ def findxmetaatt(xmetalist: List[Meta], name: str, cond: MetaCondition = lambda 
     return result
 
 
-def tokenreplace(oldtokens: List[Token], newtoken: Token) -> List[Token]:
-    newtokens = []
-    for token in oldtokens:
-        if token.pos == newtoken.pos:
-            newtokens.append(newtoken)
-        else:
-            newtokens.append(token)
-    return newtokens
 
 
-def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[TokenListMD]:
-    # interpret single word explanation as replacement # this will work only after retokenistion of the origutt
-    result = None
-    origmetadata = tokensmd.metadata
-    xtokens, xmetalist = gettokensplusxmeta(tree)
-    explanations = [xm for xm in xmetalist if xm.name == 'Explanation']
-    newtokens = copy.deepcopy(xtokens)
-    newmetadata = origmetadata + xmetalist
-    for explanation in explanations:
-        newwordlist = explanation.annotationwordlist
-        oldwordlist = explanation.annotatedwordlist
-        tokenposlist = explanation.annotatedposlist
-        if len(newwordlist) == 1 and len(tokenposlist) == 1 and len(oldwordlist) == 1:
-            newword = newwordlist[0]
-            oldwordpos = tokenposlist[0]
-            oldword = oldwordlist[0]
-            newtoken = Token(newword, oldwordpos)
-            oldtoken = Token(oldword, oldwordpos)
-            if known_word(newword):
-                newtokens = tokenreplace(newtokens, newtoken)
-                bpl = bpl_node if known_word(oldword) else bpl_word
-                meta = mkSASTAMeta(oldtoken, newtoken, name='ExplanationasReplacement',
-                                   value='ExplanationasReplacement',
-                                   cat='Lexical Error', backplacement=bpl)
-                newmetadata.append(meta)
-                result = TokenListMD(newtokens, newmetadata)
-    return result
+# def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[TokenListMD]: moved to sasta_explanation
 
 
 # some words are known but very unlikely as such
