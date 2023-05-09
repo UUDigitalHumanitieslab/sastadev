@@ -44,7 +44,8 @@ sastalog.txt
 .DS_Store
 
 # documentation
-Documentation/_build/
+docs/_build/
+
 
 
 
