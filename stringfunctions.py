@@ -36,6 +36,7 @@ dutch_base_triphthongs = ['aai', 'eeu', 'ooi', 'oei']
 dutch_y_tetraphthongs = ['y' + d for d in dutch_base_triphthongs]
 dutch_triphthongs = dutch_base_triphthongs + dutch_y_triphthongs
 dutch_tetraphthongs = dutch_y_tetraphthongs
+foreign_triphthongs = ['eau', 'oeu']
 
 hyphenprefixes = ['anti', 'contra', 'ex']
 

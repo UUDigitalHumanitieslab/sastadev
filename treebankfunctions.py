@@ -78,6 +78,10 @@ complrels = ['su', 'obj1', 'pobj1', 'obj2', 'se', 'pc', 'vc', 'svp', 'predc', 'l
 
 mainclausecats = ['smain', 'whq', 'sv1']
 
+ptsubclasspairs = [('n', 'ntype'), ('tw', 'numtype'), ('vnw', 'vwtype'), ('lw', 'lwtype'), ('vz', 'vztype'),
+                   ('vg' , 'conjtype'), ('spec', 'spectype')]
+ptsubclassdict = {pt:subclass for (pt, subclass) in ptsubclasspairs}
+
 pluralcrds = [('en',)]
 
 hwws_tijd = ['hebben', 'zijn', 'zullen']
@@ -2055,7 +2059,19 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
     return resulttree
 
+def getptsubclass(pt):
+    if pt in ptsubclassdict:
+        return ptsubclassdict[pt]
+    else:
+        return None
 
+
+def subclasscompatible(sc1, sc2):
+    result = (sc1 == sc2) or \
+             (sc1 in ['pr', 'refl'] and sc2 in ['pr', 'refl']) or\
+             (sc1 in ['pr', 'pers'] and sc2 in ['pr', 'pers']) or \
+             (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm'])
+    return result
 def fatparse(utterance: str, tokenlist: List[Token]) -> SynTree:
     stree = PARSE_FUNC(utterance)
     fatstree = deepcopy(stree)

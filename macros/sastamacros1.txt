@@ -58,7 +58,7 @@ Tarsp_hww = """
   @lemma = "zitten")
  """
  
-Tarsp_vc_sibling = """parent::node[ node[@rel="vc"]]"""
+Tarsp_vc_sibling = """parent::node[ node[@rel="vc" and node[@rel="hd"]]]"""
 Tarsp_predc_sibling = """parent::node[ node[@rel="predc"]]"""
 Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
