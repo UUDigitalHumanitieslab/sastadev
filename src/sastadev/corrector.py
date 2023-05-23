@@ -478,30 +478,15 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
 
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
 def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId):
-    tokensmd = explanationasreplacement(origtokensmd, tree)
-    if tokensmd is None:
+
+
+
+
+    newtokensmd = explanationasreplacement(origtokensmd, tree)
+    if newtokensmd is not None:
+        tokensmd = newtokensmd
+    else:
         tokensmd = origtokensmd
-
-
-    alignment = finaltokenmultiwordexplanation(tokensmd,tree)
-    if alignment is not None:
-        # make the realoriguttmetadata @@todo@@
-        origuttel = find1(tree, '//meta[@name="origutt"]')
-        realoriguttmd = MetaValue('realorigutt', 'text', origuttel.attrib['value'])
-        realoriguttel = realoriguttmd.metavalue2xml()
-        neworiguttmd = MetaValue('origutt', 'text', alignment)
-        neworiguttel = neworiguttmd.metavalue2xml()
-        treemetadata = find1(tree, '//metadata')
-        treemetadata.append(realoriguttel)
-        treemetadata.remove(origuttel)
-        treemetadata.append(neworiguttel)
-
-        #clean the alignment
-        cleanutttokens, chatmetadata = cleantext(alignment, False, tokenoutput=True)
-
-        newmetadata = tokensmd.metadata + chatmetadata
-        tokensmd = TokenListMD(cleanutttokens, newmetadata)
-
 
 
     tokens = tokensmd.tokens

@@ -1,14 +1,13 @@
 import re
-from sastatypes import SynTree
 from typing import List, Tuple
-from treebankfunctions import find1
-import cleanCHILDEStokens
-from sastatoken import Token
-from metadata import Meta
 
 import sastadev.CHAT_Annotation as sastachat
+import sastadev.cleanCHILDEStokens
+from sastadev.metadata import Meta
 #from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
-from sastadev.sastatoken import stringlist2tokenlist
+from sastadev.sastatoken import Token, stringlist2tokenlist
+from sastadev.sastatypes import SynTree
+from sastadev.treebankfunctions import find1
 
 
 def alts(pats, grouping=False):
@@ -79,5 +78,5 @@ def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     '''
     origutt = find1(tree, './/meta[@name="origutt"]/@value')
     tokens1 = sasta_tokenize(origutt)
-    tokens2, metadata = cleanCHILDEStokens.cleantokens(tokens1, repkeep=False)
+    tokens2, metadata = sastadev.cleanCHILDEStokens.cleantokens(tokens1, repkeep=False)
     return tokens2, metadata

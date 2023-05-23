@@ -3,8 +3,8 @@ import csv
 import pytest
 
 from sastadev import lexicon
-from sastadev.iedims import (bigfilesep, getbaseinlexicon, getjeformsnolex,
-                             slash)
+from sastadev.iedims import (bigfilesep, getbaseinlexicon, getjeforms,
+                             getjeformsnolex, slash)
 
 testset = [('cluppie', ['clubje', 'clupje']), ('bakkie', ['bakje']), ('dakkie', ['dakje']), ('darmpie', ['darmpje']),
            ('doppie', ['dopje']), ('rapie', ['raapje']), ('huisie',
@@ -84,3 +84,10 @@ def test_iedims():
     for (ieform, jeforms) in testset:
         results = getjeformsnolex(ieform)
         report(results, ieform, jeforms, logfile)
+
+
+def test_iedims_je():
+    iewords = ['poppie', 'kassie', 'boekie']
+    jewords = [getjeforms(word) for word in iewords]
+
+    assert jewords == ['popje', 'kasje', 'boekje']

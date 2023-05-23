@@ -1,5 +1,7 @@
-from typing import Dict, List
+import os
+from typing import Dict, List, Tuple
 
+from sastadev.conf import settings
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
@@ -62,7 +64,59 @@ def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> b
          and implies('A045' in xrs, xr not in xrs['A045']))
 
 
+def getmethodfromfile(filename: str) -> str:
+    result = ''
+    path, base = os.path.split(filename.lower())
+    for m in supported_methods:
+        if m in base:
+            result = m
+    if result == '':
+        settings.LOGGER.error('No supported method found in filename')
+        exit(-1)
+    else:
+        return result
+
+
+def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
+    if methodname is None and methodfilename is None:
+        settings.LOGGER.error('Specify a method using -m ')
+        exit(-1)
+    elif methodname is None and methodfilename is not None:
+        resultmethodfilename = methodfilename
+        resultmethodname = getmethodfromfile(methodfilename)
+        settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = supported_methods[methodname]
+        else:
+            resultmethodfilename = methodname
+            resultmethodname = getmethodfromfile(methodname)
+            settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is not None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = methodfilename
+        else:
+            settings.LOGGER.error('Unsupported method specified {}'.format(methodname))
+            exit(-1)
+    return resultmethodname, resultmethodfilename
+
+
+
+codepath = settings.SD_DIR
+methodspath = os.path.join(codepath, 'methods')
+
+
+supported_methods = {}
+supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
+supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
+
+
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}
 defaultfilters[asta] = astadefaultfilter
 defaultfilters[tarsp] = allok
 defaultfilters[stap] = allok
+
+

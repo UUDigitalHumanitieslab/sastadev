@@ -159,7 +159,8 @@ from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros
-from sastadev.methods import Method, defaultfilters
+from sastadev.methods import (Method, defaultfilters, supported_methods,
+                              treatmethod)
 from sastadev.mismatches import exactmismatches, getmarkposition
 from sastadev.mksilver import getsilverannotations, permprefix
 from sastadev.query import (Query, form_process, is_core, is_pre, is_preorcore,
@@ -168,6 +169,7 @@ from sastadev.readmethod import itemseppattern, read_method
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
+from sastadev.sasta_explanation import finalexplanation_adapttreebank
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
                                  GoldTuple, MatchesDict, MethodName, QId,
                                  QIdCount, QueryDict, ResultsCounter,
@@ -193,10 +195,14 @@ gramat = 'gramat'
 codepath = os.path.dirname(os.path.abspath(__file__))
 methodspath = os.path.join(codepath, 'data', 'methods')
 
-supported_methods = {}
-supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
-supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
-supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
+
+# moved to methods.py
+# methodspath = os.path.join(codepath, 'methods')
+
+# supported_methods = {}
+# supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
+# supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+#supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 platinumchecksuffix = '_platinum.check.tsv'
 platinumcheckeditedsuffix = '_platinum.check-edited.tsv'
@@ -533,44 +539,6 @@ def get_comparison(resultscounts: QIdCount, goldcounts: QIdCount, queries: Query
     return comparison
 
 
-def getmethodfromfile(filename: str) -> str:
-    result = ''
-    path, base = os.path.split(filename.lower())
-    for m in supported_methods:
-        if m in base:
-            result = m
-    if result == '':
-        settings.LOGGER.error('No supported method found in filename')
-        exit(-1)
-    else:
-        return result
-
-
-def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
-    if methodname is None and methodfilename is None:
-        settings.LOGGER.error('Specify a method using -m ')
-        exit(-1)
-    elif methodname is None and methodfilename is not None:
-        resultmethodfilename = methodfilename
-        resultmethodname = getmethodfromfile(methodfilename)
-        settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
-    elif methodname is not None and methodfilename is None:
-        if methodname.lower() in supported_methods:
-            resultmethodname = methodname.lower()
-            resultmethodfilename = supported_methods[methodname]
-        else:
-            resultmethodfilename = methodname
-            resultmethodname = getmethodfromfile(methodname)
-            settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
-    elif methodname is not None and methodfilename is not None:
-        if methodname.lower() in supported_methods:
-            resultmethodname = methodname.lower()
-            resultmethodfilename = methodfilename
-        else:
-            settings.LOGGER.error('Unsupported method specified {}'.format(methodname))
-            exit(-1)
-    return resultmethodname, resultmethodfilename
-
 
 topnodequery = './/node[@cat="top"]'
 
@@ -876,7 +844,23 @@ def main():
         uttcount = 0
         # determine targets
         targets = get_targets(origtreebank)
-        treebank, errordict, allorandalts = correcttreebank(origtreebank, targets, options.methodname, options.corr)
+
+        # for tree in origtreebank:
+        #     showtree(tree, 'voor fexplanations')
+
+        # deal with final explanations
+        fexplanations = True
+        if fexplanations:
+            treebank1 = finalexplanation_adapttreebank(origtreebank)
+        else:
+            treebank1 = origtreebank
+
+        # for tree in treebank1:
+        #     showtree(tree, 'na fexplanations')
+        treebank, errordict, allorandalts = correcttreebank(treebank1, targets, options.methodname, options.corr)
+
+        # for tree in treebank:
+        #    showtree(tree, 'na correcties')
 
         # create the new treebank
         fulltreebank = etree.ElementTree(treebank)
@@ -900,6 +884,7 @@ def main():
 
         analysedtrees = []
         for syntree in treebank:
+            temputtid = getuttid(syntree)
             uttcount += 1
             #settings.LOGGER.error('uttcount={}'.format(uttcount))
             mustbedone = get_mustbedone(syntree, targets)
@@ -992,7 +977,7 @@ def main():
     # exactresults = getexactresults(allmatches)
     exact = True
 
-    pcheaders = [['User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt']]
+    pcheaders = [['User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt', 'origutt']]
     allrows = []
 
     for queryid in results:
