@@ -57,9 +57,9 @@ def parse(origsent: str, escape: bool = True):
     The parameter *escape* can be used to escape symbols that have a special meaning
     for Alpino. Its default value is *True*.
 
-    This function is memoised, which might give unexpected results since the output type is mutable. Be careful if
-    the same input string is parsed twice and the resulting objects should really be considered two different
-    instances.!
+    This function is memoised. In order to avoid unexpected results since the output type is mutable, a deepcopy
+    of the result is returned. This is essential, because if the same input string is parsed twice,
+    the resulting parse tree objects should really be two different instances.!
 
     '''
     if isempty(origsent):

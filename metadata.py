@@ -16,8 +16,7 @@ xmlformat = '''
        annotationposlist="{annotationposlist}" annotatedwordlist="{annotatedwordlist}"
        annotatedposlist="{annotatedposlist}"  cat="{cat}" subcat="{subcat}" source="{source}"
        backplacement="{backplacement}" penalty="{penalty}"
-/>\n
-'''
+/>'''
 
 # MetaValue class for simple PaQu style metadata copied from chamd
 class MetaValue:
@@ -29,12 +28,20 @@ class MetaValue:
     def __str__(self):
         return space.join([metakw, self.value_type, self.uel, "=", self.text])
 
-    def metavalue2xml(self):
+    def toElement(self):
         meta = etree.Element('meta')
         meta.set('name', self.uel)
         meta.set('type', self.value_type)
         meta.set('value', self.text)
         return meta
+
+def fromElement(xmlel):
+    value_type = xmlel.attrib['type']
+    text = xmlel.attrib['value']
+    uel = xmlel.attrib['name']
+    result = MetaValue(uel, value_type, text)
+    return result
+
 
 # copied from chamd
 def despace(str):

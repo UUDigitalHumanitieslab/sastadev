@@ -82,7 +82,7 @@ def checkpermformat(header, data, colcount, strict=True):
 
 def updatepermdict(fullname, permdict):
     silverheader, silverdata = getxlsxdata(fullname)
-    colsok = checkpermformat(silverheader, silverdata, permsilvercolcount)
+    colsok = checkpermformat(silverheader, silverdata, permsilvercolcount, strict=False)
     silverfulldatadict = silverdata2dict(silverdata)
 
     #Voeg silverfulldatadict toe aan permdict

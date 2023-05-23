@@ -11,7 +11,7 @@ from copy import deepcopy
 import CHAT_Annotation
 import sastatok
 from config import SDLOGGER
-from metadata import Meta, bpl_none, Metadata
+from metadata import Meta, bpl_none, Metadata, MetaValue
 from sastatoken import show, Token
 from typing import List, Union, Tuple, Pattern, Optional, TextIO
 from sastatypes import IntSpan
@@ -129,6 +129,7 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool=False) -> Tuple[Cleaned
     newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
     newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
     newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
+    #newmeta4 = Meta('cleantext',  'done')
     metadata += [newmeta1, newmeta2, newmeta3]
     resultmetadata = metadata
     if tokenoutput:

@@ -13,6 +13,7 @@ else:
     dataroot = '.'
 
 bronzefolder = 'bronze'
+confidencefolder = 'confidence'
 formsfolder = 'forms'
 indatafolder = 'indata'
 intreebanksfolder = 'intreebanks'
