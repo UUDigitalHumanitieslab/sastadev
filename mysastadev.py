@@ -448,7 +448,7 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
             for m in matches:
                 # showtree(m)
                 if m is None:
-                    showtree(syntree)
+                    showtree(syntree, text='in doqueries: Nonematch')
                 if (queryid, uttid) in allmatches:
                     allmatches[(queryid, uttid)].append((m, syntree))
                 else:
@@ -607,7 +607,7 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
     queries = method.queries
     for queryid in rawexactresults:
         query = queries[queryid]
-        queryfilter = query.special2
+        queryfilter = query.filter
         thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[queryfilter]
         exactresults[queryid] = [r for r in rawexactresults[queryid] if thefilter(query, rawexactresults, r)]
     return exactresults

@@ -8,70 +8,80 @@ from collections import Counter
 from query import Query
 from sastatoken import Token
 
+Level = str  # in the future perhaps NewType('Level', str)
+Position = int  # in the future perhapos NewType('Position', int)
+PhiTriple = Tuple[str, str, str]
+QId = str  # in the futute perhaps NewType('QId', str)
+SynTree = etree.Element  # type: ignore
+UttId = str  # in the future perhaps NewType('UttId', str)
+
+
+Item = str  # in the future perhaps NewType('Item', str)
+Item2LevelsDict = Dict[Item, List[Level]]
+Item_Level = Tuple[Item, Level]
+
+
+AltCodeDict = Dict[Item_Level, Item_Level]
 AltId = int
 BackPlacement = int
-CapitalName = str
-CountryName = str
-ContinentName = str
 CELEXPosCode = str
-FirstName = str
-LocationName = str
-DCOIPt = str
-DeHet = str
 CELEX_INFL =str
-DCOITuple = Tuple
-Lemma = str
+CapitalName = str
+ContinentName = str
 CorrectionMode = str  # Literal['0','1','n']
+CountryName = str
+DCOIPt = str
+DCOITuple = Tuple
+DeHet = str
 ErrorDict = Dict[str, List[List[str]]]
-Level = str  # in the future perhaps NewType('Level', str)
-Item = str  # in the future perhaps NewType('Item', str)
-Item_Level = Tuple[Item, Level]
-IntSpan = Tuple[int, int]
-AltCodeDict = Dict[Item_Level, Item_Level]
-QId = str  # in the futute perhaps NewType('QId', str)
-UttId = str  # in the future perhaps NewType('UttId', str)
-Position = int  # in the future perhapos NewType('Position', int)
-PositionStr = str
-Stage = int
-#SynTree = etree._Element  # type: ignore
-SynTree = etree.Element  # type: ignore
+ExactResult = Tuple[UttId, Position]
+ExactResults = List[ExactResult]
+ExactResultsDict = Dict[QId, ExactResults]  # qid
+ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
+FileName = str  # perhaps in the future NewType('FileName', str)
+FirstName = str
+Gender = str
 GoldTuple = Tuple[str, str, Counter]
-Item2LevelsDict = Dict[Item, List[Level]]
+GoldResults = Dict[QId, GoldTuple]
+IntSpan = Tuple[int, int]
+Item_Level2QIdDict = Dict[Item_Level, QId]
+Lemma = str
+LocationName = str
 Match = Tuple[SynTree, SynTree]
 Matches = List[Match]
 MatchesDict = Dict[Tuple[QId, UttId], Matches]
 MetaElement = etree.Element
-ExactResult = Tuple[UttId, Position]
-ExactResults = List[ExactResult]
-ExactResultsDict = Dict[QId, ExactResults]  # qid
-Gender = str
-Penalty = int
-PhiTriple = Tuple[str, str, str]
-OptPhiTriple = Optional[PhiTriple]
-PositionMap = Dict[Position, Position]
-QueryDict = Dict[QId, Query]
-QIdCount = Dict[QId, int]
 MethodName = str  # perhaps in the future NewType('MethodName', str)
-FileName = str  # perhaps in the future NewType('FileName', str)
+Nort = Union[SynTree, Token]
+OptPhiTriple = Optional[PhiTriple]
+Penalty = int
+PositionMap = Dict[Position, Position]
+PositionStr = str
+Postag = str
+Pt = str
+QIdCount = Dict[QId, int]
+QueryDict = Dict[QId, Query]
 ReplacementMode = int
 ResultsCounter = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict = Dict[QId, ResultsCounter]
+Source = str
 Span = Tuple[PositionStr, PositionStr]
-Item_Level2QIdDict = Dict[Item_Level, QId]
-Nort = Union[SynTree, Token]
-ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
+Stage = int
 Targets = int
-Treebank = etree.Element
-TreePredicate = Callable[[SynTree], bool]
 TokenTreePredicate = Callable[[Token, SynTree], bool]
+TreePredicate = Callable[[SynTree], bool]
+Treebank = etree.Element
 URL = str
 UttTokenDict = Dict[UttId, List[Token]]
 UttWordDict = Dict[UttId, List[str]]
+Word = str
 WordInfo = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
+WordLower = str
+
 # moved the following to allresuls.py
-#CoreQueryFunction = Callable[[SynTree], List[SynTree]]
-#PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]
-#QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
+# CoreQueryFunction = Callable[[SynTree], List[SynTree]]
+# PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]
+# QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
 
 
 
