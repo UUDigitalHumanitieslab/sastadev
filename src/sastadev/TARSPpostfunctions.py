@@ -192,7 +192,7 @@ def genpfi(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> int:
     The description in Schlichting (p. 23) is not specific enough.
     '''
     theqids = [qid for qid in allqueries if allqueries[qid].fase == stage and allqueries[qid].process == core_process
-               and allqueries[qid].special1 != 'star2']
+               and allqueries[qid].stars != 'star2']
     coreresults = allresults.coreresults
     scoredqids = [qid for qid in theqids if qid in coreresults and len(coreresults[qid]) > 0]
     # OndVC

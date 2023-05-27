@@ -26,7 +26,7 @@ def clean(valstr):
 
 class Query:
     def __init__(self, id, cat, subcat, level, item, altitems, implies, original, pages, fase, query, inform,
-                 screening, process, special1, special2, comments):
+                 screening, process, stars, filter, variants, unused1, unused2, comments):
         self.id = id
         self.cat = cat
         self.subcat = subcat
@@ -41,8 +41,11 @@ class Query:
         self.inform = inform
         self.screening = screening
         self.process = getprocess(process)
-        self.special1 = clean(special1)
-        self.special2 = special2
+        self.stars = clean(stars)
+        self.filter = filter
+        self.variants = variants
+        self.unused1 = unused1
+        self.unused2 = unused2
         self.comments = comments
 
 
