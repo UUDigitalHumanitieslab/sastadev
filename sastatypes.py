@@ -36,6 +36,7 @@ PositionStr: TypeAlias = str
 Stage: TypeAlias = int
 SynTree: TypeAlias = etree._Element  # type: ignore
 GoldTuple: TypeAlias = Tuple[str, str, Counter]
+GoldResults = Dict[QId, GoldTuple]
 Item2LevelsDict: TypeAlias = Dict[Item, List[Level]]
 Match: TypeAlias = Tuple[SynTree, SynTree]
 Matches: TypeAlias = List[Match]
@@ -49,6 +50,8 @@ Penalty: TypeAlias = int
 PhiTriple: TypeAlias = Tuple[str, str, str]
 OptPhiTriple: TypeAlias = Optional[PhiTriple]
 PositionMap: TypeAlias = Dict[Position, Position]
+Postag = str
+Pt = str
 QueryDict: TypeAlias = Dict[QId, Query]
 QIdCount: TypeAlias = Dict[QId, int]
 MethodName: TypeAlias = str  # perhaps in the future NewType('MethodName', str)
@@ -56,6 +59,7 @@ FileName: TypeAlias = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode: TypeAlias = int
 ResultsCounter: TypeAlias = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
+Source = str
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
 Nort: TypeAlias = Union[SynTree, Token]
@@ -67,8 +71,16 @@ TokenTreePredicate: TypeAlias = Callable[[Token, SynTree], bool]
 URL: TypeAlias = str
 UttTokenDict: TypeAlias = Dict[UttId, List[Token]]
 UttWordDict: TypeAlias = Dict[UttId, List[str]]
+Word = str
 WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
+WordLower = str
+
 # moved the following to allresuls.py
 #CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
 #PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
 #QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
+
+
+
+
+

@@ -1,5 +1,5 @@
 '''
-The *imply* module im plements the function *removeimplies* to remove matches that are implied by a given match
+The *imply* module implements the function *removeimplies* to remove matches that are implied by a given match
 '''
 
 from sastatypes import MatchesDict, Query, QId, QueryDict, Matches, Match
@@ -17,7 +17,7 @@ def removeimplies(matches: MatchesDict, queries: QueryDict) -> MatchesDict:
                 if valid:
                     toremovekeys.append((impliedqid, uttid))
 
-    newmatches = {key:val for key, val in matches.items() if key not in toremovekeys}
+    newmatches = {key: val for key, val in matches.items() if key not in toremovekeys}
     return newmatches
 
 def contains(match: Match, impliedmatch: Match) -> bool:

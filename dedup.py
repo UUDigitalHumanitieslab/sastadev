@@ -637,7 +637,7 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
                 tokenbeginstr = mlumd.attrib['annotatedposlist']
                 tokenbegins = string2list(tokenbeginstr)
                 for tokenbegin in tokenbegins:
-                    nodexpath = './/node[@pt and @begin="{}"]'.format(tokenbegin)
+                    nodexpath = './/node[(@pt or @pos) and @begin="{}"]'.format(tokenbegin)
                     newnode = find1(stree, nodexpath)
                     if newnode is not None:
                         mdnodes.append(newnode)
@@ -933,7 +933,7 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
             tokenbeginstr = mlumd.attrib['annotatedposlist']
             tokenbegins = string2list(tokenbeginstr)
             for tokenbegin in tokenbegins:
-                nodexpath = './/node[@pt and @begin="{}"]'.format(tokenbegin)
+                nodexpath = './/node[(@pt or @pos) and @begin="{}"]'.format(tokenbegin)
                 newnode = find1(stree, nodexpath)
                 if newnode is not None:
                     mdnodes.append(newnode)

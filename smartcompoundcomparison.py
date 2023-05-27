@@ -1,7 +1,9 @@
 '''
 
 This module provides a function to determine whether an illegal word is to be considered as a compound,
-based on its correction and the lemma of its correction
+based on its correction and the lemma of its correction.
+It works for nouns only!
+
 '''
 import editdistance
 from normalise_lemma import normaliselemma
@@ -12,8 +14,8 @@ def reldistance(word, corr):
     return result
 
 def iscompound(word, corr, rawcorrlemma):
-    debug = True
-    corrlemma = normaliselemma(corr, rawcorrlemma)
+    debug = False
+    corrlemma = normaliselemma(corr, rawcorrlemma, keeplastsep=True)
     corrlemmaparts = corrlemma.split('_')
     if len(corrlemmaparts) == 1:
         return False
@@ -43,49 +45,43 @@ def iscompound(word, corr, rawcorrlemma):
 
 def main():
     testlist = [
-                ('zingdoppe', 'zingdoppen', 'zingen_doppen', True),
                 ('koekkok', 'koekoeksklok', 'koekoek_klok', True),
+                ('zingdoppe', 'zingdoppen', 'zingen_doppen', True),
                 ('chocomelluk', 'chocolademelk', 'chocolade_melk', True),
                 ('zepezop', 'zeepsop', 'zeep_sop', True),
                 ('verffinger', 'vingerverf', 'vinger_verf', True),
                 ('welə', 'welles', 'wel_les', True),
+                ('staap', 'stapelbed', 'stapel_bed', False),
                 ('stape', 'stapelbed', 'stapel_bed', False),
-                ('ingedoet', 'ingedaan', 'in_doen', True),
-                ('sakhoue', 'vasthouden', 'vast_houden', True),
-                ('opraaien', 'opdraaien', 'op_draaien', True),
                 ('aardbeiijs', 'aardbeienijs', 'aardbei_ijs', True),
-                ('ophouwe', 'ophouden', 'op_houden', True),
-                ('voorlese', 'voorlezen', 'voor_lezen', True),
                 ('slijbaan', 'glijbaan', 'glij_baan', True),
                 ('zwatte+piet', 'Zwarte_Piet', 'Zwarte_Piet', True),
-                ('innezette', 'inzetten', 'in_zetten', True),
-                ('dichhouwe', 'dichthouden', 'dicht_houden', True),
-                ('bijhouwen', 'bijhouden', 'bij_houden', True),
-                ('ommedaaje', 'omdraaien', 'om_draaien', True),
                 ('poplepel', 'pollepel', 'pol_lepel', True),
-                ('ingedoet', 'ingedaan', 'in_doen', True),
                 ('pokeepel', 'pollepel', 'pol_lepel', True),
-                ('afdoje', 'afdrogen', 'af_drogen', True),
-                ('affedoen', 'afdoen', 'af_doen', True),
-                ('afdooje', 'afdrogen', 'af_drogen', True),
                 ('vrastauto', 'vrachtauto', 'vracht_auto', True),
                 ('slaapliets', 'slaapliedje', 'slaap_lied', True),
-                ('vasthouwen', 'vasthouden', 'vast_houden', True),
-                ('ophouwen', 'ophouden', 'op_houden', True),
                 ('slinderjurk', 'vlinderjurk', 'vlinder_jurk', True),
                 ('abbesap', 'appelsap', 'appel_sap', True),
                 ('vloerplussel', 'vloerpuzzel', 'vloer_puzzel', True),
                 ('bestesap', 'bessensap', 'bes_sap', True),
                 ('Astepoester', 'Asseposter', 'Asse_poster', True),
                 ('affesap', 'appelsap', 'appel_sap', True),
-                ('risstengeltjes', 'rietstengeltjes', 'riet_steng', True),
+                ('risstengeltjes', 'rietstengeltjes', 'riet_stengel', True),
                 ('zeemepaardjes', 'zeemeerminpaardje', 'zeemeermin_paard', True),
-                ('vasthouwe', 'vasthouden', 'vast_houden', True),
                 ('sampejonnetje', 'lampionnetje', 'lampion_net', True),
+                ('babykijn', 'babykonijn', 'baby_konijn', True),
+                ('twemles', 'zwemles', 'zwem_les', True),
+                ('laapkamer', 'slaapkamer','slaap_kamer', True),
+                ('sintetlaaspaatje', 'sinterklaaspaardje', 'sinterklaas_paardje', True),
+                ('kippes', 'kippies', 'kip_pies', True),
+                ('diehoek', 'driehoek', 'drie_hoek', True),
+                ('jantauto', 'brandweerauto', 'brandweer_auto', True)
 
-                ]
+    ]
+    # testlist = [('risstengeltjes', 'rietstengeltjes', 'riet_stengel', True)]
+
     max = len(testlist)
-    max = 5
+    # max = 1
     for word, corr, corrlemma, ref in testlist[:max]:
         result = iscompound(word, corr, corrlemma)
         if result != ref:
