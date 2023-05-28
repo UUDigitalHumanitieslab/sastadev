@@ -744,11 +744,12 @@ def main():
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
 
-    # @@adapt this so that the method is read in directly as a Method object
-    (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodfilename)
-    defaultfilter = defaultfilters[options.methodname]
-    themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
-                       options.methodfilename, defaultfilter)
+    # adapted this so that the method is read in directly as a Method object
+    # (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodname, options.methodfilename)
+    # defaultfilter = defaultfilters[options.methodname]
+    # themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
+    #                   options.methodfilename, defaultfilter)
+    themethod = read_method(options.methodname, options.methodfilename)
 
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
@@ -756,8 +757,8 @@ def main():
     # read the annotation reference file if available, otherwise the gold file, otherwise quit
     goldscores = {}
     if options.annotationfilename != '' and os.path.exists(options.annotationfilename):
-        allannutts, richexactgoldscores = get_golddata(options.annotationfilename, item2idmap, altcodes, queries,
-                                                       options.includeimplies)
+        allannutts, richexactgoldscores = get_golddata(options.annotationfilename, themethod.item2idmap,
+                                                       themethod.altcodes, themethod.queries, options.includeimplies)
         annuttcount = len(allannutts)
         exactgoldscores = richscores2scores(richexactgoldscores)
         richgoldscores = richexact2global(richexactgoldscores)
@@ -894,8 +895,8 @@ def main():
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
                 analysedtrees.append(syntree)
-                doprequeries(syntree, queries, rawexactresults, allmatches)
-                docorequeries(syntree, queries, rawexactresults, allmatches)
+                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
 
                 # uttid = getuttid(syntree)
                 uttid = getxselseuttid(syntree)
@@ -928,11 +929,11 @@ def main():
     allresults = AllResults(uttcount, coreresults, exactresults, postresults, allmatches, options.infilename, analysedtrees,
                             allutts, annotationinput)
 
-    postquerylist: List[QId] = [q for q in postorformquerylist if queries[q].process == post_process]
-    formquerylist: List[QId] = [q for q in postorformquerylist if queries[q].process == form_process]
+    postquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
+    formquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
 
-    dopostqueries(allresults, postquerylist, queries)
-    dopostqueries(allresults, formquerylist, queries)
+    dopostqueries(allresults, postquerylist, themethod.queries)
+    dopostqueries(allresults, formquerylist, themethod.queries)
 
     (base, ext) = os.path.splitext(options.infilename)
     outputfullname = os.path.join(resultspath, corefilename + "_analysis" + tsvext + txtext)
@@ -950,7 +951,7 @@ def main():
     if os.path.exists(options.platinuminfilename):
         platinuminfilefound = True
         platinumresults = read_referencefile(options.platinuminfilename, logfile)
-        checkplatinum(goldscores, platinumresults, queries)
+        checkplatinum(goldscores, platinumresults, themethod.queries)
     else:
         SDLOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
         platinumresults = {}
@@ -1000,7 +1001,7 @@ def main():
         else:
             goldcount = 0
             sortedgolduttstr = ''
-        thequery = queries[queryid]
+        thequery = themethod.queries[queryid]
         if query_exists(thequery):
             if queryid not in invalidqueries:
                 qex = 'yes'
@@ -1055,7 +1056,8 @@ def main():
         platinumoutresults = theresults | goldcounter
         platinumoutresultsstring = counter2liststr(platinumoutresults)
 
-        queryinforow = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item]
+        queryinforow = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                        themethod.queries[queryid].item]
         queryresultsrow = [str(sumfreq(theresults)), resultstr, str(goldcount), sortedgolduttstr, qex]
         queryRGscorerow = [sf(recall), sf(precision), sf(f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
         queryRPscorerow = [sortedplatinumliststr, sf(platinumrecall), sf(platinumprecision), sf(platinumf1score),
@@ -1068,14 +1070,14 @@ def main():
         outworksheet.write_row(outrowctr, outstartcol, fullresultrow)
         outrowctr += 1
 
-        platinumrow = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
-                       platinumoutresultsstring, listminusgoldstr, '', '']
+        platinumrow = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                       themethod.queries[queryid].item, platinumoutresultsstring, listminusgoldstr, '', '']
 
         print(tab.join(platinumrow), file=platinumoutfile)
 
         # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
         if exact:
-            newrows = exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches, allutts,
+            newrows = exactmismatches(queryid, themethod.queries, exactresults, exactgoldscores, allmatches, allutts,
                                       platinumcheckfile, silverannotationsdict, annotationinput)
             allrows += newrows
         else:
@@ -1085,8 +1087,8 @@ def main():
                 if (queryid, uttid) in allmatches:
                     for (m, syntree) in allmatches[(queryid, uttid)]:
                         markedutt = getmarkedutt(m, syntree)
-                        platinumcheckrow1 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
-                                             uttid, markedutt]
+                        platinumcheckrow1 = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                                             themethod.queries[queryid].item, uttid, markedutt]
                         print(tab.join(platinumcheckrow1), file=platinumcheckfile)
 
             if goldminustheresults != {}:
@@ -1096,8 +1098,8 @@ def main():
                     uttstr = space.join(allutts[uttid])
                 else:
                     SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
-                platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid,
-                                     uttstr]
+                platinumcheckrow2 = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                                     themethod.queries[queryid].item, uttid, uttstr]
                 print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
     #platinumcheckfullname = platinumcheckfile.name
@@ -1114,7 +1116,7 @@ def main():
         goldcounters[qid] = goldscores[qid][2]
     allgoldresults = AllResults(uttcount, goldcounters, exactgoldscores, goldpostresults, allgoldmatches, reffilename, [],
                                 allannutts, annotationinput)
-    dopostqueries(allgoldresults, postquerylist, queries)
+    dopostqueries(allgoldresults, postquerylist, themethod.queries)
 
     # compute the platinum postresults
 
@@ -1126,12 +1128,13 @@ def main():
         resultposval = str(getpostval(queryid, thepostresults))
         goldpostval = str(getpostval(queryid, goldpostresults))
         platinumpostval = str(getpostval(queryid, platinumpostresults))
-        if queries[queryid].query != '':
+        if themethod.queries[queryid].query != '':
             qex = 'yes'
         else:
             qex = 'no'
 
-        queryinforow = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item]
+        queryinforow = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                        themethod.queries[queryid].item]
         queryresultsrow = ['', resultposval, '', goldpostval, qex] + erow(6) + [platinumpostval] + erow(11)
 
         postrow = queryinforow + queryresultsrow
@@ -1164,14 +1167,14 @@ def main():
         # gather resultscount
         resultscount = 0
         for queryid in results:
-            thequery = queries[queryid]
+            thequery = themethod.queries[queryid]
             if thequery.original and queryfunction(thequery):
                 resultscount += sum(results[queryid].values())
 
         # gather goldcount
         goldcount = 0
         for queryid in goldscores:
-            thequery = queries[queryid]
+            thequery = themethod.queries[queryid]
             goldcounter = goldscores[queryid][2]
             if thequery.original and queryfunction(thequery):
                 goldcount += sum(goldcounter.values())
@@ -1179,8 +1182,8 @@ def main():
         # gather platinumcount
         platinumcount = 0
         for queryid in platinumresults:
-            if queryid in queries:
-                thequery = queries[queryid]
+            if queryid in themethod.queries:
+                thequery = themethod.queries[queryid]
                 if thequery.original and queryfunction(thequery):
                     platinumcount += sum(platinumresults[queryid].values())
             else:
@@ -1189,7 +1192,7 @@ def main():
         # resultsgoldintersectiocount
         resultsgoldintersectioncount = 0
         for queryid in results:
-            thequery = queries[queryid]
+            thequery = themethod.queries[queryid]
             if thequery.original and queryfunction(thequery):
                 if queryid in goldscores:
                     goldcounter = goldscores[queryid][2]
@@ -1202,7 +1205,7 @@ def main():
         # resultsplatinumintersectioncount
         resultsplatinumintersectioncount = 0
         for queryid in results:
-            thequery = queries[queryid]
+            thequery = themethod.queries[queryid]
             if thequery.original and queryfunction(thequery):
                 if queryid in platinumresults:
                     intersection = results[queryid] & platinumresults[queryid]
@@ -1214,8 +1217,8 @@ def main():
         # goldplatinumintersectioncount
         goldplatinumintersectioncount = 0
         for queryid in platinumresults:
-            if queryid in queries:
-                thequery = queries[queryid]
+            if queryid in themethod.queries:
+                thequery = themethod.queries[queryid]
                 if thequery.original and queryfunction(thequery):
                     if queryid in goldscores:
                         goldcounter = goldscores[queryid][2]
@@ -1255,7 +1258,7 @@ def main():
 
     resultscounts = scores2counts(results)
 
-    countcomparison = get_comparison(resultscounts, goldcounts, queries)
+    countcomparison = get_comparison(resultscounts, goldcounts, themethod.queries)
     if countcomparison != []:
         countcomparisonfile = open(countcomparisonfilename, 'w', encoding='utf8')
         ccheader = ['Measure', 'result', 'gold', 'diff']
@@ -1268,8 +1271,8 @@ def main():
     definedqcount = qcount - undefinedqcount
 
 
-    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, queries)
-    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, queries)
+    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, themethod.queries)
+    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, themethod.queries)
 
     lgoldscores = len(goldscores)
 
