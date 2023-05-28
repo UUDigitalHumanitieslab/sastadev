@@ -897,6 +897,10 @@ def main():
             #SDLOGGER.error('uttcount={}'.format(uttcount))
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
+                analysedtrees.append(syntree)
+                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
+
                 # uttid = getuttid(syntree)
                 # analysedtrees consists of (uttid, syntree) pairs in order
                 uttid = getxselseuttid(syntree)
@@ -949,27 +953,10 @@ def main():
     allresults = AllResults(uttcount, coreresults, exactresults, postresults, allmatches, options.infilename, analysedtrees,
                             allutts, annotationinput)
 
-    samplesizefunction = getsamplesizefunction(options.methodname)
-    samplesizetuple: SampleSizeTuple = samplesizefunction(allresults)
-
     postquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
     formquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
 
-    # we assume the reduction must be done before the postqueries
-    allresults = reduceallresults(allresults, samplesizetuple, options.methodname)
-
-    # bronze reduction
-    exactgoldscores = reduceexactgoldscores(exactgoldscores, samplesizetuple, options.methodname)  # ongoing
-    goldscores = exact2results(exactgoldscores) # ongoing
-    goldcounts = scores2counts(goldscores)
-
-
-    # silver / platinumreduction
-    platinumresults: Dict[QId, Counter] = reduceresults(platinumresults, samplesizetuple, options.methodname)
-
     dopostqueries(allresults, postquerylist, themethod.queries)
-
-
     dopostqueries(allresults, formquerylist, themethod.queries)
 
     (base, ext) = os.path.splitext(options.infilename)
@@ -984,6 +971,19 @@ def main():
     outrowctr = outstartrow
     outworksheet.freeze_panes('E2')
 
+    platinuminfilefound = False
+    if os.path.exists(options.platinuminfilename):
+        platinuminfilefound = True
+        platinumresults = read_referencefile(options.platinuminfilename, logfile)
+        checkplatinum(goldscores, platinumresults, themethod.queries)
+    else:
+        SDLOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
+        platinumresults = {}
+
+    # platinumoutfilename = base + platinumsuffix + txtext
+    platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
+    # platinumcheckfilename = base + platinumchecksuffix + txtext
+    platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
 
     countcomparisonfilename = os.path.join(resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
@@ -1200,7 +1200,7 @@ def main():
         goldcount = 0
         for queryid in goldscores:
             thequery = themethod.queries[queryid]
-            goldcounter = goldscores[queryid]
+            goldcounter = goldscores[queryid][2]
             if thequery.original and queryfunction(thequery):
                 goldcount += sum(goldcounter.values())
 
