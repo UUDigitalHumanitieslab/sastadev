@@ -12,6 +12,8 @@ import xlsx
 
 from config import SDLOGGER
 from query import Query, form_process, post_process
+from methods import defaultfilters
+from methods import Method
 
 comma = ','
 
@@ -127,7 +129,7 @@ def empty(row: list) -> bool:
             return False
     return True
 
-def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
+def read_method(methodname: str, methodfilename: FileName) -> Method:
     header, data = xlsx.getxlsxdata(methodfilename)
 
     idcol, catcol, subcatcol, levelcol, itemcol, altcol, impliescol, \
@@ -180,4 +182,8 @@ def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict
                     SDLOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
                 altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 
-    return (queries, item2idmap, altcodes, postquerylist)
+    defaultfilter = defaultfilters[methodname]
+    themethod = Method(methodname, queries, item2idmap, altcodes, postquerylist,
+                       methodfilename, defaultfilter)
+
+    return themethod
