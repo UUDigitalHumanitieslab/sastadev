@@ -36,6 +36,8 @@ PositionStr: TypeAlias = str
 Stage: TypeAlias = int
 SynTree: TypeAlias = etree._Element  # type: ignore
 GoldTuple: TypeAlias = Tuple[str, str, Counter]
+
+AnalysedTrees = List[Tuple[UttId, SynTree]]
 GoldResults = Dict[QId, GoldTuple]
 Item2LevelsDict: TypeAlias = Dict[Item, List[Level]]
 Match: TypeAlias = Tuple[SynTree, SynTree]
@@ -59,6 +61,7 @@ FileName: TypeAlias = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode: TypeAlias = int
 ResultsCounter: TypeAlias = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
+SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
 Source = str
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
@@ -79,8 +82,3 @@ WordLower = str
 #CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
 #PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
 #QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
-
-
-
-
-

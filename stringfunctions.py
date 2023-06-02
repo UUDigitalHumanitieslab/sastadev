@@ -433,7 +433,7 @@ def string2list(liststr: str, quoteignore=False) -> List[str]:
 
 def realwordstring(w: str) -> bool:
     '''
-    The function realwordstrin gcheck whether the string w @@ to be extended@@
+    The function *realwordstring* checks whether the string w @@ to be extended@@
 
     '''
     if len(w) != 1:
