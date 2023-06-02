@@ -1,5 +1,5 @@
 from query import pre_process
-from typing import Callable, List, Dict, Tuple
+from typing import Callable, List, Dict, Optional, Tuple
 from sastatypes import MethodName, QueryDict, Query, Item_Level2QIdDict, AltCodeDict, QId, FileName, \
     ExactResult, ExactResultsDict, ExactResultsFilter
 import os
@@ -10,7 +10,18 @@ asta = 'asta'
 stap = 'stap'
 tarsp = 'tarsp'
 
-validmethods = [asta, stap, tarsp]
+tarspmethods = [tarsp]
+astamethods = [asta]
+stapmethods = [stap]
+
+validmethods = astamethods + stapmethods +  tarspmethods
+
+astalexicalmeasures = ['A018', 'A021']  # LEX and N
+
+class SampleSize:
+    def __init__(self, maxuttcount=None, maxwordcount=None):
+        self.maxuttcount : Optional[int] = maxuttcount
+        self.maxwordcount: Optional[int] = maxwordcount
 
 def validmethod(rawmethod: str) -> bool:
     method = rawmethod.lower()
@@ -114,4 +125,12 @@ defaultfilters[asta] = astadefaultfilter
 defaultfilters[tarsp] = allok
 defaultfilters[stap] = allok
 
+maxsamplesize: Dict[MethodName, SampleSize] = {}
+maxsamplesize[asta] = SampleSize(maxwordcount=300)
+maxsamplesize[tarsp] = SampleSize(maxuttcount=40)
+maxsamplesize[stap] = SampleSize(maxuttcount=50)
 
+lastuttqidcondition: Dict[MethodName, Callable] = {}
+lastuttqidcondition[asta] = lambda q:  q in astalexicalmeasures
+lastuttqidcondition[tarsp] = lambda q: True
+lastuttqidcondition[stap] = lambda q: True

@@ -4,8 +4,8 @@ from stringfunctions import realwordstring
 from copy import deepcopy
 from lexicon import getwordposinfo, getwordinfo
 
-from typing import List, Optional, Tuple
-from sastatypes import SynTree, QId, UttId
+from typing import Dict, List, Optional, Tuple
+from sastatypes import SynTree, QId, UttId, AnalysedTrees, Position, UttWordDict
 from allresults import AllResults
 
 lpad = 3
@@ -119,6 +119,47 @@ def wordcountperutt(allresults):
     result = {uttid: ctr for uttid, ctr in result.items() if ctr != 0}
     return result
 
+def getignorewordcount(allresults, uttid):
+    result = 0
+    if samplesizeqid in allresults.coreresults:
+        if uttid in allresults.coreresults[samplesizeqid]:
+            result = allresults.coreresults[samplesizeqid][uttid]
+    return result
+
+def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+    cutoffpoint = None
+    words = getallrealwords(allresults)
+    cumwordcount = 0
+    wordcounts: Dict[UttId, Tuple[int, int, int]] = {}
+    uttidlist = []
+    for uttid in allresults.allutts:
+        basewordcount = sum(words[uttid].values())
+        ignorewordcount = getignorewordcount(allresults, uttid)
+        wordcount = basewordcount - ignorewordcount
+        wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
+        uttidlist.append(uttid)
+        if cumwordcount + wordcount <= astamaxwordcount:
+            cumwordcount += wordcount
+        else:
+            diff = astamaxwordcount - cumwordcount
+            cumwordcount = astamaxwordcount
+            cutoffpoint = getcutoffpoint(allresults, uttid, diff)
+            break
+    result = (uttidlist, cumwordcount, cutoffpoint)
+    return result
+
+
+def getcutoffpoint(allresults: AllResults,  uttid: UttId, diff: int) -> int:
+    theutt = allresults.allutts[uttid]
+    final = diff
+    for i, w in enumerate(theutt):
+        if (uttid, i+1) in allresults.exactresults[samplesizeqid]:
+            final += 1
+        if i + 1 == final:
+            break
+    return final
+
+
 
 def finietheidsindex(allresults, _):
     allpvs = allresults.coreresults[
@@ -223,14 +264,19 @@ def getalllemmas(allresults):
                       realwordstring(w)]
             result[uttid] = Counter(lemmas)
     else:
-        for syntree in allresults.analysedtrees:
-            uttid = getuttid(syntree)
+        for uttid, syntree in allresults.analysedtrees:
+            # uttid = getuttid(syntree)
             lemmas = [getattval(node, 'lemma') for node in getnodeyield(syntree) if
                       realword(node)]
             result[uttid] = Counter(lemmas)
     return result
 
-
+def getallrealwords(allresults):
+    result = {}
+    for uttid in allresults.allutts:
+        words = [w for w in allresults.allutts[uttid] if realwordstring(w)]
+        result[uttid] = Counter(words)
+    return result
 def old_getlemmas(allresults, _):
     allmatches = allresults.allmatches
     result = Counter()

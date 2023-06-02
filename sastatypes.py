@@ -23,6 +23,7 @@ Item_Level = Tuple[Item, Level]
 
 AltCodeDict = Dict[Item_Level, Item_Level]
 AltId = int
+AnalysedTrees = List[Tuple[UttId, SynTree]]
 BackPlacement = int
 CELEXPosCode = str
 CELEX_INFL =str
@@ -64,6 +65,7 @@ QueryDict = Dict[QId, Query]
 ReplacementMode = int
 ResultsCounter = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict = Dict[QId, ResultsCounter]
+SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
 Source = str
 Span = Tuple[PositionStr, PositionStr]
 Stage = int
