@@ -3,7 +3,7 @@ This module contains definitions of types used in multiple modules
 '''
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from lxml import etree  # type: ignore
 from typing_extensions import TypeAlias
@@ -74,3 +74,8 @@ WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CE
 #CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
 #PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
 #QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
+
+AnalysedTrees = List[Tuple[UttId, SynTree]]
+SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
+# TODO: fix
+GoldResults = Any
