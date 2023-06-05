@@ -603,13 +603,13 @@ def getattval_fallback(node: SynTree, att: str, fallback: str = '') -> str:
         str: attribute value or fallback value if none is found
     """
     while True:
-        if not node:
+        if node is None:
             return fallback
         val = getattval(node, att)
         if val:
             return val
         parent = node.getparent()
-        if not parent:
+        if parent is None:
             return fallback
         node = parent
 
