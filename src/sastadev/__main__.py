@@ -149,7 +149,7 @@ from lxml import etree
 
 from sastadev import compounds
 from sastadev.allresults import AllResults, scores2counts
-from sastadev.ASTApostfunctions import getmaxsamplesizeuttidsandcutoff
+from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from sastadev.conf import settings
 from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
                                 loggingfolder, outtreebanksfolder,
@@ -174,10 +174,11 @@ from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
 from sastadev.sasta_explanation import finalexplanation_adapttreebank
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
-                                 GoldTuple, MatchesDict, MethodName, QId,
-                                 QIdCount, QueryDict, ResultsCounter,
+                                 GoldTuple, MatchesDict, MethodName, Position,
+                                 QId, QIdCount, QueryDict, ResultsCounter,
                                  ResultsDict, SampleSizeTuple, SynTree, UttId)
 from sastadev.SRFreader import read_referencefile
+from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets
 from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
@@ -607,15 +608,31 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
         exactresults[queryid] = [r for r in rawexactresults[queryid] if thefilter(query, rawexactresults, r)]
     return exactresults
 
+
+def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+    cutoffpoint = None
+    words = getallrealwords(allresults)
+    cumwordcount = 0
+    wordcounts: Dict[UttId, Tuple[int, int, int]] = {}
+    uttidlist = []
+    for uttid in allresults.allutts:
+        basewordcount = sum(words[uttid].values())
+        ignorewordcount = 0 # getignorewordcount(allresults, uttid)
+        wordcount = basewordcount - ignorewordcount
+        wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
+        uttidlist.append(uttid)
+        cumwordcount += wordcount
+    result = (uttidlist, cumwordcount, cutoffpoint)
+    return result
 def getsamplesizefunction(methodname: MethodName) -> Callable:
     if methodname in astamethods:
-        result = getmaxsamplesizeuttidsandcutoff
+        result = getastamaxsamplesizeuttidsandcutoff
     elif methodname in tarspmethods:
         # @@to be implemented
-        result = lambda x: x
+        result = getmaxsamplesizeuttidsandcutoff
     elif methodname in stapmethods:
         # @@to be implemented
-        result = lambda x : x
+        result = getmaxsamplesizeuttidsandcutoff
     return result
 
 #defaulttarsp = r"TARSP Index Current.xlsx"

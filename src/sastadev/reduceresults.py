@@ -36,7 +36,7 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
     (uttidlist, wordcount, cutoffpoint) = samplesizetuple
     uttcount = len(uttidlist)
     maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount,  maxsamplesize[methodname].maxwordcount
-    if wordcount is not None and wordcount < maxwordcount:
+    if wordcount is not None and maxwordcount is not None and wordcount < maxwordcount:
         return allresults
     elif maxuttcount is not None and uttcount < maxuttcount:
         return allresults
@@ -76,7 +76,8 @@ def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist:
         newexactresults = []
         for uttid, position in exactresultsdict[qid]:
             if (uttid in uttidlist and uttid != lastuttid) or \
-               (uttid == lastuttid and not (position > cutoffpoint) and lastuttqidcondition[methodname](qid)):
+               (uttid == lastuttid and cutoffpoint is not None and
+                not (position > cutoffpoint) and lastuttqidcondition[methodname](qid)):
                 newexactresults.append((uttid, position))
         newexactresultsdict[qid] = newexactresults
     return newexactresultsdict
@@ -86,9 +87,9 @@ def reduceresults(resultsdict: Dict[QId, Counter], samplesizetuple: SampleSizeTu
     (uttidlist, wordcount, cutoffpoint) = samplesizetuple
     uttcount = len(uttidlist)
     maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount,  maxsamplesize[methodname].maxwordcount
-    if wordcount is not None and wordcount < maxwordcount:
+    if wordcount is not None and maxwordcount is not None and wordcount < maxwordcount:
         newresultsdict = resultsdict
-    elif maxuttcount is not None and uttcount < maxuttcount:
+    elif maxuttcount is not None and uttcount <= maxuttcount:
         newresultsdict = resultsdict
     else:
         newresultsdict = {}
@@ -142,9 +143,9 @@ def reduceexactgoldscores(exactgoldscores: ExactResultsDict, samplesizetuple: Sa
     (uttidlist, wordcount, cutoffpoint) = samplesizetuple
     uttcount = len(uttidlist)
     maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount,  maxsamplesize[methodname].maxwordcount
-    if wordcount is not None and wordcount < maxwordcount:
+    if wordcount is not None and maxwordcount is not None and wordcount < maxwordcount:
         newexactgoldscores = exactgoldscores
-    elif maxuttcount is not None and uttcount < maxuttcount:
+    elif maxuttcount is not None and uttcount <= maxuttcount:
         newexactgoldscores = exactgoldscores
     else:
         newexactgoldscores: ExactResultsDict = reduceexactresults(exactgoldscores,

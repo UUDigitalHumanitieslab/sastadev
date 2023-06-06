@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Tuple
 from sastadev.allresults import AllResults
 from sastadev.lexicon import getwordinfo, getwordposinfo
 from sastadev.sastatypes import Position, QId, SynTree, UttId
-from sastadev.stringfunctions import realwordstring
+from sastadev.stringfunctions import getallrealwords, realwordstring
 from sastadev.treebankfunctions import getattval, getnodeyield, getuttid
 
 lpad = 3
@@ -126,7 +126,7 @@ def getignorewordcount(allresults, uttid):
             result = allresults.coreresults[samplesizeqid][uttid]
     return result
 
-def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+def getastamaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
     cutoffpoint = None
     words = getallrealwords(allresults)
     cumwordcount = 0
@@ -271,12 +271,7 @@ def getalllemmas(allresults):
             result[uttid] = Counter(lemmas)
     return result
 
-def getallrealwords(allresults):
-    result = {}
-    for uttid in allresults.allutts:
-        words = [w for w in allresults.allutts[uttid] if realwordstring(w)]
-        result[uttid] = Counter(words)
-    return result
+
 def old_getlemmas(allresults, _):
     allmatches = allresults.allmatches
     result = Counter()

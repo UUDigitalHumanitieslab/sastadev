@@ -132,8 +132,8 @@ defaultfilters[stap] = allok
 
 maxsamplesize: Dict[MethodName, SampleSize] = {}
 maxsamplesize[asta] = SampleSize(maxwordcount=300)
-maxsamplesize[tarsp] = SampleSize(maxuttcount=40)
-maxsamplesize[stap] = SampleSize(maxuttcount=50)
+maxsamplesize[tarsp] = SampleSize(maxuttcount=100) # reset when utterance selection is automated
+maxsamplesize[stap] = SampleSize(maxuttcount=100)  # reset when utterance selection is automated
 
 lastuttqidcondition: Dict[MethodName, Callable] = {}
 lastuttqidcondition[asta] = lambda q:  q in astalexicalmeasures

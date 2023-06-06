@@ -1,6 +1,7 @@
 import re
 import unicodedata
 from typing import Any, Callable, List, Match, Optional, Sequence, Set
+from collections import Counter
 
 vertbar = '|'
 space = ' '
@@ -442,6 +443,13 @@ def realwordstring(w: str) -> bool:
         result = not unicodedata.category(w).startswith('P')
     return result
 
+
+def getallrealwords(allresults):
+    result = {}
+    for uttid in allresults.allutts:
+        words = [w for w in allresults.allutts[uttid] if realwordstring(w)]
+        result[uttid] = Counter(words)
+    return result
 
 if __name__ == '__main__':
     test()
