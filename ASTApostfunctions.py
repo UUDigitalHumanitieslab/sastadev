@@ -1,6 +1,6 @@
 from collections import Counter
 from treebankfunctions import getattval, getuttid, getnodeyield
-from stringfunctions import realwordstring
+from stringfunctions import realwordstring,  getallrealwords
 from copy import deepcopy
 from lexicon import getwordposinfo, getwordinfo
 
@@ -126,7 +126,7 @@ def getignorewordcount(allresults, uttid):
             result = allresults.coreresults[samplesizeqid][uttid]
     return result
 
-def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+def getastamaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
     cutoffpoint = None
     words = getallrealwords(allresults)
     cumwordcount = 0
@@ -271,12 +271,7 @@ def getalllemmas(allresults):
             result[uttid] = Counter(lemmas)
     return result
 
-def getallrealwords(allresults):
-    result = {}
-    for uttid in allresults.allutts:
-        words = [w for w in allresults.allutts[uttid] if realwordstring(w)]
-        result[uttid] = Counter(words)
-    return result
+
 def old_getlemmas(allresults, _):
     allmatches = allresults.allmatches
     result = Counter()

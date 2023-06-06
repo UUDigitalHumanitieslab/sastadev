@@ -179,8 +179,9 @@ from methods import Method, defaultfilters, supported_methods, SampleSize
 from dataconfig import bronzefolder, formsfolder, intreebanksfolder, loggingfolder, outtreebanksfolder, \
     resultsfolder, silverfolder, silverpermfolder
 from sasta_explanation import finalexplanation_adapttreebank
-from ASTApostfunctions import getmaxsamplesizeuttidsandcutoff
+from ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from reduceresults import reduceallresults, exact2results, reduceexactgoldscores, reduceresults
+from stringfunctions import getallrealwords
 
 listDir = False
 if listDir:
@@ -603,15 +604,31 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
         exactresults[queryid] = [r for r in rawexactresults[queryid] if thefilter(query, rawexactresults, r)]
     return exactresults
 
+
+def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+    cutoffpoint = None
+    words = getallrealwords(allresults)
+    cumwordcount = 0
+    wordcounts: Dict[UttId, Tuple[int, int, int]] = {}
+    uttidlist = []
+    for uttid in allresults.allutts:
+        basewordcount = sum(words[uttid].values())
+        ignorewordcount = 0 # getignorewordcount(allresults, uttid)
+        wordcount = basewordcount - ignorewordcount
+        wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
+        uttidlist.append(uttid)
+        cumwordcount += wordcount
+    result = (uttidlist, cumwordcount, cutoffpoint)
+    return result
 def getsamplesizefunction(methodname: MethodName) -> Callable:
     if methodname in astamethods:
-        result = getmaxsamplesizeuttidsandcutoff
+        result = getastamaxsamplesizeuttidsandcutoff
     elif methodname in tarspmethods:
         # @@to be implemented
-        result = lambda x: x
+        result = getmaxsamplesizeuttidsandcutoff
     elif methodname in stapmethods:
         # @@to be implemented
-        result = lambda x : x
+        result = getmaxsamplesizeuttidsandcutoff
     return result
 
 #defaulttarsp = r"TARSP Index Current.xlsx"
