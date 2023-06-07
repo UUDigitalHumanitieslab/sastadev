@@ -12,34 +12,34 @@ All input is supposed to be encoded in UTF8, all output is also generated in UTF
 
 Here is the help for this module (python sastadev.py -h)::
 
-	Usage: sastadev.py [options]
+    Usage: sastadev.py [options]
 
-	Options:
-	  -h, --help            show this help message and exit
-	  -f INFILENAME, --file=INFILENAME
-							Treebank File to be analysed
-	  -m METHODNAME, --method=METHODNAME
-							Name of the method or (for backwards compatibility)
-							file containing definition of assessment method (SAM)
-	  -a ANNOTATIONFILENAME, --anno=ANNOTATIONFILENAME
-							SASTA Annotation Format File containing annotations to
-							derive a  reference
-	  -g GOLDFILENAME, --gold=GOLDFILENAME
-							File containing a gold reference in SASTA Reference
-							Format
-	  -c GOLDCOUNTSFILENAME, --goldcounts=GOLDCOUNTSFILENAME
-							File containing  gold reference counts in  SASTA
-							Counts Reference Format
-	  -p PLATINUMINFILENAME, --plat=PLATINUMINFILENAME
-							File containing a platinum reference in SASTA
-							Reference Format
-	  -i, --impl            Use the implies column of the method
-	  -l LOGFILENAME, --log=LOGFILENAME
-							File for logging
-	  --corr=CORR           0=No correction; 1=correction with 1 alternative;
-							n=correction with multiple alternatives (default)
-	  --mf=METHODFILENAME, --mfile=METHODFILENAME
-							File containing definition of assessment method (SAM)
+    Options:
+      -h, --help            show this help message and exit
+      -f INFILENAME, --file=INFILENAME
+                            Treebank File to be analysed
+      -m METHODNAME, --method=METHODNAME
+                            Name of the method or (for backwards compatibility)
+                            file containing definition of assessment method (SAM)
+      -a ANNOTATIONFILENAME, --anno=ANNOTATIONFILENAME
+                            SASTA Annotation Format File containing annotations to
+                            derive a  reference
+      -g GOLDFILENAME, --gold=GOLDFILENAME
+                            File containing a gold reference in SASTA Reference
+                            Format
+      -c GOLDCOUNTSFILENAME, --goldcounts=GOLDCOUNTSFILENAME
+                            File containing  gold reference counts in  SASTA
+                            Counts Reference Format
+      -p PLATINUMINFILENAME, --plat=PLATINUMINFILENAME
+                            File containing a platinum reference in SASTA
+                            Reference Format
+      -i, --impl            Use the implies column of the method
+      -l LOGFILENAME, --log=LOGFILENAME
+                            File for logging
+      --corr=CORR           0=No correction; 1=correction with 1 alternative;
+                            n=correction with multiple alternatives (default)
+      --mf=METHODFILENAME, --mfile=METHODFILENAME
+                            File containing definition of assessment method (SAM)
 
 
 
@@ -134,7 +134,6 @@ Sastadev logs its actions through:
 # to do
 # -Excel output, cleanup output code
 
-import csv
 import datetime
 import logging
 import os
@@ -143,45 +142,39 @@ import sys
 from collections import Counter, defaultdict
 # from altcodes import altcodes
 from optparse import OptionParser
-from typing import (Any, Callable, DefaultDict, Dict, List, Optional, Pattern,
-                    Tuple)
+from typing import Any, Callable, Dict, List, Pattern, Tuple
 
-import compounds
 import xlsxwriter
-from correcttreebank import (corr0, corr1, correcttreebank, corrn,
-                             errorwbheader, validcorroptions)
-from external_functions import str2functionmap
-from goldcountreader import get_goldcounts
-#import xlrd
 from lxml import etree
-from mismatches import exactmismatches, getmarkposition, mismatches
-from mksilver import getsilverannotations, permprefix
-from rpf1 import getevalscores, getscores, sumfreq
-from SAFreader import get_golddata, richexact2global, richscores2scores
-from SRFreader import read_referencefile
-from targets import get_mustbedone, get_targets
 
+from sastadev import compounds
 from sastadev.allresults import AllResults, scores2counts
 from sastadev.config import SDLOGGER
+from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader,
+                                      validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.dataconfig import (bronzefolder, formsfolder, intreebanksfolder,
                                  loggingfolder, outtreebanksfolder,
                                  resultsfolder, silverfolder, silverpermfolder)
+from sastadev.external_functions import str2functionmap
+from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros
-from sastadev.methods import Method, allok, defaultfilters
-from sastadev.query import (Query, core_process, form_process, is_core, is_pre,
-                            is_preorcore, post_process, pre_process,
-                            query_exists, query_inform)
+from sastadev.methods import Method, defaultfilters
+from sastadev.mismatches import exactmismatches, getmarkposition
+from sastadev.mksilver import getsilverannotations, permprefix
+from sastadev.query import (Query, form_process, is_core, is_pre, is_preorcore,
+                            post_process, query_exists, query_inform)
 from sastadev.readmethod import itemseppattern, read_method
-# import sastatypes
-from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResults,
-                                 ExactResultsDict, FileName, GoldTuple, Match,
-                                 Matches, MatchesDict, MethodName, Position,
-                                 QId, QIdCount, QueryDict, ResultsCounter,
+from sastadev.rpf1 import getevalscores, getscores, sumfreq
+from sastadev.SAFreader import (get_golddata, richexact2global,
+                                richscores2scores)
+from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
+                                 GoldTuple, MatchesDict, MethodName, QId,
+                                 QIdCount, QueryDict, ResultsCounter,
                                  ResultsDict, SynTree, UttId)
-from sastadev.TARSPscreening import screening4stage
-from sastadev.treebankfunctions import (getattval, getmeta, getnodeendmap,
-                                        getuttid, getuttidorno, getuttno,
+from sastadev.SRFreader import read_referencefile
+from sastadev.targets import get_mustbedone, get_targets
+from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
                                         getyield, showtree)
 from sastadev.xlsx import mkworkbook
