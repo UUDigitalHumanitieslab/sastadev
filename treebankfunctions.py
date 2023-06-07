@@ -591,6 +591,29 @@ def getqueryresult(syntree: SynTree, xpathquery: Optional[str] = None,
     return result
 
 
+def getattval_fallback(node: SynTree, att: str, fallback: str = '') -> str:
+    """Gets the attribute from the current node or goes up in parents to find it
+
+    Args:
+        node (SynTree): node to search
+        att (str): attribute name
+        fallback (str): if nothing is found
+
+    Returns:
+        str: attribute value or fallback value if none is found
+    """
+    while True:
+        if node is None:
+            return fallback
+        val = getattval(node, att)
+        if val:
+            return val
+        parent = node.getparent()
+        if parent is None:
+            return fallback
+        node = parent
+
+
 def getnodeyield(syntree: SynTree) -> List[SynTree]:
     resultlist = []
     if syntree is None:
@@ -599,7 +622,7 @@ def getnodeyield(syntree: SynTree) -> List[SynTree]:
         for node in syntree.iter():
             if 'pt' in node.attrib or 'pos' in node.attrib:
                 resultlist.append(node)
-        sortedresultlist = sorted(resultlist, key=lambda x: int(getattval(x, 'end')))
+        sortedresultlist = sorted(resultlist, key=lambda x: int(getattval_fallback(x, 'end', '9999')))
         return sortedresultlist
 
 

@@ -6,7 +6,7 @@ with open('README.md') as file:
 setup(
     name='sastadev',
     python_requires='>=3.7, <4',
-    version='0.0.3',
+    version='0.0.4a2',
     description='Linguistic functions for SASTA tool',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,6 +15,7 @@ setup(
     url='https://github.com/UUDigitalHumanitieslab/sastadev',
     license='BSD-3-Clause',
     include_package_data=True,
+    install_requires=['lxml'],
     packages=['sastadev'],
     package_data={
         'sastadev': ['*.txt', 'LICENSE', 'py.typed']
