@@ -3,13 +3,14 @@ The module *tblex* contains functiond that require function
 from the lexicon module and from the treebankfunctions module
 """
 
-from sastatypes import SynTree
-import lexicon as lex
-from treebankfunctions import (all_lower_consonantsnode, getattval,
-                               is_duplicate_spec_noun, iscompound,
-                               isdiminutive, isnumber, issubstantivised_verb,
-                               sasta_long, sasta_pseudonym,
-                               short_nucl_n, spec_noun)
+import sastadev.lexicon as lex
+from sastadev.sastatypes import SynTree
+from sastadev.treebankfunctions import (all_lower_consonantsnode, getattval,
+                                        is_duplicate_spec_noun, iscompound,
+                                        isdiminutive, isnumber,
+                                        issubstantivised_verb, sasta_long,
+                                        sasta_pseudonym, short_nucl_n,
+                                        spec_noun)
 
 
 def recognised_wordnodepos(node: SynTree, pos: str) -> bool:

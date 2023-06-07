@@ -1,4 +1,4 @@
-from config import SDLOGGER
+from sastadev.config import SDLOGGER
 
 pre_process_str, core_process_str, post_process_str, form_process_str = 'pre', 'core', 'post', 'form'
 pre_process, core_process, post_process, form_process = 0, 1, 2, 3

@@ -1,5 +1,6 @@
-from macros import expandmacros
 from lxml import etree
+
+from sastadev.macros import expandmacros
 
 expectedresultslist = [[],
                    [('top', '0', '8'), ('du', '0', '7'), ('pp', '4', '7'), ('np', '5', '7')],

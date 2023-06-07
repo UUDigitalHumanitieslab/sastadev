@@ -1,5 +1,6 @@
-from lxml import etree
 from typing import List
+
+from lxml import etree
 
 bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma = tuple(range(7))
 defaultpenalty = 10

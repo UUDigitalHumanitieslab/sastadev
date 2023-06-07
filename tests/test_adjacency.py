@@ -1,5 +1,8 @@
 from lxml import etree
-from treebankfunctions import adjacent, find1, getnodeyield, immediately_precedes, immediately_follows
+
+from sastadev.treebankfunctions import (adjacent, find1, getnodeyield,
+                                        immediately_follows,
+                                        immediately_precedes)
 
 streestrings = {}
 streestrings[1] = '''

@@ -1,7 +1,8 @@
-from Sziplus import getnodecount
-from treebankfunctions import getattval
-from sastatypes import SynTree
 from typing import List, Set
+
+from sastadev.sastatypes import SynTree
+from sastadev.Sziplus import getnodecount
+from sastadev.treebankfunctions import getattval
 
 noimplemmas = {'hoeven', 'moeten', 'mogen', 'kunnen', 'hebben', 'willen', 'hebben', 'zitten'}
 noimpwords = {'ben', 'bent', 'is', 'zijn'}

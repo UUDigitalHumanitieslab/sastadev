@@ -1,8 +1,6 @@
 from lxml import etree
 
-from queryfunctions import vobij, voslashbij
-
-
+from sastadev.queryfunctions import vobij, voslashbij
 
 # find the cases written separately
 

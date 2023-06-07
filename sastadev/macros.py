@@ -9,12 +9,12 @@ The macros module:
 
 '''
 
-from typing import List, Dict, TextIO
 import os.path as op
 import re
+from typing import Dict, List, TextIO
 
-from config import SD_DIR, SDLOGGER
-from generatemacros import generatemacros
+from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.generatemacros import generatemacros
 
 idpat = r'([A-z_][A-z0-9_]*)'
 eqpat = r'='

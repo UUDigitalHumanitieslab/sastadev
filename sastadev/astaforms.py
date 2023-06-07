@@ -1,13 +1,12 @@
-import os
+
 from collections import Counter, defaultdict
 from io import BytesIO
 
 import xlsxwriter
 
-from ASTApostfunctions import wordcountperutt, nounlemmaqid, verblemmaqid
-from treebankfunctions import getattval
-#from dataconfig import intreebanksfolder, formsfolder
-from forms import getformfilename
+from sastadev.ASTApostfunctions import (nounlemmaqid, verblemmaqid,
+                                        wordcountperutt)
+from sastadev.forms import getformfilename
 
 green = '#00FF00'
 red = '#FF0000'

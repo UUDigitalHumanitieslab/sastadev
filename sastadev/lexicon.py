@@ -9,12 +9,12 @@ for this purpose.
 
 '''
 
-import celexlexicon
-import treebankfunctions
-from namepartlexicon import namepart_isa_namepart, namepart_isa_namepart_uc
-
 from typing import Any, Dict, List, Optional
-from sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
+
+from sastadev import celexlexicon, treebankfunctions
+from sastadev.namepartlexicon import (namepart_isa_namepart,
+                                      namepart_isa_namepart_uc)
+from sastadev.sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
 
 space = ' '
 

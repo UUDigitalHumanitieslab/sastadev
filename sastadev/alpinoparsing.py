@@ -11,18 +11,19 @@ The *alpinoparsing* module provides functions for:
 
 '''
 
+import logging
 import re
 import urllib.parse
 import urllib.request
 
 from lxml import etree  # type: ignore
-from memoize import memoize
 
-import logging
-#from sastatypes import SynTree, URL
+from sastadev.memoize import memoize
 
-#from config import SDLOGGER
-#from sastatypes import SynTree, URL
+#from sastadev.sastatypes import SynTree, URL
+
+#from sastadev.config import SDLOGGER
+#from sastadev.sastatypes import SynTree, URL
 
 urllibrequestversion = urllib.request.__version__
 

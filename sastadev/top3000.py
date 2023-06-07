@@ -33,14 +33,14 @@ in particular a top 3000 words by Schlichting. It has the following columns:
 The information needs extension and there are more files with relevant data.
 '''
 
-from xlsx import getxlsxdata
-from treebankfunctions import getattval
-from namepartlexicon import namepart_isa_namepart
-from config import SD_DIR
 import os
-
 from typing import Dict, List, Tuple
-from sastatypes import SynTree, DCOIPt
+
+from sastadev.config import SD_DIR
+from sastadev.namepartlexicon import namepart_isa_namepart
+from sastadev.sastatypes import DCOIPt, SynTree
+from sastadev.treebankfunctions import getattval
+from sastadev.xlsx import getxlsxdata
 
 
 def ishuman(node: SynTree) -> bool:

@@ -10,18 +10,18 @@ and the function read_annotations() to obtain a score dictionary with queryid as
 # -code alternatives and replacemtne extensions
 # =codes written without spaces?
 
+import os
+import re
+#import xlrd  # type: ignore
+from collections import Counter, defaultdict
 from typing import Any, Dict, List, Match, Optional, Pattern, Tuple
 
-import xlsx
-from sastatypes import FileName, Item, Item2LevelsDict, Level, Position, QueryDict, QId, UttId, UttWordDict
-#import xlrd  # type: ignore
-from collections import defaultdict
-from collections import Counter
-import re
-import os
-from config import SDLOGGER
+from sastadev import xlsx
+from sastadev.config import SDLOGGER
 #import logging
-from readmethod import read_method, itemseppattern
+from sastadev.readmethod import itemseppattern, read_method
+from sastadev.sastatypes import (FileName, Item, Item2LevelsDict, Level,
+                                 Position, QId, QueryDict, UttId, UttWordDict)
 
 varitem = ''
 

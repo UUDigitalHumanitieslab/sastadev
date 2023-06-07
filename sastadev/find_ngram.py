@@ -1,10 +1,9 @@
 import os
 
-from dedup import filledpauseslexicon
-from treebankfunctions import (getattval, getnodeyield, getstree, getuttid,
-                               getyield, onbvnwdet)
-from dataconfig import dataroot
-from dataconfig import intreebanksfolder, outtreebanksfolder
+from sastadev.dataconfig import dataroot, intreebanksfolder, outtreebanksfolder
+from sastadev.dedup import filledpauseslexicon
+from sastadev.treebankfunctions import (getattval, getnodeyield, getstree,
+                                        getuttid, getyield, onbvnwdet)
 
 digits2 = r'\d\d'
 

@@ -28,11 +28,11 @@ import os
 import re
 import sys
 from collections import defaultdict
-
-import treebankfunctions
-from config import SD_DIR
 from typing import Dict, List, Optional, Tuple
-from sastatypes import CELEX_INFL, SynTree, WordInfo
+
+from sastadev import treebankfunctions
+from sastadev.config import SD_DIR
+from sastadev.sastatypes import CELEX_INFL, SynTree, WordInfo
 
 backslash = '\\'
 celexsep = backslash

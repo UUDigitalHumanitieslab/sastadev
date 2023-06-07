@@ -3,14 +3,12 @@ import re
 from collections import Counter
 from io import BytesIO
 
-import xlsx
-#import xlrd
 import xlsxwriter
-from config import SD_DIR
-from counterfunctions import counter2liststr
-from forms import getformfilename
 
-
+from sastadev import xlsx
+from sastadev.config import SD_DIR
+from sastadev.counterfunctions import counter2liststr
+from sastadev.forms import getformfilename
 
 ordA = ord('A')
 comma = ','

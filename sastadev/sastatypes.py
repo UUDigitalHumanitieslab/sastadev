@@ -2,11 +2,13 @@
 This module contains definitions of types used in multiple modules
 '''
 
-from typing import Dict, List, Tuple, Callable, Optional, Union
-from lxml import etree  # type: ignore
 from collections import Counter
-from query import Query
-from sastatoken import Token
+from typing import Callable, Dict, List, Optional, Tuple, Union
+
+from lxml import etree  # type: ignore
+
+from sastadev.query import Query
+from sastadev.sastatoken import Token
 
 AltId = int
 BackPlacement = int

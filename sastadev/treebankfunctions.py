@@ -7,18 +7,19 @@ various treebank functions
 import re
 # import logging
 from copy import copy, deepcopy
-from lxml import etree
-from config import SDLOGGER
-from stringfunctions import allconsonants
-# from lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
-#import lexicon as lex
-from config import PARSE_FUNC
-
-from sastatoken import Token
-from metadata import Meta
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from sastatypes import FileName, OptPhiTriple, PhiTriple, Position, PositionMap, PositionStr, Span, SynTree, UttId
+from lxml import etree
+
+# from sastadev.lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
+#import lexicon as lex
+from sastadev.config import PARSE_FUNC, SDLOGGER
+from sastadev.metadata import Meta
+from sastadev.sastatoken import Token
+from sastadev.sastatypes import (FileName, OptPhiTriple, PhiTriple, Position,
+                                 PositionMap, PositionStr, Span, SynTree,
+                                 UttId)
+from sastadev.stringfunctions import allconsonants
 
 
 class Metadata:

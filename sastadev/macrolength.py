@@ -1,4 +1,4 @@
-from macros import macrodict, expandmacros
+from sastadev.macros import expandmacros, macrodict
 
 resultlist = []
 for macroname, macrovalue in macrodict.items():

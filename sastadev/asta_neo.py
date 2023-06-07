@@ -1,8 +1,6 @@
 from lxml import etree
-#from CHAT_Annotation import specialform, errormarking
-from ASTApostfunctions import  sempar, phonpar, neologisme
 
-
+from sastadev.ASTApostfunctions import neologisme, phonpar, sempar
 
 
 def test(stree):
@@ -10,16 +8,16 @@ def test(stree):
     semparresults = sempar(stree)
     phonparresults = phonpar(stree)
     results = [('neo', neoresult) for neoresult in neoresults] +\
-              [('sempar', semparresult) for semparresult in  semparresults] +\
+              [('sempar', semparresult) for semparresult in semparresults] +\
               [('phonpar', phonparresult) for phonparresult in phonparresults]
     return results
+
 
 def main():
     for i in strees:
         results = test(strees[i])
         for result in results:
             print('{}: {}:{}'.format(result[0], result[1].attrib['word'], result[1].attrib['begin']))
-
 
 
 streestrings = {}

@@ -1,7 +1,7 @@
 import xlsxwriter
 from openpyxl import load_workbook
 
-from config import SDLOGGER
+from sastadev.config import SDLOGGER
 
 eps = ''
 defaultcolwidth = 15

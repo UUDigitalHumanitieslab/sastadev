@@ -13,25 +13,30 @@ The name of the function must be added to one of the variables
 '''
 
 import re
-from compounds import getcompounds
-from Sziplus import sziplus6, vr5plus
-from xenx import xenx
-from imperatives import wx, wxy, wxyz, wxyz5, wondx, wond4, wond5plus
-from TARSPscreening import tarsp_screening
-from TARSPpostfunctions import vutotaal, gofase, gtotaal, pf2, pf3, pf4, pf5, pf6, pf7, pf
-from queryfunctions import xneg_x, xneg_neg, VzN, vobij, voslashbij
-from dedup import mlux, samplesize, neologisme, onvolledig, correct
-from STAPpostfunctions import BB_totaal, GLVU, GL5LVU
-from ASTApostfunctions import wordcountperutt, countwordsandcutoff, KMcount, finietheidsindex, getnounlemmas,\
-    getlexlemmas, getalllemmas,  sempar, phonpar, neologisme
-from astaforms import astaform
-from tarspform import mktarspform
-from stapforms import makestapform
-from asta_queries import asta_noun, asta_bijzin, asta_lex, asta_delpv
-from methods import allok
 from typing import Callable, Dict, List
-from sastatypes import SynTree
-from allresults import QueryFunction
+
+from sastadev.allresults import QueryFunction
+from sastadev.asta_queries import asta_bijzin, asta_delpv, asta_lex, asta_noun
+from sastadev.astaforms import astaform
+from sastadev.ASTApostfunctions import (KMcount, countwordsandcutoff,
+                                        finietheidsindex, getalllemmas,
+                                        getlexlemmas, getnounlemmas,
+                                        neologisme, phonpar, sempar,
+                                        wordcountperutt)
+from sastadev.compounds import getcompounds
+from sastadev.dedup import correct, mlux, neologisme, onvolledig, samplesize
+from sastadev.imperatives import wond4, wond5plus, wondx, wx, wxy, wxyz, wxyz5
+from sastadev.methods import allok
+from sastadev.queryfunctions import VzN, vobij, voslashbij, xneg_neg, xneg_x
+from sastadev.sastatypes import SynTree
+from sastadev.stapforms import makestapform
+from sastadev.STAPpostfunctions import GL5LVU, GLVU, BB_totaal
+from sastadev.Sziplus import sziplus6, vr5plus
+from sastadev.tarspform import mktarspform
+from sastadev.TARSPpostfunctions import (gofase, gtotaal, pf, pf2, pf3, pf4,
+                                         pf5, pf6, pf7, vutotaal)
+from sastadev.TARSPscreening import tarsp_screening
+from sastadev.xenx import xenx
 
 normalfunctionpattern = r'<function\s+(\w+)\b'
 builtinfunctionpattern = r'<built-in function\s+(\w+)\b'

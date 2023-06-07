@@ -1,9 +1,7 @@
-from typing import List, Dict, Any, Counter, Callable, Union
-#import sastatypes
-from sastatypes import ResultsCounter, ExactResultsDict, FileName, SynTree, MatchesDict, QId, UttWordDict
+from typing import Any, Callable, Counter, Dict, List, Union
 
-
-
+from sastadev.sastatypes import (ExactResultsDict, FileName, MatchesDict, QId,
+                                 ResultsCounter, SynTree, UttWordDict)
 
 
 class AllResults:
@@ -18,6 +16,7 @@ class AllResults:
         self.allutts: UttWordDict = allutts
         self.annotationinput: bool = annotationinput
 
+
 def scores2counts(scores: Dict[QId, Counter]) -> Dict[QId, int]:
     '''
     input is a dictionary of Counter()s
@@ -28,6 +27,7 @@ def scores2counts(scores: Dict[QId, Counter]) -> Dict[QId, int]:
         countval = len(scores[el])
         counts[el] = countval
     return counts
+
 
 CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 PostQueryFunction = Callable[[AllResults, SynTree], List[SynTree]]

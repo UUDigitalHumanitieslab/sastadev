@@ -16,11 +16,11 @@ The generatemacros function generates this macro on the basis of a list of  (ver
 Running the module standalone outputs the macrodefinitions to stdout
 '''
 
-from typing import Dict, Set, Tuple, List
+from typing import Dict, List, Set, Tuple
 
 StrPair = Tuple[str, str]
 
-tarsp_wvzexceptions : Set[StrPair] = {('hebben', 'van'),  # hebben can occur with pc/van but only in fixed expressions: last hebben van, spijt hebben van
+tarsp_wvzexceptions: Set[StrPair] = {('hebben', 'van'),  # hebben can occur with pc/van but only in fixed expressions: last hebben van, spijt hebben van
                        ('slaan', 'op'),  # of course correct but not used in this sense with very young children
                        ('lukken', 'in'), \
                        ('passen', 'bij'), \

@@ -1,11 +1,14 @@
 
-from sastatypes import SynTree
-#import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
+from typing import Optional
 
-import treebankfunctions as tbf
 #import find1, iswordnode, getattval
 import stringfunctions as strf
-from typing import Optional
+import treebankfunctions as tbf
+
+from sastadev.sastatypes import SynTree
+
+#import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
+
 
 space = ' '
 CHAT_explanation = 'Explanation'

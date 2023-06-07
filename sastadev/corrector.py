@@ -4,42 +4,52 @@ to be added
 
 import copy
 import re
-
-from alpino import getdehetwordinfo
-from basicreplacements import (basicexpansions, basicreplacements,
-                               getdisambiguationdict)
-from cleanCHILDEStokens import cleantokens
-from config import PARSE_FUNC, SDLOGGER
-from dedup import (cleanwordofnort, find_duplicates2, find_janeenouduplicates,
-                   find_simpleduplicates, find_substringduplicates2,
-                   getfilledpauses, getprefixwords, getrepeatedtokens,
-                   getunwantedtokens, nodesfindjaneenou)
-from deregularise import correctinflection
-from iedims import getjeforms
-from lexicon import de, dets, getwordinfo, het, informlexicon, known_word, isa_namepart, tswnouns, WordInfo
-from macros import expandmacros
-# from namepartlexicon import namepart_isa_namepart
-from sastatok import sasta_tokenize
-from sastatoken import Token, tokenlist2stringlist
-from stringfunctions import (chatxxxcodes, consonants, deduplicate,
-                             endsinschwa, fullworddehyphenate, monosyllabic,
-                             vowels)
-from sva import getsvacorrections
-from tokenmd import TokenListMD, TokenMD, mdlist2listmd
-from treebankfunctions import find1, getattval, getnodeyield, showtree, treeinflate, fatparse
-from lxml import etree
 import sys
-# from alternative import Alternative, Replacement, Metadata, Meta
-from metadata import Meta, defaultbackplacement, defaultpenalty, bpl_node, bpl_none, bpl_word, bpl_indeze, \
-    bpl_wordlemma, mkSASTAMeta, janeenou, shortrep, longrep, repeatedseqtoken, intj, unknownword, unknownsymbol, \
-    filled_pause, repeatedjaneenou, repeated, substringrep, fstoken, falsestart
-from alpinoparsing import parse, escape_alpino_input
-from expandquery import expandmacros
-from find_ngram import Ngram, findmatches, ngram1, ngram2, ngram7, ngram10, ngram11, ngram16, ngram17
-from smallclauses import smallclauses
-
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from sastatypes import BackPlacement, MethodName, Nort, Penalty, Position, SynTree, UttId
+
+from lxml import etree
+
+from sastadev.alpino import getdehetwordinfo
+from sastadev.alpinoparsing import escape_alpino_input, parse
+from sastadev.basicreplacements import (basicexpansions, basicreplacements,
+                                        getdisambiguationdict)
+from sastadev.cleanCHILDEStokens import cleantokens
+from sastadev.config import PARSE_FUNC, SDLOGGER
+from sastadev.dedup import (cleanwordofnort, find_duplicates2,
+                            find_janeenouduplicates, find_simpleduplicates,
+                            find_substringduplicates2, getfilledpauses,
+                            getprefixwords, getrepeatedtokens,
+                            getunwantedtokens, nodesfindjaneenou)
+from sastadev.deregularise import correctinflection
+from sastadev.expandquery import expandmacros
+from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
+                                 ngram10, ngram11, ngram16, ngram17)
+from sastadev.iedims import getjeforms
+from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
+                              informlexicon, isa_namepart, known_word,
+                              tswnouns)
+from sastadev.macros import expandmacros
+# from alternative import Alternative, Replacement, Metadata, Meta
+from sastadev.metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
+                               bpl_wordlemma, defaultbackplacement,
+                               defaultpenalty, falsestart, filled_pause,
+                               fstoken, intj, janeenou, longrep, mkSASTAMeta,
+                               repeated, repeatedjaneenou, repeatedseqtoken,
+                               shortrep, substringrep, unknownsymbol,
+                               unknownword)
+# from sastadev.namepartlexicon import namepart_isa_namepart
+from sastadev.sastatok import sasta_tokenize
+from sastadev.sastatoken import Token, tokenlist2stringlist
+from sastadev.sastatypes import (BackPlacement, MethodName, Nort, Penalty,
+                                 Position, SynTree, UttId)
+from sastadev.smallclauses import smallclauses
+from sastadev.stringfunctions import (chatxxxcodes, consonants, deduplicate,
+                                      endsinschwa, fullworddehyphenate,
+                                      monosyllabic, vowels)
+from sastadev.sva import getsvacorrections
+from sastadev.tokenmd import TokenListMD, TokenMD, mdlist2listmd
+from sastadev.treebankfunctions import (fatparse, find1, getattval,
+                                        getnodeyield, showtree, treeinflate)
 
 Correction = Tuple[List[Token], List[Meta]]
 MetaCondition = Callable[[Meta], bool]
@@ -76,7 +86,7 @@ class Ngramcorrection:
         self.metafunction = metafunction
 
 
-def mkmeta(att: str, val: str, type: str ='text') -> str:
+def mkmeta(att: str, val: str, type: str = 'text') -> str:
     result = metatemplate.format(type, att, val)
     return result
 
@@ -124,9 +134,9 @@ def skiptokens(tokenlist: List[Token], skiptokenlist: List[Token]) -> List[Token
     return resultlist
 
 
-def ngramreduction(reducedtokens: List[Token], token2nodemap: Dict[Token, SynTree] , allremovetokens: List[Token],
+def ngramreduction(reducedtokens: List[Token], token2nodemap: Dict[Token, SynTree], allremovetokens: List[Token],
                    allremovepositions: List[Position], allmetadata: List[Meta], ngramcor: Ngramcorrection) \
-          -> Tuple[List[Token], List[Token], List[Meta]]:
+        -> Tuple[List[Token], List[Token], List[Meta]]:
     # metadat function should still be added / abstracted
     (fb, fe) = ngramcor.fpositions
     (cb, ce) = ngramcor.cpositions
@@ -490,7 +500,7 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
     # get all the new token sequences
     tokenctr = 0
     lvalidalternativetokenmds = len(validalternativetokenmds)
-    altutts : List[List[TokenMD]] = [[]]
+    altutts: List[List[TokenMD]] = [[]]
     newutts = []
     while tokenctr < lvalidalternativetokenmds:
         for tokenmd in validalternativetokenmds[tokenctr]:
@@ -510,7 +520,7 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
             newaltuttmds.append(newaltuttmd)
 
     # basic expansions
-    allalternativemds = newaltuttmds # put off, taken care of in getvalidalternatives:  + [tokensmd]
+    allalternativemds = newaltuttmds  # put off, taken care of in getvalidalternatives:  + [tokensmd]
 
     newresults = []
     for uttmd in allalternativemds:
@@ -594,8 +604,6 @@ def mkuttwithskips(tokens: List[Token], delete: bool = True) -> Tuple[str, List[
     result = space.join(resultlist)
 
     return result, tokenposlist
-
-
 
 
 def OLDgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
@@ -685,6 +693,7 @@ def getsingleitemexpansions(token: Token, intokenposlist) -> List[Tuple[TokenLis
 
     return results
 
+
 def combine(headresult: Tuple[TokenListMD, List[int]], tailresult: Tuple[TokenListMD, List[int]]) \
         -> Tuple[TokenListMD, List[int]]:
     '''
@@ -734,11 +743,11 @@ def getexpansions2(tokenlist: List[Token], intokenposlist: List[int]) -> List[Tu
     finalresults = []
     if tokenlist == []:
         outtokenposlist = copy.copy(intokenposlist)
-        finalresults = [(TokenListMD([],[]), outtokenposlist)]
+        finalresults = [(TokenListMD([], []), outtokenposlist)]
     else:
         headresults = getsingleitemexpansions(tokenlist[0], intokenposlist)
         for headresult in headresults:
-            tailresults  = getexpansions2(tokenlist[1:], headresult[1])
+            tailresults = getexpansions2(tokenlist[1:], headresult[1])
             results = [combine(headresult, tailresult) for tailresult in tailresults]
             finalresults += [(TokenListMD(result[0].tokens, result[0].metadata), result[1]) for result in results]
     return finalresults
@@ -748,6 +757,7 @@ def gettokenyield(tokens: List[Token]) -> str:
     words = [token.word for token in tokens]
     result = space.join(words)
     return result
+
 
 def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     '''
@@ -782,8 +792,6 @@ def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
 
     return newtokenmds
 
-
-
     # adapt the metadata
     # finalresults = []
     # for result in results:
@@ -795,7 +803,6 @@ def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     #     newmd.append(meta2)
     #     finalresult = [TokenListMD(result.tokens, newmd)]
     #     finalresults.append(finalresult)
-
 
 
 def lexcheck(intokensmd: TokenListMD, allalternativemds: List[TokenListMD]) -> List[TokenListMD]:
@@ -828,10 +835,10 @@ def lexcheck(intokensmd: TokenListMD, allalternativemds: List[TokenListMD]) -> L
 #    return result
 
 
-def updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newwords: List[str], beginmetadata: List[Meta], \
-                       name: str, value: str, cat: str, subcat: Optional[str] = None,
+def updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newwords: List[str], beginmetadata: List[Meta],
+                      name: str, value: str, cat: str, subcat: Optional[str] = None,
                       penalty: Penalty = defaultpenalty, backplacement: BackPlacement = defaultbackplacement) \
-                -> List[TokenMD]:
+        -> List[TokenMD]:
     for nw in newwords:
         nwt = Token(nw, token.pos)
         meta = mkSASTAMeta(token, nwt, name=name, value=value, cat=cat, subcat=subcat, penalty=penalty,
@@ -936,7 +943,7 @@ def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[T
     return newtokenmds
 
 
-def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int, \
+def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int,
                            tree: SynTree, uttid: UttId) -> List[TokenMD]:
     token = tokenmd.token
     beginmetadata = tokenmd.metadata
@@ -1059,7 +1066,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                             cat='Pronunciation', backplacement=bpl_word)
 
     # e-> e(n)
-    enexceptions = {'inne', 'mette', 'omme', 'oppe','vanne'}
+    enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
     if not known_word(
             token.word) and token.word.lower() not in basicreplacements and token.word.lower() not in enexceptions:
         if endsinschwa(token.word) and not monosyllabic(token.word):

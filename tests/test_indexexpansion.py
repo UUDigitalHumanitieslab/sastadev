@@ -1,6 +1,8 @@
-from lxml import etree
-from treebankfunctions import indextransform, getstree
 import os
+
+from lxml import etree
+
+from sastadev.treebankfunctions import getstree, indextransform
 
 bareindexnodexpath = './/node[@index and not(@cat) and not(@word)]'
 

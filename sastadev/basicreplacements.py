@@ -1,10 +1,11 @@
 from collections import defaultdict
-from metadata import bpl_word, bpl_node, defaultpenalty
-from deregularise import correctinflection
 from typing import Dict, List, Tuple
-from sastatypes import ReplacementMode, TokenTreePredicate, SynTree
-from sastatoken import Token
-from treebankfunctions import find1
+
+from sastadev.deregularise import correctinflection
+from sastadev.metadata import bpl_word, defaultpenalty
+from sastadev.sastatoken import Token
+from sastadev.sastatypes import ReplacementMode, SynTree, TokenTreePredicate
+from sastadev.treebankfunctions import find1
 
 BasicExpansion = Tuple[str, List[str], str, str, str, int]
 BasicReplacement = Tuple[str, str, str, str, str, int]

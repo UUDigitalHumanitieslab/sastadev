@@ -24,10 +24,10 @@ The module to use for a renewed test is tests.iedims_test.py, the file is tests.
 '''
 
 
-from typing import List, Optional
 import re
+from typing import List, Optional
 
-import lexicon
+from sastadev import lexicon
 
 comma = ','
 semicolon = ';'

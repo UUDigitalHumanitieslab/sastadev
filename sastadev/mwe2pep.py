@@ -1,6 +1,7 @@
-from xlsx import getxlsxdata
 import os
 import re
+
+from sastadev.xlsx import getxlsxdata
 
 
 def remove(patlist, rawstr):

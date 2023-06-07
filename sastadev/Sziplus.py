@@ -15,9 +15,10 @@ The module *Sziplus* implements two TARSP language measures:
 '''
 
 
-from treebankfunctions import getattval
-from sastatypes import SynTree
 from typing import List
+
+from sastadev.sastatypes import SynTree
+from sastadev.treebankfunctions import getattval
 
 #: the variable (constant) *clausequery*  is an XPath query that searches for nodes
 #: that are clauses.

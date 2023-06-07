@@ -1,6 +1,7 @@
-from ..TARSPscreening import screening4stage
-from ..goldcountreader import get_goldcounts
 import os
+
+from ..goldcountreader import get_goldcounts
+from ..TARSPscreening import screening4stage
 
 
 def test_tarspscreening():

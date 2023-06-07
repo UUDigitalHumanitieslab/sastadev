@@ -1,5 +1,7 @@
 from lxml import etree
-from ..treebankfunctions import getmarkedutt, indextransform, lastmainclauseof, simpleshow
+
+from ..treebankfunctions import (getmarkedutt, indextransform,
+                                 lastmainclauseof, simpleshow)
 
 streestrings = {}
 streestrings[1] = '''

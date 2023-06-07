@@ -9,12 +9,12 @@ it provides the function *getdehetwordinfo*:
 '''
 #from __future__ import annotations
 
-import lexicon
-import treebankfunctions
-
-from config import PARSE_FUNC
-from sastatypes import WordInfo
 from typing import List, Tuple
+
+from sastadev import lexicon, treebankfunctions
+from sastadev.config import PARSE_FUNC
+from sastadev.sastatypes import WordInfo
+
 
 def getalpinowordinfo(word: str) -> List[WordInfo]:
     '''

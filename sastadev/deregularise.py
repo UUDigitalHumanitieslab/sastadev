@@ -32,10 +32,11 @@ The module initialises the dictionary *correction* by reading in the file with t
 
 '''
 import csv
-import re
 import os
-from typing import cast, Dict, List, Optional, Tuple
-from config import SD_DIR
+import re
+from typing import Dict, List, Optional, Tuple, cast
+
+from sastadev.config import SD_DIR
 
 tab = '\t'
 plussym = '+'

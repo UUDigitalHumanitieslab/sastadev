@@ -1,12 +1,11 @@
-from functools import lru_cache
 import socket
 from contextlib import contextmanager
+from functools import lru_cache
 
 from lxml import etree
 
-import config
-
-from alpinoparsing import escape_alpino_input, isempty
+from sastadev import config
+from sastadev.alpinoparsing import escape_alpino_input, isempty
 
 
 class AlpinoSentenceParser:

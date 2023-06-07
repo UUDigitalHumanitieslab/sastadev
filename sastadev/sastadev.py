@@ -134,50 +134,57 @@ Sastadev logs its actions through:
 # to do
 # -Excel output, cleanup output code
 
-from typing import Dict, List, Any, Tuple, Callable, Pattern, Optional, DefaultDict
-# import sastatypes
-from sastatypes import QId, UttId, Position, SynTree, GoldTuple, Match, Matches, MatchesDict, ExactResult, \
-    ExactResults, ExactResultsDict, QueryDict, QIdCount, MethodName, FileName, ResultsCounter, ResultsDict, AltCodeDict
-
-
-#import xlrd
-from lxml import etree
-import os
-import sys
-import re
 import csv
 import datetime
-import compounds
+import logging
+import os
+import re
+import sys
 from collections import Counter, defaultdict
 # from altcodes import altcodes
 from optparse import OptionParser
-import logging
-from config import SDLOGGER
-from SAFreader import get_golddata, richscores2scores,  richexact2global
-from external_functions import str2functionmap
-from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
-    showtree, getnodeendmap, getxselseuttid
-from SRFreader import read_referencefile
-from goldcountreader import get_goldcounts
-from TARSPscreening import screening4stage
-from allresults import AllResults, scores2counts
-from readmethod import read_method, itemseppattern
-from methods import allok
-from query import Query, pre_process, core_process, post_process, form_process, is_preorcore, query_inform, query_exists, \
-    is_pre, is_core
-from macros import expandmacros
-from mismatches import mismatches, exactmismatches, getmarkposition
-from xlsx import mkworkbook
-import xlsxwriter
-from counterfunctions import counter2liststr
-from mksilver import getsilverannotations, permprefix
-from rpf1 import getscores, getevalscores, sumfreq
-from targets import get_mustbedone, get_targets
-from correcttreebank import correcttreebank, corr0, corr1, corrn, validcorroptions, errorwbheader
-from methods import Method, defaultfilters
-from dataconfig import bronzefolder, formsfolder, intreebanksfolder, loggingfolder, outtreebanksfolder, \
-    resultsfolder, silverfolder, silverpermfolder
+from typing import (Any, Callable, DefaultDict, Dict, List, Optional, Pattern,
+                    Tuple)
 
+import compounds
+import xlsxwriter
+from correcttreebank import (corr0, corr1, correcttreebank, corrn,
+                             errorwbheader, validcorroptions)
+from external_functions import str2functionmap
+from goldcountreader import get_goldcounts
+#import xlrd
+from lxml import etree
+from mismatches import exactmismatches, getmarkposition, mismatches
+from mksilver import getsilverannotations, permprefix
+from rpf1 import getevalscores, getscores, sumfreq
+from SAFreader import get_golddata, richexact2global, richscores2scores
+from SRFreader import read_referencefile
+from targets import get_mustbedone, get_targets
+
+from sastadev.allresults import AllResults, scores2counts
+from sastadev.config import SDLOGGER
+from sastadev.counterfunctions import counter2liststr
+from sastadev.dataconfig import (bronzefolder, formsfolder, intreebanksfolder,
+                                 loggingfolder, outtreebanksfolder,
+                                 resultsfolder, silverfolder, silverpermfolder)
+from sastadev.macros import expandmacros
+from sastadev.methods import Method, allok, defaultfilters
+from sastadev.query import (Query, core_process, form_process, is_core, is_pre,
+                            is_preorcore, post_process, pre_process,
+                            query_exists, query_inform)
+from sastadev.readmethod import itemseppattern, read_method
+# import sastatypes
+from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResults,
+                                 ExactResultsDict, FileName, GoldTuple, Match,
+                                 Matches, MatchesDict, MethodName, Position,
+                                 QId, QIdCount, QueryDict, ResultsCounter,
+                                 ResultsDict, SynTree, UttId)
+from sastadev.TARSPscreening import screening4stage
+from sastadev.treebankfunctions import (getattval, getmeta, getnodeendmap,
+                                        getuttid, getuttidorno, getuttno,
+                                        getxmetatreepositions, getxselseuttid,
+                                        getyield, showtree)
+from sastadev.xlsx import mkworkbook
 
 listDir = False
 if listDir:

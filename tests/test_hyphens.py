@@ -1,8 +1,5 @@
-from lexicon import informlexicon
-
-
-from stringfunctions import delhyphenprefix, accentaigu
-
+from sastadev.lexicon import informlexicon
+from sastadev.stringfunctions import accentaigu, delhyphenprefix
 
 
 def test():

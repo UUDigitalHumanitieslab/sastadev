@@ -1,16 +1,19 @@
+from typing import List
+
 from lxml import etree
 
-from config import SDLOGGER
-from lexicon import getinflforms, getwordposinfo, informlexiconpos, pvinfl2dcoi
-from metadata import bpl_node, mkSASTAMeta
-from sastatoken import Token
-from tokenmd import TokenListMD
-from treebankfunctions import (copymodifynode, find1, getattval, getdetof,
-                               getheadof, getlemma, indextransform, inverted,
-                               lbrother, nominal, rbrother, simpleshow, showtree)
-from typing import List
-from sastatypes import SynTree, UttId
-
+from sastadev.config import SDLOGGER
+from sastadev.lexicon import (getinflforms, getwordposinfo, informlexiconpos,
+                              pvinfl2dcoi)
+from sastadev.metadata import bpl_node, mkSASTAMeta
+from sastadev.sastatoken import Token
+from sastadev.sastatypes import SynTree, UttId
+from sastadev.tokenmd import TokenListMD
+from sastadev.treebankfunctions import (copymodifynode, find1, getattval,
+                                        getdetof, getheadof, getlemma,
+                                        indextransform, inverted, lbrother,
+                                        nominal, rbrother, showtree,
+                                        simpleshow)
 
 debug = False
 

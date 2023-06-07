@@ -1,4 +1,4 @@
-import iedims
+from sastadev import iedims
 
 result = iedims.getjeforms('maaggie')
 print(result)

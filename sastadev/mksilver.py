@@ -1,11 +1,10 @@
-from config import SDLOGGER
 from collections import Counter, defaultdict
 from math import isnan
 
-import readcsv
-from xlsx import getxlsxdata, mkworkbook
-
-from counterfunctions import counter2liststr
+from sastadev import readcsv
+from sastadev.config import SDLOGGER
+from sastadev.counterfunctions import counter2liststr
+from sastadev.xlsx import getxlsxdata, mkworkbook
 
 permprefix = 'perm_'
 

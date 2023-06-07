@@ -1,11 +1,9 @@
 import re
 
-# from cleanCHILDEStokens import cleantokens
-import cleanCHILDEStokens
-from metadata import Meta, bpl_delete
-from sastatoken import Token, show
-
-from config import SDLOGGER
+from sastadev import cleanCHILDEStokens
+from sastadev.config import SDLOGGER
+from sastadev.metadata import Meta, bpl_delete
+from sastadev.sastatoken import Token, show
 
 CHAT = 'CHAT'
 

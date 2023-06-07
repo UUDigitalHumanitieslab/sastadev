@@ -1,6 +1,6 @@
 import csv
 
-from config import SDLOGGER
+from sastadev.config import SDLOGGER
 
 tab = '\t'
 mysep = tab

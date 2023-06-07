@@ -1,6 +1,7 @@
-from treebankfunctions import clausecats, getattval
-from sastatypes import SynTree
 from typing import Dict, List
+
+from sastadev.sastatypes import SynTree
+from sastadev.treebankfunctions import clausecats, getattval
 
 conjxpath = './/node[@cat="conj" and (count(node)=3 or count(node)=5)]'
 

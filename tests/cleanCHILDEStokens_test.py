@@ -1,5 +1,5 @@
 from .. import sastatok
-from ..cleanCHILDEStokens import space, scope_open, cleantext
+from ..cleanCHILDEStokens import cleantext, scope_open, space
 
 
 def test_1():

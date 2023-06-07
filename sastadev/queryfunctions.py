@@ -1,9 +1,9 @@
-from macros import expandmacros
-from treebankfunctions import get_left_siblings, getattval, parent, find1, adjacent
-
 from typing import Callable, List
-from sastatypes import SynTree
 
+from sastadev.macros import expandmacros
+from sastadev.sastatypes import SynTree
+from sastadev.treebankfunctions import (adjacent, find1, get_left_siblings,
+                                        getattval, parent)
 
 nietxpath = './/node[@lemma="niet"]'
 wordxpath = './/node[@pt]'

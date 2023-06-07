@@ -16,9 +16,9 @@ The namepartlexicon module:
 
 import csv
 import os
-
-from config import SD_DIR
 from typing import Dict
+
+from sastadev.config import SD_DIR
 
 tab: str = '\t'
 namepartlexicon: Dict[str, int] = {}

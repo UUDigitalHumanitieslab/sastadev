@@ -1,7 +1,10 @@
-from query import pre_process
-from typing import Callable, List, Dict
-from sastatypes import MethodName, QueryDict, Query, Item_Level2QIdDict, AltCodeDict, QId, FileName, \
-    ExactResult, ExactResultsDict, ExactResultsFilter
+from typing import Callable, Dict, List
+
+from sastadev.query import pre_process
+from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
+                                 ExactResultsFilter, FileName,
+                                 Item_Level2QIdDict, MethodName, QId, Query,
+                                 QueryDict)
 
 asta = 'asta'
 stap = 'stap'

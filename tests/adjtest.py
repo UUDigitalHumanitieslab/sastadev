@@ -1,6 +1,7 @@
 from lxml import etree
-from treebankfunctions import showtree
-from asta_queries import asta_bijzin
+
+from sastadev.asta_queries import asta_bijzin
+from sastadev.treebankfunctions import showtree
 
 streestrings = {}
 

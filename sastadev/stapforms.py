@@ -1,13 +1,13 @@
-from io import BytesIO
 import os
-from shutil import copyfile, copyfileobj
 from collections import defaultdict
+from io import BytesIO
+from shutil import copyfile, copyfileobj
 
 from openpyxl import load_workbook
-from allresults import AllResults
-from config import SD_DIR, SDLOGGER
-from forms import getformfilename
 
+from sastadev.allresults import AllResults
+from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.forms import getformfilename
 
 scoresheetname = 'STAP 1 - 5'
 maxutt = 50

@@ -35,18 +35,22 @@ The different subcases are dealt with by the function *smallclauses*:
 
 '''
 
-from config import SDLOGGER
-from treebankfunctions import getstree, getnodeyield, getattval
-from dedup import filledpauseslexicon
-from top3000 import ishuman, transitive, intransitive, pseudotr, isanimate, genlexicon
-from lexicon import known_word, tswnouns
-from namepartlexicon import namepart_isa_namepart
-from sastatoken import Token, show
-from tokenmd import TokenListMD
-from metadata import Meta, bpl_delete, defaultpenalty, insertion, smallclause, SASTA, bpl_none, tokenmapping,\
-    insertiontokenmapping
-from sastatypes import SynTree
 from typing import List
+
+from sastadev.config import SDLOGGER
+from sastadev.dedup import filledpauseslexicon
+from sastadev.lexicon import known_word, tswnouns
+from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
+                               defaultpenalty, insertion,
+                               insertiontokenmapping, smallclause,
+                               tokenmapping)
+from sastadev.namepartlexicon import namepart_isa_namepart
+from sastadev.sastatoken import Token, show
+from sastadev.sastatypes import SynTree
+from sastadev.tokenmd import TokenListMD
+from sastadev.top3000 import (genlexicon, intransitive, isanimate, ishuman,
+                              pseudotr, transitive)
+from sastadev.treebankfunctions import getattval, getnodeyield, getstree
 
 space = ' '
 biglocvzs = ['achter', 'beneden', 'binnen', 'boven', 'bovenop', 'buiten', 'dichtbij']

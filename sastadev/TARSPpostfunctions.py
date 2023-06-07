@@ -3,14 +3,13 @@ The module TARSPpostfunctions defines functions for the TARSP post part of the m
 
 '''
 from collections import Counter
-
-from query import core_process
-from treebankfunctions import getmeta
-from config import SDLOGGER
-
 from typing import Dict, List
-from sastatypes import SynTree, QId, Query, QueryDict, Stage
-from allresults import AllResults
+
+from sastadev.allresults import AllResults
+from sastadev.config import SDLOGGER
+from sastadev.query import core_process
+from sastadev.sastatypes import QId, Query, QueryDict, Stage, SynTree
+from sastadev.treebankfunctions import getmeta
 
 OndVC = 'T071'
 OndWVC = 'T076'

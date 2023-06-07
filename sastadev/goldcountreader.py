@@ -1,9 +1,5 @@
-import os
-
-#import xlrd
-import xlsx
-
-from config import SDLOGGER
+from sastadev import xlsx
+from sastadev.config import SDLOGGER
 
 gcadd = '_count_tsv'
 txtext = ".txt"

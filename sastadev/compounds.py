@@ -29,11 +29,11 @@ The module *compounds*:
 import csv
 import os
 from collections import defaultdict
-
-from config import SDLOGGER, SD_DIR
-from treebankfunctions import getattval
 from typing import Dict, List
-from sastatypes import SynTree
+
+from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.sastatypes import SynTree
+from sastadev.treebankfunctions import getattval
 
 underscore = "_"
 FlatClass = 0

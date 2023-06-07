@@ -8,10 +8,13 @@ not for recall. They will very likely require several new versions.
 '''
 
 import os
-from xlsx import getxlsxdata, mkworkbook
-from dataconfig import bronzefolder, dataroot, loggingfolder, resultsfolder
 from optparse import OptionParser
-from stringfunctions import nono
+
+from sastadev.dataconfig import (bronzefolder, dataroot, loggingfolder,
+                                 resultsfolder)
+from sastadev.stringfunctions import nono
+from sastadev.xlsx import getxlsxdata, mkworkbook
+
 
 def main():
 

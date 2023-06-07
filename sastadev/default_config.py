@@ -1,7 +1,7 @@
 import logging
 import os.path as op
-import sentence_parser
 
+from sastadev import sentence_parser
 
 # logging object
 SDLOGGER = logging.getLogger()

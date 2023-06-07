@@ -7,14 +7,13 @@ yielding a cleaned text and associated metadata.
 '''
 import re
 from copy import deepcopy
+from typing import List, Optional, Pattern, TextIO, Tuple, Union
 
-import CHAT_Annotation
-import sastatok
-from config import SDLOGGER
-from metadata import Meta, bpl_none, Metadata
-from sastatoken import show, Token
-from typing import List, Union, Tuple, Pattern, Optional, TextIO
-from sastatypes import IntSpan
+from sastadev import CHAT_Annotation, sastatok
+from sastadev.config import SDLOGGER
+from sastadev.metadata import Meta, Metadata, bpl_none
+from sastadev.sastatoken import Token, show
+from sastadev.sastatypes import IntSpan
 
 hexformat = '\\u{0:04X}'
 

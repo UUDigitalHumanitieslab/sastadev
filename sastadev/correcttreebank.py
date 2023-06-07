@@ -1,33 +1,36 @@
 from collections import defaultdict
 from copy import copy, deepcopy
+from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
 
 from lxml import etree
 
-from basicreplacements import basicreplacements
-from corrector import Correction, getcorrections, mkuttwithskips, disambiguationdict
-from lexicon import de, dets, known_word
-from metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_none,
-                      bpl_word, bpl_wordlemma)
-from sastatok import sasta_tokenize
-from sastatoken import tokenlist2stringlist, Token
-from sva import phicompatible
-from targets import get_mustbedone
-from treebankfunctions import (adaptsentence, add_metadata, countav,
-                               deletewordnodes, find1, getattval, getbeginend,
-                               getcompoundcount, getnodeyield, getsentid,
-                               gettokposlist, getyield, myfind, showflatxml,
-                               simpleshow, transplant_node, showtree, treeinflate, fatparse, treewithtokenpos,
-                               updatetokenpos, getuttid)
-from config import PARSE_FUNC, SDLOGGER
-from metadata import insertion
-from sastatoken import inflate, deflate, tokeninflate, insertinflate
-from CHAT_Annotation import omittedword
-from cleanCHILDEStokens import cleantext
-from macros import expandmacros
-
-from typing import Dict, List, Optional, Set, Sequence, Tuple, Union
-from sastatypes import AltId, CorrectionMode, ErrorDict, UttId, MetaElement, MethodName, Penalty, Position, PositionStr, \
-    SynTree, Targets, Treebank
+from sastadev.basicreplacements import basicreplacements
+from sastadev.CHAT_Annotation import omittedword
+from sastadev.cleanCHILDEStokens import cleantext
+from sastadev.config import PARSE_FUNC, SDLOGGER
+from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
+                                mkuttwithskips)
+from sastadev.lexicon import de, dets, known_word
+from sastadev.macros import expandmacros
+from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
+                               bpl_none, bpl_word, bpl_wordlemma, insertion)
+from sastadev.sastatok import sasta_tokenize
+from sastadev.sastatoken import (Token, deflate, inflate, insertinflate,
+                                 tokeninflate, tokenlist2stringlist)
+from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
+                                 MethodName, Penalty, Position, PositionStr,
+                                 SynTree, Targets, Treebank, UttId)
+from sastadev.sva import phicompatible
+from sastadev.targets import get_mustbedone
+from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
+                                        deletewordnodes, fatparse, find1,
+                                        getattval, getbeginend,
+                                        getcompoundcount, getnodeyield,
+                                        getsentid, gettokposlist, getuttid,
+                                        getyield, myfind, showflatxml,
+                                        showtree, simpleshow, transplant_node,
+                                        treeinflate, treewithtokenpos,
+                                        updatetokenpos)
 
 ampersand = '&'
 

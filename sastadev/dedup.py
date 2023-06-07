@@ -1,23 +1,25 @@
 # to do
 import os
 from copy import deepcopy
+from typing import Callable, List, Tuple
 
 from lxml import etree
-from phonetics import phoneticise
 
-import compounds
-from config import SD_DIR, SDLOGGER
-from lexicon import informlexicon
-from metadata import (filled_pause, fstoken, intj, janeenou, longrep, repeated,
-                      repeatedjaneenou, repeatedseqtoken, shortrep,
-                      substringrep, unknownsymbol, unknownword)
-from sastatoken import Token
-from stringfunctions import deduplicate, string2list
-from tblex import asta_recognised_wordnode
-from treebankfunctions import (all_lower_consonantsnode,
-                               find1, getattval,
-                               getnodeyield, lastmainclauseof, openclasspts)
-
+from sastadev import compounds
+from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.lexicon import informlexicon
+from sastadev.metadata import (filled_pause, fstoken, intj, janeenou, longrep,
+                               repeated, repeatedjaneenou, repeatedseqtoken,
+                               shortrep, substringrep, unknownsymbol,
+                               unknownword)
+from sastadev.phonetics import phoneticise
+from sastadev.sastatoken import Token
+from sastadev.sastatypes import Nort, SynTree
+from sastadev.stringfunctions import deduplicate, string2list
+from sastadev.tblex import asta_recognised_wordnode
+from sastadev.treebankfunctions import (all_lower_consonantsnode, find1,
+                                        getattval, getnodeyield,
+                                        lastmainclauseof, openclasspts)
 
 nodetype = etree._Element
 
@@ -28,9 +30,6 @@ xmetaxpath = './/xmeta'
 samplesizemdvalues = {repeatedjaneenou, shortrep, intj, unknownsymbol, filled_pause}
 mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou,
                fstoken}
-
-from typing import Callable, List, Tuple
-from sastatypes import SynTree, Nort
 
 
 class DupInfo:
@@ -484,8 +483,8 @@ def nextnode(node, nodes):
 def nodesfindjaneenou(nodes):
     janees = [n for n in nodes if getattval(n, 'lemma') in {'ja', 'nee'}]
     nous = [n for n in nodes if getattval(n, 'lemma') == 'nou' and (
-                getattval(n, 'rel') in {'mwp', 'tag', 'cnj'}
-                or getattval(nextnode(n, nodes), 'lemma') in {'ja', 'nee'})]
+        getattval(n, 'rel') in {'mwp', 'tag', 'cnj'}
+        or getattval(nextnode(n, nodes), 'lemma') in {'ja', 'nee'})]
     results = janees + nous
     return results
 
@@ -776,7 +775,7 @@ def getprefixwords(wlist, cond):
 
 def getprefixwords2(wlist: List[Nort],
                     cond: Callable[[Nort, Nort], bool]) \
-                  -> Tuple[List[Nort], DupInfo]:
+        -> Tuple[List[Nort], DupInfo]:
     '''
     The function *getprefixwords2* finds nodes with words that are a prefix of the word
     of the successor node, and it creates a DupInfo object that contains a dictionary

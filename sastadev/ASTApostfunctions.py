@@ -1,12 +1,12 @@
 from collections import Counter
-from treebankfunctions import getattval, getuttid, getnodeyield
-from stringfunctions import realwordstring
 from copy import deepcopy
-from lexicon import getwordposinfo, getwordinfo
-
 from typing import List, Optional, Tuple
-from sastatypes import SynTree, QId, UttId
-from allresults import AllResults
+
+from sastadev.allresults import AllResults
+from sastadev.lexicon import getwordinfo, getwordposinfo
+from sastadev.sastatypes import QId, SynTree, UttId
+from sastadev.stringfunctions import realwordstring
+from sastadev.treebankfunctions import getattval, getnodeyield, getuttid
 
 lpad = 3
 zero = '0'

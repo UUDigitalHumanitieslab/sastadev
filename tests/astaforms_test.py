@@ -1,4 +1,4 @@
-from ..astaforms import AstaFormData, ExcelForm, make_astaform, tabel, scores
+from ..astaforms import AstaFormData, ExcelForm, make_astaform, scores, tabel
 
 
 def test_astaform():

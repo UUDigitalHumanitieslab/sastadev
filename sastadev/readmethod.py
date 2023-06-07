@@ -4,14 +4,13 @@ This module defines the function read_method to read in a method:
 * read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
 '''
 
-from typing import List, Dict, Tuple
-from sastatypes import FileName, AltCodeDict, QueryDict, Item_Level, QId, Item_Level2QIdDict
+from typing import Dict, List, Tuple
 
-#import xlrd  # type: ignore
-import xlsx
-
-from config import SDLOGGER
-from query import Query, form_process, post_process
+from sastadev import xlsx
+from sastadev.config import SDLOGGER
+from sastadev.query import Query, form_process, post_process
+from sastadev.sastatypes import (AltCodeDict, FileName, Item_Level,
+                                 Item_Level2QIdDict, QId, QueryDict)
 
 comma = ','
 

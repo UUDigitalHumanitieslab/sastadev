@@ -1,7 +1,6 @@
 from lxml import etree
 
-from ..imperatives import wond4, wondx, wx, wxyz, wxyz5, wxy, wond5plus
-
+from ..imperatives import wond4, wond5plus, wondx, wx, wxy, wxyz, wxyz5
 
 testtreestr = {}
 

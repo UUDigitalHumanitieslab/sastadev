@@ -1,10 +1,12 @@
 import os
 from collections import Counter
 from copy import copy
+
 from lxml import etree
-from config import SDLOGGER
-from treebankfunctions import getyield, getmarkedyield, getattval
-from sastatoken import deflate
+
+from sastadev.config import SDLOGGER
+from sastadev.sastatoken import deflate
+from sastadev.treebankfunctions import getattval, getmarkedyield, getyield
 
 tab = '\t'
 space = ' '

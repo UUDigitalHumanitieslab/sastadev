@@ -1,7 +1,7 @@
 import sys
 from optparse import OptionParser
 
-from macros import expandmacros
+from sastadev.macros import expandmacros
 
 
 def main():
