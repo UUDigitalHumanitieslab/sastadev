@@ -14,6 +14,7 @@ pip-delete-this-directory.txt
 coverage.xml
 *.cover
 .pytest_cache/
+.mypy_cache/
 
 # Environments
 .env
@@ -25,7 +26,7 @@ env.bak/
 venv.bak/
 
 # configuration
-./config.py
+config.py
 
 # additional files
 .idea/
