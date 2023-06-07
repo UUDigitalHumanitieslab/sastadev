@@ -1,0 +1,11 @@
+Word 1,Word 1 additional,Word 2,Word 2 additional,Inserted verb,Example
+demonstrative pronoun or known noun or personal pronoun.,,predicative adverb or adposition or adverb,,*moet* / *moeten*,
+predicative adverb,,nominative personal pronoun,,*moet* / *moeten*,
+demonstrative pronoun or known noun,,adjective,,*is* / *zijn*,
+big locative adposition,,demonstrative pronoun or known noun or numeral,,*is* / *zijn*,
+known noun,has genitive,different known noun,,*z'n*,
+known noun,no genitive,different known noun,,*is* / *zijn*,
+demonstrative pronoun or known noun or tswnoun,,infinitive,intransitive,*wil* / *willen*,mama slapen
+demonstrative pronoun or known noun or tswnoun,human,infinitive,transitive,*wil* / *willen*,mama beertje pakken
+demonstrative pronoun or known noun or tswnoun,human or animate,infinitive,pseudotransitive,*wil* / *willen*,mama eten
+demonstrative pronoun or known noun or tswnoun,not( human or animate),infinitive,pseudotransitive,*ik wil* __,boekje lezen

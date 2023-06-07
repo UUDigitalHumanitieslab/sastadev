@@ -9,6 +9,9 @@ slash = '/'
 tab = '\t'
 comma = ','
 
+csvre = "'[^']+'|[^,' ]+"  # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
+csvpat = re.compile(csvre)
+
 wpat = r'^.*\w.*$'
 wre = re.compile(wpat)
 allhyphenspat = r'^-+$'
@@ -399,21 +402,30 @@ def allconsonants(inval: str) -> bool:
     return result
 
 
-def string2list(liststr: str) -> List[str]:
+def string2list(liststr: str, quoteignore=False) -> List[str]:
     '''
     The function string2list turns a string surrounded by [ ] into a list by splitting it on a comma
     Examples:
     * "[1,2,3]" becomes ['1', '2', '3']
     * "[]" becomes []
     * "[ ]" becomes [" "]
+    * "['Jan', 'Piet']" becomes ["'Jan'", "'Piet'"] if quoteignore = False
+    * "['Jan', 'Piet']" becomes ['Jan', 'Piet'] if quoteignore = True
+    * comma's between single quotes are allowed
 
     '''
     if liststr is None or len(liststr) == 2:
         return []
     elif liststr[0] == '[' and liststr[-1] == ']':
         core = liststr[1:-1]
-        parts = core.split(comma)
-        return parts
+        parts = csvpat.findall(core)
+        strippedparts = [part.strip() for part in parts]
+        if quoteignore:
+            cleanparts1 = [part.strip("'") for part in strippedparts]
+            cleanparts = [part.strip('"') for part in cleanparts1]
+        else:
+            cleanparts = strippedparts
+        return cleanparts
     else:
         return []
 

@@ -8,29 +8,43 @@ from tokenmd import TokenListMD
 from treebankfunctions import (copymodifynode, find1, getattval, getdetof,
                                getheadof, getlemma, indextransform, inverted,
                                lbrother, nominal, rbrother, simpleshow, showtree)
+from typing import List
+from sastatypes import SynTree, UttId
+
 
 debug = False
 
 nominalpts = ['n', 'vnw', 'tw']
 nominalisablepts = ['adj', 'ww']
 
+#: The constant *normalsentencexpath* defines a query for a finite verb form
+#: with *smain* or *sv1* as parent node that is the only phrase under the top node,
+#: possibly accompanied by punctuation signs.
 normalsentencexpath = """.//node[@pt="ww" and  @wvorm="pv" and
        parent::node[(@cat="smain" or @cat="sv1") and
            parent::node[@cat="top" and count(node[@cat or  @pt!="let"])=1]]]"""
 
+#: The constant *normalwhqsentencexpath* defines a query for a finite verb form with as parent a node with
+#: *cat*=*sv1* which has a parent node with *cat*=*whq* that is the only phrase under the top node,
+#: possibly accompanied by punctuation signs.
 normalwhqsentencexpath = """
 //node[@pt="ww" and  @wvorm="pv" and
        parent::node[( @cat="sv1") and
            parent::node[@cat="whq" and
                parent::node[@cat="top" and count(node[@cat or  @pt!="let"])=1]]]]"""
-
+#: The constant *abnormalobj2sentencexpath* defines a query for a finite verb of which the parent contains
+#: as indirect object (*obj2*) a pronoun or  the word *zij*. (*zij* can also be analysed, usually incorrectly
+#: in the SASTA context, as the subjunctive form of the verb *zijn*).
+#: example sentence to which this applies: 	*mij lukt het ook*
 abnormalobj2sentencexpath = """.//node[@pt="ww" and  @wvorm="pv" and
        parent::node[node[@rel="obj2" and (@pt="vnw" or @word="zij")]]]
 """
-
+#: The constant *abnormalobj2xpath* searches for nodes that are an indirect object and either a pronoun or the word "zij"
+#: and that have a sibling finite verb. @I do not understand this anymore@
 abnormalobj2xpath = """.//node[@rel="obj2" and (@pt="vnw" or @word="zij")
         and parent::node[node[@pt="ww" and @wvorm="pv"]]]"""
 
+#: The constant *subjxpath* defines a query to search for a subject that is a sibling of a finite verb.
 subjxpath = """.//node[@rel="su" and parent::node[node[@pt="ww" and @wvorm="pv"]]]"""
 
 zijsgnodestringtemplate = """
@@ -250,7 +264,27 @@ def getpotsubjs(tree):
     return results
 
 
-def getpvs(tokensmd, tree, uttid):
+def getpvs(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[SynTree]:
+    """
+    The function *getpvs* searches for finite verbs and potentially finite verbs in the structure
+
+    * It first looks for words that are explicitly marked as finite verbs (*@pt="ww" and @wvorm="pv"*)
+    except for the words *ja*, *zij* and *kijk*.
+    * If none has been found, it identifies infinitrves as potential finite verbs (infinitives in Dutch are always
+    homophonous to present tense plural finite verbs). However, such an infinitive should not be preceded by explicit
+    infinitive markers such as *te* or *aan het* (as determined by the functions *ahi* and *ti*):
+
+        * .. autofunction:: sva::ahi
+
+        * .. autofunction:: sva::ti
+
+        If multiple infinitives are found, arbitrarily the first one is selected.
+
+        **Remark** We should actually select the first one that is not preceded by *te* or *aan het*.
+
+        It the seelcted node is not immediately preceded by *te* or *aan het*
+        @@hier verder@@
+    """
     if tree is None:
         return []
     else:
@@ -261,8 +295,8 @@ def getpvs(tokensmd, tree, uttid):
             if pvs != []:
                 thepv = pvs[0]
                 if not ahi(thepv, tree) and not ti(thepv, tree):
-                    rb = rbrother(thepv, tree)
-                    lb = lbrother(thepv, tree)
+                    rb = rbrother(thepv, tree)    # use infl_rbrother instead for inflated trees
+                    lb = lbrother(thepv, tree)    # use infl_lbrother instead for inflated trees
                     lblemma = getattval(lb, 'lemma')
                     lbrel = getattval(lb, 'rel')
                     if nominal(rb) or getattval(rb, 'pt') == 'lid' or (lblemma in ['je', 'het'] and lbrel == 'det'):
@@ -333,7 +367,17 @@ def zijnimperativeok(vnode):
     return result
 
 
-def ahi(node, tree):
+def ahi(node: SynTree, tree: SynTree) -> bool:
+    '''
+    The function *ahi* checks whether a given node *node* is immediately preceded by the words *aan* and *het* in
+    syntactic structure *tree*.
+
+    **Remark** The function currently works for standard syntactic structures, not for inflated
+    syntactic structures.
+    :param node: the node for which it is checked whether it is immediately preceded by *aan* and *het*
+    :param tree: the syntactic structure that contains the node *node*.
+    :return: True if *aan het* immediately precedes *node*, False otherwise
+    '''
     nodepos = int(getattval(node, 'end'))
     p1end = str(nodepos - 2)
     p2end = str(nodepos - 1)
@@ -343,7 +387,18 @@ def ahi(node, tree):
     return result
 
 
-def ti(node, tree):
+def ti(node: SynTree, tree: SynTree) -> bool:
+    '''
+    The function *ti* checks whether a given node *node* is immediately preceded by the word *te* in
+    syntactic structure *tree*
+
+    **Remark** The function currently works for standard syntactic structures, not for inflated
+    syntactic structures.
+
+    :param node: the node for which it is checked whether it is immediately preceded by *te*
+    :param tree: the syntactic structure that contains the node *node*.
+    :return: True if *te* immediately precedes *node*, False otherwise
+    '''
     nodepos = int(getattval(node, 'end'))
     p1end = str(nodepos - 1)
     p1 = find1(tree, '//node[@pt and @end={} and @lemma="te"]'.format(p1end))
@@ -376,7 +431,53 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
     return results
 
 
-def getsvacorrections(tokensmd, rawtree, uttid):
+def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    '''
+
+    :param tokensmd: the input sequence of tokens plus metadata
+    :param rawtree: the syntacti structuire of the original utterance
+    :param uttid: the identifier of the utterance
+    :return: a list of pairs (token sequence , metadata)
+
+    The function *getsvacorrections* generates alternative token sequences plus associated metadata for an input token
+    sequence with associated metadata for an utterance with id *uttid* and (inflated) syntactic structure *rawtree*.
+
+    The function performs the following steps:
+    * It transforms all index nodes in the syntactic structure to nodes of their antecedents
+    (except for the *rel* attribute) by means of the function *indextransform* from the module *treebankfunctons*. See  :ref:`indexnodeexpansion`.
+    * It looks up all finite verb forms in the structure by means of the function *getpvs*
+        * ..autofunction::  sva::getpvs
+
+    * It only deals with structures that contain at most one finite verb
+    * Next, it searches for the subject or for potential subjects in the structure. How it searches depend on the structure of the sentence.
+        * normal sentences that match the  Xpath expression *normalsentencexpath*:
+
+            .. autodata:: sva::normalsentencexpath
+
+            In this case the query *subjxpath* is used to search for the subject(s).
+            Of the subjects found (if any), the first one is selected as the subject.
+            Normally, there is only one subject in a clause.
+
+        * abnormalobj2 sentences that match the  Xpath expression *abnormalobj2sentencexpath*:
+
+            .. autodata:: sva::abnormalobj2sentencexpath
+
+            In this case, potential subjects are searched for, as described below.
+
+        * normal whquestion sentences that match the  Xpath expression *normalwhqsentencexpath*:
+
+            .. autodata:: sva::normalwhqsentencexpath
+
+            In this case the query *subjxpath* is used to search for the subject(s).
+            Of the subjects found (if any), the first one is selected as the subject.
+            Normally, there is only one subject in a clause.
+
+          The query *subjxpath* is defined as follows:
+
+          .. autodata:: sva::subjxpath
+
+
+    '''
     debug = False
     if debug:
         showtree(rawtree, text='rawtree')

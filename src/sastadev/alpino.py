@@ -1,3 +1,14 @@
+'''
+The module *alpino* provides functions related to Alpino structures. In particular,
+it provides the function *getdehetwordinfo*:
+
+* obtaining grammatical information from nouns in an Alpino parse
+
+  .. autofunction:: alpino::getdehetwordinfo
+
+'''
+#from __future__ import annotations
+
 import lexicon
 import treebankfunctions
 
@@ -9,6 +20,11 @@ def getalpinowordinfo(word: str) -> List[WordInfo]:
     '''
     The function *getalpinowordinfo* parses the input word in isolation, extracts its properties and returns some of
     the properties as a list of WordInfo objects.
+
+    Note that it is essential to parse the word in isolation, because unknown words
+    that follow a uter determiner are analysed by Alpino as a uter noun
+    (e.g. in *de ponyautootje*), even if they are analysed as neuter nouns in
+    isolation.
 
     '''
     tree = PARSE_FUNC(word)
@@ -38,6 +54,8 @@ def getdehetwordinfo(wrd: str) -> Tuple[List[WordInfo], str]:
     *getalpinowordinfo*.
     It returns a tuple consisting of a list of WordInfo objects and a string indicating the source where the properties
     have been found.
+
+    .. autofunction:: alpino::getalpinowordinfo
     '''
 
     wordinfos = lexicon.getwordinfo(wrd)

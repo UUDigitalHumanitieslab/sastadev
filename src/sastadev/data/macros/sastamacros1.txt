@@ -34,6 +34,9 @@ JO_kijken_naar = """        parent::node[@cat="pp" and
               ]
 """
 
+PQ_e = """@end"""
+PQ_b = """@begin"""
+
 robusttopicdrop = """(@cat="sv1" and ../node[@lemma="."])"""
 
 Tarsp_hww = """
@@ -179,6 +182,17 @@ singlewordbw = """ (@pt="bw" or %Rpronoun% or %adjadv%)
 """
 
 
+diedatrel = """(@pt="vnw" and @vwtype="betr" and @rel="rhd" and (@lemma="die" or @lemma="dat"))"""
+
+avnrel = """(%diedatrel% and parent::node[@cat="rel" and @rel!="mod"])"""
+
+v2problem = """//node[@pt="ww" and @wvorm="pv" and 
+       @begin != parent::node[@cat="ssub"]/parent::node[@cat="rel" and @rel!="mod"]/node[%diedatrel% ]/@end
+      ]"""
+
+coreavn = """(@pt="vnw"  and @vwtype="aanw" and @lemma!="hier" and @lemma!="daar" and @lemma!="er" and @rel!="det" and (not(@positie) or @positie!="prenom") )"""
+
+AVn = """(%coreavn% or %avnrel%)"""" 
 
 corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
@@ -497,8 +511,8 @@ robustdelpv = """(not(@rel="dp" and @begin > ancestor::node[@cat="top"]/descenda
 
 delpv = """(%coredelpv% and %robustdelpv%)"""
 
-Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or @lemma="daarom") and 
-@lemma!="er" and @lemma!="daar" and @lemma!="hier" and (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or starts-with(@lemma, 'hier')))"""
+Vobij = """(@pt="bw" and (contains(@frame,"er_adverb" ) or contains(@frame, "tmp_adverb") or contains(@frame, "waar_adverb") or @lemma="daarom") and 
+@lemma!="er" and @lemma!="daar" and @lemma!="hier" and @lemma!="waar" and (starts-with(@lemma, 'er') or starts-with(@lemma, 'daar') or starts-with(@lemma, 'hier') or starts-with(@lemma, 'waar')))"""
 
 Tarsp_VzN = """(%vzn1xpath% or %vzn2xpath% ) """
 

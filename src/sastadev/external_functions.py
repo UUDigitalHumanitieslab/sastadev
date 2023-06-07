@@ -3,8 +3,8 @@ The external_functions module creates the link between a function mentioned in t
 A function mentioned in a pre or core language measure takes as input a syntactic structure and
 yields a list of nodes  as output.
 
-A function mentioned in a post or form query takes as input an AllResults object and a syntactic strucure and
-yields  a rersult of any type as output
+A function mentioned in a post or form query takes as input an AllResults object and a
+syntactic structure and yields  a result of any type as output.
 
 If the function is defined in some other module, it must be imported here.
 The name of the function must be added to one of the variables
@@ -19,7 +19,7 @@ from xenx import xenx
 from imperatives import wx, wxy, wxyz, wxyz5, wondx, wond4, wond5plus
 from TARSPscreening import tarsp_screening
 from TARSPpostfunctions import vutotaal, gofase, gtotaal, pf2, pf3, pf4, pf5, pf6, pf7, pf
-from queryfunctions import xneg_x, xneg_neg, VzN
+from queryfunctions import xneg_x, xneg_neg, VzN, vobij, voslashbij
 from dedup import mlux, samplesize, neologisme, onvolledig, correct
 from STAPpostfunctions import BB_totaal, GLVU, GL5LVU
 from ASTApostfunctions import wordcountperutt, countwordsandcutoff, KMcount, finietheidsindex, getnounlemmas,\
@@ -63,7 +63,7 @@ def oldgetfname(f: Callable) -> str:
 # Initialisation
 thetarspfunctions = [getcompounds, sziplus6, xenx, vr5plus, wx, wxy, wxyz, wxyz5, wondx, wond4, wond5plus,
                      tarsp_screening, vutotaal, gofase, gtotaal, pf2, pf3, pf4, pf5, pf6, pf7, pf, xneg_x, xneg_neg,
-                     mktarspform, VzN]
+                     mktarspform, VzN, vobij, voslashbij]
 
 thestapfunctions = [BB_totaal, GLVU, GL5LVU, makestapform]
 

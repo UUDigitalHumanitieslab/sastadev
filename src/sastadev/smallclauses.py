@@ -1,3 +1,40 @@
+'''
+The module *smallclauses* deals with *small clauses*, i.e. utterances with a
+predication but no finite verb. Examples include:
+
+* die dicht
+* schoenen aan
+* ladder hier
+* ik varken
+* nou Marije nat
+* traktor niet hier
+* mama even drinken
+* nee dees wel
+* ikke dees pakke
+* ik naar omie
+
+Alpino cannot analyse such utterances in a proper manner. For example,
+it analyses *schoenen aan* as a sequence of two discourse part, one a noun, the other an
+adjective.
+
+For this reason this module inserts an appropriate finite verb into these utterances. This modified utterance with
+a finite verb can be analysed by Alpino. In the resulting parse, SASTA removes the verb
+again and the resulting parse tree is subjected to the queries for analysis.
+
+For example, by inserting the finite verb *moeten* in the utterance *schoenen aan*,
+resuting in *schoenen moeten aan*, *schoenen* can be analysed as a subject noun and *aan* as predicative adjective,
+and the whole utterance as an instance of TARSP *OndVC*.
+
+The small clause utterances are often very short, and we analysed utterances with 2
+and 3 "real" words,  "real" in the sense that we excluded interjections, filled pauses,
+interpunction signs, CHAT codes such as *xxx*, etc.
+
+The different subcases are dealt with by the function *smallclauses*:
+
+.. autofunction:: smallclauses::smallclauses
+
+'''
+
 from config import SDLOGGER
 from treebankfunctions import getstree, getnodeyield, getattval
 from dedup import filledpauseslexicon
@@ -8,6 +45,8 @@ from sastatoken import Token, show
 from tokenmd import TokenListMD
 from metadata import Meta, bpl_delete, defaultpenalty, insertion, smallclause, SASTA, bpl_none, tokenmapping,\
     insertiontokenmapping
+from sastatypes import SynTree
+from typing import List
 
 space = ' '
 biglocvzs = ['achter', 'beneden', 'binnen', 'boven', 'bovenop', 'buiten', 'dichtbij']
@@ -205,7 +244,38 @@ def mkinsertmeta(inserttokens, resultlist):
     return metadata
 
 
-def smallclauses(tokensmd, tree):
+def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
+    '''
+
+    :param tokensmd: list of tokens with metadata
+    :param tree: the syntactic structure of the utterance
+    :return: a possibly empty list of alternative TokenListMD objects
+
+    The function *smallclauses* creates zero or more alternative TokenListMD
+    objects by inserting an appropriate finite verb.
+
+    "Appropriate"in this comtext means that it must fit in *syntactically* and
+    *morphologically* in this context:
+
+    * **syntactically** the verb must take the right complements
+    * **morphologically** the verb form must agree with the subject
+
+    SASTA usually inserts a verb that has few different inflectional forms, so that the
+    agreement requirement is met in the easiest way. (e.g. *moeten* has only one form
+    in present tense for singular (*moet*), and only one form for plural (*moeten*).
+
+    The relevant cases from the available TARSP-examples have been inventoried,
+    and some of the relevant cases have been implemented. The table below specifies which cases are currently covered.
+
+    Cases covered so far:
+
+    .. csv-table:: Small Clause Subcases covered
+      :file: Documentation/smallclausetable.csv
+      :widths: 16, 16, 16, 16, 16, 20
+      :header-rows: 1
+
+
+    '''
     resultlist = []
     leaves = getnodeyield(tree)
     reducedleaves = [leave for leave in leaves if realword(leave)]

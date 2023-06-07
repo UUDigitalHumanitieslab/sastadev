@@ -9,6 +9,8 @@ from config import SDLOGGER
 
 CHAT = 'CHAT'
 
+CHAT_explanation = 'Explanation'
+
 monadic = 1
 dyadic = 2
 
@@ -642,7 +644,7 @@ annotations = [
                     CHAT_SimpleScopedRegex(r'\[!!\]', keep, False, monadic),
                     simplescopedmetafunction),
     # Duration to be added here @@
-    CHAT_Annotation('Explanation', '8.3:69', '10.3:73',
+    CHAT_Annotation(CHAT_explanation, '8.3:69', '10.3:73',
                     CHAT_ComplexRegex((r'\[=', anybutrb, r'\]'), (keep, eps), False),
                     complexmetafunction),
     CHAT_Annotation('Replacement', '8.3:69', '10.3:73',

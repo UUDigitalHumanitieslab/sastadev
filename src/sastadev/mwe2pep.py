@@ -10,16 +10,19 @@ def remove(patlist, rawstr):
     return result
 
 def clean(rawutt):
-    pats = [r'dd:', r'\[', r'\]', r'<', r'>', r'0', r'\*', r'c:', r'\+', r'com:']
+    pats = [r'dd:', r'\[', r'\]', r'<', r'>', r'0', r'\*', r'c:', r'\+', r'com:', r'=']
     result = remove(pats, rawutt)
-    result = re.sub(r'iemand\s*\|\s*iets', 'iemand', result)
-    result = re.sub(r'iets\s*\|\s*iemand', 'iemand', result)
+    result = re.sub(r'(?i)iemand\s*\|\s*iets', 'iemand', result)
+    result = re.sub(r'(?i)iets\s*\|\s*iemand', 'iemand', result)
+    result = re.sub(r'\u2018', "'", result)
+    result = re.sub(r'\u2019', "'", result)
 
     return result
 
 metamodel = '##META text {att} = {val}'
 
-inpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\researchproposals\MWEs'
+#inpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\researchproposals\MWEs'
+inpath = r'C:\Users\Odijk101\Dropbox\jodijk\Utrecht\researchproposals\MWEs'
 infilename = 'UitdrukkingenNL expanded_dedup Current.xlsx'
 
 infullname = os.path.join(inpath, infilename)
@@ -44,7 +47,7 @@ for row in data:
     peplines.append('')     # blank line to finish input for this utterance
 
 outpath = inpath
-outfilename = 'MWE2022-04-29.txt'
+outfilename = 'MWE2022-08-03.txt'
 outfullname = os.path.join(outpath, outfilename)
 with open(outfullname, 'w', encoding='utf8') as outfile:
     for pepline in peplines:

@@ -1,7 +1,11 @@
+.. _lexicons:
+
 Lexicons
 ========
 
 SASTA uses a range of lexicons. We will briefly describe these here.
+
+.. _Alpinolexicon:
 
 Alpinolexicon
 -------------
@@ -27,6 +31,8 @@ Gertjan van Noord wrote to me about this::
 	 
 	de regels die met TAG beginnen zijn relevant. En die hebben velden, gescheiden door | veld 4 is de woordsoort, veld 5 is de naam van de heuristiek die is gebruikt. Als die naam met 'normal(' begint, zou je kunnen zeggen dat het woord gewoon in het woordenboek staat.
 
+.. _CELEX:
+
 CELEX
 -----
 The lexicon that we use most is CELEX. There is a module lexicon.py which provides the interface to the lexion actually used:
@@ -36,6 +42,8 @@ The lexicon that we use most is CELEX. There is a module lexicon.py which provid
 But in it the actual lexicon used is the CELEX lexicon, taken care of by the celexlexicon module:
 
 .. automodule:: celexlexicon
+
+.. _top3000:
 
 Top3000
 -------
@@ -59,6 +67,7 @@ The dictionary with nameparts has been derived by the SASTA script getnamepartsl
 .. automodule:: namelexicons
 
  
+.. _filledpauseslexicon:
 
 Filled pauses lexicon
 ---------------------
@@ -68,11 +77,14 @@ The filledpauseslexicon is a set created in the module dedup on the basis of the
 This file has been created by searching for strings marked with & in the Dutch CHILDES corpora (with the script getchildes.py), and manual filtering.
 
 
+.. _compounds:
 
 Compounds
 ---------
 
 .. automodule:: compounds
+
+.. _exceptionslists:
 
 Exception Lists
 --------------- 

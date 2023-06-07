@@ -4,9 +4,9 @@ from macros import expandmacros
 from metadata import (longrep, repeated, repeatedseqtoken, repetition,
                       substringrep)
 from stringfunctions import string2list
-from treebankfunctions import (asta_recognised_lexnode,
-                               asta_recognised_nounnode, clausecats, find1,
-                               getattval, getnodeyield, getyield, showtns)
+from tblex import asta_recognised_lexnode, asta_recognised_nounnode
+from treebankfunctions import (clausecats, find1, getattval,
+                               getnodeyield, getyield, showtns)
 
 from typing import Callable, Dict, List
 from sastatypes import SynTree
@@ -45,8 +45,8 @@ def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
 
 
 def asta_noun(
-              stree: SynTree) \
-              -> List[SynTree]:
+        stree: SynTree) \
+        -> List[SynTree]:
     '''The function *asta_noun* uses the function *asta_x* with parameters *stree*,
     *expanded_noun_path* and the function *asta_recognised_nounnode*.
 
@@ -127,7 +127,7 @@ def asta_delpv(stree: SynTree) -> List[SynTree]:
 
 def asta_x(stree: SynTree,
            xpathexpr: str,
-           recognized_x_f: Callable[[SynTree], bool]) -> List [ SynTree]:
+           recognized_x_f: Callable[[SynTree], bool]) -> List[SynTree]:
     theyield = getyield(stree)   # for debugging purposes
     thenodeyield = getnodeyield(stree)
     cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(repeated, repeatedseqtoken, longrep, substringrep)
@@ -209,7 +209,12 @@ def old_asta_bijzin(stree):
     return resultingnodes
 
 
-def removerepetitions(ptnodes, stree):
+def removerepetitions(ptnodes: List[SynTree], stree: SynTree) -> List[SynTree]:
+    '''
+    The function *removerepetitions* returns a list of nodes from *ptnodes* that are
+    not marked in the metadata as repetitions.
+
+    '''
     newptnodes = []
     for ptnode in ptnodes:
         ptnodeend = ptnode.attrib['begin'] if 'begin' in ptnode.attrib else None
@@ -220,7 +225,37 @@ def removerepetitions(ptnodes, stree):
     return newptnodes
 
 
-def asta_bijzin(stree):
+def asta_bijzin(stree: SynTree) -> List[SynTree]:
+    '''
+    The function *asta_bijzin* identifies *bijzinnen* in  *stree*. The term *bijzin*
+    is used in ASTA in a slightly different way than usual.
+    It usually means *subordinate clause*, but in ASTA it is equivalent to the English
+    term *clause* (so it can be a main clause or a subordinate clause).
+
+    The function finds each node that is a clause except for the left-most one. For
+    example, in *wij gaan naar huis als hij ziek is* the leftmost clause starts at
+    *wij* (and is not marked as a clause), and the second one starts with *als*,
+    and that one is found as a *Bijzin*.
+
+    If a main clause starts with a subordinate clause, then this subordinate clause is
+    contained in the main clause: In e.g. *als hij ziek is gaan we naar huis* the
+    subordinate clause is *als hij ziek is* and the main clause is *als hij ziek is
+    gaan we naar huis*. We should mark *gaan* as the first word of a clause, but
+    in the Alpino structure it is not the first word of a clause. For this reason we set
+    the start of a clause
+    that contains another clause with the same value for the *begin* attribute equal
+    to the *end* attribute of the contained clause, so that a marking appears under the
+    word *gaan*, the first word after the contained clause.
+
+    The function launches an XPath query (*astabijzinquery*)  which crucially uses the
+    macro *ASTA_Bijzin*. This query yields not only true clause nodes but also nodes
+    of words that typically introduce clauses but have been parsed wrongly.
+    These words may have been repeated, and if so, only one of them should be in the
+    results, so the repetitions are removed from the results by means of the function
+    *removerepetitions*:
+
+    .. autofunction:: asta_queries::removerepetitions
+    '''
     theyield = getyield(stree)
     clausenodes = stree.xpath(astabijzinquery)
     ptnodes = [n for n in clausenodes if 'pt' in n.attrib]
@@ -248,7 +283,7 @@ def asta_bijzin(stree):
     else:
         result = sortedclausenodes[1:] + okptnodes
 
-   #ad hoc statement to ensure that there are no None matches should not happen anymore
+    # ad hoc statement to ensure that there are no None matches should not happen anymore
     result = [el for el in result if el is not None]
     return result
 

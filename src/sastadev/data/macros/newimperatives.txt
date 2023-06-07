@@ -1,6 +1,6 @@
 
 
-subject = """(@rel="su")"""
+subject = """(@rel="su" and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
 questionmark = """(@pt="let" and @word="?")"""
 exclamationmark = """(@pt="let" and @word="!")"""
 periodmark = """(@pt="let" and @word=".")"""
@@ -9,7 +9,7 @@ topcontainsexclamationmark = """ (ancestor::node[@cat="top" and node[%exclamatio
 topcontainsperiodmark = """ (ancestor::node[@cat="top" and node[%periodmark%]])"""
 
 Ond = """node[%subject%]"""
-FullOnd = """((%subject% and (@pt or @cat) ) or %erx%)"""
+FullOnd = """(%subject% or %erx%)"""
 
 
 
@@ -60,8 +60,9 @@ nonfincat = """(@cat="inf" or @cat="ppart")"""
 nonfinvc = """(@rel="vc" and %nonfincat%) """
 
 realcomplormodnode = """node[%realcomplormod%]"""
-realcomplormod = """(not(%particlesvp%) and not(%indexnode%) and not(%nonfinvc%) and not(@rel="hd"))"""
+realcomplormod = """(not(%particlesvp%) and (not(%indexnode%) or %includeindexnode%) and not(%nonfinvc%) and not(@rel="hd"))"""
 indexnode = """(@index and not (@cat or @pt or @pos))"""
+includeindexnode = """(%indexnode% and  parent::node[@cat="ssub" and parent::node[@cat="rel" ]])"""
 suindexnode = """(%indexnode% and @rel="su") """
 nonfinindexnode = """(%indexnode% and parent::node[%nonfinvc%])"""
 
@@ -111,7 +112,7 @@ Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
-Tarsp_OndW = """(%declarative% and %Ond% and  (%Tarsp_W%  or node[%Tarsp_onlyWinVC%]) and %realcomplormodnodecount% = 0 )"""
+Tarsp_OndW = """(%declarative% and %Ond% and  (%Tarsp_W%  or node[%Tarsp_onlyWinVC%]) and %realcomplormodnodecount% = 1 )"""
 
 Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww" and %realcomplormodnodecount% = 0])"""
 
@@ -162,19 +163,21 @@ Tarsp_WOnd4 = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionm
 Tarsp_WOnd5plus = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% =4)
 """
 
-Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub"))"""
-]
+Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub") or (@cat="whrel" and @rel="--"))"""
+
+Tarsp_whqhead = """(@rel="whd" or @rel="rhd") """
+whqbody = """((@cat="sv1" or @cat="ssub") and @rel="body")"""
 Tarsp_VrXY = """(%Tarsp_whq% and
-        node[@rel="whd"] and
-        node[@cat="sv1" and @rel="body"  and %realcomplormodnodecount% = 1])"""
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%   and %realcomplormodnodecount% <= 1])"""
 
 Tarsp_Vr4 = """(%Tarsp_whq% and
-        node[@rel="whd"] and
-        node[@cat="sv1" and @rel="body"  and %realcomplormodnodecount% = 2])"""
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%  and %realcomplormodnodecount% = 2])"""
 
 Tarsp_Vr5plus = """(%Tarsp_whq% and
-        node[@rel="whd"] and
-        node[@cat="sv1" and @rel="body"  and %realcomplormodnodecount% > 2])"""
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%  and %realcomplormodnodecount% > 2])"""
 		
 Tarsp_BBX = """((@cat="top" and
    count(.//node[@pt!='let' and @pt!='vg'])=3 and 
