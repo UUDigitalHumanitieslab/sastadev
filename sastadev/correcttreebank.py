@@ -60,7 +60,7 @@ altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'di
 errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
                 ['altid', 'altsent', 'score'] + \
-                altpropertiesheader
+    altpropertiesheader
 
 
 class Alternative():
@@ -181,7 +181,7 @@ def get_origandparsedas(metadatalist: List[MetaElement]) -> Tuple[Optional[str],
 
 
 def mkmetarecord(meta: MetaElement, origutt: Optional[str], parsed_as: Optional[str]) -> Tuple[
-    Optional[str], List[str]]:
+        Optional[str], List[str]]:
     if meta is None:
         return None, []
     key = meta.attrib['name']
@@ -754,7 +754,7 @@ def updatecleantokmeta(meta: Meta, begins: List[str], cleantokpos: List[int]) ->
             intbegin = int(begin)
             beginindex = cleantokpos.index(intbegin)
             newmeta.annotationwordlist = newmeta.annotationwordlist[:beginindex] \
-                                         + newmeta.annotationwordlist[beginindex + 1:]
+                + newmeta.annotationwordlist[beginindex + 1:]
         newmeta.value = newmeta.annotationwordlist
         return newmeta
     else:
@@ -858,7 +858,7 @@ def getunknownwordcount(nt: SynTree) -> int:
 
 
 def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode) -> Tuple[
-    ParsedCorrection, OrigandAlts]:
+        ParsedCorrection, OrigandAlts]:
     # to be implemented@@
     # it is presupposed that ptmds is not []
 

@@ -50,7 +50,7 @@ commentsheaders = ['comments', 'commentaar']
 unalignedheaders = ['unaligned']
 
 
-def nested_dict(n:int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
+def nested_dict(n: int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
         return defaultdict(type)
     else:
@@ -350,7 +350,7 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
         elif clean(val) in unalignedheaders:
             unalignedcol = col
         else:
-            pass # maybe warn here that an unknow column header has been encountered?
+            pass  # maybe warn here that an unknow column header has been encountered?
 
     for row in data:
         if row[uttidcol] != "":
@@ -398,7 +398,6 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
     return allutts, thedata
 
 
-
 def update(thedict: Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]], qid: QId,
            goldtuple: Tuple[Level, Item, List[Tuple[UttId, Position]]]):
     (level, item, thecounter) = goldtuple
@@ -418,6 +417,7 @@ def oldgetitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Li
             resultmap[item] = [level]
     return resultmap
 
+
 def getitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Level]:
     resultmap: Dict[Item, Level] = {}
     for (item, level) in mapping:
@@ -426,7 +426,6 @@ def getitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Level
         else:
             resultmap[item] = level
     return resultmap
-
 
 
 def codeadapt(c: str) -> str:
@@ -450,10 +449,8 @@ def mkpatterns(allcodes: List[str]) -> Tuple[Pattern, Pattern]:
     return (re.compile(basepattern), re.compile(fullpattern))
 
 
-
-
 def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]],
-                 queries: QueryDict, includeimplies: bool=False) \
+                 queries: QueryDict, includeimplies: bool = False) \
         -> Tuple[UttWordDict, Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]]]:
     # item2levelmap = {}
     mappingitem2levelmap = getitem2levelmap(mapping)
@@ -522,7 +519,7 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
             update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
             SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
                                                                                                 thecorrectlevel,
-                                                                                               thecorrectitem))
+                                                                                                thecorrectitem))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     impliedlevel = mappingitem2levelmap[implieditem]
@@ -572,4 +569,3 @@ def richscores2scores(richscores: Dict[QId, Tuple[Level, Item, Any]]) -> Dict[QI
     for queryid in richscores:
         scores[queryid] = richscores[queryid][2]
     return scores
-

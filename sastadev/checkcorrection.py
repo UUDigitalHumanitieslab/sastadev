@@ -92,7 +92,7 @@ def main():
 
     refaddfilename = f'{options.dataset}_newrefcandidates.xlsx'
     refadditions = os.path.join(options.referencepath, refaddfilename)
-    wb = mkworkbook(refadditions, [refheader], missedcorrectionslist, freeze_panes=(0,1))
+    wb = mkworkbook(refadditions, [refheader], missedcorrectionslist, freeze_panes=(0, 1))
     wb.close()
 
 

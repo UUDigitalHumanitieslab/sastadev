@@ -4,6 +4,7 @@ from sastadev.dataconfig import formsfolder, intreebanksfolder
 
 formext = '.xlsx'
 
+
 def getformfilename(infullname, suffix):
     base, infilename = os.path.split(infullname)
     (filebase, ext) = os.path.splitext(infilename)

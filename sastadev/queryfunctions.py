@@ -39,7 +39,8 @@ voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and
 #:
 vobijxpath = expandmacros('.//node[%Vobij%]')
 
-notadjacent = lambda n1, n2, t: not adjacent(n1, n2, t)
+
+def notadjacent(n1, n2, t): return not adjacent(n1, n2, t)
 
 
 def xneg(stree):
@@ -83,6 +84,7 @@ def VzN(stree):
     results += stree.xpath(vzn3xpath)
     #results += stree.xpath(vzn4xpath) # does not belong here after all, these will be scored under Vo/Bij
     return results
+
 
 def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) -> List[SynTree]:
     '''

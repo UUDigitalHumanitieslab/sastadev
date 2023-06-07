@@ -38,7 +38,7 @@ bstate, ostate, oostate, costate, ccstate = 0, 1, 2, 3, 4
 illegalcleanedchatsymbols = '<>'
 
 
-def findscopeclose(tokens: List[Token], offset: int=0) -> Optional[IntSpan]:
+def findscopeclose(tokens: List[Token], offset: int = 0) -> Optional[IntSpan]:
     tokenctr = 0
     bracketcounter = -1
     begin = None
@@ -88,9 +88,11 @@ def clearnesting(intokens: List[Token], repkeep: bool) -> Tuple[List[Token], Met
         else:
             newtokens.append(token)
         tokenctr += 1
-    return(newtokens, metadata)
+    return (newtokens, metadata)
 
 #this is probably obsolete, it still uses Python2 syntax (print)
+
+
 def checkline(line: str, newline: str, outfilename: str, lineno, logfile: TextIO):
     if checkpattern.search(newline) or pluspattern.search(newline):
         print(outfilename, lineno, 'suspect character', file=logfile)
@@ -104,9 +106,11 @@ def purifytokens(tokens: List[Token]) -> List[Token]:
     result = [token for token in tokens if token.word not in illegalcleanedchatsymbols]
     return result
 
-CleanedText = Union[List[Token],str]
 
-def cleantext(utt: str, repkeep: bool, tokenoutput: bool=False) -> Tuple[CleanedText, Metadata]:
+CleanedText = Union[List[Token], str]
+
+
+def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False) -> Tuple[CleanedText, Metadata]:
     '''
 
     :param utt:
@@ -131,7 +135,7 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool=False) -> Tuple[Cleaned
     metadata += [newmeta1, newmeta2, newmeta3]
     resultmetadata = metadata
     if tokenoutput:
-        return(newtokens, resultmetadata)
+        return (newtokens, resultmetadata)
     else:
         return (resultstring, resultmetadata)
 
@@ -158,7 +162,7 @@ def str2codes(str: str) -> List[Tuple[str, str]]:
         curchar = str[i]
         curcode = hexformat.format(ord(str[i]))
         result.append((curchar, curcode))
-    return(result)
+    return (result)
 
 
 def removesuspects(str: str) -> str:
@@ -167,20 +171,21 @@ def removesuspects(str: str) -> str:
     result = re.sub(pluspattern2, r'\1', result2)
     return result
 
+
 RobustnessTuple = Tuple[Pattern, str, str, str]
 
-robustnessrules : List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
-                   (re.compile('#'), '#', '', 'Number Sign (#, Unicode U+0023) removed'),
-                   #(re.compile('#'), '#', '(.)', 'Number Sign (#, Unicode U+0023) replaced by CHAT (short) pause code: (.)'),
-                   (re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
-                   (re.compile(r'\[\+trn\]'), '[+trn]', '[+ trn]', 'Missing space'),
-                   (re.compile(r'\[:(?![:\s])'), '[:', '[: ', 'Missing space'),
-                   (re.compile(r'(?<=\w)\+\.\.\.'), '+...', ' +...', 'Missing space'),
-                   (re.compile(r'\u2018'), '\u2018', "'", "Left Single Quotation Mark (\u2018. Unicode U+2018) replaced by Apostrophe ' (Unicode U+0027)"),
-                   (re.compile(r'\u2019'), '\u2019', "'", "Right Single Quotation Mark (\u2019, Unicode U+2019) replaced by Apostrophe ' (Unicode U+0027)"),
-                   (re.compile(r'\u201C'), '\u201C', '"', 'Left Double Quotation Mark (\u201C, Unicode U+201C) replaced by Quotation Mark (", Unicode U+0022)'),
-                   (re.compile(r'\u201D'), '\u201D', '"', 'Right Double Quotation Mark (\u201D, Unicode U+201D) replaced by Quotation Mark (", Unicode U+0022)')
-                   ]
+robustnessrules: List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
+                                          (re.compile('#'), '#', '', 'Number Sign (#, Unicode U+0023) removed'),
+                                          #(re.compile('#'), '#', '(.)', 'Number Sign (#, Unicode U+0023) replaced by CHAT (short) pause code: (.)'),
+                                          (re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
+                                          (re.compile(r'\[\+trn\]'), '[+trn]', '[+ trn]', 'Missing space'),
+                                          (re.compile(r'\[:(?![:\s])'), '[:', '[: ', 'Missing space'),
+                                          (re.compile(r'(?<=\w)\+\.\.\.'), '+...', ' +...', 'Missing space'),
+                                          (re.compile(r'\u2018'), '\u2018', "'", "Left Single Quotation Mark (\u2018. Unicode U+2018) replaced by Apostrophe ' (Unicode U+0027)"),
+                                          (re.compile(r'\u2019'), '\u2019', "'", "Right Single Quotation Mark (\u2019, Unicode U+2019) replaced by Apostrophe ' (Unicode U+0027)"),
+                                          (re.compile(r'\u201C'), '\u201C', '"', 'Left Double Quotation Mark (\u201C, Unicode U+201C) replaced by Quotation Mark (", Unicode U+0022)'),
+                                          (re.compile(r'\u201D'), '\u201D', '"', 'Right Double Quotation Mark (\u201D, Unicode U+201D) replaced by Quotation Mark (", Unicode U+0022)')
+                                          ]
 
 
 def robustness(utt: str) -> str:

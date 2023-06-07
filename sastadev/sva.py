@@ -333,7 +333,7 @@ def getpvs(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[SynTree]:
                 precedingjes = tree.xpath(precedingjequery)
                 precedingjefound = precedingjes != []
                 wistfound = nounstr == 'wist'
-                if not(zijverbfound or precedingjefound or wistfound):
+                if not (zijverbfound or precedingjefound or wistfound):
                     continue
                 if informlexiconpos(nounstr, 'ww'):
                     cands = getwordposinfo(nounstr, 'ww')

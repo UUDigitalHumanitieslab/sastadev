@@ -6,8 +6,6 @@ from math import log
 knownmethods = {'asta', 'stap', 'tarsp'}
 
 
-
-
 def isknownmethod(mname):
     if mname is None:
         result = False

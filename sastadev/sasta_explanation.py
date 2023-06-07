@@ -19,13 +19,11 @@ explannposlistxpath = f'.//xmeta[@name="{CHAT_explanation}"]/@annotationposlist'
 def finalmultiwordexplanation(stree: SynTree) -> Optional[str]:
     #get the multiword explanation and the last tokenposition is occupies
 
-
     explannwrdliststr = tbf.find1(stree, explannwordlistxpath)
     explannwrdlist = strf.string2list(explannwrdliststr, quoteignore=True)
 
     explannposliststr = tbf.find1(stree, explannposlistxpath)
     explannposlist = strf.string2list(explannposliststr)
-
 
     ismultiword = len(explannwrdlist) > 1
 

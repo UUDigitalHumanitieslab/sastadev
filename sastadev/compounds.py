@@ -74,6 +74,8 @@ def getcompounds(syntree: SynTree) -> List[SynTree]:
     return results
 
 # I do not know how to type this, because the nesting can be arbitrarily deep
+
+
 def nested_dict(n, type):
     if n == 1:
         return defaultdict(type)

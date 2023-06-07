@@ -12,10 +12,12 @@ tarsp = 'tarsp'
 
 validmethods = [asta, stap, tarsp]
 
+
 def validmethod(rawmethod: str) -> bool:
     method = rawmethod.lower()
     result = method in validmethods
     return result
+
 
 def allok(query: Query, xs: ExactResultsDict, x: ExactResult) -> bool:
     return True
@@ -36,12 +38,13 @@ class Method:
 
 
     '''
+
     def __init__(self, name: MethodName, queries: QueryDict, item2idmap: Item_Level2QIdDict,
                  altcodes: AltCodeDict, postquerylist: List[QId], methodfilename: FileName,
                  defaultfilter: ExactResultsFilter = allok):
         self.name: MethodName = name
         self.queries: QueryDict = queries
-        self.defaultfilter : ExactResultsFilter = defaultfilter
+        self.defaultfilter: ExactResultsFilter = defaultfilter
         self.item2idmap: Item_Level2QIdDict = item2idmap
         self.altcodes: AltCodeDict = altcodes
         self.postquerylist: List[QId] = postquerylist
@@ -55,8 +58,8 @@ def implies(a: bool, b: bool) -> bool:
 #filter specifies what passes the filter
 def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
     return query.process == pre_process or \
-    (implies('A029' in xrs, xr not in xrs['A029'])
-     and implies('A045' in xrs, xr not in xrs['A045']))
+        (implies('A029' in xrs, xr not in xrs['A029'])
+         and implies('A045' in xrs, xr not in xrs['A045']))
 
 
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}

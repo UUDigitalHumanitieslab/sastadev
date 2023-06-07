@@ -58,7 +58,6 @@ def readbaseform(infilename):
     return basesheet
 
 
-
 def is_id(word):
     result = idre.match(word)
     return result
@@ -101,7 +100,7 @@ def mktarspform(allresults, _, in_memory=False):
     global basesheet
 
     if not in_memory:
-        target = getformfilename(allresults.filename, tarspformsuffix )
+        target = getformfilename(allresults.filename, tarspformsuffix)
         #(base, ext) = os.path.splitext(allresults.filename)
         #core, filename = os.path.split(base)
         #root, lastfolder = os.path.split(core)

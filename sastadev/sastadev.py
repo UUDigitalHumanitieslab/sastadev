@@ -254,7 +254,7 @@ resultsheaderstring = tab.join(resultsheaderrow)
 platinumheaderrow = ['id', 'cat', 'subcat', 'item', 'uttids', 'results-gold', 'status', 'remarks']
 platinumheaderstring = tab.join(platinumheaderrow)
 
-allmatches : MatchesDict = {}
+allmatches: MatchesDict = {}
 altcodes: AltCodeDict = {}
 
 emptycounter: Counter = Counter()
@@ -378,7 +378,7 @@ def getmarkedyield(wordlist: List[str], positions: List[int]) -> List[str]:
     return resultlist
 
 
-def update(thedict:Dict[str, GoldTuple], qid: str, goldtuple: GoldTuple):
+def update(thedict: Dict[str, GoldTuple], qid: str, goldtuple: GoldTuple):
     (level, item, thecounter) = goldtuple
     if qid in thedict:
         (oldlevel, olditem, oldcounter) = thedict[qid]
@@ -393,6 +393,8 @@ def logprint(str: str):
         print(str, file=sys.stderr)
 
 ##@@ types to be reconsidered
+
+
 def getitem2levelmap(mapping):
     resultmap: Dict[Any, List[Any]] = {}
     for (item, level) in mapping:
@@ -404,7 +406,7 @@ def getitem2levelmap(mapping):
 
 
 def getcompounds(syntree: SynTree) -> List[SynTree]:
-    results : List[SynTree] = []
+    results: List[SynTree] = []
     tlist = syntree.xpath(getwordsxpath)
     for t in tlist:
         w = t.attrib['word']
@@ -464,7 +466,6 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
             #    results[queryid] = Counter(matchingids)
 
 
-
 def docorequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
     doqueries(syntree, queries, results, allmatches, is_core)
 
@@ -507,7 +508,7 @@ def mkpatterns(allcodes: List[str]) -> Tuple[Pattern, Pattern]:
     return (re.compile(basepattern), re.compile(fullpattern))
 
 
-def get_definedfornonemptygold(goldscores, queries: QueryDict) -> Tuple[int, List[QId] ]:
+def get_definedfornonemptygold(goldscores, queries: QueryDict) -> Tuple[int, List[QId]]:
     undefinedqueries = []
     definedfornonemptygoldscore = 0
     for queryid in goldscores:
@@ -657,6 +658,7 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
 #defaulttarsp = r"TARSP Index Current.xlsx"
 defaulttarsp = supported_methods[tarsp]
 
+
 def main():
 
     parser = OptionParser()
@@ -706,7 +708,7 @@ def main():
 
     if lastfolder == intreebanksfolder:
         intreebankinput = True
-        analysespath = os.path.join(corepath,'analyses')
+        analysespath = os.path.join(corepath, 'analyses')
         bronzepath = os.path.join(corepath, bronzefolder)
         silverpath = os.path.join(corepath, silverfolder)
         outtreebankspath = os.path.join(corepath, outtreebanksfolder)
@@ -726,7 +728,6 @@ def main():
         intreebankinput = False
         analysespath = bronzepath = outtreebankspath = resultspath = loggingpath = formspath = basepath
         silverpermpath = os.path.join(basepath, path2permfolder)
-
 
     if inext not in ['.xml', '.xlsx']:
         SDLOGGER.error('Illegal input file type: must be a treebank (.xml) or an annotationfile (.xlsx)')
@@ -784,13 +785,11 @@ def main():
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
-
     # @@adapt this so that the method is read in directly as a Method object
     (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodfilename)
     defaultfilter = defaultfilters[options.methodname]
     themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
                        options.methodfilename, defaultfilter)
-
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
 
@@ -943,7 +942,6 @@ def main():
 
     # adapt the exactresults  positions to the reference
 
-
     coreresults = exact2results(exactresults)
 
     postresults: Dict[QId, Any] = {}
@@ -1009,7 +1007,7 @@ def main():
 
     for queryid in results:
         sortedgolduttlist: List[str] = []
-        platinumoutresults : Dict[UttId, int] = Counter()
+        platinumoutresults: Dict[UttId, int] = Counter()
         platinumoutresultsstring = ''
         qcount += 1
         theresults = results[queryid]
@@ -1288,7 +1286,6 @@ def main():
                 print(q, r, g, r - g, sep=tab, file=countcomparisonfile)
 
     definedqcount = qcount - undefinedqcount
-
 
     (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, queries)
     (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, queries)

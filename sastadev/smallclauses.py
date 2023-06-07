@@ -66,7 +66,7 @@ def makegen(lemma):
         result = None
     elif lemma[-1] in ['s', 'z', 'x']:
         result = lemma + "'"
-    elif lemma[-2:] in [ 'ij']:
+    elif lemma[-2:] in ['ij']:
         result = lemma + 's'
     elif lemma[-2] in vowels and lemma[-1] in vowels:
         result = lemma + 's'
@@ -76,13 +76,13 @@ def makegen(lemma):
         result = lemma + 's'
     return result
 
+
 def realword(node):
     result = True
     result = result and getattval(node, 'pt') not in ['tsw', 'let']
     result = result and getattval(node, 'lemma') not in ['xx', 'xxx', 'yyy', 'www', 'hè']
     result = result and getattval(node, 'lemma') not in filledpauseslexicon
     result = result or lemma(node) in tswnouns
-
 
     return result
 
@@ -95,6 +95,7 @@ def hasgenitive(node):
     result = (lemma, nodept) in genlexicon and 'yes' in genlexicon[(lemma, nodept)]
     result = result or namepart_isa_namepart(lemma)
     return result
+
 
 def aanwvnw(node):
     result = getattval(node, 'pt') == 'vnw' and getattval(node, 'vwtype') == 'aanw' and not rpronoun(node)
@@ -110,17 +111,21 @@ def getal(node):
     result = getattval(node, 'getal')
     return result
 
+
 def pt(node):
     result = getattval(node, 'pt')
     return result
+
 
 def bg(node):
     result = int(getattval(node, 'begin'))
     return result
 
+
 def tw(node):
     result = getattval(node, 'pt') == 'tw'
     return result
+
 
 def word(node):
     result = getattval(node, 'word')
@@ -131,16 +136,19 @@ def adj(node):
     result = getattval(node, 'pt') == 'adj'
     return result
 
+
 def perspro(node):
     pt = getattval(node, 'pt')
     vwtype = getattval(node, 'vwtype')
     result = pt == 'vnw' and vwtype == 'pers'
     return result
 
+
 def nomperspro(node):
     lemma = getattval(node, 'lemma')
     result = perspro(node) and lemma in uniquelynominativeperspros
     return result
+
 
 def inf(node):
     result = getattval(node, 'pt') == 'ww' and getattval(node, 'wvorm') == 'inf'
@@ -149,12 +157,14 @@ def inf(node):
 
 def rpronoun(node):
     result = getattval(node, 'pt') == 'vnw' and \
-             getattval(node, 'lemma') in ['er', 'hier', 'daar', 'ergens', 'overal', 'nergens', 'waar']
+        getattval(node, 'lemma') in ['er', 'hier', 'daar', 'ergens', 'overal', 'nergens', 'waar']
     return result
+
 
 def bw(node):
     result = getattval(node, 'pt') == 'bw'
     return result
+
 
 def ww(node):
     result = getattval(node, 'pt') == 'ww'
@@ -165,14 +175,17 @@ def lemma(node):
     result = getattval(node, 'lemma')
     return result
 
+
 def predadv(node):
     result = locadv(node)
     result = result or (bw(node) and lemma(node) in ['niet', 'mee', 'weg'])
     return result
 
+
 def vz(node):
     result = getattval(node, 'pt') == 'vz'
     return result
+
 
 def locadv(node):
     result = getattval(node, 'pt') in ['bw', 'vz']
@@ -181,13 +194,16 @@ def locadv(node):
     result = result or rpronoun(node)
     return result
 
+
 def biglocvz(node):
     result = getattval(node, 'lemma') in biglocvzs
     return result
 
+
 def istswnoun(node):
     result = getattval(node, 'lemma') in tswnouns
     return result
+
 
 def getleavestr(leaves):
     leaveseq = ['{}:{}:{}:{}'.format(getattval(leave, 'end'), getattval(leave, 'word'), getattval(leave, 'lemma'),
@@ -195,6 +211,7 @@ def getleavestr(leaves):
                 in leaves]
     leavestr = space.join(leaveseq)
     return leavestr
+
 
 def knownnoun(node):
     word = getattval(node, 'word')
@@ -204,9 +221,11 @@ def knownnoun(node):
     result = result or lemma in tswnouns
     return result
 
+
 def nominal(node):
     result = pt(node) == 'n' or aanwvnw(node)
     return result
+
 
 def mktoken(node, map):
     nodebegin = bg(node)
@@ -222,14 +241,14 @@ def mktoken(node, map):
 
 def mktokenlist(tokens, fpos, inserttokens):
     resultlist = [token for token in tokens if token.pos <= fpos] + \
-                 inserttokens + \
+        inserttokens + \
                  [token for token in tokens if token.pos > fpos]
     return resultlist
 
 
 def oldmktokenlist(leaves, themap, fpos, inserttokens):
     resultlist = [mktoken(lv, themap) for lv in leaves if bg(lv) <= fpos] + \
-                 inserttokens + \
+        inserttokens + \
                  [mktoken(lv, themap) for lv in leaves if bg(lv) > fpos]
     return resultlist
 
@@ -283,7 +302,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     resultlist = []
     leaves = getnodeyield(tree)
     reducedleaves = [leave for leave in leaves if realword(leave)]
-    if not(len(reducedleaves) > 1 and len(reducedleaves) <= 3):
+    if not (len(reducedleaves) > 1 and len(reducedleaves) <= 3):
         return resultlist
     tokens = tokensmd.tokens
     treewords = [word(tokennode) for tokennode in leaves]
@@ -301,16 +320,16 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
         third = leaves[0]
 
     if len(reducedleaves) == 2:
-        if (aanwvnw(first) or knownnoun(first) or perspro(first)) and (predadv(second)or vz(second) or bw(second)):
+        if (aanwvnw(first) or knownnoun(first) or perspro(first)) and (predadv(second) or vz(second) or bw(second)):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('moet' if getal(first) != 'mv' else 'moeten', fpos, subpos=5)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         #elif (aanwvnw(second) or knownnoun(second) or perspro(second) or tw(second)) and predadv(first):
-        elif nomperspro(second)  and predadv(first):
+        elif nomperspro(second) and predadv(first):
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('moet' if getal(second) != 'mv' else 'moeten', fpos, subpos=5)]
-            resultlist = mktokenlist(tokens,  fpos, inserttokens)
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         elif (aanwvnw(first) or knownnoun(first)) and adj(second):
             fpos = int(getattval(first, 'begin'))
@@ -321,7 +340,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('is' if getal(first) != 'mv' else 'zijn', fpos, subpos=5)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
-        elif knownnoun(first) and knownnoun(second) and not(lemma(first) == lemma(second)):
+        elif knownnoun(first) and knownnoun(second) and not (lemma(first) == lemma(second)):
             if hasgenitive(first):
                 genform = makegen(lemma(first))
                 fpos = int(getattval(first, 'begin'))
@@ -348,7 +367,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
             else:
                 fpos = -1
                 inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
-            resultlist =  mktokenlist(tokens, fpos, inserttokens)
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
         elif not nominal(first) and not ww(first) and inf(second):
             fpos = -1
@@ -360,7 +379,3 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     else:
         result = [TokenListMD(resultlist, metadata)]
     return result
-
-
-
-

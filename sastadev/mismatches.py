@@ -124,6 +124,7 @@ def getmarkposition(position, nodeendmap, uttid):
         result = 1
     return result
 
+
 def exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
                     permsilverdatadict={}, annotationinput=False):
     theexactresults = exactresults[queryid] if queryid in exactresults else Counter()

@@ -41,7 +41,7 @@ def getalpinowordinfo(word: str) -> List[WordInfo]:
             infl = 'd' if graad == 'dim' else ''
             infl += 'e' if getal == 'ev' else 'm'
             lemma = treebankfunctions.getattval(relevantnode, 'lemma')
-            return([(pos, dehet, infl, lemma)])
+            return ([(pos, dehet, infl, lemma)])
         else:
             return []
 

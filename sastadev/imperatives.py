@@ -104,7 +104,7 @@ def wond5plus(syntree):
     return results
 
 
-def impwi(syntree: SynTree, nodecounts:Set[int]) -> List[SynTree]:
+def impwi(syntree: SynTree, nodecounts: Set[int]) -> List[SynTree]:
     '''
     The function impwi finds nodes for imperative clauses in *syntree* with the number of nodes equal to one of the  integers in the *nodecounts* set
     '''

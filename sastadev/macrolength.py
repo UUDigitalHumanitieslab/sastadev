@@ -16,7 +16,7 @@ for query in querylist:
     queryresultlist.append((query, len(expandedquery)))
 
 print('\n\nQueries:\n')
-sortedqueryresultlist = sorted(queryresultlist, key= lambda x: x[1], reverse=True)
+sortedqueryresultlist = sorted(queryresultlist, key=lambda x: x[1], reverse=True)
 for (query, lvalue) in sortedqueryresultlist:
     print(f'{query}\t{lvalue}')
 

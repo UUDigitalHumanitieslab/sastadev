@@ -63,23 +63,23 @@ Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden'
 #: .. autodata:: basicreplacements::Rvzlist
 #:        :no-value:
 #:
-ervzvariants : List[BasicReplacement] = \
-               [('der' + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
-               [("d'r" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist]
+ervzvariants: List[BasicReplacement] = \
+    [('der' + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
+    [("d'r" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist]
 
 #: The constant *innereplacements* contains replacements for short closed syllable prepositions followed by *e*
 #: (and with final consonant doubling), e.g. *inne* for the preposition *in*. They can be replaced by *in* or by *erin*.
 #: The preferred replacement for *inne* and *innu* is by an expansion into preposition + definite article, so
 #: replacement by *in* has a higher penalty than such an expansion, and replacement by *erin* has an even higher penalty.
 #:
-innereplacements = [    ('inne', 'erin', pron, wrongpron, erdrop, dp6),
-                        ('inne', 'in', pron, wrongpron, emphasis, dp3),
-                        ('omme', 'erom', pron, wrongpron, erdrop, dp6),
-                        ('omme', 'om', pron, wrongpron, emphasis, dp3),
-                        ('oppe', 'erop', pron, wrongpron, erdrop, dp6),
-                        ('oppe', 'op', pron, wrongpron, emphasis, dp3),
-                        ('vanne', 'ervan', pron, wrongpron, erdrop, dp6),
-                        ('vanne', 'van', pron, wrongpron, emphasis, dp3),
+innereplacements = [('inne', 'erin', pron, wrongpron, erdrop, dp6),
+                    ('inne', 'in', pron, wrongpron, emphasis, dp3),
+                    ('omme', 'erom', pron, wrongpron, erdrop, dp6),
+                    ('omme', 'om', pron, wrongpron, emphasis, dp3),
+                    ('oppe', 'erop', pron, wrongpron, erdrop, dp6),
+                    ('oppe', 'op', pron, wrongpron, emphasis, dp3),
+                    ('vanne', 'ervan', pron, wrongpron, erdrop, dp6),
+                    ('vanne', 'van', pron, wrongpron, emphasis, dp3),
                     ]
 #: The constant *innureplacements* is derived from the constant *innereplacements* by replacing the final *e* of the
 #: first word in each tuple by an *u*.
@@ -113,56 +113,56 @@ innureplacements = [(w1[:-1] + 'u', w2, c, n, v, p) for (w1, w2, c, n, v, p) in 
 #:
 basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared, dp),
                                                 ('isse', 'is', pron, infpron, addschwa, dp),
-                        ('ooke', 'ook', pron, infpron, addschwa, dp),
-                        ('t', "'t", orth, spellerr, apomiss, dp),
-                        ('effjes', 'eventjes', pron, infpron, varpron, dp),
-                        ('effetjes', 'eventjes', pron, infpron, varpron, dp),
-                        ('effe', 'even', pron, infpron, varpron, dp),
-                        ('set', 'zet', pron, infpron, initdev, dp),
-                        ('fan', 'van', pron, infpron ,initdev, dp),
-                        ('hie', 'hier', pron, pronerr, codared, dp),
-                        ('eers', 'eerst', pron, pronerr, codared, dp),
-                        ('era', 'eraf', pron, pronerr, codared, dp),
-                        ('il', 'wil', pron, pronerr, onsetred, dp),
-                        ('tee', 'twee', pron, pronerr, onsetred, dp),
-                        ('nie', 'niet', pron, infpron, codared, dp),
-                        ('s', 'is', orth, spellerr, apomiss, dp),
-                        ('ooke', 'ook', pron, infpron, addschwa, dp),
-                        ('it', 'dit', pron, pronerr, onsetred, dp),
-                        ('da', 'dat', pron, infpron, codared, dp),
-                        ('si', 'zit', pron, infpron, codared, dp),  # and zdev
-                        ('ieduleen', 'iedereen', pron, wrongpron, phonrepl.format(wrong='l', correct='r'), dp),
-                        ('allemaaw', 'allemaal', pron, wrongpron, phonrepl.format(wrong='w', correct='l'), dp),
-                        ('amaal', 'allemaal', pron, infpron, varpron, dp),
-                        ('wiw', 'wil', pron, wrongpron, phonrepl.format(wrong='w', correct='l'), dp),
-                        ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der'), dp),
-                        ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di'), dp),
-                        ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron), dp),
-                        ('maggen', 'mogen', morph, wronginfl, overgen, dp),
-                        ('aleen', 'alleen', orth, typo, typorepl.format(wrong='alleen', correct='alleen'), dp),
-                        ('heef', 'heeft', pron, infpron, codared, dp),
-                        ('saan', 'staan', pron, wrongpron, onsetred, dp),
-                        ('saan', 'gaan', pron, wrongpron, wrongpron, dp+2),
-                        ('jerke', 'werken', pron, wrongpron, wrongpron, dp),
-                        ('taan', 'staan', pron, wrongpron, onsetred, dp),
-                        ("a'maal", 'allemaal', pron, infpron, redpron, dp),
-                        ('taan', 'staan', pron, wrongpron, onsetred, dp),
-                        ('beurt', 'gebeurt', pron, wrongpron, prefixdrop, dp),
-                        ('dahaar', 'daar', pron, emphasis, voweldup, dp),
-                        ('desu', 'deze', pron, infpron, vzdevoicing, dp),
-                        ('tan', 'dan', pron, infpron, initdev, dp),
-                        ('tat', 'dat', pron, infpron, initdev, dp),
-                        ('tit', 'dit', pron, infpron, initdev, dp),
-                        ('lape', 'slapen', pron, infpron, f'{onsetred}+{fndrop}', dp),
-                        ('vas', 'vast', pron, infpron, codared, dp),
-                        ('datte', 'dat', pron, infpron, emphasis, dp),
-                        ('omdatte', 'dat', pron, infpron, emphasis, dp),
-                        ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp)
+                                                ('ooke', 'ook', pron, infpron, addschwa, dp),
+                                                ('t', "'t", orth, spellerr, apomiss, dp),
+                                                ('effjes', 'eventjes', pron, infpron, varpron, dp),
+                                                ('effetjes', 'eventjes', pron, infpron, varpron, dp),
+                                                ('effe', 'even', pron, infpron, varpron, dp),
+                                                ('set', 'zet', pron, infpron, initdev, dp),
+                                                ('fan', 'van', pron, infpron, initdev, dp),
+                                                ('hie', 'hier', pron, pronerr, codared, dp),
+                                                ('eers', 'eerst', pron, pronerr, codared, dp),
+                                                ('era', 'eraf', pron, pronerr, codared, dp),
+                                                ('il', 'wil', pron, pronerr, onsetred, dp),
+                                                ('tee', 'twee', pron, pronerr, onsetred, dp),
+                                                ('nie', 'niet', pron, infpron, codared, dp),
+                                                ('s', 'is', orth, spellerr, apomiss, dp),
+                                                ('ooke', 'ook', pron, infpron, addschwa, dp),
+                                                ('it', 'dit', pron, pronerr, onsetred, dp),
+                                                ('da', 'dat', pron, infpron, codared, dp),
+                                                ('si', 'zit', pron, infpron, codared, dp),  # and zdev
+                                                ('ieduleen', 'iedereen', pron, wrongpron, phonrepl.format(wrong='l', correct='r'), dp),
+                                                ('allemaaw', 'allemaal', pron, wrongpron, phonrepl.format(wrong='w', correct='l'), dp),
+                                                ('amaal', 'allemaal', pron, infpron, varpron, dp),
+                                                ('wiw', 'wil', pron, wrongpron, phonrepl.format(wrong='w', correct='l'), dp),
+                                                ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der'), dp),
+                                                ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di'), dp),
+                                                ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron), dp),
+                                                ('maggen', 'mogen', morph, wronginfl, overgen, dp),
+                                                ('aleen', 'alleen', orth, typo, typorepl.format(wrong='alleen', correct='alleen'), dp),
+                                                ('heef', 'heeft', pron, infpron, codared, dp),
+                                                ('saan', 'staan', pron, wrongpron, onsetred, dp),
+                                                ('saan', 'gaan', pron, wrongpron, wrongpron, dp + 2),
+                                                ('jerke', 'werken', pron, wrongpron, wrongpron, dp),
+                                                ('taan', 'staan', pron, wrongpron, onsetred, dp),
+                                                ("a'maal", 'allemaal', pron, infpron, redpron, dp),
+                                                ('taan', 'staan', pron, wrongpron, onsetred, dp),
+                                                ('beurt', 'gebeurt', pron, wrongpron, prefixdrop, dp),
+                                                ('dahaar', 'daar', pron, emphasis, voweldup, dp),
+                                                ('desu', 'deze', pron, infpron, vzdevoicing, dp),
+                                                ('tan', 'dan', pron, infpron, initdev, dp),
+                                                ('tat', 'dat', pron, infpron, initdev, dp),
+                                                ('tit', 'dit', pron, infpron, initdev, dp),
+                                                ('lape', 'slapen', pron, infpron, f'{onsetred}+{fndrop}', dp),
+                                                ('vas', 'vast', pron, infpron, codared, dp),
+                                                ('datte', 'dat', pron, infpron, emphasis, dp),
+                                                ('omdatte', 'dat', pron, infpron, emphasis, dp),
+                                                ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp)
 
                                                 ] + \
-                       ervzvariants + \
-                       innereplacements + \
-                       innureplacements
+    ervzvariants + \
+    innereplacements + \
+    innureplacements
 
 
 #: The dictionary *basicreplacements* maps a word with deviant orthography to a list of
@@ -221,21 +221,21 @@ innuclosedsyllshortprepexpansions = [(w1[:-1] + 'u', w2, c, n, v, p)
 #:   * .. autodata:: basicreplacements::innuclosesyllshortprepexpansions
 #:
 basicexpansionlist: List[BasicExpansion] = \
-                     [('dis', ['dit', 'is'], pron, infpron, contract, dp),
-                      ('das', ['dat', 'is'], pron, infpron, contract, dp),
-                      ('tis', ['dit', 'is'], pron, infpron, contract, dp),
-                      ('waas', ['waar', 'is'], pron, infpron, contract, dp),
-                      ('is-t-ie', ['is', 'ie'], pron, infpron, t_ie, dp),
-                      ('als-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
-                      ('of-t-ie', ['of', 'ie'], pron, infpron, t_ie, dp),
-                      ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
-                      ("dit's", ["dit", "is"], pron, infpron, contract, dp),
-                      ("dat's", ["dat", "is"], pron, infpron, contract, dp),
-                      ("datte", ['dat', 'ie'], pron, infpron, contract, dp+2),
-                      ("omdatte", ['omdat', 'ie'], pron, infpron, contract, dp+2)
-                      ]
-                     # + closesyllshortprepexpansions # put off does not lead to improvement
-                     # + innuclosedsyllshortprepexpansions # put off does not lead to improvement
+    [('dis', ['dit', 'is'], pron, infpron, contract, dp),
+     ('das', ['dat', 'is'], pron, infpron, contract, dp),
+     ('tis', ['dit', 'is'], pron, infpron, contract, dp),
+     ('waas', ['waar', 'is'], pron, infpron, contract, dp),
+     ('is-t-ie', ['is', 'ie'], pron, infpron, t_ie, dp),
+     ('als-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
+     ('of-t-ie', ['of', 'ie'], pron, infpron, t_ie, dp),
+     ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
+     ("dit's", ["dit", "is"], pron, infpron, contract, dp),
+     ("dat's", ["dat", "is"], pron, infpron, contract, dp),
+     ("datte", ['dat', 'ie'], pron, infpron, contract, dp + 2),
+     ("omdatte", ['omdat', 'ie'], pron, infpron, contract, dp + 2)
+     ]
+# + closesyllshortprepexpansions # put off does not lead to improvement
+# + innuclosedsyllshortprepexpansions # put off does not lead to improvement
 
 
 #: The dictionary *basicexpansions* maps a contracted word form to a list of 4-tuples
@@ -273,8 +273,10 @@ def getmeta4CHATreplacements(wrongword: str, correctword: str) -> KnownReplaceme
                       bpl_word)
     return result
 
+
 #: dttp = default token tree predicate
-dtp = lambda token, tree: True
+def dtp(token, tree): return True
+
 
 def welnietttp(token: Token, stree: SynTree) -> bool:
     """
@@ -287,6 +289,7 @@ def welnietttp(token: Token, stree: SynTree) -> bool:
     wordnode = find1(stree, f'.//node[@pt="ww" and @begin="{beginval}"]')
     result = wordnode is not None
     return result
+
 
 # keer removed
 #: The constant *disambiguation_replacements* contains a list of tuples. Each tuple
@@ -304,23 +307,23 @@ def welnietttp(token: Token, stree: SynTree) -> bool:
 #:
 #: **Remark** Currently no distinction is made between singular *count* and singular *mass* nouns: they are both replaced by the same word. This may have to be adapted.
 disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
-                              [(dtp, ['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
-                                 'kwartet', 'kruis'], 'gas'),
-                               (dtp, ['toren', 'fiets', 'puzzel', 'boom', 'vis', 'melk', 'zon', 'pot', 'klok',
-                                 'school', 'boer', 'lepel', 'jas', 'tuin', 'fles', 'lucht', 'emmer', 'maan', 'kachel',
-                                 'kwak', 'verf', 'hop', 'kam', 'spiegel', 'klap', 'stal', 'lijm', 'lift', 'kat',
-                                 'wagen', 'schep', 'kus', 'wind', 'borstel', 'duim', 'strik', 'klik', 'pleister',
-                                 'stok', 'knoop', 'rits', 'knikker', 'put', 'boor', 'plons', 'beurt', 'toeter', 'poot',
-                                 'punt', 'post', 'gom', 'tap', 'kraanwagen', 'drup', 'wieg', 'kriebel', 'pit', 'zaag',
-                                 'slof', 'deuk', 'hark', 'jeuk', 'stift', 'aard', 'hamster', 'kiek', 'haak', 'schroef',
-                                 'tape', 'vorm', 'klem', 'mot', 'druppel'], 'teil'),
-                               (dtp, ['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',
-                                 'wieken', 'paarden', 'stoelen', 'ramen', 'strepen', 'planten', 'groeten',
-                                 'flessen', 'boeren', 'punten', 'tranen'], 'teilen'),
-                               (dtp, ['snel', 'wit', 'kort', 'dicht'], 'mooi'),
-                               (dtp, ['witte'], 'mooie'),
-                               (welnietttp, ['wel', 'niet'], 'ietsjes')  #find a different adverb that does not get inside constituents (ietsjes?)
-                               ]
+    [(dtp, ['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
+                                      'kwartet', 'kruis'], 'gas'),
+     (dtp, ['toren', 'fiets', 'puzzel', 'boom', 'vis', 'melk', 'zon', 'pot', 'klok',
+            'school', 'boer', 'lepel', 'jas', 'tuin', 'fles', 'lucht', 'emmer', 'maan', 'kachel',
+            'kwak', 'verf', 'hop', 'kam', 'spiegel', 'klap', 'stal', 'lijm', 'lift', 'kat',
+            'wagen', 'schep', 'kus', 'wind', 'borstel', 'duim', 'strik', 'klik', 'pleister',
+            'stok', 'knoop', 'rits', 'knikker', 'put', 'boor', 'plons', 'beurt', 'toeter', 'poot',
+            'punt', 'post', 'gom', 'tap', 'kraanwagen', 'drup', 'wieg', 'kriebel', 'pit', 'zaag',
+            'slof', 'deuk', 'hark', 'jeuk', 'stift', 'aard', 'hamster', 'kiek', 'haak', 'schroef',
+            'tape', 'vorm', 'klem', 'mot', 'druppel'], 'teil'),
+     (dtp, ['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',
+            'wieken', 'paarden', 'stoelen', 'ramen', 'strepen', 'planten', 'groeten',
+            'flessen', 'boeren', 'punten', 'tranen'], 'teilen'),
+     (dtp, ['snel', 'wit', 'kort', 'dicht'], 'mooi'),
+     (dtp, ['witte'], 'mooie'),
+     (welnietttp, ['wel', 'niet'], 'ietsjes')  # find a different adverb that does not get inside constituents (ietsjes?)
+     ]
 
 
 def getdisambiguationdict() -> Dict[str, Tuple[TokenTreePredicate, str]]:

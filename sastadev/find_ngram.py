@@ -14,15 +14,18 @@ dld = 'dld'
 schl = 'schlichting'
 auris = 'auris'
 
+
 def shorten(fullname):
     _, filename = os.path.split(fullname)
     basename, _ = os.path.splitext(filename)
     return basename
 
+
 def getpaths(dataset):
     result = [os.path.join(dataroot, 'VKLStap', intreebanksfolder),
               os.path.join(dataroot, 'VKLStap', outtreebanksfolder)]
     return result
+
 
 paths = {}
 
@@ -193,6 +196,7 @@ def cond17a(ns, lvs, i): return lemma(ns[0]) == 'te' and word(ns[1]) == 'kregen'
 
 def cond18(ns, lvs, i): return pt(ns[0]) == 'vz' and lemma(ns[1]) in {'dit', 'dat', 'deze', 'die'}
 
+
 ngram1 = Ngram(4, cond1)
 ngram2 = Ngram(4, cond2)
 ngram3 = Ngram(2, cond3)
@@ -213,6 +217,7 @@ ngram16a = Ngram(4, cond16a)  # geen beroerte een beroerte test
 ngram17 = Ngram(4, cond17)  # te kregen te krijgen
 ngram17a = Ngram(4, cond17a)  # te kregen te krijgen test
 ngram18 = Ngram(2, cond18)  # met dit
+
 
 def main():
 

@@ -34,10 +34,6 @@ platinumsuffix = '.platinum.tsv'
 platinumeditedsuffix = '.platinum-edited.tsv'
 
 
-
-
-
-
 def write2excel(datadict, header, filename):
     data = [datadict[key] for key in datadict]
     workbook = mkworkbook(filename, [header], data)

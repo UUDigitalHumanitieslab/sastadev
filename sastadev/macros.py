@@ -41,7 +41,7 @@ def macrostrs2dict(teststrings: List[str]) -> Dict[str, str]:
     return macrodict
 
 
-def readmacros(macrofile: TextIO, macrodict: Dict[str,str]) -> Dict[str, str]:
+def readmacros(macrofile: TextIO, macrodict: Dict[str, str]) -> Dict[str, str]:
     macrotext = macrofile.read()
     macromatches = macrore.finditer(macrotext)
     for macromatch in macromatches:

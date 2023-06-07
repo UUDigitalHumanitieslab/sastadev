@@ -87,7 +87,7 @@ for f in thefunctions:
 junk = 0
 
 # Used by SASTA to find form functions
-form_map : Dict[str, Callable] = {
+form_map: Dict[str, Callable] = {
     'TARSP': mktarspform,
     'ASTA': astaform,
     'STAP': makestapform

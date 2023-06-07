@@ -168,6 +168,8 @@ def sziplus(syntree: SynTree, i: int) -> List[SynTree]:
     return results
 
 # vr5plus is obsolete because there is composed language measure for it.
+
+
 def vr5plus(syntree: SynTree) -> List[SynTree]:
     '''
     The function *vr5plus* is intended to implement the TARSP language measure *Vr5+*.

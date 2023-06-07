@@ -26,6 +26,7 @@ errormarking = 'Error Marking'
 omittedword = 'Omitted Word'
 specialform = 'Special Form'
 
+
 def fullre(pat):
     result = r'^' + pat + r'$'
     return result
@@ -389,7 +390,7 @@ class CHAT_ComplexRegex(CHAT_Regex):
                     annotationtokens = todotokens[bracketbegin + 1: bracketend]
                     (cleanannotationtokens, innermetadata) = cleanCHILDEStokens.cleantokens(annotationtokens,
                                                                                             repkeep) if self.containswords else (
-                    annotationtokens, [])
+                        annotationtokens, [])
                     metadata += innermetadata
                     annotatedwords = [t.word for t in tobereplacedtokens if t.word not in ['<', '>']]
                     annotatedpositions = [t.pos for t in tobereplacedtokens if t.word not in ['<', '>']]

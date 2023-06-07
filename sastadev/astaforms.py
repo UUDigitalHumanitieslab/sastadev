@@ -22,8 +22,6 @@ grey = '#B0B0B0'
 # orange = 'yellow'
 
 
-
-
 class ExcelForm:
     def __init__(self, tabel, scores):
         self.tabel = tabel

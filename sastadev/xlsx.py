@@ -136,7 +136,7 @@ def getxlsxdata(fullname, headerrow=0, sheetname=None):
     try:
         wb = load_workbook(fullname)
     except:
-        return(header, data)
+        return (header, data)
     wsns = wb.sheetnames
     if wsns != []:
         if sheetname is None:

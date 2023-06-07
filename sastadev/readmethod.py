@@ -126,6 +126,7 @@ def empty(row: list) -> bool:
             return False
     return True
 
+
 def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
     header, data = xlsx.getxlsxdata(methodfilename)
 
@@ -140,9 +141,9 @@ def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict
     altcodes: AltCodeDict = {}
 
     postquerylist: List[QId] = []
-    for row  in data:
+    for row in data:
         if not empty(row):
-            id : QId = row[idcol].strip()
+            id: QId = row[idcol].strip()
             cat: str = row[catcol].strip()
             subcat: str = row[subcatcol].strip()
             level: str = row[levelcol].strip()
@@ -154,7 +155,7 @@ def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict
             fase: int = getint(row[fasecol])
             query: str = row[querycol]
             inform: str = row[informcol]
-            screening: str  = row[screeningcol]
+            screening: str = row[screeningcol]
             process: str = row[processcol].strip()
             special1: str = row[special1col].strip()
             special2: str = row[special2col].strip()

@@ -77,7 +77,7 @@ def vutotaal(allresults: AllResults, _: SynTree) -> int:
     return result
 
 
-def gtotaal(allresults: AllResults, _:SynTree) -> int:
+def gtotaal(allresults: AllResults, _: SynTree) -> int:
     '''
     The function *gtotaal* computes the number of utterances to be analysed. It does
     so by subtracting the number of V.U. utterances and the results for *Atotaal* from
@@ -179,7 +179,7 @@ def gofase(allresults: AllResults, thequeries: QueryDict) -> Stage:
     return result
 
 
-def genpfi(stage: Stage, allresults: AllResults, allqueries:QueryDict) -> int:
+def genpfi(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> int:
     '''
     The function *genpfi* computes the *Profielscore* (PF) for the stage given by the
     parameter *stage* on the basis of *allresults* and the query dictionary *allqueries*.
@@ -245,7 +245,7 @@ def pf7(allresults: AllResults, allqueries: QueryDict) -> int:
     '''
     The function *pf7* uses the function *genpfi* to compute the 'Profielscore' for Stage VII
     '''
-    return genpfi(7, allresults,  allqueries)
+    return genpfi(7, allresults, allqueries)
 
 
 def pf(allresults: AllResults, allqueries: QueryDict) -> int:

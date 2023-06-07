@@ -10,6 +10,7 @@ def remove(patlist, rawstr):
         result = re.sub(pat, '', result)
     return result
 
+
 def clean(rawutt):
     pats = [r'dd:', r'\[', r'\]', r'<', r'>', r'0', r'\*', r'c:', r'\+', r'com:', r'=']
     result = remove(pats, rawutt)
@@ -19,6 +20,7 @@ def clean(rawutt):
     result = re.sub(r'\u2019', "'", result)
 
     return result
+
 
 metamodel = '##META text {att} = {val}'
 
@@ -30,9 +32,9 @@ infullname = os.path.join(inpath, infilename)
 
 rawheader, data = getxlsxdata(infullname, sheetname='Data')
 
-header = [ re.sub(r'\s', '_', rh) for rh in rawheader]
+header = [re.sub(r'\s', '_', rh) for rh in rawheader]
 
-utterancecol = 4 # kolom E
+utterancecol = 4  # kolom E
 
 peplines = []
 for row in data:
@@ -53,4 +55,3 @@ outfullname = os.path.join(outpath, outfilename)
 with open(outfullname, 'w', encoding='utf8') as outfile:
     for pepline in peplines:
         print(pepline, file=outfile)
-

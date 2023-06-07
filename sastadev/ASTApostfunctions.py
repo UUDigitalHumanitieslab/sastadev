@@ -323,7 +323,7 @@ def getposlemmas(allresults: AllResults, posqid: QId) -> List[Tuple[str, UttId]]
     return result
 
 
-def bgetlemma(word: str, pos: Optional[str]=None):
+def bgetlemma(word: str, pos: Optional[str] = None):
     if pos is None:
         wordinfos = getwordinfo(word)
         if wordinfos == []:
