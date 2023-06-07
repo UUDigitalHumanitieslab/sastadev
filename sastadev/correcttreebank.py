@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
 from lxml import etree
 
 from sastadev.basicreplacements import basicreplacements
-from sastadev.CHAT_Annotation import omittedword
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.config import PARSE_FUNC, SDLOGGER
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
@@ -389,6 +388,7 @@ def insertskips(newstree: SynTree, tokenlist: List[Token], stree: SynTree) -> Sy
 
 
 def getomittedwordbegins(metalist: List[Meta]) -> List[Position]:
+    from sastadev.CHAT_Annotation import omittedword
     results = []
     for meta in metalist:
         if meta.name == omittedword:
