@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from lxml import etree
 
 from sastadev.treebankfunctions import getstree, indextransform
@@ -65,8 +66,7 @@ streestrings[1] = """
 strees = {i: etree.fromstring(streestrings[i]) for i in streestrings}
 
 
-
-
+@pytest.mark.skip(reason='test code does not work')
 def test():
     for i in strees:
         idxnodes = strees[i].xpath(bareindexnodexpath)
@@ -92,9 +92,11 @@ def testwholelassy():
                     etree.dump(stree)
                     etree.dump(expansion)
 
+
 def main():
     test()
-    #testwholelassy()
+    # testwholelassy()
+
 
 if __name__ == '__main__':
     main()

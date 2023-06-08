@@ -2,8 +2,8 @@
 from typing import Optional
 
 #import find1, iswordnode, getattval
-import stringfunctions as strf
-import treebankfunctions as tbf
+import sastadev.stringfunctions as strf
+import sastadev.treebankfunctions as tbf
 
 from sastadev.sastatypes import SynTree
 

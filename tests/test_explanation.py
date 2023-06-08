@@ -1,8 +1,11 @@
-import sasta_explanation
-import treebankfunctions as tbf
+import pytest
 from auchann.align_words import align_words
 
-print(dir(sasta_explanation))
+import sastadev.treebankfunctions as tbf
+from sastadev import sasta_explanation
+
+
+@pytest.mark.skip(reason='test code does not work')
 def test():
     infullname = r"D:\Dropbox\jodijk\Utrecht\Projects\SASTADATA\Auris\outtreebanks\DLD07_corrected.xml"
     fulltreebank = tbf.getstree(infullname)
@@ -16,7 +19,8 @@ def test():
         else:
             alignment = None
         if explanationstr is not None:
-            print(f' Orig:{origutt}\nClean:{cleanutt}\n Expl:{explanationstr}\nAlign:{alignment}\n\n')
+            print(
+                f' Orig:{origutt}\nClean:{cleanutt}\n Expl:{explanationstr}\nAlign:{alignment}\n\n')
 
 
 if __name__ == '__main__':

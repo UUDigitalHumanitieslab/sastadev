@@ -6,6 +6,12 @@
 #
 attrs==21.2.0
     # via pytest
+auchann==0.1.1
+    # via -r requirements.in
+chamd==0.5.8
+    # via auchann
+editdistance==0.6.2
+    # via auchann
 et-xmlfile==1.1.0
     # via openpyxl
 flake8==6.0.0
@@ -16,6 +22,10 @@ lxml==4.6.4
     # via -r requirements.in
 mccabe==0.7.0
     # via flake8
+mypy==1.3.0
+    # via -r requirements.in
+mypy-extensions==1.0.0
+    # via mypy
 openpyxl==3.0.9
     # via -r requirements.in
 packaging==21.3
@@ -32,7 +42,17 @@ pyparsing==3.0.6
     # via packaging
 pytest==6.2.5
     # via -r requirements.in
+pyyaml==6.0
+    # via pyyaml-include
+pyyaml-include==1.3
+    # via auchann
+sastadev==0.0.3
+    # via auchann
 toml==0.10.2
     # via pytest
+tomli==2.0.1
+    # via mypy
+typing-extensions==4.6.3
+    # via mypy
 xlsxwriter==3.0.2
     # via -r requirements.in

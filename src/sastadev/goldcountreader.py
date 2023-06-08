@@ -119,6 +119,7 @@ def get_goldcounts(infilename):
 
     thedata = {}
     header, data = xlsx.getxlsxdata(infilename)
+    idcol = None
 
     for col, val in enumerate(header):
         if val.lower() in IDheaders:

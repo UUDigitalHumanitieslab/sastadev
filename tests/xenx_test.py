@@ -1,9 +1,9 @@
 from lxml import etree
 
-from ..treebankfunctions import getyield
-from ..xenx import xenx
+from sastadev.treebankfunctions import getyield
+from sastadev.xenx import xenx
 
-#testdata
+# testdata
 teststr = {}
 
 teststr[1] = '''
@@ -146,7 +146,7 @@ teststr[3] = '''
 
 testtrees = {}
 for el in teststr:
-    #print(el)
+    # print(el)
     testtrees[el] = etree.fromstring(teststr[el])
 
 

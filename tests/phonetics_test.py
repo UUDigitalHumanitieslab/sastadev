@@ -1,4 +1,4 @@
-from ..phonetics import phoneticise
+from sastadev.phonetics import phoneticise
 
 
 def test_phoneticise():

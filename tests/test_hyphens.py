@@ -12,5 +12,6 @@ def test():
     assert delhyphenprefix('vver-verkoop', informlexicon) == ['verkoop']
     assert delhyphenprefix('vvver-verkoop', informlexicon) == ['verkoop']
 
+
 if __name__ == '__main__':
     test()

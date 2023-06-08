@@ -127,11 +127,13 @@ strees = {}
 for el in streestrings:
     strees[el] = etree.fromstring(streestrings[el])
 
+
 def getnode(stree, word):
     result = find1(stree, f'//node[@word="{word}"]')
     return result
 
 # is nogal
+
 
 thetree = strees[1]
 node1 = getnode(thetree, 'is')
@@ -161,10 +163,10 @@ thetree = strees[2]
 yieldnodes = getnodeyield(thetree)
 for i, n in enumerate(yieldnodes):
     if i > 0:
-        assert adjacent(yieldnodes[i-1], n, thetree)
-        assert immediately_precedes(yieldnodes[i-1], n, thetree)
+        assert adjacent(yieldnodes[i - 1], n, thetree)
+        assert immediately_precedes(yieldnodes[i - 1], n, thetree)
         assert immediately_follows(n, yieldnodes[i - 1], thetree)
     if i < len(yieldnodes) - 1:
-        assert adjacent(n, yieldnodes[i+1], thetree)
-        assert immediately_precedes(n, yieldnodes[i+1], thetree)
-        assert immediately_follows(yieldnodes[i+1], n, thetree)
+        assert adjacent(n, yieldnodes[i + 1], thetree)
+        assert immediately_precedes(n, yieldnodes[i + 1], thetree)
+        assert immediately_follows(yieldnodes[i + 1], n, thetree)

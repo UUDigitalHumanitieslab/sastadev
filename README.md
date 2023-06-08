@@ -34,9 +34,14 @@ To install the requirements:
 pip install -r requirements.txt
 ```
 
-### Tests
+### Testing
 Tests should be written and run using [pytest](https://docs.pytest.org/).
-To test:
+To test, make sure the package is installed in editable mode:
+```
+pip install -e .
+```
+
+Then, each time you wis to run the tests:
 ```
 pytest
 ```

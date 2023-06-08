@@ -1,9 +1,7 @@
 import os
 
-from dataconfig import dataroot, intreebanksfolder
-from smallclauses import bg, getleavestr, smallclauses, word
-
 from sastadev.config import SDLOGGER
+from sastadev.dataconfig import dataroot, intreebanksfolder
 from sastadev.dedup import filledpauseslexicon
 from sastadev.lexicon import known_word
 from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
@@ -12,6 +10,7 @@ from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
                                tokenmapping)
 from sastadev.namepartlexicon import namepart_isa_namepart
 from sastadev.sastatoken import Token, show
+from sastadev.smallclauses import bg, getleavestr, smallclauses, word
 from sastadev.tokenmd import TokenListMD
 from sastadev.top3000 import (genlexicon, intransitive, isanimate, ishuman,
                               pseudotr, transitive)
@@ -22,18 +21,17 @@ def getfn(dataset, filename):
     result = os.path.join(dataroot, dataset, intreebanksfolder, filename)
     return result
 
-testbank = getfn( 'sctest',  "smallclausetest.xml")
-#schlichtingtreebank = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\schlichtingtreebank\TREEBANK_ID.xml'
+
+testbank = getfn('sctest', "smallclausetest.xml")
+# schlichtingtreebank = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\schlichtingtreebank\TREEBANK_ID.xml'
 schlichtingtreebank = getfn('schlichting', 'TARVB2_ID2.xml')
 mieke06 = getfn('miekeplat', "TARSP_MIEKE06_ID.xml")
 mieke08 = getfn('miekeplat', "TARSP_MIEKE08_ID.xml")
 aurisraw = getfn('Eliska', 'AURIS_ELISKA_ORIGINAL_ID.xml')
 tarsp02 = os.path.join(dataroot, 'VKLTarsp', intreebanksfolder, 'Tarsp_02.xml')
 tarsp06 = os.path.join(dataroot, 'VKLTarsp', intreebanksfolder, 'Tarsp_06.xml')
-schlichtingall = os.path.join(dataroot, 'Schlichtingall', intreebanksfolder, 'TREEBANK_SCHLICHTING_CHAT_ID.xml')
-
-
-
+schlichtingall = os.path.join(
+    dataroot, 'Schlichtingall', intreebanksfolder, 'TREEBANK_SCHLICHTING_CHAT_ID.xml')
 
 
 def main():
@@ -41,7 +39,8 @@ def main():
     if smalltest:
         fullnames = [testbank]
     else:
-        fullnames = [ schlichtingtreebank,  mieke06, mieke08, aurisraw, tarsp02, tarsp06, schlichtingall]
+        fullnames = [schlichtingtreebank, mieke06, mieke08,
+                     aurisraw, tarsp02, tarsp06, schlichtingall]
     for infullname in fullnames:
         print(f'\n{infullname}\n')
         fulltreebank = getstree(infullname)
@@ -53,7 +52,7 @@ def main():
                 tokensmd = TokenListMD(tokens, [])
                 resultlist = smallclauses(tokensmd, tree)
                 if resultlist != []:
-                    print('input:  ', getleavestr(leaves) )
+                    print('input:  ', getleavestr(leaves))
                     print('output: ', show(resultlist[0].tokens))
                     print('result: ', resultlist[0].metadata)
 

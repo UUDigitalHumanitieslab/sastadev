@@ -139,7 +139,7 @@ streestrings[3] = """
 
 """
 
-strees = {i: etree.fromstring(ts) for i, ts in streestrings.items() }
+strees = {i: etree.fromstring(ts) for i, ts in streestrings.items()}
 
 # reference dictionary contains tuples with (1) VoBij reference results; (2) Voslashbij reference results
 reference = {}
@@ -147,20 +147,23 @@ reference[1] = (['40'], [])
 reference[2] = (['30'], [])
 reference[3] = ([], ['30'])
 
+
 def test():
     for i, stree in strees.items():
         results = [n.attrib['begin'] for n in vobij(stree)]
         try:
             assert results == reference[i][0]
         except AssertionError as e:
-            print(f'Vobij: i={i}, reference={reference[i][0]}, =/= results={results}')
+            print(
+                f'Vobij: i={i}, reference={reference[i][0]}, =/= results={results}')
             raise AssertionError
 
         results = [n.attrib['begin'] for n in voslashbij(stree)]
         try:
             assert results == reference[i][1]
         except AssertionError as e:
-            print(f'Vo/bij: i={i}, reference={reference[i][1]}, =/= results={results}')
+            print(
+                f'Vo/bij: i={i}, reference={reference[i][1]}, =/= results={results}')
             raise AssertionError
 
 

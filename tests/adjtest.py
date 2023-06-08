@@ -116,7 +116,7 @@ thequery = """
 ]
 """
 
-#matches = strees[0].xpath(thequery)
+# matches = strees[0].xpath(thequery)
 matches = asta_bijzin(strees[0])
 for m in matches:
     showtree(m)

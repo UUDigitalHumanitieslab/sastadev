@@ -1,7 +1,7 @@
 import os
 
-from ..goldcountreader import get_goldcounts
-from ..TARSPscreening import screening4stage
+from sastadev.goldcountreader import get_goldcounts
+from sastadev.TARSPscreening import screening4stage
 
 
 def test_tarspscreening():
@@ -12,6 +12,6 @@ def test_tarspscreening():
                (200, 'TARSP_MIEKE07_ID.xml'), (200, 'TARSP_MIEKE08_ID.xml')]
     for (uttcnt, tbn) in testset:
         print('Processing {}...'.format(tbn))
-        tbndata = get_goldcounts(testfullname, tbn)
+        tbndata = get_goldcounts(testfullname)
         thestage = screening4stage(uttcnt, tbndata)
         print('Stage of {}:  {}'.format(tbn, thestage))

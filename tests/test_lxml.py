@@ -3,13 +3,15 @@ from lxml import etree
 from sastadev.macros import expandmacros
 
 expectedresultslist = [[],
-                   [('top', '0', '8'), ('du', '0', '7'), ('pp', '4', '7'), ('np', '5', '7')],
-                   [('top', '0', '8'), ('du', '0', '7'), ('pp', '4', '7'), ('np', '5', '7')],
-                   [('smain', '1', '7')],
-                   [('smain', '1', '7')],
-                   [],
-                   [('smain', '1', '7')],
-                   [], [], [], [], [], [], [], [], [], [], []]
+                       [('top', '0', '8'), ('du', '0', '7'),
+                        ('pp', '4', '7'), ('np', '5', '7')],
+                       [('top', '0', '8'), ('du', '0', '7'),
+                        ('pp', '4', '7'), ('np', '5', '7')],
+                       [('smain', '1', '7')],
+                       [('smain', '1', '7')],
+                       [],
+                       [('smain', '1', '7')],
+                       [], [], [], [], [], [], [], [], [], [], []]
 
 bigquery = """//node[(
 
@@ -26,6 +28,7 @@ bigquery = """//node[(
  )]
 """
 
+
 def getresults(stree, fullquery):
     noderesults = stree.xpath(fullquery)
     results = []
@@ -34,10 +37,11 @@ def getresults(stree, fullquery):
         pos = noderesult.get('pt')
         poscat = pos if cat is None else cat
         begin = noderesult.get('begin')
-        end= noderesult.get('end')
+        end = noderesult.get('end')
         result = (poscat, begin, end)
         results.append(result)
     return results
+
 
 def main():
     queries = []
@@ -56,9 +60,12 @@ def main():
     queries.append('//node[%Ond% and %Tarsp_B_X_count% = 3]')
     queries.append('//node[%Ond% and (%Tarsp_B_X_count%) = 3]')
     queries.append('//node[%Ond% and (%Tarsp_B_X_count% = 3)]')
-    queries.append('//node[( (%declarative%) and (%Ond%)  and  (%Tarsp_B_X_count% = 3))]')
-    queries.append('//node[( (%declarative%) and (%Ond%)  and  (%Tarsp_B_X_count% = 3))]')
-    queries.append('//node[( %declarative% and %Ond%  and  (%Tarsp_B_X_count%) = 3)]')
+    queries.append(
+        '//node[( (%declarative%) and (%Ond%)  and  (%Tarsp_B_X_count% = 3))]')
+    queries.append(
+        '//node[( (%declarative%) and (%Ond%)  and  (%Tarsp_B_X_count% = 3))]')
+    queries.append(
+        '//node[( %declarative% and %Ond%  and  (%Tarsp_B_X_count%) = 3)]')
     queries.append(
         '//node[(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 3 and %realcomplormodnodecount% = 4)]')
 
@@ -124,14 +131,14 @@ def main():
     allresults = []
     for stree in strees:
         for query, fullquery, expectedresults in zip(queries, fullqueries,
-                                                    expectedresultslist):
-            #print(query)
+                                                     expectedresultslist):
+            # print(query)
             results = getresults(strees[stree], fullquery)
             assert results == expectedresults
-            #allresults.append(results)
+            # allresults.append(results)
 
-    #print(allresults)
-    #print('finished')
+    # print(allresults)
+    # print('finished')
 
 
 if __name__ == '__main__':
