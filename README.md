@@ -6,9 +6,49 @@
 
 Method definitions for use in SASTA
 
-Copy `default_config.py` to your own `config.py` in the `sastadev` directory, and change what you need.
+## Installation
+You can install SASTADEV using pip:
+```
+pip install auchann
+```
 
-## Upload to PyPi
+## Usage
+The installation provides an entrypoint `sastadev` which invokes `sastadev.__main__.main()`
+
+To lists arguments and options:
+
+```
+sastadev -h
+```
+or
+```
+python -m sastadev -h
+```
+
+## Configuration
+TODO
+
+## Development
+To install the requirements:
+```
+pip install -r requirements.txt
+```
+
+### Tests
+Tests should be written and run using [pytest](https://docs.pytest.org/).
+To test:
+```
+pytest
+```
+
+### Linting
+Linting configuration is provided for [flake8](https://flake8.pycqa.org/en/latest/).
+To lint, run:
+```
+flake8 ./src/sastadev/
+```
+
+### Upload to PyPi
 
 Specify the files which should be included in the package in `pypi/include.txt`.
 
