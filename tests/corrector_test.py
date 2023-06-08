@@ -29,12 +29,12 @@ def test_token():
     testutts += ['ie(t)s e(r)in setten.']
     testutts = ['kat-oorbellen.']
 
-    for testutt in testutts:
-        # correction, metadata = getcorrection(testutt)
-        print(testutt)
-        print(space.join(correction))
-        for metadatum in metadata:
-            print(str(metadatum))
+    # for testutt in testutts:
+    #     correction, metadata = getcorrections(testutt)
+    #     print(testutt)
+    #     print(space.join(correction))
+    #     for metadatum in metadata:
+    #         print(str(metadatum))
 
 
 @pytest.mark.skip(reason='test code does not work')

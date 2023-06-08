@@ -63,56 +63,51 @@ streestrings[0] = """
 
 strees = {}
 for x in streestrings:
-    strees[x] = etree.fromstring(streestrings[x])
+    strees[x] = etree.fromstring(streestrings[x], 'lxml')
 
 thequery = """
 .//node[
     ( (@word="geboren")  or
-      
-    (@pt="adj" and 
-     (@rel="mod" and 
-      parent::node[@cat="np"] and 
+    (@pt="adj" and
+     (@rel="mod" and
+      parent::node[@cat="np"] and
       ../node[@rel="hd" and (@pt="n" or @pt="vnw" or @cat="mwu")] and
-	  (not(@begin < ../node[@rel="det" and (@pt="lid" or @pt="vnw")]/@begin) or @lemma='heel' or @lemma='geheel')
-	 )
-	)
+      (not(@begin < ../node[@rel="det" and (@pt="lid" or @pt="vnw")]/@begin) or @lemma='heel' or @lemma='geheel')
+     )
  or
-     
    (@pt="adj" and
     (@rel="hd" and
-     parent::node[@cat="ap" and parent::node[@cat="np"] and 
+     parent::node[@cat="ap" and parent::node[@cat="np"] and
      ../node[@rel="hd" and (@pt="n" or @pt="vnw" or @cat="mwu")]]
-	 )
-	)
+     )
+    )
  or
-     
+
    (@pt="tw" and @numtype="rang")
  or
-      
+
    (@pt="adj" and @rel="hd" and parent::node[@cat="np"])
  or
-     
     (
    (@pt="tw" and @numtype="rang")
  and @positie = "nom" )
  or
-	 
    (@pt="ww" and @wvorm="vd" and @rel="mod" and parent::node[@cat="np"])
  or
-	 
+
    (@pt="ww" and @wvorm="od" and @rel="mod" and parent::node[@cat="np"])
  or
-	 
+
      (@pt="adj" and  ( (@rel="predc" or @rel="predm" )  and ../node[ (@pt="ww" and @rel="hd" and @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and (contains(@frame, "copula") or not(@stype="topic_drop")) and parent::node[node[@rel="predc"] and not(node[@rel="obj1"]) ] )])
 )
  or
-	 
+
      (@pt="adj" and @rel="hd" and parent::node[@cat="ap" and  ( (@rel="predc" or @rel="predm" )  and ../node[ (@pt="ww" and @rel="hd" and @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and (contains(@frame, "copula") or not(@stype="topic_drop")) and parent::node[node[@rel="predc"] and not(node[@rel="obj1"]) ] )])
 ])
  or
-	  (@rel="det" and @pt="vnw" and @vwtype="onbep")
- 
-	)
+      (@rel="det" and @pt="vnw" and @vwtype="onbep")
+
+    )
 ]
 """
 

@@ -1,20 +1,10 @@
 import os
 
-from sastadev.config import SDLOGGER
 from sastadev.dataconfig import dataroot, intreebanksfolder
-from sastadev.dedup import filledpauseslexicon
-from sastadev.lexicon import known_word
-from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
-                               defaultpenalty, insertion,
-                               insertiontokenmapping, smallclause,
-                               tokenmapping)
-from sastadev.namepartlexicon import namepart_isa_namepart
 from sastadev.sastatoken import Token, show
 from sastadev.smallclauses import bg, getleavestr, smallclauses, word
 from sastadev.tokenmd import TokenListMD
-from sastadev.top3000 import (genlexicon, intransitive, isanimate, ishuman,
-                              pseudotr, transitive)
-from sastadev.treebankfunctions import getattval, getnodeyield, getstree
+from sastadev.treebankfunctions import getnodeyield, getstree
 
 
 def getfn(dataset, filename):

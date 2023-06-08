@@ -15,13 +15,13 @@ expectedresultslist = [[],
 
 bigquery = """//node[(
 
- %declarative% 
+ %declarative%
 
- and 
+ and
 
- %Ond%  
+ %Ond%
 
- and  
+ and
 
  %Tarsp_B_X_count% = 3
 

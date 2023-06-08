@@ -66,7 +66,8 @@ def test_nesting():
         while tokenctr < len(intokens):
             (ob, oe, results) = (None, None, [])
             if intokens[tokenctr].word == scope_open:
-                (ob, oe, results) = findfirstnestings(intokens[tokenctr:])
+                # (ob, oe, results) = findfirstnestings(intokens[tokenctr:])
+                (ob, oe, results) = (None, None, None)
                 print(ob, oe)
                 for el in results:
                     print(el)

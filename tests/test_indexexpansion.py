@@ -72,7 +72,8 @@ def test():
         idxnodes = strees[i].xpath(bareindexnodexpath)
         if idxnodes == []:
             print('No bare index nodes in tree {i}')
-        newtree = newindextransform(strees[i])
+        # newtree = newindextransform(strees[i])
+        newtree = indextransform(strees[i])
         etree.dump(newtree)
 
 

@@ -139,25 +139,25 @@ thetree = strees[1]
 node1 = getnode(thetree, 'is')
 node2 = getnode(thetree, 'nogal')
 result = adjacent(node1, node2, thetree)
-assert result == True
+assert result is True
 
 thetree = strees[2]
 node1 = getnode(thetree, 'gaan')
 node2 = getnode(thetree, 'trouwen')
 result = adjacent(node1, node2, thetree)
-assert result == True
+assert result is True
 
 thetree = strees[2]
 node1 = getnode(thetree, 'wil')
 node2 = getnode(thetree, 'gaan')
 result = adjacent(node1, node2, thetree)
-assert result == True
+assert result is True
 
 thetree = strees[2]
 node1 = getnode(thetree, 'wil')
 node2 = getnode(thetree, 'trouwen')
 result = adjacent(node1, node2, thetree)
-assert result == False
+assert result is False
 
 thetree = strees[2]
 yieldnodes = getnodeyield(thetree)
