@@ -629,7 +629,7 @@ def makeparadigm(word, forms):
 #: reading from the file with the name in the constant *correctionfilename* upon
 #: initialisation of the module *deregularise*
 correction: Dict[str, Tuple[str, str]] = {}
-correctionfile = open(os.path.join(SD_DIR, correctionfilename), 'r', encoding='utf8')
+correctionfile = open(os.path.join(SD_DIR, 'data', correctionfilename), 'r', encoding='utf8')
 myreader = csv.reader(correctionfile, delimiter=tab)
 for row in myreader:
     wrong = row[0]
