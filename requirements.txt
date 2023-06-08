@@ -8,10 +8,14 @@ attrs==21.2.0
     # via pytest
 et-xmlfile==1.1.0
     # via openpyxl
+flake8==6.0.0
+    # via -r requirements.in
 iniconfig==1.1.1
     # via pytest
 lxml==4.6.4
     # via -r requirements.in
+mccabe==0.7.0
+    # via flake8
 openpyxl==3.0.9
     # via -r requirements.in
 packaging==21.3
@@ -20,6 +24,10 @@ pluggy==1.0.0
     # via pytest
 py==1.11.0
     # via pytest
+pycodestyle==2.10.0
+    # via flake8
+pyflakes==3.0.1
+    # via flake8
 pyparsing==3.0.6
     # via packaging
 pytest==6.2.5
