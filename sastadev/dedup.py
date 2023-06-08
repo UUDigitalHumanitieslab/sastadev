@@ -4,8 +4,6 @@ from copy import deepcopy
 from typing import Callable, List, Tuple
 
 from lxml import etree
-
-from sastadev import compounds
 from sastadev.config import SD_DIR, SDLOGGER
 from sastadev.lexicon import informlexicon
 from sastadev.metadata import (filled_pause, fstoken, intj, janeenou, longrep,
@@ -20,6 +18,8 @@ from sastadev.tblex import asta_recognised_wordnode
 from sastadev.treebankfunctions import (all_lower_consonantsnode, find1,
                                         getattval, getnodeyield,
                                         lastmainclauseof, openclasspts)
+
+from sastadev import compounds
 
 nodetype = etree._Element
 
@@ -978,7 +978,7 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
 
 # initialize filledpauseslexicon
 filledpauseslexicon = set()
-filledpausesfilename = os.path.join(SD_DIR, 'filledpauseslexicon',
+filledpausesfilename = os.path.join(SD_DIR, 'data', 'filledpauseslexicon',
                                     'filledpauseslexicon.txt')
 filledpausesfile = open(filledpausesfilename, 'r', encoding='utf8')
 for word in filledpausesfile:

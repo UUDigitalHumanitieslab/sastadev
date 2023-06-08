@@ -4,7 +4,6 @@ from io import BytesIO
 from shutil import copyfile, copyfileobj
 
 from openpyxl import load_workbook
-
 from sastadev.allresults import AllResults
 from sastadev.config import SD_DIR, SDLOGGER
 from sastadev.forms import getformfilename
@@ -12,7 +11,7 @@ from sastadev.forms import getformfilename
 scoresheetname = 'STAP 1 - 5'
 maxutt = 50
 zerocount = 0
-basexl = os.path.join(SD_DIR, 'form_templates', 'STAP Excel VUmc 2018.xlsx')
+basexl = os.path.join(SD_DIR, 'data', 'form_templates', 'STAP Excel VUmc 2018.xlsx')
 
 NS = 'S001'
 OS = 'S002'
