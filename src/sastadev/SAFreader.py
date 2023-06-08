@@ -10,18 +10,15 @@ and the function read_annotations() to obtain a score dictionary with queryid as
 # -code alternatives and replacemtne extensions
 # =codes written without spaces?
 
-import os
 import re
-#import xlrd  # type: ignore
 from collections import Counter, defaultdict
 from typing import Any, Dict, List, Match, Optional, Pattern, Tuple
 
 from sastadev import xlsx
 from sastadev.config import SDLOGGER
-#import logging
-from sastadev.readmethod import itemseppattern, read_method
-from sastadev.sastatypes import (FileName, Item, Item2LevelsDict, Level,
-                                 Position, QId, QueryDict, UttId, UttWordDict)
+from sastadev.readmethod import itemseppattern
+from sastadev.sastatypes import (FileName, Item, Level, Position, QId,
+                                 QueryDict, UttId, UttWordDict)
 
 varitem = ''
 
@@ -471,7 +468,7 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
 #        else:
 #            mappingitem = theitem
         if thelevel in literallevels:
-            #we still have to determine how to deal with this
+            # we still have to determine how to deal with this
             pass
         elif (theitem, thelevel) in mapping:
             qid = mapping[(theitem, thelevel)]

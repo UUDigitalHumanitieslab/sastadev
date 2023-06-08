@@ -146,6 +146,8 @@ from typing import Any, Callable, Dict, List, Pattern, Tuple
 
 import xlsxwriter
 from lxml import etree
+
+from sastadev import compounds
 from sastadev.allresults import AllResults, scores2counts
 from sastadev.config import SDLOGGER
 from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader,
@@ -176,8 +178,6 @@ from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
                                         getyield, showtree)
 from sastadev.xlsx import mkworkbook
-
-from sastadev import compounds
 
 listDir = False
 if listDir:

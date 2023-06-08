@@ -1,7 +1,6 @@
 import re
 
 import sastadev.CHAT_Annotation as sastachat
-
 #from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
 from sastadev.sastatoken import stringlist2tokenlist
 

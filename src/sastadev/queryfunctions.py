@@ -22,8 +22,8 @@ vzn3xpath = './/node[@pt="vz" and ../node[(@lemma="dit" or @lemma="dat")  and @b
 #:
 #: **Remark** We may have to do something special for *pobj1*
 #:
-voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and 
-            node[@rel="obj1" and 
+voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and
+            node[@rel="obj1" and
                  ((@index and not(@word or @cat)) or
                   (%Rpronoun%)
                  )]]""")

@@ -449,23 +449,30 @@ def dropbrackets(w):
     return result
 
 
-def simplemetafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos],
-                                                           annotatedwordlist=[w], source=CHAT)
+def simplemetafunction(f):
+    return lambda ann, pos, w: Meta(ann.name, [f(w)],
+                                    annotatedposlist=[pos],
+                                    annotatedwordlist=[w],
+                                    source=CHAT)
 
 
-def simple_bpldel_metafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos],
-                                                                   annotatedwordlist=[w], source=CHAT,
-                                                                   backplacement=bpl_delete)
+def simple_bpldel_metafunction(f): 
+    return lambda ann, pos, w: Meta(ann.name, [f(w)], 
+                                    annotatedposlist=[pos],
+                                    annotatedwordlist=[w], source=CHAT,
+                                    backplacement=bpl_delete)
 
 
-def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
-    Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedposlist=annotatedposlist,
-         annotatedwordlist=annotatedwordlist, source=CHAT)
+def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
+    return Meta(ann.name, annotationwordlist,
+                annotationposlist=annotationposlist, annotatedposlist=annotatedposlist,
+                annotatedwordlist=annotatedwordlist, source=CHAT)
 
 
-def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
-    Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
-         annotatedposlist=annotatedposlist, source=CHAT)
+def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
+    return Meta(ann.name, annotationwordlist, 
+                annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
+                annotatedposlist=annotatedposlist, source=CHAT)
 
 
 def charmetafunction(ann, annotationcharlist, annotatedcharlist, annotationcharposlist, annotatedcharposlist):
@@ -474,7 +481,8 @@ def charmetafunction(ann, annotationcharlist, annotatedcharlist, annotationcharp
                 annotationcharposlist=annotationcharposlist, annotatedcharposlist=annotatedcharposlist)
 
 
-def epsf(w): return ''
+def epsf(w):
+    return ''
 
 
 interposedpat = r'^&\*(\w\w\w:[\w:]+)$'
@@ -515,7 +523,8 @@ def dropsubstr(w, s):
     return result
 
 
-def dropchars(c): return lambda w: dropchars2(w, c)
+def dropchars(c): 
+    return lambda w: dropchars2(w, c)
 
 
 def dropchars2(w, c):
@@ -525,7 +534,8 @@ def dropchars2(w, c):
 
 
 def CHAT_message(msg):
-    def result(x, y): return SDLOGGER.warning(msg.format(x, y))
+    def result(x, y): 
+        return SDLOGGER.warning(msg.format(x, y))
 
     return result
 

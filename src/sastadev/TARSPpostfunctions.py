@@ -8,7 +8,7 @@ from typing import Dict, List
 from sastadev.allresults import AllResults
 from sastadev.config import SDLOGGER
 from sastadev.query import core_process
-from sastadev.sastatypes import QId, Query, QueryDict, Stage, SynTree
+from sastadev.sastatypes import QId, QueryDict, Stage, SynTree
 from sastadev.treebankfunctions import getmeta
 
 OndVC = 'T071'
@@ -195,13 +195,13 @@ def genpfi(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> int:
                and allqueries[qid].special1 != 'star2']
     coreresults = allresults.coreresults
     scoredqids = [qid for qid in theqids if qid in coreresults and len(coreresults[qid]) > 0]
-    #OndVC
+    # OndVC
     if OndWVC in theqids or OndWBVC in scoredqids:
         scoredqids.append(OndVC)
-    #XNeg
-    #OndB
-    #VCW
-    #BX
+    # XNeg
+    # OndB
+    # VCW
+    # BX
     result = len(scoredqids)
     return result
 

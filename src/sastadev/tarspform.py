@@ -4,10 +4,11 @@ from collections import Counter
 from io import BytesIO
 
 import xlsxwriter
+
+from sastadev import xlsx
 from sastadev.config import SD_DIR
 from sastadev.counterfunctions import counter2liststr
 from sastadev.forms import getformfilename
-from sastadev import xlsx
 
 ordA = ord('A')
 comma = ','

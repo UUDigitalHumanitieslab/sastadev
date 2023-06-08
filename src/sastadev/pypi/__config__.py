@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os.path as op
+
 import sentence_parser
 
 # logging object

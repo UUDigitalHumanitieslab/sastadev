@@ -45,12 +45,12 @@ from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
                                insertiontokenmapping, smallclause,
                                tokenmapping)
 from sastadev.namepartlexicon import namepart_isa_namepart
-from sastadev.sastatoken import Token, show
+from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.tokenmd import TokenListMD
 from sastadev.top3000 import (genlexicon, intransitive, isanimate, ishuman,
                               pseudotr, transitive)
-from sastadev.treebankfunctions import getattval, getnodeyield, getstree
+from sastadev.treebankfunctions import getattval, getnodeyield
 
 space = ' '
 biglocvzs = ['achter', 'beneden', 'binnen', 'boven', 'bovenop', 'buiten', 'dichtbij']

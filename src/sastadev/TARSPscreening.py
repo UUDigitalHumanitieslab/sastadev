@@ -154,7 +154,7 @@ def screening(results):
         #        stageslogger.info('Checking stage %s', s)
         if result is None and stages[s]:
             result = s
-            #for ls in range(s,0,-1):
+            # for ls in range(s,0,-1):
             #    if not stages[ls]:
             #        print('Warning. Stage is {} but lower stage {} conditions are not met'. format(s,ls), file=sys.stderr)
     return result
@@ -165,7 +165,7 @@ def tarsp_screening(allresults, _):
     result = screening4stage(allresults.uttcount, resultscounts)
     return result
 
-#def screening4stage(uttcount, results, thefilename):
+# def screening4stage(uttcount, results, thefilename):
 
 
 def screening4stage(uttcount, results):
@@ -187,6 +187,6 @@ def screening4stage(uttcount, results):
     if uttcount < uttcountthreshold:
         message = 'TARSP Screening: Less than {} utterances ({}). Results not reliable'.format(uttcountthreshold, uttcount)
         SDLOGGER.warning(message)
-        #print(message)
+        # print(message)
     result = screening(results)
     return result

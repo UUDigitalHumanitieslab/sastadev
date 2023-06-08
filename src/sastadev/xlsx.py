@@ -135,7 +135,7 @@ def getxlsxdata(fullname, headerrow=0, sheetname=None):
     header = []
     try:
         wb = load_workbook(fullname)
-    except:
+    except Exception:
         return (header, data)
     wsns = wb.sheetnames
     if wsns != []:

@@ -4,24 +4,19 @@ to be added
 
 import copy
 import re
-import sys
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from lxml import etree
-
 from sastadev.alpino import getdehetwordinfo
-from sastadev.alpinoparsing import escape_alpino_input, parse
 from sastadev.basicreplacements import (basicexpansions, basicreplacements,
                                         getdisambiguationdict)
 from sastadev.cleanCHILDEStokens import cleantokens
-from sastadev.config import PARSE_FUNC, SDLOGGER
+from sastadev.config import SDLOGGER
 from sastadev.dedup import (cleanwordofnort, find_duplicates2,
                             find_janeenouduplicates, find_simpleduplicates,
                             find_substringduplicates2, getfilledpauses,
                             getprefixwords, getrepeatedtokens,
                             getunwantedtokens, nodesfindjaneenou)
 from sastadev.deregularise import correctinflection
-from sastadev.expandquery import expandmacros
 from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
                                  ngram10, ngram11, ngram16, ngram17)
 from sastadev.iedims import getjeforms
@@ -29,15 +24,12 @@ from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, known_word,
                               tswnouns)
 from sastadev.macros import expandmacros
-# from alternative import Alternative, Replacement, Metadata, Meta
 from sastadev.metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
-                               defaultpenalty, falsestart, filled_pause,
-                               fstoken, intj, janeenou, longrep, mkSASTAMeta,
-                               repeated, repeatedjaneenou, repeatedseqtoken,
-                               shortrep, substringrep, unknownsymbol,
-                               unknownword)
-# from sastadev.namepartlexicon import namepart_isa_namepart
+                               defaultpenalty, filled_pause, fstoken, intj,
+                               janeenou, longrep, mkSASTAMeta, repeated,
+                               repeatedjaneenou, repeatedseqtoken, shortrep,
+                               substringrep, unknownsymbol)
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, tokenlist2stringlist
 from sastadev.sastatypes import (BackPlacement, MethodName, Nort, Penalty,
@@ -49,7 +41,7 @@ from sastadev.stringfunctions import (chatxxxcodes, consonants, deduplicate,
 from sastadev.sva import getsvacorrections
 from sastadev.tokenmd import TokenListMD, TokenMD, mdlist2listmd
 from sastadev.treebankfunctions import (fatparse, find1, getattval,
-                                        getnodeyield, showtree, treeinflate)
+                                        getnodeyield, showtree)
 
 Correction = Tuple[List[Token], List[Meta]]
 MetaCondition = Callable[[Meta], bool]

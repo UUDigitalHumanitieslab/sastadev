@@ -1,6 +1,6 @@
 from collections import defaultdict
 from copy import copy, deepcopy
-from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple
 
 from lxml import etree
 
@@ -13,9 +13,7 @@ from sastadev.lexicon import de, dets, known_word
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
                                bpl_none, bpl_word, bpl_wordlemma, insertion)
-from sastadev.sastatok import sasta_tokenize
-from sastadev.sastatoken import (Token, deflate, inflate, insertinflate,
-                                 tokeninflate, tokenlist2stringlist)
+from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
@@ -645,7 +643,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                             simpleshow(oldnode, showchildren=False)
                         if 'lemma' not in newnode.attrib:
                             SDLOGGER.error(
-                                'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid))
+                                'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid, newnode))
                             simpleshow(oldnode, showchildren=False)
 
         elif meta.backplacement == bpl_none:
@@ -888,8 +886,8 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         subjunctivecount = len([node for node in nt.xpath('.//node[@pvtijd="conj"]')])
         unknownnouncount = len([node for node in nt.xpath('.//node[@pt="n" and @frame="noun(both,both,both)"]')])
         unknownnamecount = len([node for node in nt.xpath('.//node[@pt="n" and @frame="proper_name(both)"]')])
-        complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and 
-                                                     @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and  
+        complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and
+                                                     @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and
                                                not(node[%Rpronoun%])]""")
         complsucount = len([node for node in nt.xpath(complsuxpath)])
         dezebwcount = len([node for node in nt.xpath(dezebwxpath)])
@@ -921,7 +919,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         orandalts.selected = bestaltid
     else:
         # should never occur
-        SDlogger.error(f'Illegal correction value: {corr}')
+        SDLOGGER.error(f'Illegal correction value: {corr}')
         exit(-1)
 
     result = ptmds[orandalts.selected]

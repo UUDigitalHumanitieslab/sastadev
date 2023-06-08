@@ -4,13 +4,13 @@ This module defines the function read_method to read in a method:
 * read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
 '''
 
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from sastadev import xlsx
 from sastadev.config import SDLOGGER
 from sastadev.query import Query, form_process, post_process
-from sastadev.sastatypes import (AltCodeDict, FileName, Item_Level,
-                                 Item_Level2QIdDict, QId, QueryDict)
+from sastadev.sastatypes import (AltCodeDict, FileName, Item_Level2QIdDict,
+                                 QId, QueryDict)
 
 comma = ','
 
@@ -36,7 +36,7 @@ def getboolean(str: str) -> bool:
 def getint(fase: str) -> int:
     try:
         result = int(fase)
-    except:
+    except Exception:
         result = 0
     return result
 

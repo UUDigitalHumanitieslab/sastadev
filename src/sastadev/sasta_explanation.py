@@ -4,7 +4,6 @@ from typing import Optional
 #import find1, iswordnode, getattval
 import sastadev.stringfunctions as strf
 import sastadev.treebankfunctions as tbf
-
 from sastadev.sastatypes import SynTree
 
 #import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
