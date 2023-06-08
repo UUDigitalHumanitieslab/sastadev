@@ -1,5 +1,6 @@
 flake8
 lxml
+mypy
 openpyxl
 pytest
 xlsxwriter
