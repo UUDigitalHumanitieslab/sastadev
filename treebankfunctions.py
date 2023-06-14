@@ -16,6 +16,8 @@ from config import PARSE_FUNC
 
 from sastatoken import Token
 from metadata import Meta
+from anonymization import pseudonymre, sasta_pseudonyms
+
 from typing import Any, AnyStr, Callable, Dict, List, Match, Optional, Tuple
 
 from sastatypes import FileName, OptPhiTriple, PhiTriple, Position, PositionMap, PositionStr, Span, SynTree, UttId
@@ -109,7 +111,8 @@ uniquecounter = 0
 countattvalxpathtemplate = 'count(.//node[@{att}="{val}"])'
 countcompoundxpath = 'count(.//node[contains(@lemma, "_")])'
 
-
+monthnames = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus',
+              'september', 'oktober', 'november', 'december']
 def adjacent(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     '''
     :param node1:
@@ -869,6 +872,17 @@ def asta_recognised_lexnode(node: SynTree) -> bool:
     return result
 
 
+def isspecdeeleigen(node: SynTree) -> bool:
+    pt = getattval(node, 'pt')
+    spectype = getattval(node, 'spectype')
+    result = pt == 'spec' and spectype == 'deeleigeb'
+    return result
+
+def ismonthname(node: SynTree) -> bool:
+    lemma = getattval(node, 'lemma')
+    result = lemma in monthnames
+    return result
+
 def asta_recognised_nounnode(node: SynTree) -> bool:
     '''
     The function *asta_recognised_nounnode* determines whether *node* should count as a
@@ -879,6 +893,14 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
     * either the node meets the conditions of *sasta_pseudonym*
 
        .. autofunction:: treebankfunctions::sasta_pseudonym
+
+    * or the node is part of name (pt = *spec*, spectype= *deeleigen*)
+
+       .. autofunction:: treebankfunctions::isspecdeeleigen
+
+    * or the node is a month name (these are not always nouns in Alpino)
+
+       .. autofunction:: treebankfunctions::ismonthname
 
     * or the node meets the conditions of *spec_noun*
 
@@ -917,6 +939,8 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
     else:
         pos = 'n'
     result = sasta_pseudonym(node)
+    result = result or isspecdeeleigen(node)
+    result = result or ismonthname(node)
     result = result or spec_noun(node)
     result = result or is_duplicate_spec_noun(node)
     result = result or sasta_long(node)
@@ -973,15 +997,8 @@ def short_nucl_n(node: SynTree) -> bool:
     result = pt == 'n' and rel == 'nucl' and sasta_short(word)
     return result
 
-#: The constant *sasta_pseudonyms* list the strings that replace names for
-#: pseudonymisation purposes.
-sasta_pseudonyms = ['NAAM', 'VOORNAAM', 'ACHTERNAAM', 'ZIEKENHUIS', 'STRAAT', 'PLAATS', 'PLAATSNAAM', 'KIND', 'BEROEP',
-                    'OPLEIDING']
-#: The constant *pseudonym_patternlist* contains regular expressions for pseudonyms
-#: based on elements from the *sasta_pseudonyms* (pseudonym + number).
-pseudonym_patternlist = [r'^{}\d?$'.format(el) for el in sasta_pseudonyms]
-pseudonym_pattern = vertbar.join(pseudonym_patternlist)
-pseudonymre = re.compile(pseudonym_pattern)
+#sasta_pseudonyms = ['NAAM', 'VOORNAAM', 'ACHTERNAAM', 'ZIEKENHUIS', 'STRAAT', 'PLAATS', 'PLAATSNAAM', 'KIND', 'BEROEP',
+#                    'OPLEIDING']
 
 
 def sasta_pseudonym(node: SynTree) -> bool:

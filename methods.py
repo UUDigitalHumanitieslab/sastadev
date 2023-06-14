@@ -1,10 +1,14 @@
 from query import pre_process
 from typing import Callable, List, Dict, Optional, Tuple
 from sastatypes import MethodName, QueryDict, Query, Item_Level2QIdDict, AltCodeDict, QId, FileName, \
-    ExactResult, ExactResultsDict, ExactResultsFilter
+    ExactResult
+from allresults import ExactResultsDict, ExactResultsFilter, mkresultskey
 import os
 from config import SDLOGGER
 
+lemmaqid = 'A051'
+lexreskey = mkresultskey('A018')
+nreskey = mkresultskey('A021')
 
 asta = 'asta'
 stap = 'stap'
@@ -16,7 +20,7 @@ stapmethods = [stap]
 
 validmethods = astamethods + stapmethods +  tarspmethods
 
-astalexicalmeasures = ['A018', 'A021']  # LEX and N
+astalexicalmeasures = [mkresultskey('A018'), mkresultskey('A021')]  # LEX and N
 
 class SampleSize:
     def __init__(self, maxuttcount=None, maxwordcount=None):
@@ -60,15 +64,31 @@ class Method:
 
 
 def implies(a: bool, b: bool) -> bool:
-    return (not a or b)
+    return (not a) or b
+
+
+
+def astalemmafilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
+    for (qid, val) in xrs:
+        if qid == lemmaqid:
+            if xr in xrs[(qid, val)]:
+                result1 =  xr in xrs[lexreskey] or xr in xrs[nreskey]
+                result = query.process == pre_process or result1
+                return result
+
+    return True
+
 
 
 #filter specifies what passes the filter
 def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
-    return query.process == pre_process or \
-    (implies('A029' in xrs, xr not in xrs['A029'])
-     and implies('A045' in xrs, xr not in xrs['A045']))
-
+    a029 = mkresultskey('A029')
+    a045 = mkresultskey('A045')
+    result1 = query.process == pre_process
+    result2 = xr not in xrs[a029] if a029 in xrs else True
+    result3 = xr not in xrs[a045] if a045 in xrs else True
+    result = result1 or (result2 and result3)
+    return result
 
 def getmethodfromfile(filename: str) -> str:
     result = ''

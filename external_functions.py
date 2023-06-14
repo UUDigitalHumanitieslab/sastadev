@@ -27,8 +27,8 @@ from ASTApostfunctions import wordcountperutt, countwordsandcutoff, KMcount, fin
 from astaforms import astaform
 from tarspform import mktarspform
 from stapforms import makestapform
-from asta_queries import asta_noun, asta_bijzin, asta_lex, asta_delpv
-from methods import allok
+from asta_queries import asta_noun, asta_bijzin, asta_lex, asta_delpv, asta_lemma, astalemmafunction
+from methods import allok, astalemmafilter
 from typing import Callable, Dict, List
 from sastatypes import SynTree
 from allresults import QueryFunction
@@ -69,7 +69,8 @@ thestapfunctions = [BB_totaal, GLVU, GL5LVU, makestapform]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
-                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, neologisme]
+                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, neologisme, astalemmafilter, asta_lemma,
+                    astalemmafunction]
 
 thefunctions = thetarspfunctions + thestapfunctions + theastafunctions
 

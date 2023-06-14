@@ -8,8 +8,10 @@ from treebankfunctions import (asta_recognised_lexnode,
                                asta_recognised_nounnode, clausecats, find1,
                                getattval, getnodeyield, getyield, showtns)
 
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 from sastatypes import SynTree
+from normalise_lemma import normaliselemma
+
 
 noun_xpath = './/node[%asta_noun%]'
 expanded_noun_xpath = expandmacros(noun_xpath)
@@ -25,6 +27,37 @@ expandedastacoredelpvquery = expandmacros(astacoredelpvquery)
 
 dpancestorsquery = 'ancestor::node[@rel="dp"] | self::node[@rel="dp" or @rel="--"]'
 
+lemma_path = './/node[%asta_noun% or %ASTA_LEX%]'
+expandedlemma_path = expandmacros(lemma_path)
+repetitioncond = f'@subcat="{repetition}"' # this covers all repetitions but the short repetitions should not be included
+longrepetitioncond = f'@value="{repeated}" or @value="{repeatedseqtoken}" or @value="{longrep}" or @value="{substringrep}"'
+
+
+def astalemmafunction(node: SynTree) -> str:
+    repetitionantecedent = getrepetitionantecedent(node)
+    if repetitionantecedent is not None:
+        result = astalemmafunction(repetitionantecedent)
+    else:
+        rawlemma = getattval(node, 'lemma')
+        rawword = getattval(node, 'word')
+        pt = getattval(node, 'pt')
+        if pt == 'n':
+            result = normaliselemma(rawword, rawlemma)
+        else:
+            resultlist = [c for c in rawlemma  if c != '_']
+            result = ''.join(resultlist)
+    return result
+
+def getrepetitionantecedent(node: SynTree) -> Optional[SynTree]:
+    topnode = find1(node, 'ancestor::alpino_ds')
+    dupindex = get_dupindex(topnode, longrepetitioncond)
+    nodepos = getattval(node, 'begin')
+    if nodepos in dupindex:
+        antecedentpos = dupindex[nodepos]
+        antecedent = find1(topnode, f'.//node[@word and @begin="{antecedentpos}"]')
+    else:
+        antecedent = None
+    return antecedent
 
 
 def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
@@ -74,6 +107,21 @@ def asta_lex(stree: SynTree) -> List[SynTree]:
     results = asta_x(stree, expanded_lex_xpath, asta_recognised_lexnode)
     return results
 
+def asta_recognised_lexicalnode(node: SynTree) -> bool:
+    result = asta_recognised_nounnode(node) or asta_recognised_lexnode(node)
+    return result
+
+def asta_lemma(stree: SynTree) -> List[SynTree]:
+    '''The function *asta_lemma* uses the function *asta_x* with parameters *stree*,
+    *lemma_path* and the function *asta_recognised_lexicalnode*.
+
+
+    .. autofunction:: treebankfunctions::asta_recognised_lexicalnode
+         :noindex:
+
+    '''
+    results = asta_x(stree, expandedlemma_path, asta_recognised_lexicalnode)
+    return results
 
 def old_asta_noun(stree: SynTree) -> List[SynTree]:
     theyield = getyield(stree)   # for debugging purposes
