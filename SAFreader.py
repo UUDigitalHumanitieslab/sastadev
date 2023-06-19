@@ -34,6 +34,8 @@ tsvext = '.tsv'
 commaspace = ', '
 tab = '\t'
 all_levels = set()
+
+# @@next must be made dependent on the method
 literallevels = ['lemma']
 
 semicolon = ';'
