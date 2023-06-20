@@ -25,6 +25,7 @@ setup(
         ],
     },
     install_requires=[
+        'auchann',
         'lxml',
         'openpyxl',
         'XlsxWriter'
