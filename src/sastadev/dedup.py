@@ -6,7 +6,7 @@ from typing import Callable, List, Tuple
 from lxml import etree
 
 from sastadev import compounds
-from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.conf import settings
 from sastadev.lexicon import informlexicon
 from sastadev.metadata import (filled_pause, fstoken, intj, janeenou, longrep,
                                repeated, repeatedjaneenou, repeatedseqtoken,
@@ -79,13 +79,13 @@ def dictmerge(dict1, dict2):
     for el in dict2:
         if el in newdict:
             if newdict[el] != dict2[el]:
-                SDLOGGER.error('Conflicting values for {}: {}: {} not included'.format(el,
+                settings.LOGGER.error('Conflicting values for {}: {}: {} not included'.format(el,
                                                                                        newdict[
                                                                                            el],
                                                                                        dict2[
                                                                                            el]))
             else:
-                SDLOGGER.warning(
+                settings.LOGGER.warning(
                     'Duplicate values for {}: {} = {}'.format(el, newdict[el], dict2[el]))
         else:
             newdict[el] = dict2[el]
@@ -641,7 +641,7 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
                     if newnode is not None:
                         mdnodes.append(newnode)
                     else:
-                        SDLOGGER.error(
+                        settings.LOGGER.error(
                             'Metadata node not found in tree: md.begin={}'.format(
                                 tokenbegin))
                         etree.dump(stree)
@@ -937,7 +937,7 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
                 if newnode is not None:
                     mdnodes.append(newnode)
                 else:
-                    SDLOGGER.error(
+                    settings.LOGGER.error(
                         'Metadata node not found in tree: md.begin={}'.format(tokenbegin))
                     etree.dump(stree)
     excludednodes += mdnodes
@@ -978,7 +978,7 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
 
 # initialize filledpauseslexicon
 filledpauseslexicon = set()
-filledpausesfilename = os.path.join(SD_DIR, 'data', 'filledpauseslexicon',
+filledpausesfilename = os.path.join(settings.SD_DIR, 'data', 'filledpauseslexicon',
                                     'filledpauseslexicon.txt')
 filledpausesfile = open(filledpausesfilename, 'r', encoding='utf8')
 for word in filledpausesfile:

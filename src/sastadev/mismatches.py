@@ -3,7 +3,7 @@ from copy import copy
 
 from lxml import etree
 
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.treebankfunctions import getattval, getmarkedyield, getyield
 
 tab = '\t'
@@ -102,7 +102,7 @@ def mismatches(queryid, queries, theresultsminusgold, goldminustheresults, allma
         if uttid in allutts:
             uttstr = space.join(allutts[uttid])
         else:
-            SDLOGGER.warning('uttid {} not in alluts'.format(uttid))
+            settings.LOGGER.warning('uttid {} not in alluts'.format(uttid))
         platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid,
                              uttstr]
         print(tab.join(platinumcheckrow2), file=platinumcheckfile)
@@ -115,10 +115,10 @@ def getmarkposition(position, nodeendmap, uttid):
         if str(position) in nodeendmap[uttid]:
             result = nodeendmap[uttid][str(position)]
         else:
-            SDLOGGER.error('getmarkposition: No mapping found for position {} in utterance {}'.format(position, uttid))
+            settings.LOGGER.error('getmarkposition: No mapping found for position {} in utterance {}'.format(position, uttid))
             result = 1
     else:
-        SDLOGGER.error('getmarkposition: No mappings found for uttid {}'.format(uttid))
+        settings.LOGGER.error('getmarkposition: No mappings found for uttid {}'.format(uttid))
         result = 1
     return result
 
@@ -162,7 +162,7 @@ def exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches,
             markedwordlist = getmarkedyield(allutts[uttid], [markposition])
             uttstr = space.join(markedwordlist)
         else:
-            SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
+            settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
             uttstr = ""
             markposition = 0
         platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, str(uttid),
@@ -251,7 +251,7 @@ def getusercomments(permsilverdict, key, report=False):
         resultlist = [usercommentdefaultvalue for _ in range(count)]
         result = resultlist
         if report:
-            SDLOGGER.warning('No silver remark for key: {}'.format(key))
+            settings.LOGGER.warning('No silver remark for key: {}'.format(key))
     return result
 
 

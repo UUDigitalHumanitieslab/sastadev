@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from sastadev.config import SD_DIR
+from sastadev.conf import settings
 from sastadev.deregularise import (correctionfilename, getcorrections,
                                    makeparadigm, tab)
 
@@ -86,7 +86,7 @@ def test_deregularise():
             print(w, corrected, m)
 
     correctionfile = open(os.path.join(
-        SD_DIR, correctionfilename), 'w', encoding='utf8')
+        settngs.settngs.settings.SD_DIR, correctionfilename), 'w', encoding='utf8')
     for w in correction:
         print(w, correction[w][0], correction[w]
               [1], sep=tab, file=correctionfile)

@@ -1,6 +1,6 @@
 import csv
 
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 
 tab = '\t'
 mysep = tab
@@ -11,7 +11,7 @@ def readcsv(filename, sep=mysep, header=True, quotechar='"', encoding='utf8'):
     try:
         infile = open(filename, 'r', encoding=encoding, newline='')
     except FileNotFoundError as e:
-        SDLOGGER.error(e)
+        settings.LOGGER.error(e)
         return result
     myreader = csv.reader(infile, delimiter=sep, quotechar=quotechar)
     # read the header if needed
@@ -31,14 +31,14 @@ def readheadedcsv(filename, sep=mysep, quotechar='"', encoding='utf8'):
     try:
         infile = open(filename, 'r', encoding=encoding, newline='')
     except FileNotFoundError as e:
-        SDLOGGER.warning(e)
+        settings.LOGGER.warning(e)
         return header, result
     myreader = csv.reader(infile, delimiter=sep, quotechar=quotechar)
     # read the header
     try:
         header = next(myreader)
     except StopIteration as e:
-        SDLOGGER.warning(e)
+        settings.LOGGER.warning(e)
         pass
     rowctr = 1
     for row in myreader:

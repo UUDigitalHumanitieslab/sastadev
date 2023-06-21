@@ -1,4 +1,4 @@
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 
 pre_process_str, core_process_str, post_process_str, form_process_str = 'pre', 'core', 'post', 'form'
 pre_process, core_process, post_process, form_process = 0, 1, 2, 3
@@ -15,7 +15,7 @@ def getprocess(process):
         result = form_process
     else:
         result = -1
-        SDLOGGER.error('Illegal value for process {}'.format(process))
+        settings.LOGGER.error('Illegal value for process {}'.format(process))
     return result
 
 

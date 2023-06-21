@@ -37,7 +37,7 @@ The different subcases are dealt with by the function *smallclauses*:
 
 from typing import List
 
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.dedup import filledpauseslexicon
 from sastadev.lexicon import known_word, tswnouns
 from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
@@ -233,7 +233,7 @@ def mktoken(node, map):
     if nodebegin in map:
         nodepos = map[nodebegin]
     else:
-        SDLOGGER.error('missing begin in map {}'.format(nodebegin))
+        settings.LOGGER.error('missing begin in map {}'.format(nodebegin))
         nodepos = int(nodebegin)
     result = Token(nodeword, nodepos)
     return result
@@ -308,7 +308,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     treewords = [word(tokennode) for tokennode in leaves]
     tokenwords = [token.word for token in tokens if not token.skip]
     if treewords != tokenwords:
-        SDLOGGER.error('Token mismatch: {} v. {}'.format(treewords, tokenwords))
+        settings.LOGGER.error('Token mismatch: {} v. {}'.format(treewords, tokenwords))
         return []
     themap = {bg(tokennode): token.pos for (tokennode, token) in zip(leaves, tokens)}
     metadata = tokensmd.metadata

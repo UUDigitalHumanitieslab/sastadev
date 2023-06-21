@@ -31,7 +31,8 @@ import os
 from collections import defaultdict
 from typing import Dict, List
 
-from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.conf import settings
+
 from sastadev.sastatypes import SynTree
 from sastadev.treebankfunctions import getattval
 
@@ -47,7 +48,7 @@ Headers[Class] = "Class"
 
 comma = ","
 
-dictfilename = os.path.join(SD_DIR, 'data', 'compoundfiles', 'Ncompounds-attempt2.txt')
+dictfilename = os.path.join(settings.SD_DIR, 'data', 'compoundfiles', 'Ncompounds-attempt2.txt')
 dictfile = open(dictfilename, 'r', encoding='utf8')
 
 getwordsxpath = ".//node[@pt]"
@@ -108,7 +109,7 @@ compounds: Dict[str, Dict[int, str]] = nested_dict(2, str)
 
 # there is an error here, the file has a header, and that is also read in as a compound
 # we should make  the character encoding explicit
-SDLOGGER.info("Initializing compound module...")
+settings.LOGGER.info("Initializing compound module...")
 myreader = csv.reader(dictfile, delimiter=mysep)
 for row in myreader:
     compounds[row[HeadDiaNew]][FlatClass] = row[FlatClass]

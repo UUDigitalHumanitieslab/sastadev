@@ -1,7 +1,7 @@
 import xlsxwriter
 from openpyxl import load_workbook
 
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 
 eps = ''
 defaultcolwidth = 15
@@ -144,7 +144,7 @@ def getxlsxdata(fullname, headerrow=0, sheetname=None):
         else:
             ws = wb[sheetname]
     else:
-        SDLOGGER.error("Error reading {}. No worksheets found\n".format(fullname))
+        settings.LOGGER.error("Error reading {}. No worksheets found\n".format(fullname))
     rowctr = -1
     for row in ws.iter_rows():
         rowctr += 1

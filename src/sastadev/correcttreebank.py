@@ -6,7 +6,7 @@ from lxml import etree
 
 from sastadev.basicreplacements import basicreplacements
 from sastadev.cleanCHILDEStokens import cleantext
-from sastadev.config import PARSE_FUNC, SDLOGGER
+from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
 from sastadev.lexicon import de, dets, known_word
@@ -477,7 +477,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
 
     origutt = getorigutt(stree)
     if origutt is None:
-        SDLOGGER.error('Missing origutt in utterance {}'.format(uttid))
+        settings.LOGGER.error('Missing origutt in utterance {}'.format(uttid))
         origutt = space.join(getyield(stree))
         # return stree, orandalts
     # list of token positions
@@ -486,9 +486,9 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     metadatalist = stree.xpath(metadataxpath)
     lmetadatalist = len(metadatalist)
     if lmetadatalist == 0:
-        SDLOGGER.error('Missing metadata in utterance {}'.format(uttid))
+        settings.LOGGER.error('Missing metadata in utterance {}'.format(uttid))
     elif lmetadatalist > 1:
-        SDLOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
+        settings.LOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
     else:
         origmetadata = metadatalist[0]
 
@@ -574,7 +574,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     elif corr in [corr1, corrn]:
         thecorrection, orandalts = selectcorrection(fatstree, ptmds, corr)
     else:
-        SDLOGGER.error('Illegal correction value: {}. No corrections applied'.format(corr))
+        settings.LOGGER.error('Illegal correction value: {}. No corrections applied'.format(corr))
         thecorrection, orandalts = (cleanutt, fatstree, origmetadata), None
 
     thetree = deepcopy(thecorrection[1])
@@ -627,10 +627,10 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                     thetree = adaptsentence(thetree)
                 else:
                     if 'word' not in oldnode.attrib:
-                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
+                        settings.LOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
                         simpleshow(oldnode, showchildren=False)
                     if 'word' not in newnode.attrib:
-                        SDLOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
+                        settings.LOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
                         simpleshow(oldnode, showchildren=False)
             if meta.backplacement == bpl_wordlemma:
                 if newnode is not None and oldnode is not None:
@@ -639,10 +639,10 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                         thetree = adaptsentence(thetree)
                     else:
                         if 'lemma' not in oldnode.attrib:
-                            SDLOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node: '.format(uttid))
+                            settings.LOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node: '.format(uttid))
                             simpleshow(oldnode, showchildren=False)
                         if 'lemma' not in newnode.attrib:
-                            SDLOGGER.error(
+                            settings.LOGGER.error(
                                 'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid, newnode))
                             simpleshow(oldnode, showchildren=False)
 
@@ -716,7 +716,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         streesentlist = getyield(fatstree)
         fulltreesentlist = getyield(fulltree)
         if streesentlist != fulltreesentlist:
-            SDLOGGER.warning(
+            settings.LOGGER.warning(
                 'Yield mismatch\nOriginal={original}\nAfter correction={newone}'.format(original=streesentlist,
                                                                                         newone=fulltreesentlist))
     rawoldleavenodes = getnodeyield(fatstree)
@@ -726,7 +726,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     newleaves = getyield(fulltree)
     uttid = getuttid(stree)
     if debug and oldleaves != newleaves:
-        SDLOGGER.error(
+        settings.LOGGER.error(
             'Yield mismatch:{uttid}\n:OLD={oldleaves}\nNEW={newleaves}'.format(uttid=uttid, oldleaves=oldleaves,
                                                                                newleaves=newleaves))
     # return this stree
@@ -762,7 +762,7 @@ def updatecleantokmeta(meta: Meta, begins: List[str], cleantokpos: List[int]) ->
 def oldgetuttid(stree: SynTree) -> UttId:
     uttidlist = stree.xpath(uttidxpath)
     if uttidlist == []:
-        SDLOGGER.error('Missing uttid')
+        settings.LOGGER.error('Missing uttid')
         uttid = 'None'
     else:
         uttid = uttidlist[0]
@@ -818,7 +818,7 @@ def getdeplusneutcount(nt: SynTree) -> int:
         if word1 in dets[de]:
             node2 = theyield[i + 1]
             word2 = getattval(node2, 'word').lower()
-            parsedwordtree = PARSE_FUNC(word2)
+            parsedwordtree = settings.PARSE_FUNC(word2)
             parsedwordnode = find1(parsedwordtree, './/node[@pt]')
             if parsedwordnode is not None and getattval(parsedwordnode, 'genus') == 'onz' and \
                     getattval(parsedwordnode, 'getal') == 'ev':
@@ -914,12 +914,12 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
             # should never occur
             theyield: List[str] = getyield(stree)
             utt: str = space.join(theyield)
-            SDLOGGER.error(f'No alternatives for {utt}')
+            settings.LOGGER.error(f'No alternatives for {utt}')
             exit(-1)
         orandalts.selected = bestaltid
     else:
         # should never occur
-        SDLOGGER.error(f'Illegal correction value: {corr}')
+        settings.LOGGER.error(f'Illegal correction value: {corr}')
         exit(-1)
 
     result = ptmds[orandalts.selected]

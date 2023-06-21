@@ -13,7 +13,7 @@ from lxml import etree
 
 # from sastadev.lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
 #import lexicon as lex
-from sastadev.config import PARSE_FUNC, SDLOGGER
+from sastadev.conf import settings
 from sastadev.metadata import Meta
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import (FileName, OptPhiTriple, PhiTriple, Position,
@@ -442,7 +442,7 @@ def phimax(v1: str, v2: str) -> str:
     elif v1 in genders and v2 in genders:
         result = valmerge(v1, v2, genders)
     else:
-        SDLOGGER.error('Phimax: Illegal or incompatible value combination: V1={}, v2={}'.format(v1, v2))
+        settings.LOGGER.error('Phimax: Illegal or incompatible value combination: V1={}, v2={}'.format(v1, v2))
         result = v1
     return result
 
@@ -616,11 +616,11 @@ def getyield(syntree: SynTree) -> List[str]:  # deze herformuleren in termen van
                     resultlist.append(newel)
                 else:
                     if 'word' not in node.attrib:
-                        SDLOGGER.error('No word in pt or pos node')
+                        settings.LOGGER.error('No word in pt or pos node')
                     if 'end' not in node.attrib:
-                        SDLOGGER.error('No end in pt or pos node')
+                        settings.LOGGER.error('No end in pt or pos node')
                     for el in node.attrib:
-                        SDLOGGER.info('{}\t{}'.format(el, node.attrib[el]))
+                        settings.LOGGER.info('{}\t{}'.format(el, node.attrib[el]))
         sortedresultlist = sorted(resultlist, key=lambda x: x[1])
         theyield = [w for (w, _) in sortedresultlist]
     return theyield
@@ -1203,34 +1203,34 @@ def getstree(fullname: FileName) -> SynTree:
     try:
         thefile = open(fullname, 'r', encoding='utf8')
     except FileNotFoundError as e:
-        SDLOGGER.error('File not found: {}'.format(e))
+        settings.LOGGER.error('File not found: {}'.format(e))
         return None
     except etree.ParseError as e:
-        SDLOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
+        settings.LOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
         return None
     except OSError as e:
-        SDLOGGER.error('OS Error: {}; file: {}'.format(e, fullname))
+        settings.LOGGER.error('OS Error: {}; file: {}'.format(e, fullname))
         return None
     except Exception:
-        SDLOGGER.error('Error: Unknown error in file {}'.format(fullname))
+        settings.LOGGER.error('Error: Unknown error in file {}'.format(fullname))
         return None
 
     with thefile:
         try:
             tree = etree.parse(thefile)
         except etree.ParseError as e:
-            SDLOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
+            settings.LOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
             return None
         except UnicodeDecodeError as e:
-            SDLOGGER.error('Unicode error: {} in file {}'.format(e, fullname))
+            settings.LOGGER.error('Unicode error: {} in file {}'.format(e, fullname))
             try:
                 windowsfile = open(fullname, 'r')
                 tree = etree.parse(windowsfile)
             except ValueError as e:
-                SDLOGGER.error('Char Descoding Error: {}; file: {}'.format(e, fullname))
+                settings.LOGGER.error('Char Descoding Error: {}; file: {}'.format(e, fullname))
                 return None
             except etree.ParseError as e:
-                SDLOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
+                settings.LOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
                 return None
             else:
                 return tree
@@ -1372,7 +1372,7 @@ def test() -> None:
 def getsentid(stree: SynTree) -> UttId:
     sentidlist = stree.xpath(sentidxpath)
     if sentidlist == []:
-        SDLOGGER.error('Missing sentid')
+        settings.LOGGER.error('Missing sentid')
         result = 'None'
     else:
         result = str(sentidlist[0])
@@ -1400,7 +1400,7 @@ def adaptsentence(stree: SynTree) -> SynTree:
     sentid = getsentid(stree)
     sentencenode = stree.find('.//sentence')
     if sentencenode is None:
-        SDLOGGER.ERROR('No sentence element found for stree with sentid={}'.format(sentid))
+        settings.LOGGER.ERROR('No sentence element found for stree with sentid={}'.format(sentid))
         return stree
     sentencenodeparent = sentencenode.getparent()
     sentencenodeindex = sentencenodeparent.index(sentencenode)
@@ -1432,13 +1432,13 @@ def transplant_node(node1: SynTree, node2: SynTree, stree: SynTree) -> SynTree:
         result = stree
     else:
         parent, index = parentindex
-        # SDLOGGER.debug(simpleshow(parent))
+        # settings.LOGGER.debug(simpleshow(parent))
         del parent[index]
-        # SDLOGGER.debug(simpleshow(parent))
+        # settings.LOGGER.debug(simpleshow(parent))
         parent.insert(index, node2)
-        # SDLOGGER.debug(simpleshow(parent))
+        # settings.LOGGER.debug(simpleshow(parent))
         result = stree
-        # SDLOGGER.debug(simpleshow(stree))
+        # settings.LOGGER.debug(simpleshow(stree))
 
     # adapt the sentence
     # find the sentence element's parent and its index
@@ -1562,7 +1562,7 @@ def decomposetree(tree: SynTree) -> Tuple[SynTree, SynTree, SynTree, SynTree, Sy
         elif child.tag == 'parser':
             parser = child
         else:
-            SDLOGGER.error('Unknown tag encountered in tree: {}'.format(child.tag))
+            settings.LOGGER.error('Unknown tag encountered in tree: {}'.format(child.tag))
     return parser, metadata, node, sentence, comments
 
 
@@ -1628,7 +1628,7 @@ def gettreepos(origpos: PositionStr, reverseindex: List[PositionStr]) -> Positio
     if origpos in reverseindex:
         result = str(reverseindex.index(origpos))
     else:
-        SDLOGGER.error('origpos {} not in reverseindex: {}'.format(origpos, reverseindex))
+        settings.LOGGER.error('origpos {} not in reverseindex: {}'.format(origpos, reverseindex))
         result = str(0)
     return result
 
@@ -1851,16 +1851,16 @@ def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
                 node.attrib['end'] = str(newendint)
                 node.attrib['begin'] = str(newendint - 1)
             else:
-                SDLOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
+                settings.LOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
                 fulltrees = node.xpath('ancestor::node[@cat="top"]')
                 if fulltrees != []:
                     fulltree = fulltrees[0]
                 else:
                     fulltree = node
                 sent = getyield(fulltree)
-                SDLOGGER.error('utterance={}'.format(sent))
+                settings.LOGGER.error('utterance={}'.format(sent))
                 # etree.dump(resulttree)
-                SDLOGGER.error('tokenposdict={}'.format(tokenposdict))
+                settings.LOGGER.error('tokenposdict={}'.format(tokenposdict))
         elif 'cat' in node.attrib:
             children = [ch for ch in node]
             (b, e) = getbeginend(children)
@@ -1890,11 +1890,11 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     intbegins = [int(getattval(n, 'begin')) for n in thetreeleaves]
     tokenlistbegins = [t.pos + t.subpos for t in tokenlist]
     if len(intbegins) != len(tokenlistbegins):
-        SDLOGGER.error('token mismatch')
-        SDLOGGER.error('tree yield={}'.format(getyield(thetree)))
-        SDLOGGER.error('tokenlist={}'.format(tokenlist))
-        SDLOGGER.error('intbegins={}'.format(intbegins))
-        SDLOGGER.error('tokenlistbegins ={}'.format(tokenlistbegins))
+        settings.LOGGER.error('token mismatch')
+        settings.LOGGER.error('tree yield={}'.format(getyield(thetree)))
+        settings.LOGGER.error('tokenlist={}'.format(tokenlist))
+        settings.LOGGER.error('intbegins={}'.format(intbegins))
+        settings.LOGGER.error('tokenlistbegins ={}'.format(tokenlistbegins))
     pospairs = zip(intbegins, tokenlistbegins)
     thetreetokenposdict = {treepos + 1: tokenpos + 1 for treepos, tokenpos in pospairs}
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
@@ -1902,7 +1902,7 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
 
 
 def fatparse(utterance: str, tokenlist: List[Token]) -> SynTree:
-    stree = PARSE_FUNC(utterance)
+    stree = settings.PARSE_FUNC(utterance)
     fatstree = deepcopy(stree)
     treeinflate(fatstree, start=10, inc=10)
     debug = False

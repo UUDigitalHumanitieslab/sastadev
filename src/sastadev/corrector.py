@@ -10,7 +10,7 @@ from sastadev.alpino import getdehetwordinfo
 from sastadev.basicreplacements import (basicexpansions, basicreplacements,
                                         getdisambiguationdict)
 from sastadev.cleanCHILDEStokens import cleantokens
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.dedup import (cleanwordofnort, find_duplicates2,
                             find_janeenouduplicates, find_simpleduplicates,
                             find_substringduplicates2, getfilledpauses,
@@ -154,7 +154,7 @@ def ngramreduction(reducedtokens: List[Token], token2nodemap: Dict[Token, SynTre
 
 def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], List[Meta]]:
     if tree is None:
-        SDLOGGER.error('No tree for :{}\nNo reduction applied'.format(tokens))
+        settings.LOGGER.error('No tree for :{}\nNo reduction applied'.format(tokens))
         return ((tokens, []))
 
     tokennodes = tree.xpath('.//node[@pt or @pos]')
@@ -381,13 +381,13 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
 
 def keycheck(key: Any, dict: Dict[Any, Any]) -> bool:
     if key not in dict:
-        SDLOGGER.error('key {}  not in dictionary. Contents of dictionary:'.format(key))
+        settings.LOGGER.error('key {}  not in dictionary. Contents of dictionary:'.format(key))
         for akey, val in dict.items():
             valbgn = getattval(val, 'begin')
             valpt = getattval(val, 'pt')
             valword = getattval(val, 'word')
             valstr = '{}:{}:{}'.format(valbgn, valpt, valword)
-            SDLOGGER.error('{}={}'.format(akey, valstr))
+            settings.LOGGER.error('{}={}'.format(akey, valstr))
     return key in dict
 
 

@@ -35,8 +35,9 @@ import csv
 import os
 import re
 from typing import Dict, List, Optional, Tuple, cast
+from sastadev.conf import settings
 
-from sastadev.config import SD_DIR
+
 
 tab = '\t'
 plussym = '+'
@@ -629,7 +630,7 @@ def makeparadigm(word, forms):
 #: reading from the file with the name in the constant *correctionfilename* upon
 #: initialisation of the module *deregularise*
 correction: Dict[str, Tuple[str, str]] = {}
-correctionfile = open(os.path.join(SD_DIR, 'data', correctionfilename), 'r', encoding='utf8')
+correctionfile = open(os.path.join(settings.SD_DIR, 'data', correctionfilename), 'r', encoding='utf8')
 myreader = csv.reader(correctionfile, delimiter=tab)
 for row in myreader:
     wrong = row[0]

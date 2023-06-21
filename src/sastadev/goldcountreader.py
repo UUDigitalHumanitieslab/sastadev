@@ -1,5 +1,5 @@
 from sastadev import xlsx
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 
 gcadd = '_count_tsv'
 txtext = ".txt"
@@ -45,10 +45,10 @@ uttcountheaders = ['uttcount', 'uttcounts']
 #                     treebankcol = colctr
 #         else:
 #             if idcol is None:
-#                 SDLOGGER.error('no ID column found')
+#                 settings.LOGGER.error('no ID column found')
 #                 exit(-1)
 #             if treebankcol is None:
-#                 SDLOGGER.error('No column found for Treebank {}.'.format(treebankname))
+#                 settings.LOGGER.error('No column found for Treebank {}.'.format(treebankname))
 #                 exit(-1)
 #             theid = sheet.cell_value(rowctr, idcol)
 #             thecount = sheet.cell_value(rowctr, treebankcol)
@@ -93,10 +93,10 @@ uttcountheaders = ['uttcount', 'uttcounts']
 #                     uttcountcol = colctr
 #         else:
 #             if idcol is None:
-#                 SDLOGGER.error('no ID column found')
+#                 settings.LOGGER.error('no ID column found')
 #                 break
 #             elif uttcountcol is None:
-#                 SDLOGGER.error('No uttcount column found')
+#                 settings.LOGGER.error('No uttcount column found')
 #                 break
 #             else:
 #                 theid = sheet.cell_value(rowctr, idcol)
@@ -127,10 +127,10 @@ def get_goldcounts(infilename):
         elif val.lower() in uttcountheaders:
             uttcountcol = col
     if idcol is None:
-        SDLOGGER.error('no ID column found')
+        settings.LOGGER.error('no ID column found')
         return thedata
     if uttcountcol is None:
-        SDLOGGER.error('No uttcount column found')
+        settings.LOGGER.error('No uttcount column found')
         return thedata
     for row in data:
         if len(row) >= max(idcol, uttcountcol):
@@ -141,5 +141,5 @@ def get_goldcounts(infilename):
         else:
             rowstrlist = [str(x) for x in row]
             rowstr = ';'.join(rowstrlist)
-            SDLOGGER.error(f'Row has no id or uttcount: {rowstr}')
+            settings.LOGGER.error(f'Row has no id or uttcount: {rowstr}')
     return thedata

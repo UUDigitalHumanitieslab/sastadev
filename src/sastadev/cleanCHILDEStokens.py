@@ -10,7 +10,7 @@ from copy import deepcopy
 from typing import List, Optional, Pattern, TextIO, Tuple, Union
 
 from sastadev import CHAT_Annotation, sastatok
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.metadata import Meta, Metadata, bpl_none
 from sastadev.sastatoken import Token, show
 from sastadev.sastatypes import IntSpan
@@ -75,7 +75,7 @@ def clearnesting(intokens: List[Token], repkeep: bool) -> Tuple[List[Token], Met
             begin = tokenctr
             span = findscopeclose(tokens[tokenctr:], offset=tokenctr)
             if span is None:
-                SDLOGGER.error('Syntax error:Scope Open Symbol {} with position = {} ignored (no corresponding closing bracket) in:\n {}'.format(token.word, token.pos, show(tokens)))
+                settings.LOGGER.error('Syntax error:Scope Open Symbol {} with position = {} ignored (no corresponding closing bracket) in:\n {}'.format(token.word, token.pos, show(tokens)))
             else:
                 (begin, end) = span
                 (midtokens, midmetadata) = cleantokens(tokens[begin + 1:end], repkeep)
@@ -83,7 +83,7 @@ def clearnesting(intokens: List[Token], repkeep: bool) -> Tuple[List[Token], Met
                 metadata += midmetadata
                 tokenctr = end
         elif token.word == scope_close:
-            SDLOGGER.error('Syntax error: unexpected {} excountered with position {} in:\n {}'.format(token.word, token.pos, show(tokens)))
+            settings.LOGGER.error('Syntax error: unexpected {} excountered with position {} in:\n {}'.format(token.word, token.pos, show(tokens)))
             newtokens.append(token)
         else:
             newtokens.append(token)
@@ -193,7 +193,7 @@ def robustness(utt: str) -> str:
     for (regex, instr, outstr, msg) in robustnessrules:
         newnewutt = regex.sub(outstr, newutt)
         if newnewutt != newutt:
-            SDLOGGER.warning('{}. Interpreted <{}> as <{}> in <{}>'.format(msg, instr, outstr, utt))
+            settings.LOGGER.warning('{}. Interpreted <{}> as <{}> in <{}>'.format(msg, instr, outstr, utt))
         newutt = newnewutt
     return newutt
 

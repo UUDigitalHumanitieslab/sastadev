@@ -15,7 +15,7 @@ from collections import Counter, defaultdict
 from typing import Any, Dict, List, Match, Optional, Pattern, Tuple
 
 from sastadev import xlsx
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.readmethod import itemseppattern
 from sastadev.sastatypes import (FileName, Item, Level, Position, QId,
                                  QueryDict, UttId, UttWordDict)
@@ -73,7 +73,7 @@ def getlabels(labelstr: str, patterns: Tuple[Pattern, Pattern]) -> List[str]:
         ms = pattern.finditer(labelstr)
         logstr = str([m.group(0) for m in ms if m.group(0) not in ' ;,-'])
         # print('Cannot interpret {};  found items: {}'.format(labelstr,logstr), file=sys.stderr)
-        SDLOGGER.warning('Cannot interpret %s; found items: %s', labelstr, logstr)
+        settings.LOGGER.warning('Cannot interpret %s; found items: %s', labelstr, logstr)
         # exit(-1)
     return results
 
@@ -419,7 +419,7 @@ def getitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Level
     resultmap: Dict[Item, Level] = {}
     for (item, level) in mapping:
         if item in resultmap:
-            SDLOGGER.error('Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
+            settings.LOGGER.error('Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
         else:
             resultmap[item] = level
     return resultmap
@@ -480,12 +480,12 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif (theitem, thelevel) in altcodes:
             (altitem, altlevel) = altcodes[(theitem, thelevel)]
             qid = mapping[(altitem, altlevel)]
             update(results, qid, (altlevel, altitem, thecounter))
-            SDLOGGER.info(
+            settings.LOGGER.info(
                 '{} of level {} invalid code replaced by {} of level {}'.format(theitem, thelevel, altitem, altlevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
@@ -494,12 +494,12 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif theitem in mappingitem2levelmap:   # valid item but wrong level
             thecorrectlevel = mappingitem2levelmap[theitem]
             qid = mapping[(theitem, thecorrectlevel)]
             update(results, qid, (thecorrectlevel, theitem, thecounter))
-            SDLOGGER.info(
+            settings.LOGGER.info(
                 'level {} of item {} replaced by correct level {}'.format(thelevel, theitem, thecorrectlevel))
             if includeimplies:
                 for implieditem in queries[qid].implies:
@@ -508,13 +508,13 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif theitem in altcodesitem2levelmap:  # valid alternative item but wrong level
             theitemlevel = altcodesitem2levelmap[theitem]
             (thecorrectitem, thecorrectlevel) = altcodes[(theitem, theitemlevel)]
             qid = mapping[(thecorrectitem, thecorrectlevel)]
             update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
-            SDLOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
+            settings.LOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
                                                                                                 thecorrectlevel,
                                                                                                 thecorrectitem))
             if includeimplies:
@@ -524,10 +524,10 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        SDLOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
 
         else:
-            SDLOGGER.error('{} of level {} not a valid coding'.format(theitem, thelevel))
+            settings.LOGGER.error('{} of level {} not a valid coding'.format(theitem, thelevel))
     return allutts, results
 
 

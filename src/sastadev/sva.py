@@ -2,7 +2,7 @@ from typing import List
 
 from lxml import etree
 
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.lexicon import (getinflforms, getwordposinfo, informlexiconpos,
                               pvinfl2dcoi)
 from sastadev.metadata import bpl_node, mkSASTAMeta
@@ -600,7 +600,7 @@ def getpersons(vnode):
     elif vtense == 'conj':
         result = {'3'}
     else:
-        SDLOGGER.error('Unknown pvtijd value: {}'.format(vtense))
+        settings.LOGGER.error('Unknown pvtijd value: {}'.format(vtense))
         result = {}
     return result
 
@@ -654,11 +654,11 @@ def phicompatible(snode, vnode):
         else:
             if subjperson not in ['1', '2', '3']:
                 subjnodelemma = getattval(subjnode, 'lemma')
-                SDLOGGER.error('Unexpected value ({}) for the attribute persoon of {}'.format(subjperson, subjnodelemma))
+                settings.LOGGER.error('Unexpected value ({}) for the attribute persoon of {}'.format(subjperson, subjnodelemma))
             result = False
     else:
         subjnodelemma = getattval(subjnode, 'lemma')
-        SDLOGGER.error('Unexpected value ({}) for the attribute getal of {}'.format(subjgetal, subjnodelemma))
+        settings.LOGGER.error('Unexpected value ({}) for the attribute getal of {}'.format(subjgetal, subjnodelemma))
         result = False
     return result
 

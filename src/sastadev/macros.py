@@ -13,8 +13,9 @@ import os.path as op
 import re
 from typing import Dict, List, TextIO
 
-from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.conf import settings
 from sastadev.generatemacros import generatemacros
+
 
 idpat = r'([A-z_][A-z0-9_]*)'
 eqpat = r'='
@@ -48,7 +49,7 @@ def readmacros(macrofile: TextIO, macrodict: Dict[str, str]) -> Dict[str, str]:
         macroname = macromatch.group(1)
         macroexpr = macromatch.group(2)
         if macroname in macrodict:
-            SDLOGGER.warning('Duplicate macro {} encountered. Ignored'.format(macroname))
+            settings.LOGGER.warning('Duplicate macro {} encountered. Ignored'.format(macroname))
         else:
             macrodict[macroname] = macroexpr
     return macrodict
@@ -70,12 +71,12 @@ def expandmacrosdict(expr: str, macrodict: Dict[str, str]) -> str:
             newexpr = thismacrocallre.sub(macrodict[macroname], newexpr)
             thematch = macrocallre.search(newexpr)
         else:
-            SDLOGGER.error('Unknown macro call encountered: {}.'.format(macroname))
+            settings.LOGGER.error('Unknown macro call encountered: {}.'.format(macroname))
             break
     return newexpr
 
 
-macrodir = op.join(SD_DIR, 'data', 'macros')
+macrodir = op.join(settings.SD_DIR, 'data', 'macros')
 macrofilenames = [op.join(macrodir, 'sastamacros1.txt'), op.join(macrodir, 'sastamacros2.txt'), op.join(macrodir, 'newimperatives.txt')]
 
 macrodict = generatemacros()

@@ -2,7 +2,7 @@ from collections import Counter, defaultdict
 from math import isnan
 
 from sastadev import readcsv
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.counterfunctions import counter2liststr
 from sastadev.xlsx import getxlsxdata, mkworkbook
 
@@ -61,13 +61,13 @@ def checkpermformat(header, data, colcount, strict=True):
             lrow = len(row)
             result = lrow == colcount
             if not result:
-                SDLOGGER.error('Wrong # columns ({} instead of {}), row {}'.format(lrow, colcount, rowctr))
+                settings.LOGGER.error('Wrong # columns ({} instead of {}), row {}'.format(lrow, colcount, rowctr))
                 if strict:
                     exit(-1)
                 else:
                     return False
     else:
-        SDLOGGER.error('Wrong # columns ({} instead of {}) in the header'.format(lheader, colcount,))
+        settings.LOGGER.error('Wrong # columns ({} instead of {}) in the header'.format(lheader, colcount,))
         if strict:
             exit(-1)
         else:
@@ -85,7 +85,7 @@ def updatepermdict(fullname, permdict):
         if key not in permdict:
             permdict[key] = silverfulldatadict[key]
         elif not rowsequal(silverfulldatadict[key], permdict[key]):
-            SDLOGGER.warning('Key: {} Value:\n ({}) \noverwritten by value:\n {};\n File: {}'.format(key, permdict[key], silverfulldatadict[key], fullname))
+            settings.LOGGER.warning('Key: {} Value:\n ({}) \noverwritten by value:\n {};\n File: {}'.format(key, permdict[key], silverfulldatadict[key], fullname))
 
     return permdict, silverheader
 
@@ -195,7 +195,7 @@ def mksilver(permsilverdict, silvercheckfullname, platinumfullname, platinumedit
         currow = silvercheckdata[row]
         moreorless = currow[moreorlesscol]
         if moreorless not in legalmoreorlesses:
-            SDLOGGER.error('Unexpected value in row {}: {}. File {}'.format(row, moreorless, silvercheckfullname))
+            settings.LOGGER.error('Unexpected value in row {}: {}. File {}'.format(row, moreorless, silvercheckfullname))
         if moreorless == 'Missed examples':
             continue
         qid = currow[qidcol]
@@ -206,17 +206,17 @@ def mksilver(permsilverdict, silvercheckfullname, platinumfullname, platinumedit
             (user1, user2, user3) = curpermrow[user1col], curpermrow[user2col], curpermrow[user3col]
             cleanuser1 = clean(user1)
             if cleanuser1 not in allowedoknots:
-                SDLOGGER.error('Unexpected value in row {}: {}. File {}'.format(row, user1, silvercheckfullname))
+                settings.LOGGER.error('Unexpected value in row {}: {}. File {}'.format(row, user1, silvercheckfullname))
             if cleanuser1 not in oks:
                 toremove[qid].append(uttid)
             if cleanuser1 in undecideds:
                 undecidedcounter += 1
         else:
             pass
-            #SDLOGGER.warning('No Silver remark for row {}: {}. File {}; qid={}, uttid={}, pos={}'.format(row, moreorless, silvercheckfullname, qid, uttid, pos))
+            #settings.LOGGER.warning('No Silver remark for row {}: {}. File {}; qid={}, uttid={}, pos={}'.format(row, moreorless, silvercheckfullname, qid, uttid, pos))
     junk = 0
     if undecidedcounter > 0:
-        SDLOGGER.info('{} undecided in file {}'.format(undecidedcounter, silvercheckfullname))
+        settings.LOGGER.info('{} undecided in file {}'.format(undecidedcounter, silvercheckfullname))
     # read the platinumfile
     (header, platinumdata) = readcsv.readheadedcsv(platinumfullname)
     newrows = []

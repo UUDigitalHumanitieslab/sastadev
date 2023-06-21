@@ -22,7 +22,7 @@ from sastadev.memoize import memoize
 
 #from sastadev.sastatypes import SynTree, URL
 
-#from sastadev.config import SDLOGGER
+#from sastadev.config import settings.logger
 #from sastadev.sastatypes import SynTree, URL
 
 urllibrequestversion = urllib.request.__version__

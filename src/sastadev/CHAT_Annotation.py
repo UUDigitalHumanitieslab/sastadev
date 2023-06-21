@@ -1,7 +1,7 @@
 import re
 
 from sastadev import cleanCHILDEStokens
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.metadata import Meta, bpl_delete
 from sastadev.sastatoken import Token, show
 
@@ -89,7 +89,7 @@ def doreplacement(repltokens, replacement, tokens):
     elif replacement == eps:
         pass
     else:
-        SDLOGGER.error('Unknown replacement: {}'.format(replacement))
+        settings.LOGGER.error('Unknown replacement: {}'.format(replacement))
     return newtokens
 
 
@@ -232,7 +232,7 @@ class CHAT_SimpleScopedRegex(CHAT_Regex):
             else:
                 (b, e) = scope
                 if ltodotokens == e + 1:
-                    SDLOGGER.error(
+                    settings.LOGGER.error(
                         'Scope markings in positions {} and {} not followed by annotation ignored in {}'.format(b, e,
                                                                                                                 show(
                                                                                                                     todotokens)))
@@ -243,7 +243,7 @@ class CHAT_SimpleScopedRegex(CHAT_Regex):
                     annotationpositions = [token.pos for token in todotokens[b + 1:e]]
                     if self.arity == dyadic:
                         if ltodotokens <= e + 2:
-                            SDLOGGER.error(
+                            settings.LOGGER.error(
                                 'Missing second argument for dyadic annotation {} in {}'.format(annotation.name,
                                                                                                 show(todotokens)))
                             newtokens += todotokens[b + 1:e]
@@ -255,7 +255,7 @@ class CHAT_SimpleScopedRegex(CHAT_Regex):
                         annotatedwords = []
                         annotatedpositions = []
                     else:
-                        SDLOGGER.error('Illegal arity specification ({}) on {}'.format(self.arity, annotation.name))
+                        settings.LOGGER.error('Illegal arity specification ({}) on {}'.format(self.arity, annotation.name))
                         annotatedwords = []
                         annotatedpositions = []
                     newmeta = annotation.metadatafunction(annotation, annotationwords, annotatedpositions,
@@ -282,7 +282,7 @@ class CHAT_SimpleScopedRegex(CHAT_Regex):
         while i < ltodotokens:
             if self.compiledre.search(todotokens[i].word):
                 if scopewords == []:
-                    SDLOGGER.error(
+                    settings.LOGGER.error(
                         'First argument of annotation {} missing. Annotation ignored'.format(annotation.name))
                 else:
                     if self.arity == monadic:
@@ -296,7 +296,7 @@ class CHAT_SimpleScopedRegex(CHAT_Regex):
                         metadata.append(newmeta)
                     elif self.arity == dyadic:
                         if i + 1 >= ltodotokens:
-                            SDLOGGER.error(
+                            settings.LOGGER.error(
                                 'Missing second argument for dyadic annotation {} in {}'.format(annotation.name,
                                                                                                 show(todotokens)))
                         else:
@@ -375,7 +375,7 @@ class CHAT_ComplexRegex(CHAT_Regex):
             elif state == scopestate:
                 scope = findscope(tokens[tokenctr - 1:], offset=tokenctr - 1)
                 if scope is None:
-                    SDLOGGER.error('No closing bracket found for < with pos={} in {}'.format(tokens[tokenctr - 1].pos,
+                    settings.LOGGER.error('No closing bracket found for < with pos={} in {}'.format(tokens[tokenctr - 1].pos,
                                                                                              show(tokens)))
                     state = wstate
                 else:
@@ -407,7 +407,7 @@ class CHAT_ComplexRegex(CHAT_Regex):
                     elif self.bracketreplacement == eps:
                         pass
                     else:
-                        SDLOGGER.error('Unknown replacementtype: {} in {}'.format(self.scopereplacement, show(tokens)))
+                        settings.LOGGER.error('Unknown replacementtype: {} in {}'.format(self.scopereplacement, show(tokens)))
                     tobereplacedtokens = []
                     inc = bracketend - bracketbegin
                 state = wstate
@@ -416,7 +416,7 @@ class CHAT_ComplexRegex(CHAT_Regex):
         if state in estates:
             return (newtokens, metadata)
         else:
-            SDLOGGER.error('Not in an end state, state={} in {}'.format(state, show(tokens)))
+            settings.LOGGER.error('Not in an end state, state={} in {}'.format(state, show(tokens)))
             return (tokens, [])
 
 
@@ -535,7 +535,7 @@ def dropchars2(w, c):
 
 def CHAT_message(msg):
     def result(x, y): 
-        return SDLOGGER.warning(msg.format(x, y))
+        return settings.LOGGER.warning(msg.format(x, y))
 
     return result
 
@@ -759,12 +759,12 @@ def bracketseq(tokenlist, bregex, mregex, eregex):
                 end = tokenctr
                 state = estate
             elif bregex.search(token.word) is not None:
-                SDLOGGER.error('Range Open symbol encountered inside brackets in {}'.format(show(tokenlist)))
+                settings.LOGGER.error('Range Open symbol encountered inside brackets in {}'.format(show(tokenlist)))
                 state = mstate
             elif mregex.search(token.word) is not None:
                 state = mstate
             else:
-                SDLOGGER.error('Incorrect element between brackets ({}) in: {}'.format(token.word, show(tokenlist)))
+                settings.LOGGER.error('Incorrect element between brackets ({}) in: {}'.format(token.word, show(tokenlist)))
                 state = mstate
         elif state == estate:
             break
@@ -818,7 +818,7 @@ def get_CHATpatterns(annotations):
         elif isinstance(theregex, CHAT_InWordRegex):
             newpats = {}
         else:
-            SDLOGGER.error('Unknown Regex type: {}'.format(theregex))
+            settings.LOGGER.error('Unknown Regex type: {}'.format(theregex))
             newpats = {}
         result = result.union(newpats)
     return (result, openbrackets, closebrackets)

@@ -12,7 +12,7 @@ it provides the function *getdehetwordinfo*:
 from typing import List, Tuple
 
 from sastadev import lexicon, treebankfunctions
-from sastadev.config import PARSE_FUNC
+from sastadev.conf import settings
 from sastadev.sastatypes import WordInfo
 
 
@@ -27,7 +27,7 @@ def getalpinowordinfo(word: str) -> List[WordInfo]:
     isolation.
 
     '''
-    tree = PARSE_FUNC(word)
+    tree = settings.PARSE_FUNC(word)
     relevantnode = treebankfunctions.find1(tree, '//node[parent::node[@cat="top"]]')
     if relevantnode is None:
         return []

@@ -11,7 +11,7 @@ function to expose to other modules is: screening4stage(uttcount, results)
 
 '''
 from sastadev.allresults import scores2counts
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 
 stage1threshold = 95
 uttcountthreshold = 200
@@ -136,7 +136,7 @@ def stage1(results):
         proportion = stage1count / sumallresults * 100
     else:
         proportion = 0
-        SDLOGGER.warning('No results found. Output unreliable')
+        settings.LOGGER.warning('No results found. Output unreliable')
     result = proportion >= stage1threshold
     return result
 
@@ -151,7 +151,7 @@ def screening(results):
     stages[1] = stage1(results) and not stages[2]
     result = None
     for s in range(6, 0, -1):
-        #        stageslogger.info('Checking stage %s', s)
+        #        stagesLOGGER.info('Checking stage %s', s)
         if result is None and stages[s]:
             result = s
             # for ls in range(s,0,-1):
@@ -179,14 +179,14 @@ def screening4stage(uttcount, results):
     #    (inbase, ext) = os.path.splitext(thefilename)
     #    stagesexplainfile = inbase + 'stage_explanation' + '.txt'
     #    stageslogger = logging.getLogger('Stages:')
-    #    stageslogger.setLevel(logging.INFO)
+    #    stagesLOGGER.setLevel(logging.INFO)
     #    ch = logging.FileHandler(stagesexplainfile)
     #    ch.setLevel(logging.INFO)
-#    stageslogger.addHandler(ch)
+#    stagesLOGGER.addHandler(ch)
 
     if uttcount < uttcountthreshold:
         message = 'TARSP Screening: Less than {} utterances ({}). Results not reliable'.format(uttcountthreshold, uttcount)
-        SDLOGGER.warning(message)
+        settings.LOGGER.warning(message)
         # print(message)
     result = screening(results)
     return result

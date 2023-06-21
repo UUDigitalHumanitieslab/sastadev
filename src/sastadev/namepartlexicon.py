@@ -17,8 +17,9 @@ The namepartlexicon module:
 import csv
 import os
 from typing import Dict
+from sastadev.conf import settings
 
-from sastadev.config import SD_DIR
+
 
 tab: str = '\t'
 namepartlexicon: Dict[str, int] = {}
@@ -47,7 +48,7 @@ def namepart_isa_namepart_uc(word: str) -> bool:
     return result
 
 
-namepartfilename = os.path.join(SD_DIR, 'data', 'names', 'nameparts', 'namepartlexicon.csv')
+namepartfilename = os.path.join(settings.SD_DIR, 'data', 'names', 'nameparts', 'namepartlexicon.csv')
 with open(namepartfilename, 'r', encoding='utf8') as namepartfile:
     csvreader = csv.reader(namepartfile, delimiter=tab)
     for row in csvreader:

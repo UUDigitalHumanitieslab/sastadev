@@ -7,7 +7,7 @@ This module defines the function read_method to read in a method:
 from typing import List, Tuple
 
 from sastadev import xlsx
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.query import Query, form_process, post_process
 from sastadev.sastatypes import (AltCodeDict, FileName, Item_Level2QIdDict,
                                  QId, QueryDict)
@@ -109,12 +109,12 @@ def getlistofitems(str: str, sep: str) -> List[str]:
 #             lcitem = item.lower()
 #             lclevel = level.lower()
 #             if (lcitem, lclevel) in item2idmap:
-#                 SDLOGGER.error('Duplicate (item, level) pair for {} and {}'.format(item2idmap[(lcitem, lclevel)], id))
+#                 settings.LOGGER.error('Duplicate (item, level) pair for {} and {}'.format(item2idmap[(lcitem, lclevel)], id))
 #             item2idmap[(lcitem, lclevel)] = id
 #             for altitem in altitems:
 #                 lcaltitem = altitem.lower()
 #                 if (lcaltitem, lclevel) in altcodes:
-#                     SDLOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
+#                     settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
 #                 altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 #
 #         rowctr += 1
@@ -168,12 +168,12 @@ def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict
             lcitem = item.lower()
             lclevel = level.lower()
             if (lcitem, lclevel) in item2idmap:
-                SDLOGGER.error('Duplicate (item, level) pair for {} and {}'.format(item2idmap[(lcitem, lclevel)], id))
+                settings.LOGGER.error('Duplicate (item, level) pair for {} and {}'.format(item2idmap[(lcitem, lclevel)], id))
             item2idmap[(lcitem, lclevel)] = id
             for altitem in altitems:
                 lcaltitem = altitem.lower()
                 if (lcaltitem, lclevel) in altcodes:
-                    SDLOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
+                    settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
                 altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 
     return (queries, item2idmap, altcodes, postquerylist)

@@ -4,8 +4,8 @@ from functools import lru_cache
 
 from lxml import etree
 
-from sastadev import config
 from sastadev.alpinoparsing import escape_alpino_input, isempty
+import sastadev.conf
 
 
 class AlpinoSentenceParser:
@@ -14,7 +14,7 @@ class AlpinoSentenceParser:
     @contextmanager
     def connection(self):
         try:
-            s = socket.create_connection((config.ALPINO_HOST, config.ALPINO_PORT))
+            s = socket.create_connection((sastadev.conf.settings.ALPINO_HOST, sastadev.conf.settings.ALPINO_PORT))
             yield s
             s.close()
         except socket.error:

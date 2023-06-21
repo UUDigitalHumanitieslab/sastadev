@@ -6,7 +6,7 @@ from collections import Counter
 from typing import Dict, List
 
 from sastadev.allresults import AllResults
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.query import core_process
 from sastadev.sastatypes import QId, QueryDict, Stage, SynTree
 from sastadev.treebankfunctions import getmeta
@@ -141,7 +141,7 @@ def getstage(uttcounts: Dict[Stage, int], allresults: AllResults) -> Stage:
             if uttcounts[el] / gtotaal >= gofase_minthreshold:
                 cands.append(el)
         else:
-            SDLOGGER.error('gtotaal has value 0')
+            settings.LOGGER.error('gtotaal has value 0')
     if cands == []:
         result = 1
     else:

@@ -6,7 +6,7 @@ from io import BytesIO
 import xlsxwriter
 
 from sastadev import xlsx
-from sastadev.config import SD_DIR
+from sastadev.conf import settings
 from sastadev.counterfunctions import counter2liststr
 from sastadev.forms import getformfilename
 
@@ -156,5 +156,5 @@ def mktarspform(allresults, _, in_memory=False):
 
 
 # initialisation
-basefilename = os.path.join(SD_DIR, 'data', 'form_templates', 'TARSP Form Current.xlsx')
+basefilename = os.path.join(settings.SD_DIR, 'data', 'form_templates', 'TARSP Form Current.xlsx')
 basesheet = readbaseform(basefilename)

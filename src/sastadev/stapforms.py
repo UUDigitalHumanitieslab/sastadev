@@ -6,13 +6,14 @@ from shutil import copyfile, copyfileobj
 from openpyxl import load_workbook
 
 from sastadev.allresults import AllResults
-from sastadev.config import SD_DIR, SDLOGGER
+from sastadev.conf import settings
 from sastadev.forms import getformfilename
+
 
 scoresheetname = 'STAP 1 - 5'
 maxutt = 50
 zerocount = 0
-basexl = os.path.join(SD_DIR, 'data', 'form_templates', 'STAP Excel VUmc 2018.xlsx')
+basexl = os.path.join(settings.SD_DIR, 'data', 'form_templates', 'STAP Excel VUmc 2018.xlsx')
 
 NS = 'S001'
 OS = 'S002'
@@ -97,7 +98,7 @@ def makestapform(allresults, _, basexl=basexl, in_memory=False):
                 cellkey = col + uttidrowstr
                 ws[cellkey] = el
         else:
-            SDLOGGER.error('Unexpected utterance id encountered: {}'.format(uttid))
+            settings.LOGGER.error('Unexpected utterance id encountered: {}'.format(uttid))
 
     # save the workbook
     wb.save(target)

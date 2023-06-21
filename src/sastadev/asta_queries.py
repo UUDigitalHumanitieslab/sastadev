@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List
 
-from sastadev.config import SDLOGGER
+from sastadev.conf import settings
 from sastadev.dedup import getposition
 from sastadev.macros import expandmacros
 from sastadev.metadata import (longrep, repeated, repeatedseqtoken, repetition,
@@ -37,7 +37,7 @@ def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
             valueliststr = meta.attrib['annotationposlist']
             valuelist = string2list(valueliststr)
             if len(keylist) != len(valuelist):
-                SDLOGGER.error('Error in metadata: {} in sentence {}'.format(meta, getyield(stree)))
+                settings.LOGGER.error('Error in metadata: {} in sentence {}'.format(meta, getyield(stree)))
             else:
                 for key, val in zip(keylist, valuelist):
                     dupindex[key] = val
@@ -192,7 +192,7 @@ def find_node(position, nodes):
     elif lresults == 1:
         result = results[0]
     else:
-        SDLOGGER.warning('Multiple nodes found for position {}: {}, in {}'.format(position, showtns(results), showtns(nodes)))
+        settings.LOGGER.warning('Multiple nodes found for position {}: {}, in {}'.format(position, showtns(results), showtns(nodes)))
         result = results[0]
     return result
 
