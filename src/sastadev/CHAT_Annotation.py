@@ -375,8 +375,8 @@ class CHAT_ComplexRegex(CHAT_Regex):
             elif state == scopestate:
                 scope = findscope(tokens[tokenctr - 1:], offset=tokenctr - 1)
                 if scope is None:
-                    settings.LOGGER.error('No closing bracket found for < with pos={} in {}'.format(tokens[tokenctr - 1].pos,
-                                                                                             show(tokens)))
+                    settings.LOGGER.error('No closing bracket found for < with pos={} in {}'.format(
+                        tokens[tokenctr - 1].pos, show(tokens)))
                     state = wstate
                 else:
                     (b, e) = scope
@@ -456,8 +456,8 @@ def simplemetafunction(f):
                                     source=CHAT)
 
 
-def simple_bpldel_metafunction(f): 
-    return lambda ann, pos, w: Meta(ann.name, [f(w)], 
+def simple_bpldel_metafunction(f):
+    return lambda ann, pos, w: Meta(ann.name, [f(w)],
                                     annotatedposlist=[pos],
                                     annotatedwordlist=[w], source=CHAT,
                                     backplacement=bpl_delete)
@@ -470,7 +470,7 @@ def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotate
 
 
 def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
-    return Meta(ann.name, annotationwordlist, 
+    return Meta(ann.name, annotationwordlist,
                 annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
                 annotatedposlist=annotatedposlist, source=CHAT)
 
@@ -523,7 +523,7 @@ def dropsubstr(w, s):
     return result
 
 
-def dropchars(c): 
+def dropchars(c):
     return lambda w: dropchars2(w, c)
 
 
@@ -534,7 +534,7 @@ def dropchars2(w, c):
 
 
 def CHAT_message(msg):
-    def result(x, y): 
+    def result(x, y):
         return settings.LOGGER.warning(msg.format(x, y))
 
     return result

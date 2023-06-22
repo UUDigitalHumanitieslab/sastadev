@@ -514,9 +514,10 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
             (thecorrectitem, thecorrectlevel) = altcodes[(theitem, theitemlevel)]
             qid = mapping[(thecorrectitem, thecorrectlevel)]
             update(results, qid, (thecorrectlevel, thecorrectitem, thecounter))
-            settings.LOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
-                                                                                                thecorrectlevel,
-                                                                                                thecorrectitem))
+            settings.LOGGER.info(
+                'level {} of item {} replaced by correct level {} and item {}'.format(
+                    thelevel, theitem, thecorrectlevel, thecorrectitem)
+            )
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     impliedlevel = mappingitem2levelmap[implieditem]

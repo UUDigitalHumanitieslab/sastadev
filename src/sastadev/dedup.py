@@ -27,7 +27,8 @@ positionatt = 'end'
 
 xmetaxpath = './/xmeta'
 
-samplesizemdvalues = {repeatedjaneenou, shortrep, intj, unknownsymbol, filled_pause}
+samplesizemdvalues = {repeatedjaneenou,
+                      shortrep, intj, unknownsymbol, filled_pause}
 mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou,
                fstoken}
 
@@ -45,7 +46,8 @@ class DupInfo:
         self.icsws = icsws  # nodes for words in incomplete sentences
 
     def __str__(self):
-        result = str(self.longdups) + ';' + str(self.shortdups) + str(self.icsws)
+        result = str(self.longdups) + ';' + \
+            str(self.shortdups) + str(self.icsws)
         return result
 
     def merge(self, dupinfo):
@@ -79,11 +81,11 @@ def dictmerge(dict1, dict2):
     for el in dict2:
         if el in newdict:
             if newdict[el] != dict2[el]:
-                settings.LOGGER.error('Conflicting values for {}: {}: {} not included'.format(el,
-                                                                                       newdict[
-                                                                                           el],
-                                                                                       dict2[
-                                                                                           el]))
+                settings.LOGGER.error(
+                    'Conflicting values for {}: {}: {} not included'.format(
+                        el, newdict[el], dict2[el]
+                    )
+                )
             else:
                 settings.LOGGER.warning(
                     'Duplicate values for {}: {} = {}'.format(el, newdict[el], dict2[el]))
@@ -467,7 +469,8 @@ def isnortduplicate(tlist1: List[Nort], tlist2: List[Nort]) -> bool:
             lcword2 = getword(tlist2[i]).lower()
             nlcword1 = normalisestring(lcword1)
             nlcword2 = normalisestring(lcword2)
-            result = result and ((nlcword1 == nlcword2) or nlcword2.startswith(nlcword1))
+            result = result and ((nlcword1 == nlcword2)
+                                 or nlcword2.startswith(nlcword1))
     return result
 
 
@@ -636,7 +639,8 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
                 tokenbeginstr = mlumd.attrib['annotatedposlist']
                 tokenbegins = string2list(tokenbeginstr)
                 for tokenbegin in tokenbegins:
-                    nodexpath = './/node[@pt and @begin="{}"]'.format(tokenbegin)
+                    nodexpath = './/node[@pt and @begin="{}"]'.format(
+                        tokenbegin)
                     newnode = find1(stree, nodexpath)
                     if newnode is not None:
                         mdnodes.append(newnode)
@@ -646,14 +650,16 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
                                 tokenbegin))
                         etree.dump(stree)
         excludednodes += mdnodes
-        cleantokennodelist = [n for n in cleantokennodelist if n not in excludednodes]
+        cleantokennodelist = [
+            n for n in cleantokennodelist if n not in excludednodes]
         resultnodelist += mdnodes
 
     # remove unknown words if open class
     unknown_words = [n for n in cleantokennodelist if getattval(n, 'pt') in openclasspts
                      and not (asta_recognised_wordnode(n))]
     resultnodelist += unknown_words
-    cleantokennodelist = [n for n in cleantokennodelist if n not in unknown_words]
+    cleantokennodelist = [
+        n for n in cleantokennodelist if n not in unknown_words]
 
     # ASTA sec 6.3 p. 11
     # remove ja nee nou
@@ -661,7 +667,8 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
 
     janeenoulist = nodesfindjaneenou(cleantokennodelist)
     resultnodelist += janeenoulist
-    cleantokennodelist = [n for n in cleantokennodelist if n not in janeenoulist]
+    cleantokennodelist = [
+        n for n in cleantokennodelist if n not in janeenoulist]
 
     # remove false starts maybe word + nee / of nee / eh word; of w of pos1 w of pos1
     # remove of nee
@@ -681,14 +688,16 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
     dupnodelist, dupinfo = find_simpleduplicates2(cleantokennodelist)
     resultnodelist += dupnodelist
     alldupinfo = alldupinfo.merge(dupinfo)
-    cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
+    cleantokennodelist = [
+        n for n in cleantokennodelist if n not in dupnodelist]
 
     # for debugging
     # print(showtns(cleantokennodelist))
     dupnodelist, dupinfo = find_duplicates2(cleantokennodelist)
     resultnodelist += dupnodelist
     alldupinfo = alldupinfo.merge(dupinfo)
-    cleantokennodelist = [n for n in cleantokennodelist if n not in dupnodelist]
+    cleantokennodelist = [
+        n for n in cleantokennodelist if n not in dupnodelist]
 
     # find prefix herhalingen >= 50%
     def cond(x, y):
@@ -697,12 +706,14 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
     prefixnodes, dupinfo = getprefixwords2(cleantokennodelist, cond)
     resultnodelist += prefixnodes
     alldupinfo = alldupinfo.merge(dupinfo)
-    cleantokennodelist = [n for n in cleantokennodelist if n not in prefixnodes]
+    cleantokennodelist = [
+        n for n in cleantokennodelist if n not in prefixnodes]
 
     # find unknown words that are a substring of their successor
     substringnodes, dupinfo = find_substringduplicates2(cleantokennodelist)
     alldupinfo = alldupinfo.merge(dupinfo)
-    cleantokennodelist = [n for n in cleantokennodelist if n not in prefixnodes]
+    cleantokennodelist = [
+        n for n in cleantokennodelist if n not in prefixnodes]
 
     # corrections = findcorrections(cleantokennodelist)
     # if corrections != []:
@@ -714,7 +725,8 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
     # remove dus als stopwoordje
 
     # remove words that consist of consonants only
-    resultnodelist = [n for n in resultnodelist if not (all_lower_consonantsnode(n))]
+    resultnodelist = [n for n in resultnodelist if not (
+        all_lower_consonantsnode(n))]
 
     # remove words in incomplete sentences
     isws = incompletetreeleaves(stree)
@@ -957,7 +969,8 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
     # find duplicatenode repetitions of ja, nee, nou
     janeenouduplicatenodes, dupinfo = find_janeenouduplicates2(tokennodelist)
     resultlist += janeenouduplicatenodes
-    tokennodelist = [n for n in tokennodelist if n not in janeenouduplicatenodes]
+    tokennodelist = [
+        n for n in tokennodelist if n not in janeenouduplicatenodes]
     alldupinfo = alldupinfo.merge(dupinfo)
 
     # temporarily remove ja nee nou to get the right short repetitions
