@@ -1,4 +1,0 @@
-include sastadev/LICENSE
-include sastadev/*.txt
-include sastadev/celexlexicon/dutch/*.txt
-include sastadev/names/nameparts/namepartlexicon.csv
