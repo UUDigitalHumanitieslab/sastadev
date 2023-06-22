@@ -45,7 +45,6 @@ def main():
     errorloggingfilename = dataprefix + '_errorlogging.xlsx'
     errorloggingfullname = os.path.join(loggingpath, errorloggingfilename)
 
-    # referencepath = r'D:\jodijk\Dropbox\Surfdrive\Shared\SASTAPLUS\November'
     errorreffilename = dataprefix + '_error_ref.xlsx'
     errorreffullname = os.path.join(options.referencepath, errorreffilename)
 

@@ -24,7 +24,6 @@ def clean(rawutt):
 
 metamodel = '##META text {att} = {val}'
 
-#inpath = r'D:\jodijk\Dropbox\jodijk\Utrecht\researchproposals\MWEs'
 inpath = r'C:\Users\Odijk101\Dropbox\jodijk\Utrecht\researchproposals\MWEs'
 infilename = 'UitdrukkingenNL expanded_dedup Current.xlsx'
 

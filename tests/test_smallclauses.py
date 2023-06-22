@@ -14,7 +14,6 @@ def getfn(dataset, filename):
 
 
 testbank = getfn('sctest', "smallclausetest.xml")
-# schlichtingtreebank = r'D:\jodijk\Dropbox\jodijk\Utrecht\Projects\CLARIAH CORE\WP3\VKL\schlichtingtreebank\TREEBANK_ID.xml'
 schlichtingtreebank = getfn('schlichting', 'TARVB2_ID2.xml')
 mieke06 = getfn('miekeplat', "TARSP_MIEKE06_ID.xml")
 mieke08 = getfn('miekeplat', "TARSP_MIEKE08_ID.xml")

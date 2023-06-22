@@ -99,3 +99,13 @@ pip install twine
 python setup.py sdist
 twine upload dist/*.tar.gz
 ```
+
+## Contributing
+Enhancements, bugfixes, and new features are welcome. For major changes, please follow these steps:
+
+- open an issue to discuss what you would like to change
+- create a branch `feature/<your-branchname`>, based on `develop` that contains your changes 
+- ensure the code is well tested
+- create a pull request for merging the changes into `develop`
+- the maintainers will take care of reviewing the code, offering suggested changes, and merging the code
+- at the discretion of the maintainers, the `develop` branch will be merged into `master`, and a new release will be made
