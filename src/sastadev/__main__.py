@@ -48,7 +48,7 @@ specified is minimal.
 
 The preferred file and folder structure is as follows:
 
- * There is a dataroot where all data reside.  This dataroot can be specified in the module dataconfig.py and can be made dependent on the user name
+ * There is a dataroot where all data reside.  This dataroot can be specified in the configuration module
  * Within the dataroot there is a folder for each dataset (e.g., VKLTARSP for TARSP data provided by VKL)
  * Within each dataset folder the folders are fixed, as follows:
 
@@ -153,7 +153,7 @@ from sastadev.conf import settings
 from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader,
                                       validcorroptions)
 from sastadev.counterfunctions import counter2liststr
-from sastadev.dataconfig import (bronzefolder, formsfolder, intreebanksfolder,
+from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
                                  loggingfolder, outtreebanksfolder,
                                  resultsfolder, silverfolder, silverpermfolder)
 from sastadev.external_functions import str2functionmap

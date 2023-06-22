@@ -1,6 +1,6 @@
 import os
 
-from sastadev.dataconfig import formsfolder, intreebanksfolder
+from sastadev.constants import formsfolder, intreebanksfolder
 
 formext = '.xlsx'
 

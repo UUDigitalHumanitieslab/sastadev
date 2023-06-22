@@ -1,14 +1,15 @@
 import os
 
-from sastadev.dataconfig import dataroot, intreebanksfolder
+from sastadev.constants import intreebanksfolder
 from sastadev.sastatoken import Token, show
 from sastadev.smallclauses import bg, getleavestr, smallclauses, word
 from sastadev.tokenmd import TokenListMD
 from sastadev.treebankfunctions import getnodeyield, getstree
+from sastadev.conf import settings
 
 
 def getfn(dataset, filename):
-    result = os.path.join(dataroot, dataset, intreebanksfolder, filename)
+    result = os.path.join(settings.DATAROOT, dataset, intreebanksfolder, filename)
     return result
 
 
@@ -18,10 +19,10 @@ schlichtingtreebank = getfn('schlichting', 'TARVB2_ID2.xml')
 mieke06 = getfn('miekeplat', "TARSP_MIEKE06_ID.xml")
 mieke08 = getfn('miekeplat', "TARSP_MIEKE08_ID.xml")
 aurisraw = getfn('Eliska', 'AURIS_ELISKA_ORIGINAL_ID.xml')
-tarsp02 = os.path.join(dataroot, 'VKLTarsp', intreebanksfolder, 'Tarsp_02.xml')
-tarsp06 = os.path.join(dataroot, 'VKLTarsp', intreebanksfolder, 'Tarsp_06.xml')
+tarsp02 = os.path.join(settings.DATAROOT, 'VKLTarsp', intreebanksfolder, 'Tarsp_02.xml')
+tarsp06 = os.path.join(settings.DATAROOT, 'VKLTarsp', intreebanksfolder, 'Tarsp_06.xml')
 schlichtingall = os.path.join(
-    dataroot, 'Schlichtingall', intreebanksfolder, 'TREEBANK_SCHLICHTING_CHAT_ID.xml')
+    settings.DATAROOT, 'Schlichtingall', intreebanksfolder, 'TREEBANK_SCHLICHTING_CHAT_ID.xml')
 
 
 def main():

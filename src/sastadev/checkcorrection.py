@@ -10,8 +10,8 @@ not for recall. They will very likely require several new versions.
 import os
 from optparse import OptionParser
 
-from sastadev.dataconfig import (bronzefolder, dataroot, loggingfolder,
-                                 resultsfolder)
+from sastadev.conf import settings
+from sastadev.constants import bronzefolder, loggingfolder, resultsfolder
 from sastadev.stringfunctions import nono
 from sastadev.xlsx import getxlsxdata, mkworkbook
 
@@ -32,13 +32,13 @@ def main():
 
     if nono(options.referencepath):
 
-        options.referencepath = os.path.join(dataroot, options.dataset, bronzefolder)
+        options.referencepath = os.path.join(settings.DATAROOT, options.dataset, bronzefolder)
 
     missedcorrectionslist = []
     originalsents = {}
 
-    resultspath = os.path.join(dataroot, options.dataset, resultsfolder)
-    loggingpath = os.path.join(dataroot, options.dataset, loggingfolder)
+    resultspath = os.path.join(settings.DATAROOT, options.dataset, resultsfolder)
+    loggingpath = os.path.join(settings.DATAROOT, options.dataset, loggingfolder)
 
     dataprefix = options.dataset
 

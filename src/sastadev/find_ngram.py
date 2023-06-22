@@ -1,9 +1,10 @@
 import os
 
-from sastadev.dataconfig import dataroot, intreebanksfolder, outtreebanksfolder
+from sastadev.constants import intreebanksfolder, outtreebanksfolder
 from sastadev.dedup import filledpauseslexicon
 from sastadev.treebankfunctions import (getattval, getnodeyield, getstree,
                                         getuttid, getyield, onbvnwdet)
+from sastadev.conf import settings
 
 digits2 = r'\d\d'
 
@@ -22,8 +23,8 @@ def shorten(fullname):
 
 
 def getpaths(dataset):
-    result = [os.path.join(dataroot, 'VKLStap', intreebanksfolder),
-              os.path.join(dataroot, 'VKLStap', outtreebanksfolder)]
+    result = [os.path.join(settings.DATAROOT, 'VKLStap', intreebanksfolder),
+              os.path.join(settings.DATAROOT, 'VKLStap', outtreebanksfolder)]
     return result
 
 
