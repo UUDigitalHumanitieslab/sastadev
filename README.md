@@ -95,7 +95,7 @@ flake8 ./src/sastadev/
 Specify the files which should be included in the package in `pypi/include.txt`.
 
 ```bash
-cd pypi
-./prepare.sh
-twine upload dist/*
+pip install twine
+python setup.py sdist
+twine upload dist/*.tar.gz
 ```
