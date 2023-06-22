@@ -1,21 +1,6 @@
 import logging
-from sastadev import SD_DIR
-from sastadev import sentence_parser
 
-
-# @dataclass
-# class SastadevConfig:
-#     '''Class for keeping track of application configuration'''
-
-#     ALPINO_HOST: str = 'localhost'
-#     ALPINO_PORT: int = 7001
-#     logger = logging
-#     sd_dir: str = SD_DIR
-#     dataroot: str = '.'
-#     parse_func = sentence_parser.parse
-
-#     def __post_init__(self):
-#         print('initted')
+from sastadev import SD_DIR, sentence_parser
 
 
 class SastadevConfig:

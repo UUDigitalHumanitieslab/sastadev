@@ -150,12 +150,12 @@ from lxml import etree
 from sastadev import compounds
 from sastadev.allresults import AllResults, scores2counts
 from sastadev.conf import settings
+from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
+                                loggingfolder, outtreebanksfolder,
+                                resultsfolder, silverfolder, silverpermfolder)
 from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader,
                                       validcorroptions)
 from sastadev.counterfunctions import counter2liststr
-from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
-                                 loggingfolder, outtreebanksfolder,
-                                 resultsfolder, silverfolder, silverpermfolder)
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros

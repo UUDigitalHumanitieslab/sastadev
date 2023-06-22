@@ -32,7 +32,6 @@ from collections import defaultdict
 from typing import Dict, List
 
 from sastadev.conf import settings
-
 from sastadev.sastatypes import SynTree
 from sastadev.treebankfunctions import getattval
 

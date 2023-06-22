@@ -35,9 +35,8 @@ import csv
 import os
 import re
 from typing import Dict, List, Optional, Tuple, cast
+
 from sastadev.conf import settings
-
-
 
 tab = '\t'
 plussym = '+'

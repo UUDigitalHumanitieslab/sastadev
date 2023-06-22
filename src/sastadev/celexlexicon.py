@@ -31,8 +31,8 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
 from sastadev import treebankfunctions
-from sastadev.sastatypes import CELEX_INFL, SynTree, WordInfo
 from sastadev.conf import settings
+from sastadev.sastatypes import CELEX_INFL, SynTree, WordInfo
 
 backslash = '\\'
 celexsep = backslash

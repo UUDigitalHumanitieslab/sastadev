@@ -36,12 +36,11 @@ The information needs extension and there are more files with relevant data.
 import os
 from typing import Dict, List, Tuple
 
-
+from sastadev.conf import settings
 from sastadev.namepartlexicon import namepart_isa_namepart
 from sastadev.sastatypes import DCOIPt, SynTree
 from sastadev.treebankfunctions import getattval
 from sastadev.xlsx import getxlsxdata
-from sastadev.conf import settings
 
 
 def ishuman(node: SynTree) -> bool:

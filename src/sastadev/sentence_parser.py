@@ -4,8 +4,8 @@ from functools import lru_cache
 
 from lxml import etree
 
-from sastadev.alpinoparsing import escape_alpino_input, isempty
 import sastadev.conf
+from sastadev.alpinoparsing import escape_alpino_input, isempty
 
 
 class AlpinoSentenceParser:

@@ -16,7 +16,6 @@ from typing import Dict, List, TextIO
 from sastadev.conf import settings
 from sastadev.generatemacros import generatemacros
 
-
 idpat = r'([A-z_][A-z0-9_]*)'
 eqpat = r'='
 exprpat = r'"""(.*?)"""'

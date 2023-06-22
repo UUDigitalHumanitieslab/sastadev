@@ -17,9 +17,8 @@ The namepartlexicon module:
 import csv
 import os
 from typing import Dict
+
 from sastadev.conf import settings
-
-
 
 tab: str = '\t'
 namepartlexicon: Dict[str, int] = {}

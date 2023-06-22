@@ -9,7 +9,6 @@ from sastadev.allresults import AllResults
 from sastadev.conf import settings
 from sastadev.forms import getformfilename
 
-
 scoresheetname = 'STAP 1 - 5'
 maxutt = 50
 zerocount = 0
