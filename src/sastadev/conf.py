@@ -9,7 +9,7 @@ class SastadevConfig:
     def __init__(self,
                  ALPINO_HOST: str = 'localhost',
                  ALPINO_PORT: int = 7001,
-                 LOGGER=logging,
+                 LOGGER=logging.getLogger('sastadev'),
                  SD_DIR: str = SD_DIR,
                  DATAROOT: str = '.',
                  PARSE_FUNC=sentence_parser.parse

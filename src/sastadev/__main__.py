@@ -735,17 +735,14 @@ def main():
 
     options.methodname, options.methodfilename = treatmethod(options.methodname, options.methodfilename)
 
-    # testlogfilename = inbase + "-test" + logext
-    # logfile = open(options.logfilename, 'w', encoding='utf8')
-    settings.LOGGER.basicConfig(level=logging.INFO)
-    handler = settings.LOGGER.FileHandler(options.logfilename, 'w', encoding='utf8')
+    # Configure logging
+    handler = logging.FileHandler(options.logfilename, 'w', encoding='utf8')
     logformat = '%(levelname)s:%(message)s'
-    formatter = settings.LOGGER.Formatter(logformat)
+    formatter = logging.Formatter(logformat)
     handler.setFormatter(formatter)
-    root_logger = settings.LOGGER.getLogger()
+    root_logger = settings.LOGGER
     root_logger.addHandler(handler)
-    root_logger.setLevel(settings.LOGGER.INFO)
-
+    root_logger.setLevel(logging.INFO)
     settings.LOGGER.info('Start of logging')
 
     if options.annotationfilename is not None and options.goldcountsfilename is not None:
