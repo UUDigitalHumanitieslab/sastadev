@@ -1,6 +1,6 @@
 import logging
 
-from sastadev import SD_DIR, sentence_parser
+from sastadev import SD_DIR, alpinoparsing
 
 
 class SastadevConfig:
@@ -12,7 +12,7 @@ class SastadevConfig:
                  LOGGER=logging.getLogger('sastadev'),
                  SD_DIR: str = SD_DIR,
                  DATAROOT: str = '.',
-                 PARSE_FUNC=sentence_parser.parse
+                 PARSE_FUNC=alpinoparsing.parse
                  ):
         self.ALPINO_HOST = ALPINO_HOST
         self.ALPINO_PORT = ALPINO_PORT
