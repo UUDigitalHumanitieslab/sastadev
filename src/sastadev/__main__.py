@@ -191,7 +191,7 @@ asta = 'asta'
 gramat = 'gramat'
 
 codepath = os.path.dirname(os.path.abspath(__file__))
-methodspath = os.path.join(codepath, 'methods')
+methodspath = os.path.join(codepath, 'data', 'methods')
 
 supported_methods = {}
 supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
