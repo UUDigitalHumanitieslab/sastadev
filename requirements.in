@@ -1,5 +1,7 @@
+auchann
+flake8
+lxml
+mypy
 openpyxl
 pytest
-lxml
-xlrd>=1.2,<2
 xlsxwriter

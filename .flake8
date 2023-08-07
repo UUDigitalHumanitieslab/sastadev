@@ -1,2 +1,16 @@
 [flake8]
-ignore = E501, W503, E704, F841, E265
+ignore = 
+    # Line too long
+    E501
+    # Multiple statements on one line
+    E704
+    # Block comment should start with hash 
+    E265
+    # Local variable name is assigned to but never used 
+    F841
+    # Line break occurs before binary operator (deprecated)
+    W503
+exclude =
+    __pycache__
+    env
+    .env
