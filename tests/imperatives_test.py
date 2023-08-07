@@ -1,7 +1,6 @@
 from lxml import etree
 
-from ..imperatives import wond4, wondx, wx, wxyz, wxyz5, wxy, wond5plus
-
+from sastadev.imperatives import wond4, wond5plus, wondx, wx, wxy, wxyz, wxyz5
 
 testtreestr = {}
 
@@ -360,11 +359,12 @@ testtreestr[14] = '''
 
 testtrees = []
 for ctr in testtreestr:
-    #print(ctr)
+    # print(ctr)
     testtrees.append((ctr, etree.fromstring(testtreestr[ctr])))
 
-#testtrees = [(ctr, etree.fromstring(testtreestr[ctr])) for ctr in testtreestr ]
-labeledfs = [('wx', wx), ('wxy', wxy), ('wxyz', wxyz), ('wxyz5', wxyz5), ('wondx', wondx), ('wond4', wond4), ('wond5plus', wond5plus)]
+# testtrees = [(ctr, etree.fromstring(testtreestr[ctr])) for ctr in testtreestr ]
+labeledfs = [('wx', wx), ('wxy', wxy), ('wxyz', wxyz), ('wxyz5', wxyz5),
+             ('wondx', wondx), ('wond4', wond4), ('wond5plus', wond5plus)]
 
 
 def test_imperatives():
@@ -372,6 +372,6 @@ def test_imperatives():
         if True:  # treename == 14:
             print(treename)
             for label, thef in labeledfs:
-                #print('starting', label)
+                # print('starting', label)
                 results = thef(testtree)
                 print(label, len(results))

@@ -1,9 +1,11 @@
 import itertools
 
-from ..celexlexicon import getinflforms, getwordinfo
+from sastadev.celexlexicon import getinflforms, getwordinfo
+
 
 def celex_test():
-    testwords = ['liepen', 'gevalt', 'gevallen', 'mouwen', 'stukjes', 'vaak', 'mooi', 'gouden', 'mooie', 'mooiere', 'pop', 'popje']
+    testwords = ['liepen', 'gevalt', 'gevallen', 'mouwen', 'stukjes',
+                 'vaak', 'mooi', 'gouden', 'mooie', 'mooiere', 'pop', 'popje']
     for w in testwords:
         # poslist = getposlist(w)
         # lemmas = getlemmas(w)
