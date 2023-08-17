@@ -1,4 +1,5 @@
 import pathlib
+
 from setuptools import setup
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -7,7 +8,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name='sastadev',
-    version='0.1.0',
+    version='0.1.1',
     description='Linguistic functions for SASTA tool',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -28,6 +29,7 @@ setup(
         'auchann',
         'lxml',
         'openpyxl',
-        'XlsxWriter'
+        'XlsxWriter',
+        'typing-extensions'
     ],
 )
