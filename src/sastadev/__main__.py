@@ -1195,7 +1195,7 @@ def main():
     logheader = ['datetime', 'treebank', 'scorenr,' 'R', 'P', 'F1', 'P-R', 'P-P', 'P-F1', 'GP-R', 'GP-P', 'GP-F1', 'ref',
                  'method']
     logname = 'sastalog.txt'
-    logpath = r'.'
+    logpath = os.path.join(codepath, '../../sastalog')
     logfullname = os.path.join(logpath, logname)
     biglogfile = open(logfullname, 'a', encoding='utf8')
 

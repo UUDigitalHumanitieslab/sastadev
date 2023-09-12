@@ -116,7 +116,8 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
 
 
 codepath = settings.SD_DIR
-methodspath = os.path.join(codepath, 'methods')
+datapath = os.path.join(codepath, 'data')
+methodspath = os.path.join(datapath, 'methods')
 
 
 supported_methods = {}

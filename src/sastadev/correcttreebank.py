@@ -563,11 +563,11 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     metadatalist = stree.xpath(metadataxpath)
     lmetadatalist = len(metadatalist)
     if lmetadatalist == 0:
-        settings.logger.error('Missing metadata in utterance {}'.format(uttid))
+        settings.LOGGER.error('Missing metadata in utterance {}'.format(uttid))
         origmetadata = []
     else:
         if lmetadatalist > 1:
-            settings.logger.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
+            settings.LOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
         origmetadata = metadatalist[0]
 
     # allmetadata += origmetadata
@@ -707,7 +707,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
             newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
             oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [] else None
             if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
-                settings.logger.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+                settings.LOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
 
             if newnode is not None and oldword is not None:
                 # wproplist = getwordinfo(oldword)
