@@ -90,4 +90,4 @@ def test_iedims_je():
     iewords = ['poppie', 'kassie', 'boekie']
     jewords = [getjeforms(word) for word in iewords]
 
-    assert jewords == ['popje', 'kasje', 'boekje']
+    assert jewords == [['popje', 'poptje', 'poptje', 'pobje', 'pobje'], ['kasje', 'kastje', 'kastje', 'kazje', 'kazje'], ['boekje', 'boekje', 'boekje']]

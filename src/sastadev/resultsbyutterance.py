@@ -2,9 +2,8 @@
 
 The module *resultsbyutterance* provides functions to compute the results and the scores per utterance
 '''
-from ast import List
 from collections import Counter, defaultdict
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 from sastadev.conf import settings
 from sastadev.rpf1 import getscores
