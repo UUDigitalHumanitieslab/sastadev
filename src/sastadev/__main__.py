@@ -160,7 +160,7 @@ from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros
-from sastadev.methods import (Method, astamethods, defaultfilters, stapmethods,
+from sastadev.methods import (Method, astamethods, stapmethods,
                               supported_methods, tarspmethods, treatmethod)
 from sastadev.mismatches import exactmismatches, getmarkposition
 from sastadev.mksilver import getsilverannotations, permprefix
@@ -173,10 +173,10 @@ from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
 from sastadev.sasta_explanation import finalexplanation_adapttreebank
-from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
-                                 GoldTuple, MatchesDict, MethodName, Position,
-                                 QId, QIdCount, QueryDict, ResultsCounter,
-                                 ResultsDict, SampleSizeTuple, SynTree, UttId)
+from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, GoldTuple,
+                                 MatchesDict, MethodName, Position, QId,
+                                 QIdCount, QueryDict, ResultsCounter,
+                                 SampleSizeTuple, SynTree, UttId)
 from sastadev.SRFreader import read_referencefile
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets
@@ -206,7 +206,7 @@ methodspath = os.path.join(codepath, 'data', 'methods')
 # supported_methods = {}
 # supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
 # supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
-#supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
+# supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 platinumchecksuffix = '_platinum.check.tsv'
 platinumcheckeditedsuffix = '_platinum.check-edited.tsv'
@@ -246,15 +246,20 @@ na = 'na'
 getwordsxpath = ".//node[@pt or @pos]"
 
 queryinfoheaderrow = ['id', 'cat', 'subcat', 'item']
-queryresultsheaderrow = ['count', 'results', 'GoldCount', 'Goldresults', 'queryExists']
-queryRGscoreheaderrow = ['recall', 'precision', 'f1score', 'intersection', 'gold-results', 'results-gold']
+queryresultsheaderrow = ['count', 'results',
+                         'GoldCount', 'Goldresults', 'queryExists']
+queryRGscoreheaderrow = ['recall', 'precision', 'f1score',
+                         'intersection', 'gold-results', 'results-gold']
 queryRPscoreheaderrow = ['platinum', 'plat_recall', 'plat_precision',
                          'plat_f1score', 'plat-results', 'results-plat']
-queryGPscoreheaderrow = ['GP recall', 'GP precision', 'GP F1-score', 'GP intersection', 'P minus G', 'G minus P']
+queryGPscoreheaderrow = ['GP recall', 'GP precision',
+                         'GP F1-score', 'GP intersection', 'P minus G', 'G minus P']
 
-resultsheaderrow = queryinfoheaderrow + queryresultsheaderrow + queryRGscoreheaderrow + queryRPscoreheaderrow + queryGPscoreheaderrow
+resultsheaderrow = queryinfoheaderrow + queryresultsheaderrow + \
+    queryRGscoreheaderrow + queryRPscoreheaderrow + queryGPscoreheaderrow
 resultsheaderstring = tab.join(resultsheaderrow)
-platinumheaderrow = ['id', 'cat', 'subcat', 'item', 'uttids', 'results-gold', 'status', 'remarks']
+platinumheaderrow = ['id', 'cat', 'subcat', 'item',
+                     'uttids', 'results-gold', 'status', 'remarks']
 platinumheaderstring = tab.join(platinumheaderrow)
 
 allmatches: MatchesDict = {}
@@ -271,11 +276,13 @@ def checkplatinum(goldscores: Dict[QId, Counter], platinumscores: Dict[QId, Coun
             if query_exists(queries[qid]):
                 diff1 = goldscores[qid] - platinumscores[qid]
                 if diff1 != Counter():
-                    settings.LOGGER.warning('{} has goldscores not in platinum: {}'.format(qid, diff1))
+                    settings.LOGGER.warning(
+                        '{} has goldscores not in platinum: {}'.format(qid, diff1))
 
 
 def mkerrorreport(errordict, errorreportfilename: str):
-    header = ['name', 'count', 'uttid', 'value', 'source', 'cat', 'subcat', 'origutt', 'parsed_as']
+    header = ['name', 'count', 'uttid', 'value',
+              'source', 'cat', 'subcat', 'origutt', 'parsed_as']
     allrows = []
     for item in errordict:
         count = len(errordict[item])
@@ -286,7 +293,8 @@ def mkerrorreport(errordict, errorreportfilename: str):
             fullrow = [item, ''] + instancerow
             allrows.append(fullrow)
 
-    wb = mkworkbook(errorreportfilename, [header], allrows, freeze_panes=(1, 1))
+    wb = mkworkbook(errorreportfilename, [
+                    header], allrows, freeze_panes=(1, 1))
     wb.close()
 
 
@@ -313,7 +321,7 @@ def getpostval(qid, thepostresults):
 #    return counts
 
 def sf(number):
-    if type(number) == float or type(number) == int:
+    if isinstance(number, float) or isinstance(number, int):
         result = '{0:.1f}'.format(number)
     else:
         result = number
@@ -395,7 +403,7 @@ def logprint(str: str):
     if logfile != sys.stderr:
         print(str, file=sys.stderr)
 
-##@@ types to be reconsidered
+# @@ types to be reconsidered
 
 
 def getitem2levelmap(mapping):
@@ -427,7 +435,8 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
     global invalidqueries
     uttid = getuttid(syntree)
     # uttid = getuttidorno(syntree)
-    omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
+    omittedwordpositions = getxmetatreepositions(
+        syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)
     # core queries
     junk = 0
@@ -543,7 +552,6 @@ def get_comparison(resultscounts: QIdCount, goldcounts: QIdCount, queries: Query
     return comparison
 
 
-
 topnodequery = './/node[@cat="top"]'
 
 
@@ -578,8 +586,6 @@ def getexactresults(allmatches: MatchesDict) -> ExactResultsDict:
     return result
 
 
-
-
 def adaptpositions(rawexactresults: ExactResultsDict, nodeendmap) -> ExactResultsDict:
     newexactresults: ExactResultsDict = {}
     for qid in rawexactresults:
@@ -604,8 +610,10 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
     for queryid in rawexactresults:
         query = queries[queryid]
         queryfilter = query.filter
-        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[queryfilter]
-        exactresults[queryid] = [r for r in rawexactresults[queryid] if thefilter(query, rawexactresults, r)]
+        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[
+            queryfilter]
+        exactresults[queryid] = [r for r in rawexactresults[queryid]
+                                 if thefilter(query, rawexactresults, r)]
     return exactresults
 
 
@@ -617,13 +625,15 @@ def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId]
     uttidlist = []
     for uttid in allresults.allutts:
         basewordcount = sum(words[uttid].values())
-        ignorewordcount = 0 # getignorewordcount(allresults, uttid)
+        ignorewordcount = 0  # getignorewordcount(allresults, uttid)
         wordcount = basewordcount - ignorewordcount
         wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
         uttidlist.append(uttid)
         cumwordcount += wordcount
     result = (uttidlist, cumwordcount, cutoffpoint)
     return result
+
+
 def getsamplesizefunction(methodname: MethodName) -> Callable:
     if methodname in astamethods:
         result = getastamaxsamplesizeuttidsandcutoff
@@ -635,7 +645,8 @@ def getsamplesizefunction(methodname: MethodName) -> Callable:
         result = getmaxsamplesizeuttidsandcutoff
     return result
 
-#defaulttarsp = r"TARSP Index Current.xlsx"
+
+# defaulttarsp = r"TARSP Index Current.xlsx"
 defaulttarsp = supported_methods[tarsp]
 
 
@@ -671,15 +682,18 @@ def main():
         options.corr = corrn
     if options.corr not in validcorroptions:
         validcorrstr = comma.join(validcorroptions)
-        settings.LOGGER.error('Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
+        settings.LOGGER.error(
+            'Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
         exit(1)
 
     # @ hier ook toestaan dat er een annotatiefile als input komt (.xlsx)-done
     if options.infilename is None:  # an XML file or an.xlsx file
-        settings.LOGGER.error('Specify an input treebank file name to analyse (.xml) or the name of an annotationfile (.xlsx)')
+        settings.LOGGER.error(
+            'Specify an input treebank file name to analyse (.xml) or the name of an annotationfile (.xlsx)')
         exit(1)
     elif not os.path.exists(options.infilename):
-        settings.LOGGER.error('File {} not found. Aborting'.format(options.infilename))
+        settings.LOGGER.error(
+            'File {} not found. Aborting'.format(options.infilename))
         exit(1)
     (inbase, inext) = os.path.splitext(options.infilename)
     basepath, basefilename = os.path.split(options.infilename)
@@ -697,7 +711,8 @@ def main():
         loggingpath = os.path.join(corepath, loggingfolder)
         formspath = os.path.join(corepath, formsfolder)
 
-        outpaths = [analysespath, outtreebankspath, resultspath, silverpermpath, loggingpath, formspath, silverpath]
+        outpaths = [analysespath, outtreebankspath, resultspath,
+                    silverpermpath, loggingpath, formspath, silverpath]
 
         for outpath in outpaths:
             try:
@@ -710,7 +725,8 @@ def main():
         silverpermpath = os.path.join(basepath, path2permfolder)
 
     if inext not in ['.xml', '.xlsx']:
-        settings.LOGGER.error('Illegal input file type: must be a treebank (.xml) or an annotationfile (.xlsx)')
+        settings.LOGGER.error(
+            'Illegal input file type: must be a treebank (.xml) or an annotationfile (.xlsx)')
         exit(1)
     elif inext in ['.xlsx']:
         annotationinput = True
@@ -720,7 +736,8 @@ def main():
     if options.logfilename is None:
         options.logfilename = os.path.join(loggingpath, corefilename + logext)
 
-    options.methodname, options.methodfilename = treatmethod(options.methodname, options.methodfilename)
+    options.methodname, options.methodfilename = treatmethod(
+        options.methodname, options.methodfilename)
 
     # Configure logging
     handler = logging.FileHandler(options.logfilename, 'w', encoding='utf8')
@@ -733,35 +750,41 @@ def main():
     settings.LOGGER.info('Start of logging')
 
     if options.annotationfilename is not None and options.goldcountsfilename is not None:
-        settings.LOGGER.info('Annotation file and Gold counts file found; gold counts file ignored')
+        settings.LOGGER.info(
+            'Annotation file and Gold counts file found; gold counts file ignored')
     elif options.goldfilename is not None and options.goldcountsfilename is not None:
-        settings.LOGGER.info('Gold Reference file and Gold counts file found; gold counts file ignored')
+        settings.LOGGER.info(
+            'Gold Reference file and Gold counts file found; gold counts file ignored')
 
     # this is not needed anymore because of treatmethod
-    #if options.methodfilename is None:  # an xslx file
+    # if options.methodfilename is None:  # an xslx file
     #    options.methodfilename = defaulttarsp
     if options.annotationfilename is None:  # an xlsx file
-        options.annotationfilename = os.path.join(bronzepath, corefilename + bronzesuffix + xlsxext)
+        options.annotationfilename = os.path.join(
+            bronzepath, corefilename + bronzesuffix + xlsxext)
     if options.platinuminfilename is None:
         if intreebankinput:
-            options.platinuminfilename = os.path.join(silverpath, corefilename + platinumeditedsuffix + txtext)
+            options.platinuminfilename = os.path.join(
+                silverpath, corefilename + platinumeditedsuffix + txtext)
         else:
             options.platinuminfilename = inbase + platinumeditedsuffix + txtext
 
     if options.goldfilename is not None and options.annotationfilename is not None:
-        settings.LOGGER.info('annotationfile and goldfile specified. Annotationfile will be used.')
+        settings.LOGGER.info(
+            'annotationfile and goldfile specified. Annotationfile will be used.')
 
     if options.goldfilename is None:
         if intreebankinput:
-            options.goldfilename = os.path.join(bronzepath, corefilename + ".gold" + ".tsv" + ".txt")
+            options.goldfilename = os.path.join(
+                bronzepath, corefilename + ".gold" + ".tsv" + ".txt")
         else:
             options.goldfilename = inbase + ".gold" + ".tsv" + ".txt"
     if options.goldcountsfilename is None:
         if intreebankinput:
-            options.goldcountsfilename = os.path.join(bronzepath, corefilename + ".goldcounts" + xlsxext)
+            options.goldcountsfilename = os.path.join(
+                bronzepath, corefilename + ".goldcounts" + xlsxext)
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
-
 
     # adapted this so that the method is read in directly as a Method object
     # (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodname, options.methodfilename)
@@ -800,7 +823,8 @@ def main():
         else:
             reffilename = options.goldcountsfilename
     else:
-        settings.LOGGER.error('Neither an annotationfile nor a goldfile, nor a gold count file specified. Aborting')
+        settings.LOGGER.error(
+            'Neither an annotationfile nor a goldfile, nor a gold count file specified. Aborting')
         exit(1)
 
     # rawcoreresults = {}
@@ -809,18 +833,19 @@ def main():
 
     # @dit aanpassen , voor al de message-done
     if not os.path.exists(options.infilename):
-        settings.LOGGER.error('Input treebank or annotationfile {} not found. Aborting'.format(options.infilename))
+        settings.LOGGER.error(
+            'Input treebank or annotationfile {} not found. Aborting'.format(options.infilename))
         exit(1)
 
     # gather remarks on results of earlier runs, write them to a perm_file  and adapt the silverscore file
 
-    #(pathname, barefilename) = os.path.split(options.infilename)
-    #(base, ext) = os.path.splitext(barefilename)
-    #(fullbase, _) = os.path.splitext(options.infilename)
-    #permpath = os.path.join(pathname, path2permfolder)
+    # (pathname, barefilename) = os.path.split(options.infilename)
+    # (base, ext) = os.path.splitext(barefilename)
+    # (fullbase, _) = os.path.splitext(options.infilename)
+    # permpath = os.path.join(pathname, path2permfolder)
 
-    #pathname = basepath
-    #barefilename = basefilename
+    # pathname = basepath
+    # barefilename = basefilename
     base = corefilename
     ext = inext
     permpath = silverpermpath
@@ -834,11 +859,15 @@ def main():
     perm_silverfilename = permprefix + corefilename + '.xlsx'
     perm_silverfullname = os.path.join(permpath, perm_silverfilename)
     #
-    platinumcheckeditedfullname = os.path.join(resultspath, corefilename + platinumcheckeditedsuffix + '.xlsx')
+    platinumcheckeditedfullname = os.path.join(
+        resultspath, corefilename + platinumcheckeditedsuffix + '.xlsx')
 
-    platinumoutfilename = os.path.join(resultspath, corefilename + platinumsuffix + txtext)
-    platinumcheckfilename = os.path.join(resultspath, corefilename + platinumchecksuffix + txtext)
-    silvercheckfilename = os.path.join(resultspath, corefilename + platinumchecksuffix + '.xlsx')
+    platinumoutfilename = os.path.join(
+        resultspath, corefilename + platinumsuffix + txtext)
+    platinumcheckfilename = os.path.join(
+        resultspath, corefilename + platinumchecksuffix + txtext)
+    silvercheckfilename = os.path.join(
+        resultspath, corefilename + platinumchecksuffix + '.xlsx')
 
     (platbase, platext) = os.path.splitext(platinumcheckfilename)
     platinumcheckxlfullname = platbase + '.xlsx'
@@ -860,7 +889,8 @@ def main():
         tree = etree.parse(options.infilename)
         origtreebank = tree.getroot()
         if origtreebank.tag != 'treebank':
-            settings.LOGGER.error("Input treebank file does not contain a treebank element")
+            settings.LOGGER.error(
+                "Input treebank file does not contain a treebank element")
             exit(-1)
         allutts = {}
         uttcount = 0
@@ -879,29 +909,34 @@ def main():
 
         # for tree in treebank1:
         #     showtree(tree, 'na fexplanations')
-        treebank, errordict, allorandalts = correcttreebank(treebank1, targets, options.methodname, options.corr)
+        treebank, errordict, allorandalts = correcttreebank(
+            treebank1, targets, options.methodname, options.corr)
 
         # for tree in treebank:
         #    showtree(tree, 'na correcties')
 
         # create the new treebank
         fulltreebank = etree.ElementTree(treebank)
-        newtreebankfullname = os.path.join(outtreebankspath, corefilename + '_corrected' + '.xml')
+        newtreebankfullname = os.path.join(
+            outtreebankspath, corefilename + '_corrected' + '.xml')
         fulltreebank.write(newtreebankfullname, encoding="UTF8", xml_declaration=False,
                            pretty_print=True)
 
         # create error file
-        errorreportfilename = os.path.join(resultspath, corefilename + '_errorreport' + '.xlsx')
+        errorreportfilename = os.path.join(
+            resultspath, corefilename + '_errorreport' + '.xlsx')
         mkerrorreport(errordict, errorreportfilename)
 
         # create error logging
-        errorloggingfullname = os.path.join(loggingpath, corefilename + '_errorlogging' + '.xlsx')
+        errorloggingfullname = os.path.join(
+            loggingpath, corefilename + '_errorlogging' + '.xlsx')
 
         allerrorrows: List[str] = []
         for orandalts in allorandalts:
             if orandalts is not None:
                 allerrorrows += orandalts.OrigandAlts2rows(corefilename)
-        errorwb = mkworkbook(errorloggingfullname, [errorwbheader], allerrorrows, freeze_panes=(1, 1))
+        errorwb = mkworkbook(errorloggingfullname, [
+                             errorwbheader], allerrorrows, freeze_panes=(1, 1))
         errorwb.close()
 
         # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
@@ -909,7 +944,7 @@ def main():
         for syntree in treebank:
             temputtid = getuttid(syntree)
             uttcount += 1
-            #settings.LOGGER.error('uttcount={}'.format(uttcount))
+            # settings.LOGGER.error('uttcount={}'.format(uttcount))
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
                 # uttid = getuttid(syntree)
@@ -917,12 +952,15 @@ def main():
                 uttid = getxselseuttid(syntree)
                 analysedtrees.append((uttid, syntree))
 
-                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
-                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                doprequeries(syntree, themethod.queries,
+                             rawexactresults, allmatches)
+                docorequeries(syntree, themethod.queries,
+                              rawexactresults, allmatches)
 
                 # showtree(syntree)
                 if uttid in nodeendmap:
-                    settings.LOGGER.error('Duplicate uttid in sample: {}'.format(uttid))
+                    settings.LOGGER.error(
+                        'Duplicate uttid in sample: {}'.format(uttid))
                 nodeendmap[uttid] = getnodeendmap(syntree)
 
                 # uttno = getuttno(syntree)
@@ -934,8 +972,8 @@ def main():
         rawexactresults2 = passfilter(rawexactresults, themethod)
         exactresults = adaptpositions(rawexactresults2, nodeendmap)
 
-        #pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
-        #@@to be implemented @@ of misschien in de loop hierboven al?
+        # pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
+        # @@to be implemented @@ of misschien in de loop hierboven al?
 
     # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
     # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
@@ -947,17 +985,18 @@ def main():
     platinuminfilefound = False
     if os.path.exists(options.platinuminfilename):
         platinuminfilefound = True
-        platinumresults: Dict[QId, Counter] = read_referencefile(options.platinuminfilename, logfile)
+        platinumresults: Dict[QId, Counter] = read_referencefile(
+            options.platinuminfilename, logfile)
         checkplatinum(goldscores, platinumresults, themethod.queries)
     else:
-        settings.LOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
+        settings.LOGGER.info('Platinum file {} not found.'.format(
+            options.platinuminfilename))
         platinumresults = {}
 
     # platinumoutfilename = base + platinumsuffix + txtext
     platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
     # platinumcheckfilename = base + platinumchecksuffix + txtext
     platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
-
 
     postresults: Dict[QId, Any] = {}
     allresults = AllResults(uttcount, coreresults, exactresults, postresults, allmatches, options.infilename, analysedtrees,
@@ -966,28 +1005,32 @@ def main():
     samplesizefunction = getsamplesizefunction(options.methodname)
     samplesizetuple: SampleSizeTuple = samplesizefunction(allresults)
 
-    postquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
-    formquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
+    postquerylist: List[QId] = [
+        q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
+    formquerylist: List[QId] = [
+        q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
 
     # we assume the reduction must be done before the postqueries
-    allresults = reduceallresults(allresults, samplesizetuple, options.methodname)
+    allresults = reduceallresults(
+        allresults, samplesizetuple, options.methodname)
 
     # bronze reduction
-    exactgoldscores = reduceexactgoldscores(exactgoldscores, samplesizetuple, options.methodname)  # ongoing
-    goldscores = exact2results(exactgoldscores) # ongoing
+    exactgoldscores = reduceexactgoldscores(
+        exactgoldscores, samplesizetuple, options.methodname)  # ongoing
+    goldscores = exact2results(exactgoldscores)  # ongoing
     goldcounts = scores2counts(goldscores)
 
-
     # silver / platinumreduction
-    platinumresults: Dict[QId, Counter] = reduceresults(platinumresults, samplesizetuple, options.methodname)
+    platinumresults: Dict[QId, Counter] = reduceresults(
+        platinumresults, samplesizetuple, options.methodname)
 
     dopostqueries(allresults, postquerylist, themethod.queries)
-
 
     dopostqueries(allresults, formquerylist, themethod.queries)
 
     (base, ext) = os.path.splitext(options.infilename)
-    outputfullname = os.path.join(resultspath, corefilename + "_analysis" + tsvext + txtext)
+    outputfullname = os.path.join(
+        resultspath, corefilename + "_analysis" + tsvext + txtext)
     outfile = open(outputfullname, 'w', encoding='utf8')
 
     outxlsx = os.path.join(resultspath, corefilename + "_analysis" + xlsxext)
@@ -998,12 +1041,13 @@ def main():
     outrowctr = outstartrow
     outworksheet.freeze_panes('E2')
 
-
-    countcomparisonfilename = os.path.join(resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
+    countcomparisonfilename = os.path.join(
+        resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
     # print the invalid queries
     for q in invalidqueries:
-        settings.LOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], themethod.queries[q].query))
+        settings.LOGGER.error("{}: {}: <{}>".format(
+            q, invalidqueries[q], themethod.queries[q].query))
 
     # print the header
     print(resultsheaderstring, file=outfile)
@@ -1021,7 +1065,8 @@ def main():
     # exactresults = getexactresults(allmatches)
     exact = True
 
-    pcheaders = [['User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt', 'origutt']]
+    pcheaders = [['User1', 'User2', 'User3', 'MoreorLess', 'qid',
+                  'cat', 'subcat', 'item', 'uttid', 'pos', 'utt', 'origutt']]
     allrows = []
 
     for queryid in results:
@@ -1064,18 +1109,26 @@ def main():
             if platinuminfilefound and queryid in platinumresults:
                 theplatinumresults = platinumresults[queryid]
                 sortedplatinumliststr = counter2liststr(theplatinumresults)
-                liststarplatinumstr = counter2liststr(theresults & theplatinumresults)
-                platinumminusliststr = counter2liststr(theplatinumresults - theresults)
-                listminusplatinumliststr = counter2liststr(theresults - theplatinumresults)
-                (platinumrecall, platinumprecision, platinumf1score) = getscores(theresults, theplatinumresults)
+                liststarplatinumstr = counter2liststr(
+                    theresults & theplatinumresults)
+                platinumminusliststr = counter2liststr(
+                    theplatinumresults - theresults)
+                listminusplatinumliststr = counter2liststr(
+                    theresults - theplatinumresults)
+                (platinumrecall, platinumprecision, platinumf1score) = getscores(
+                    theresults, theplatinumresults)
 
-                goldstarplatinumstr = counter2liststr(goldcounter & theplatinumresults)
-                platinumminusgoldstr = counter2liststr(theplatinumresults - goldcounter)
-                goldminusplatinumstr = counter2liststr(goldcounter - theplatinumresults)
-                (gprecall, gpprecision, gpf1score) = getscores(goldcounter, theplatinumresults)
+                goldstarplatinumstr = counter2liststr(
+                    goldcounter & theplatinumresults)
+                platinumminusgoldstr = counter2liststr(
+                    theplatinumresults - goldcounter)
+                goldminusplatinumstr = counter2liststr(
+                    goldcounter - theplatinumresults)
+                (gprecall, gpprecision, gpf1score) = getscores(
+                    goldcounter, theplatinumresults)
             else:
                 sortedplatinumliststr, liststarplatinumliststr, platinumminusliststr, \
-                listminusplatinumliststr = '', '', '', ''
+                    listminusplatinumliststr = '', '', '', ''
                 (platinumrecall, platinumprecision, platinumf1score) = (na, na, na)
 
                 goldstarplatinumstr, platinumminusgoldstr, goldminusplatinumstr = '', '', ''
@@ -1097,14 +1150,17 @@ def main():
 
         queryinforow = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                         themethod.queries[queryid].item]
-        queryresultsrow = [str(sumfreq(theresults)), resultstr, str(goldcount), sortedgolduttstr, qex]
-        queryRGscorerow = [sf(recall), sf(precision), sf(f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
+        queryresultsrow = [str(sumfreq(theresults)), resultstr, str(
+            goldcount), sortedgolduttstr, qex]
+        queryRGscorerow = [sf(recall), sf(precision), sf(
+            f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
         queryRPscorerow = [sortedplatinumliststr, sf(platinumrecall), sf(platinumprecision), sf(platinumf1score),
                            platinumminusliststr, listminusplatinumliststr]
         queryGPscorerow = [sf(gprecall), sf(gpprecision), sf(gpf1score), goldstarplatinumstr, platinumminusgoldstr,
                            goldminusplatinumstr]
 
-        fullresultrow = queryinforow + queryresultsrow + queryRGscorerow + queryRPscorerow + queryGPscorerow
+        fullresultrow = queryinforow + queryresultsrow + \
+            queryRGscorerow + queryRPscorerow + queryGPscorerow
         print(tab.join(fullresultrow), file=outfile)
         outworksheet.write_row(outrowctr, outstartcol, fullresultrow)
         outrowctr += 1
@@ -1128,7 +1184,8 @@ def main():
                         markedutt = getmarkedutt(m, syntree)
                         platinumcheckrow1 = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                                              themethod.queries[queryid].item, uttid, markedutt]
-                        print(tab.join(platinumcheckrow1), file=platinumcheckfile)
+                        print(tab.join(platinumcheckrow1),
+                              file=platinumcheckfile)
 
             if goldminustheresults != {}:
                 print('Missed examples', file=platinumcheckfile)
@@ -1136,15 +1193,17 @@ def main():
                 if uttid in allutts:
                     uttstr = space.join(allutts[uttid])
                 else:
-                    settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
+                    settings.LOGGER.warning(
+                        'uttid {} not in allutts'.format(uttid))
                 platinumcheckrow2 = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                                      themethod.queries[queryid].item, uttid, uttstr]
                 print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
-    #platinumcheckfullname = platinumcheckfile.name
-    #(base, ext) = os.path.splitext(platinumcheckfilename)
+    # platinumcheckfullname = platinumcheckfile.name
+    # (base, ext) = os.path.splitext(platinumcheckfilename)
     # platinumcheckxlfullname = base + '.xlsx'
-    wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
+    wb = mkworkbook(platinumcheckxlfullname, pcheaders,
+                    allrows, freeze_panes=(1, 9))
     wb.close()
 
     # compute the gold postresults
@@ -1174,7 +1233,8 @@ def main():
 
         queryinforow = [queryid, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                         themethod.queries[queryid].item]
-        queryresultsrow = ['', resultposval, '', goldpostval, qex] + erow(6) + [platinumpostval] + erow(11)
+        queryresultsrow = ['', resultposval, '', goldpostval,
+                           qex] + erow(6) + [platinumpostval] + erow(11)
 
         postrow = queryinforow + queryresultsrow
         postrowstring = tab.join(queryinforow + queryresultsrow)
@@ -1227,7 +1287,8 @@ def main():
                 if thequery.original and queryfunction(thequery):
                     platinumcount += sum(platinumresults[queryid].values())
             else:
-                settings.LOGGER.warning('Query {} found in platinumresults but not in queries'.format(queryid))
+                settings.LOGGER.warning(
+                    'Query {} found in platinumresults but not in queries'.format(queryid))
 
         # resultsgoldintersectiocount
         resultsgoldintersectioncount = 0
@@ -1249,7 +1310,8 @@ def main():
             if thequery.original and queryfunction(thequery):
                 if queryid in platinumresults:
                     intersection = results[queryid] & platinumresults[queryid]
-                    resultsplatinumintersectioncount += sum(intersection.values())
+                    resultsplatinumintersectioncount += sum(
+                        intersection.values())
                 else:
                     pass
                     # settings.LOGGER.warning('queryid {} not in platinumresults'.format(queryid))
@@ -1263,20 +1325,25 @@ def main():
                     if queryid in goldscores:
                         goldcounter = goldscores[queryid]
                         intersection = goldcounter & platinumresults[queryid]
-                        goldplatinumintersectioncount += sum(intersection.values())
+                        goldplatinumintersectioncount += sum(
+                            intersection.values())
                     else:
                         pass
                         # settings.LOGGER.warning('Query {} in platinumresults but not in goldscores'.format(queryid))
             else:
-                settings.LOGGER.warning('Query {} in platinumresults but not in queries'.format(queryid))
+                settings.LOGGER.warning(
+                    'Query {} in platinumresults but not in queries'.format(queryid))
 
-        (recall, precision, f1score) = getevalscores(resultscount, goldcount, resultsgoldintersectioncount)
+        (recall, precision, f1score) = getevalscores(
+            resultscount, goldcount, resultsgoldintersectioncount)
         (platinumrecall, platinumprecision, platinumf1score) = getevalscores(resultscount, platinumcount,
                                                                              resultsplatinumintersectioncount)
-        (gprecall, gpprecision, gpf1score) = getevalscores(goldcount, platinumcount, goldplatinumintersectioncount)
+        (gprecall, gpprecision, gpf1score) = getevalscores(
+            goldcount, platinumcount, goldplatinumintersectioncount)
 
         overallrow = ['', '', '', message, '', '', '', '', '', sf(recall), sf(precision), sf(f1score),
-                      '', '', '', '', sf(platinumrecall), sf(platinumprecision), sf(platinumf1score), '', '',
+                      '', '', '', '', sf(platinumrecall), sf(
+                          platinumprecision), sf(platinumf1score), '', '',
                       sf(gprecall), sf(gpprecision), sf(gpf1score), '', '', '']
 
         print(tab.join(overallrow), file=outfile)
@@ -1298,9 +1365,11 @@ def main():
 
     resultscounts = scores2counts(results)
 
-    countcomparison = get_comparison(resultscounts, goldcounts, themethod.queries)
+    countcomparison = get_comparison(
+        resultscounts, goldcounts, themethod.queries)
     if countcomparison != []:
-        countcomparisonfile = open(countcomparisonfilename, 'w', encoding='utf8')
+        countcomparisonfile = open(
+            countcomparisonfilename, 'w', encoding='utf8')
         ccheader = ['Measure', 'result', 'gold', 'diff']
         ccheaderstr = tab.join(ccheader)
         print(ccheaderstr, file=countcomparisonfile)
@@ -1310,9 +1379,10 @@ def main():
 
     definedqcount = qcount - undefinedqcount
 
-
-    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, themethod.queries)
-    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, themethod.queries)
+    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(
+        goldscores, themethod.queries)
+    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(
+        goldcounts, themethod.queries)
 
     lgoldscores = len(goldscores)
 
@@ -1332,9 +1402,12 @@ def main():
     finalmessagetemplate1 = '{} measures, {} undefined, {} defined,  of which {} invalid.'
     finalmessagetemplate2 = '{} measures defined for a non empty gold score out of {} ({}).'
     finalmessagetemplate3 = '{} measures defined for a non empty gold count out of {} ({}).'
-    print(finalmessagetemplate1.format(qcount, undefinedqcount, definedqcount, invalidqcount))
-    print(finalmessagetemplate2.format(definedfornonemptygoldscore, lgoldscores, percentagecompletion1str))
-    print(finalmessagetemplate3.format(definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
+    print(finalmessagetemplate1.format(
+        qcount, undefinedqcount, definedqcount, invalidqcount))
+    print(finalmessagetemplate2.format(
+        definedfornonemptygoldscore, lgoldscores, percentagecompletion1str))
+    print(finalmessagetemplate3.format(
+        definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
     print('Undefined queries:', undefinedqueries)
     settings.LOGGER.info("Done!")
 

@@ -4,7 +4,7 @@ from typing import List, Tuple
 import sastadev.CHAT_Annotation as sastachat
 import sastadev.cleanCHILDEStokens
 from sastadev.metadata import Meta
-#from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
+# from CHAT_Annotation import CHAT_patterns, interpunction, wordpat
 from sastadev.sastatoken import Token, stringlist2tokenlist
 from sastadev.sastatypes import SynTree
 from sastadev.treebankfunctions import find1
@@ -24,8 +24,8 @@ def alts(pats, grouping=False):
     return result
 
 
-#interpunction = r'[!\?\.,;]'  # add colon separated by spaces
-#word = r'[^!\?;\.\[\]<>\s]+'
+# interpunction = r'[!\?\.,;]'  # add colon separated by spaces
+# word = r'[^!\?;\.\[\]<>\s]+'
 word = sastachat.wordpat
 scope = r'<.+?>'
 scopeorword = alts([scope, word])
@@ -35,25 +35,29 @@ realwordreplacement = scopeorword + r'\s*\[::.+?\]'
 alternativetranscription = r'\[=\?.+?\]'
 # dependenttier # p. 71
 commentonmainline = r'\[%.+?\]'  # p. 71
-#bestguess = scopeorword+r'\s*\[\?\]' #p. 70-71
+# bestguess = scopeorword+r'\s*\[\?\]' #p. 70-71
 bestguess = r'\[\?\]'
-#overlap follows p. 71
-#overlap precedes p. 71
-repetition = scopeorword + r'\s*\[/\]\s*' + word  # p73 should actually cover the number of words inside the scope
+# overlap follows p. 71
+# overlap precedes p. 71
+# p73 should actually cover the number of words inside the scope
+repetition = scopeorword + r'\s*\[/\]\s*' + word
 retracing = scopeorword + r'\s*\[//\]\s*' + word  # p73
 whitespace = r'\s+'
 
 
-#sastaspecials = [r'\[::', r'\[=', r'\[:', r'\[=\?', r'\[x', r'\<', r'\>', r'\[\?\]', r'\[/\]', r'\[//\]', r'\[///\]', r'\[%', r'\]']
+# sastaspecials = [r'\[::', r'\[=', r'\[:', r'\[=\?', r'\[x', r'\<', r'\>', r'\[\?\]', r'\[/\]', r'\[//\]', r'\[///\]', r'\[%', r'\]']
 sastaspecials = list(sastachat.CHAT_patterns)
-sastapatterns = sorted(sastaspecials, key=lambda x: len(x), reverse=True) + [word, sastachat.interpunction]
+sastapatterns = sorted(sastaspecials, key=lambda x: len(
+    x), reverse=True) + [word, sastachat.interpunction]
 fullsastapatterns = alts(sastapatterns)
 fullsastare = re.compile(fullsastapatterns)
 
-allpatterns = [realwordreplacement, replacement, myrepetition, alternativetranscription, commentonmainline, bestguess, retracing]
-sortedallpatterns = sorted(allpatterns, key=lambda x: len(x), reverse=True) + [word, sastachat.interpunction]
+allpatterns = [realwordreplacement, replacement, myrepetition,
+               alternativetranscription, commentonmainline, bestguess, retracing]
+sortedallpatterns = sorted(allpatterns, key=lambda x: len(
+    x), reverse=True) + [word, sastachat.interpunction]
 fullpattern = alts(sortedallpatterns)
-#print(fullpattern)
+# print(fullpattern)
 fullre = re.compile(fullpattern)
 
 
@@ -70,6 +74,7 @@ def sasta_tokenize(instring):
     result = stringlist2tokenlist(tokenstring, start=10, inc=10)
     return result
 
+
 def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     '''
     converts the origutt into  list of xmeta elements
@@ -78,5 +83,6 @@ def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     '''
     origutt = find1(tree, './/meta[@name="origutt"]/@value')
     tokens1 = sasta_tokenize(origutt)
-    tokens2, metadata = sastadev.cleanCHILDEStokens.cleantokens(tokens1, repkeep=False)
+    tokens2, metadata = sastadev.cleanCHILDEStokens.cleantokens(
+        tokens1, repkeep=False)
     return tokens2, metadata

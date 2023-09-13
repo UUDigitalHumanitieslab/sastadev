@@ -61,7 +61,8 @@ ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
 Nort: TypeAlias = Union[SynTree, Token]
-ExactResultsFilter: TypeAlias = Callable[[Query, ExactResultsDict, ExactResult], bool]
+ExactResultsFilter: TypeAlias = Callable[[
+    Query, ExactResultsDict, ExactResult], bool]
 Targets: TypeAlias = int
 Treebank: TypeAlias = etree.Element
 TreePredicate: TypeAlias = Callable[[SynTree], bool]
@@ -69,11 +70,12 @@ TokenTreePredicate: TypeAlias = Callable[[Token, SynTree], bool]
 URL: TypeAlias = str
 UttTokenDict: TypeAlias = Dict[UttId, List[Token]]
 UttWordDict: TypeAlias = Dict[UttId, List[str]]
-WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
+WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode],
+                            Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
 # moved the following to allresuls.py
-#CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
-#PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
-#QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
+# CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
+# PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
+# QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
 
 AnalysedTrees = List[Tuple[UttId, SynTree]]
 SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]

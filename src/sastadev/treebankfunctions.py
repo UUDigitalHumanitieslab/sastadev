@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from lxml import etree
 
 # from sastadev.lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
-#import lexicon as lex
+# import lexicon as lex
 from sastadev.conf import settings
 from sastadev.metadata import Meta
 from sastadev.sastatoken import Token
@@ -37,7 +37,8 @@ class Metadata:
         return result
 
     def md2XMLElement(self):
-        result = etree.Element('meta', type=self.type, name=self.name, value=self.value)
+        result = etree.Element('meta', type=self.type,
+                               name=self.name, value=self.value)
         return result
 
 
@@ -65,35 +66,41 @@ allrels = ['hdf', 'hd', 'cmp', 'sup', 'su', 'obj1', 'pobj1', 'obj2', 'se', 'pc',
 
 allcats = ['smain', 'np', 'ppart', 'ppres', 'pp', 'ssub', 'inf', 'cp', 'du', 'ap', 'advp', 'ti', 'rel', 'whrel',
            'whsub', 'conj', 'whq', 'oti', 'ahi', 'detp', 'sv1', 'svan', 'mwu', 'top', 'cat', 'part']
-#part occurs but is not official
+# part occurs but is not official
 
-allpts = ['let', 'spec', 'bw', 'vg', 'lid', 'vnw', 'tw', 'ww', 'adj', 'n', 'tsw', 'vz']
+allpts = ['let', 'spec', 'bw', 'vg', 'lid',
+          'vnw', 'tw', 'ww', 'adj', 'n', 'tsw', 'vz']
 
 openclasspts = ['bw', 'ww', 'adj', 'n']
 
-clausecats = ['smain', 'ssub', 'inf', 'cp', 'ti', 'rel', 'whrel', 'whsub', 'whq', 'oti', 'ahi', 'sv1', 'svan']
+clausecats = ['smain', 'ssub', 'inf', 'cp', 'ti', 'rel',
+              'whrel', 'whsub', 'whq', 'oti', 'ahi', 'sv1', 'svan']
 clausebodycats = ['smain', 'ssub', 'inf', 'sv1', 'ppart', 'ppres']
 
 trueclausecats = ['smain', 'cp', 'rel', 'whrel', 'whsub', 'whq', 'sv1', 'svan']
 
-complrels = ['su', 'obj1', 'pobj1', 'obj2', 'se', 'pc', 'vc', 'svp', 'predc', 'ld']
+complrels = ['su', 'obj1', 'pobj1', 'obj2',
+             'se', 'pc', 'vc', 'svp', 'predc', 'ld']
 
 mainclausecats = ['smain', 'whq', 'sv1']
 
 ptsubclasspairs = [('n', 'ntype'), ('tw', 'numtype'), ('vnw', 'vwtype'), ('lw', 'lwtype'), ('vz', 'vztype'),
-                   ('vg' , 'conjtype'), ('spec', 'spectype')]
-ptsubclassdict = {pt:subclass for (pt, subclass) in ptsubclasspairs}
+                   ('vg', 'conjtype'), ('spec', 'spectype')]
+ptsubclassdict = {pt: subclass for (pt, subclass) in ptsubclasspairs}
 
 pluralcrds = [('en',)]
 
 hwws_tijd = ['hebben', 'zijn', 'zullen']
-hwws_aspect = ['gaan', 'komen', 'zijn', 'blijven', 'zitten', 'liggen', 'lopen', 'staan']
+hwws_aspect = ['gaan', 'komen', 'zijn', 'blijven',
+               'zitten', 'liggen', 'lopen', 'staan']
 hwws_voice = ['worden', 'zijn']
-hwws_modal = ['kunnen', 'zullen', 'mogen', 'moeten', 'willen', 'hoeven', 'horen', 'behoren']
+hwws_modal = ['kunnen', 'zullen', 'mogen', 'moeten',
+              'willen', 'hoeven', 'horen', 'behoren']
 hwws_caus = ['doen', 'laten']
 hwws_circum = ['doen']
 
-tarsp_auxverbs = set(hwws_tijd + hwws_aspect + hwws_voice + hwws_modal + hwws_caus + hwws_circum)
+tarsp_auxverbs = set(hwws_tijd + hwws_aspect + hwws_voice
+                     + hwws_modal + hwws_caus + hwws_circum)
 
 potentialdet_onbvnws = {'al', 'alle', 'beide', 'een', 'elk', 'elke', 'ene', 'enig', 'enige', 'enkel', 'ettelijke',
                         'evenveel', 'geen', 'ieder', 'meer', 'meerdere', 'menig', 'minder', 'minst', 'sommig',
@@ -320,7 +327,7 @@ def noxpathsentid(syntree: SynTree) -> List[UttId]:
                     results = [child.attrib['sentid']]
     return results
 
-#put the next one in comments, see below for a different definition
+# put the next one in comments, see below for a different definition
 # def getsentid(syntree: SynTree) -> Optional[UttId]:
 #     result = getqueryresult(syntree, noxpathquery=noxpathsentid)
 #     return result
@@ -360,7 +367,8 @@ def reclastmainclauseof(node: SynTree, current: SynTree) -> SynTree:
     if node is None:
         result = current
     elif ismainclausenode(node):
-        currentend = int(getattval(current, 'end')) if current is not None else 0
+        currentend = int(getattval(current, 'end')
+                         ) if current is not None else 0
         nodeend = int(getattval(node, 'end'))
         if nodeend > currentend:
             result = node
@@ -446,7 +454,8 @@ def phimax(v1: str, v2: str) -> str:
     elif v1 in genders and v2 in genders:
         result = valmerge(v1, v2, genders)
     else:
-        settings.LOGGER.error('Phimax: Illegal or incompatible value combination: V1={}, v2={}'.format(v1, v2))
+        settings.LOGGER.error(
+            'Phimax: Illegal or incompatible value combination: V1={}, v2={}'.format(v1, v2))
         result = v1
     return result
 
@@ -541,7 +550,8 @@ def inverted(thesubj: SynTree, thepv: SynTree) -> bool:
     pvend = getattval(thepv, 'end')
     # maybe defien immediately-follows for inflated trees
     inversion = '2' == subjperson[0] and tense == 'tgw' and subjnumber in ['ev', 'getal'] and \
-                pvend <= subjbegin and subjlemma in ['jij', 'je']  # getal added for je
+                pvend <= subjbegin and subjlemma in [
+                    'jij', 'je']  # getal added for je
     return inversion
 
 
@@ -587,7 +597,7 @@ def getqueryresult(syntree: SynTree, xpathquery: Optional[str] = None,
         elif len(results) > 1:
             result1 = results[0]
             result = number2intstring(result1)
-            ##issue a warning
+            # issue a warning
         elif len(results) == 1:
             result1 = results[0]
             result = number2intstring(result1)
@@ -627,11 +637,13 @@ def getnodeyield(syntree: SynTree) -> List[SynTree]:
         for node in syntree.iter():
             if node.tag in ['node'] and 'pt' in node.attrib or 'pos' in node.attrib:
                 resultlist.append(node)
-        sortedresultlist = sorted(resultlist, key=lambda x: int(getattval_fallback(x, 'end', '9999')))
+        sortedresultlist = sorted(resultlist, key=lambda x: int(
+            getattval_fallback(x, 'end', '9999')))
         return sortedresultlist
 
 
-def getyield(syntree: SynTree) -> List[str]:  # deze herformuleren in termen van getnodeyield na testen
+# deze herformuleren in termen van getnodeyield na testen
+def getyield(syntree: SynTree) -> List[str]:
     resultlist = []
     if syntree is None:
         theyield = []
@@ -647,7 +659,8 @@ def getyield(syntree: SynTree) -> List[str]:  # deze herformuleren in termen van
                     if 'end' not in node.attrib:
                         settings.LOGGER.error('No end in pt or pos node')
                     for el in node.attrib:
-                        settings.LOGGER.info('{}\t{}'.format(el, node.attrib[el]))
+                        settings.LOGGER.info(
+                            '{}\t{}'.format(el, node.attrib[el]))
         sortedresultlist = sorted(resultlist, key=lambda x: x[1])
         theyield = [w for (w, _) in sortedresultlist]
     return theyield
@@ -854,7 +867,8 @@ def spec_noun(node: SynTree) -> bool:
     pos = getattval(node, 'pos')
     frame = getattval(node, 'frame')
     word = getattval(node, 'word')
-    result = (pt == 'spec' and (pos == 'name' or frame.startswith('proper_name')))
+    result = (pt == 'spec' and (
+        pos == 'name' or frame.startswith('proper_name')))
     result = result and word[0].isupper()
     return result
 
@@ -949,7 +963,7 @@ def sasta_pseudonym(node: SynTree) -> bool:
 nodeformat = '{}/{}{}'
 nodeformatplus = nodeformat + '['
 
-##@@need to add a variant that returns a string
+# @@need to add a variant that returns a string
 
 
 def simpleshow(stree: SynTree, showchildren: bool = True, newline: bool = True) -> None:
@@ -1133,11 +1147,12 @@ def bareindexnode(node: SynTree) -> bool:
     # print(props2str(get_node_props(node)), result, file=sys.stderr)
     return (result)
 
-##herdefinieren want met UD hebben terminale nodes wel children (maar geen children met tag=node)
+# herdefinieren want met UD hebben terminale nodes wel children (maar geen children met tag=node)
 
 
 def terminal(node: SynTree) -> bool:
-    result = isinstance(node, etree._Element) and node is not None and len(node) == 0
+    result = isinstance(
+        node, etree._Element) and node is not None and len(node) == 0
     return result
 
 
@@ -1151,7 +1166,7 @@ def oldindextransform(stree: SynTree) -> SynTree:
     indexednodesmap = getindexednodesmap(stree)
     # for ind, tree in indexednodesmap.items():
     # print(ind)
-    #etree.dump(tree)
+    # etree.dump(tree)
     result = indextransform2(stree, indexednodesmap)
     return result
 
@@ -1182,7 +1197,7 @@ def indextransform(stree: SynTree) -> SynTree:
     basicindexednodesmap = getbasicindexednodesmap(stree)
     # for ind, tree in indexednodesmap.items():
     # print(ind)
-    #etree.dump(tree)
+    # etree.dump(tree)
     indexnodesmap = getindexednodesmap(basicindexednodesmap)
     result = indextransform2(stree, indexnodesmap)
     return result
@@ -1239,25 +1254,30 @@ def getstree(fullname: FileName) -> etree._ElementTree:
         settings.LOGGER.error('OS Error: {}; file: {}'.format(e, fullname))
         return None
     except Exception:
-        settings.LOGGER.error('Error: Unknown error in file {}'.format(fullname))
+        settings.LOGGER.error(
+            'Error: Unknown error in file {}'.format(fullname))
         return None
 
     with thefile:
         try:
             tree = etree.parse(thefile)
         except etree.ParseError as e:
-            settings.LOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
+            settings.LOGGER.error(
+                'Parse Error: {}; file: {}'.format(e, fullname))
             return None
         except UnicodeDecodeError as e:
-            settings.LOGGER.error('Unicode error: {} in file {}'.format(e, fullname))
+            settings.LOGGER.error(
+                'Unicode error: {} in file {}'.format(e, fullname))
             try:
                 windowsfile = open(fullname, 'r')
                 tree = etree.parse(windowsfile)
             except ValueError as e:
-                settings.LOGGER.error('Char Descoding Error: {}; file: {}'.format(e, fullname))
+                settings.LOGGER.error(
+                    'Char Descoding Error: {}; file: {}'.format(e, fullname))
                 return None
             except etree.ParseError as e:
-                settings.LOGGER.error('Parse Error: {}; file: {}'.format(e, fullname))
+                settings.LOGGER.error(
+                    'Parse Error: {}; file: {}'.format(e, fullname))
                 return None
             else:
                 return tree
@@ -1427,7 +1447,8 @@ def adaptsentence(stree: SynTree) -> SynTree:
     sentid = getsentid(stree)
     sentencenode = stree.find('.//sentence')
     if sentencenode is None:
-        settings.LOGGER.ERROR('No sentence element found for stree with sentid={}'.format(sentid))
+        settings.LOGGER.ERROR(
+            'No sentence element found for stree with sentid={}'.format(sentid))
         return stree
     sentencenodeparent = sentencenode.getparent()
     sentencenodeindex = sentencenodeparent.index(sentencenode)
@@ -1589,7 +1610,8 @@ def decomposetree(tree: SynTree) -> Tuple[SynTree, SynTree, SynTree, SynTree, Sy
         elif child.tag == 'parser':
             parser = child
         else:
-            settings.LOGGER.error('Unknown tag encountered in tree: {}'.format(child.tag))
+            settings.LOGGER.error(
+                'Unknown tag encountered in tree: {}'.format(child.tag))
     return parser, metadata, node, sentence, comments
 
 
@@ -1651,11 +1673,13 @@ def gettokposlist(tree: SynTree) -> List[PositionStr]:
     return result
 
 
-def gettreepos(origpos: PositionStr, reverseindex: List[PositionStr]) -> PositionStr:  # origuttpos2treepos
+# origuttpos2treepos
+def gettreepos(origpos: PositionStr, reverseindex: List[PositionStr]) -> PositionStr:
     if origpos in reverseindex:
         result = str(reverseindex.index(origpos))
     else:
-        settings.LOGGER.error('origpos {} not in reverseindex: {}'.format(origpos, reverseindex))
+        settings.LOGGER.error(
+            'origpos {} not in reverseindex: {}'.format(origpos, reverseindex))
         result = str(0)
     return result
 
@@ -1738,7 +1762,7 @@ def olddeletewordnodes(tree: SynTree, begins: List[Position]) -> SynTree:
 
         return newtree
 
-##redefine: no children with tag == 'node'  (because of UD extensions )
+# redefine: no children with tag == 'node'  (because of UD extensions )
 
 
 def childless(node: SynTree):
@@ -1768,7 +1792,8 @@ def deletewordnodes2(tree: SynTree, begins: List[Position]) -> SynTree:
             childbeginint = int(childbegin)
             if childbeginint in begins and childless(child):
                 tree.remove(child)
-            elif 'cat' in child.attrib and childless(child):  # if its children have been deleted earlier
+            # if its children have been deleted earlier
+            elif 'cat' in child.attrib and childless(child):
                 tree.remove(child)
     # tree  begin en end bijwerken
     if tree. tag == 'node':
@@ -1878,7 +1903,8 @@ def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
                 node.attrib['end'] = str(newendint)
                 node.attrib['begin'] = str(newendint - 1)
             else:
-                settings.LOGGER.error('Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
+                settings.LOGGER.error(
+                    'Correcttreebank:updatetokenpos: Missing key in tokenposdict: key={key}'.format(key=intend))
                 fulltrees = node.xpath('ancestor::node[@cat="top"]')
                 if fulltrees != []:
                     fulltree = fulltrees[0]
@@ -1897,7 +1923,7 @@ def updatetokenpos2(node: SynTree, tokenposdict: PositionMap):
 
 
 def updateindexnodes(stree: SynTree) -> SynTree:
-    #presupposes that the non bareindex nodes have been adapted already
+    # presupposes that the non bareindex nodes have been adapted already
     indexednodesmap = getbasicindexednodesmap(stree)
     newstree = deepcopy(stree)
     for node in newstree.iter():
@@ -1927,6 +1953,7 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
     return resulttree
 
+
 def getptsubclass(pt):
     if pt in ptsubclassdict:
         return ptsubclassdict[pt]
@@ -1940,6 +1967,8 @@ def subclasscompatible(sc1, sc2):
              (sc1 in ['pr', 'pers'] and sc2 in ['pr', 'pers']) or \
              (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm'])
     return result
+
+
 def fatparse(utterance: str, tokenlist: List[Token]) -> SynTree:
     stree = settings.PARSE_FUNC(utterance)
     fatstree = deepcopy(stree)
@@ -1964,7 +1993,8 @@ def update_cleantokenisation(stree: SynTree, begin: PositionStr) -> SynTree:
     intbegin = int(begin)
     oldcleanedtokmeta = find1(stree, '//xmeta[@name="cleanedtokenisation"]')
     cleanedtokmeta = copy(oldcleanedtokmeta)
-    oldcleanedtokposmeta = find1(stree, '//xmeta[@name="cleanedtokenpositions"]')
+    oldcleanedtokposmeta = find1(
+        stree, '//xmeta[@name="cleanedtokenpositions"]')
     cleanedtokposmeta = copy(oldcleanedtokposmeta)
     parent = oldcleanedtokmeta.getparent()
     if not (cleanedtokmeta is None and cleanedtokposmeta is None):
@@ -1979,7 +2009,8 @@ def update_cleantokenisation(stree: SynTree, begin: PositionStr) -> SynTree:
 
         cleanedtokposstr = cleanedtokposmeta.attrib['annotationwordlist']
         cleanedtokpos = str2list(cleanedtokposstr)
-        newcleanedtokpos = cleanedtokpos[:intbegin] + cleanedtokpos[intbegin + 1:]
+        newcleanedtokpos = cleanedtokpos[:intbegin] + \
+            cleanedtokpos[intbegin + 1:]
         newcleanedtokposintlist = [int(istr) for istr in newcleanedtokpos]
         newcleanedtokposstr = str(newcleanedtokposintlist)
         cleanedtokposmeta.attrib['annotationwordlist'] = newcleanedtokposstr
@@ -2013,7 +2044,8 @@ def normalisebeginend(stree: SynTree) -> None:
     '''
     # etree.dump(stree, pretty_print=True)
     # begins = [getattval(node, 'begin') for node in stree.xpath('.//node[@pt or @pos]')]  # we must include indexed nodes but not have duplicates
-    begins = {getattval(node, 'begin') for node in stree.xpath('.//node[count(node)=0]')}
+    begins = {getattval(node, 'begin')
+              for node in stree.xpath('.//node[count(node)=0]')}
     sortedbegins = sorted(list(begins), key=lambda x: int(x))
     normalisebeginend2(stree, sortedbegins)
 

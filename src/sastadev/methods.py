@@ -16,13 +16,14 @@ tarspmethods = [tarsp]
 astamethods = [asta]
 stapmethods = [stap]
 
-validmethods = astamethods + stapmethods +  tarspmethods
+validmethods = astamethods + stapmethods + tarspmethods
 
 astalexicalmeasures = ['A018', 'A021']  # LEX and N
 
+
 class SampleSize:
     def __init__(self, maxuttcount=None, maxwordcount=None):
-        self.maxuttcount : Optional[int] = maxuttcount
+        self.maxuttcount: Optional[int] = maxuttcount
         self.maxwordcount: Optional[int] = maxwordcount
 
 
@@ -68,7 +69,7 @@ def implies(a: bool, b: bool) -> bool:
     return (not a or b)
 
 
-#filter specifies what passes the filter
+# filter specifies what passes the filter
 def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
     return query.process == pre_process or \
         (implies('A029' in xrs, xr not in xrs['A029'])
@@ -95,7 +96,8 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
     elif methodname is None and methodfilename is not None:
         resultmethodfilename = methodfilename
         resultmethodname = getmethodfromfile(methodfilename)
-        settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+        settings.LOGGER.warning(
+            'Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is None:
         if methodname.lower() in supported_methods:
             resultmethodname = methodname.lower()
@@ -103,16 +105,17 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
         else:
             resultmethodfilename = methodname
             resultmethodname = getmethodfromfile(methodname)
-            settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+            settings.LOGGER.warning(
+                'Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is not None:
         if methodname.lower() in supported_methods:
             resultmethodname = methodname.lower()
             resultmethodfilename = methodfilename
         else:
-            settings.LOGGER.error('Unsupported method specified {}'.format(methodname))
+            settings.LOGGER.error(
+                'Unsupported method specified {}'.format(methodname))
             exit(-1)
     return resultmethodname, resultmethodfilename
-
 
 
 codepath = settings.SD_DIR
@@ -121,7 +124,8 @@ methodspath = os.path.join(datapath, 'methods')
 
 
 supported_methods = {}
-supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
+supported_methods[tarsp] = os.path.join(
+    methodspath, 'TARSP Index Current.xlsx')
 supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
 supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
@@ -133,10 +137,12 @@ defaultfilters[stap] = allok
 
 maxsamplesize: Dict[MethodName, SampleSize] = {}
 maxsamplesize[asta] = SampleSize(maxwordcount=300)
-maxsamplesize[tarsp] = SampleSize(maxuttcount=100) # reset when utterance selection is automated
-maxsamplesize[stap] = SampleSize(maxuttcount=100)  # reset when utterance selection is automated
+# reset when utterance selection is automated
+maxsamplesize[tarsp] = SampleSize(maxuttcount=100)
+# reset when utterance selection is automated
+maxsamplesize[stap] = SampleSize(maxuttcount=100)
 
 lastuttqidcondition: Dict[MethodName, Callable] = {}
-lastuttqidcondition[asta] = lambda q:  q in astalexicalmeasures
+lastuttqidcondition[asta] = lambda q: q in astalexicalmeasures
 lastuttqidcondition[tarsp] = lambda q: True
 lastuttqidcondition[stap] = lambda q: True

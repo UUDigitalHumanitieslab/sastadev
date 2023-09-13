@@ -6,7 +6,7 @@ from sastadev.allresults import AllResults
 from sastadev.lexicon import getwordinfo, getwordposinfo
 from sastadev.sastatypes import Position, QId, SynTree, UttId
 from sastadev.stringfunctions import getallrealwords, realwordstring
-from sastadev.treebankfunctions import getattval, getnodeyield, getuttid
+from sastadev.treebankfunctions import getattval, getnodeyield
 
 lpad = 3
 zero = '0'
@@ -43,7 +43,8 @@ def mdbasedquery(stree: SynTree, mdname: str, mdvalue: str) -> List[SynTree]:
     and value = *mdvalue*. It then obtains the position of the node to which the
     metadata apply, and next finds all nodes with that position as value for its *begin* attribute.
     '''
-    mdnamemdxpath = mdnamemdxpathtemplate.format(mdname=mdname, mdvalue=mdvalue)
+    mdnamemdxpath = mdnamemdxpathtemplate.format(
+        mdname=mdname, mdvalue=mdvalue)
     mdnamemds = stree.xpath(mdnamemdxpath)
     results = []
     for mdnamemd in mdnamemds:
@@ -119,12 +120,14 @@ def wordcountperutt(allresults):
     result = {uttid: ctr for uttid, ctr in result.items() if ctr != 0}
     return result
 
+
 def getignorewordcount(allresults, uttid):
     result = 0
     if samplesizeqid in allresults.coreresults:
         if uttid in allresults.coreresults[samplesizeqid]:
             result = allresults.coreresults[samplesizeqid][uttid]
     return result
+
 
 def getastamaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
     cutoffpoint = None
@@ -149,16 +152,15 @@ def getastamaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[Ut
     return result
 
 
-def getcutoffpoint(allresults: AllResults,  uttid: UttId, diff: int) -> int:
+def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
     theutt = allresults.allutts[uttid]
     final = diff
     for i, w in enumerate(theutt):
-        if (uttid, i+1) in allresults.exactresults[samplesizeqid]:
+        if (uttid, i + 1) in allresults.exactresults[samplesizeqid]:
             final += 1
         if i + 1 == final:
             break
     return final
-
 
 
 def finietheidsindex(allresults, _):
@@ -202,8 +204,10 @@ def countwordsandcutoff(allresults, _):
 
 
 def KMcount(allresults, _):
-    Kcount = sumctr(allresults.coreresults[kqid]) if kqid in allresults.coreresults else 0
-    Mcount = sumctr(allresults.coreresults[mqid]) if mqid in allresults.coreresults else 0
+    Kcount = sumctr(
+        allresults.coreresults[kqid]) if kqid in allresults.coreresults else 0
+    Mcount = sumctr(
+        allresults.coreresults[mqid]) if mqid in allresults.coreresults else 0
     result = Kcount + Mcount
     return result
 
@@ -370,7 +374,8 @@ def bgetlemma(word: str, pos: Optional[str] = None):
         if wordinfos == []:
             lemma = word
         else:
-            filteredwordinfos = [wi for wi in wordinfos if wi[3] not in excluded_lemmas]
+            filteredwordinfos = [
+                wi for wi in wordinfos if wi[3] not in excluded_lemmas]
             if filteredwordinfos == []:
                 lemma = wordinfos[0][3]
             else:
@@ -380,7 +385,8 @@ def bgetlemma(word: str, pos: Optional[str] = None):
         if wordinfos == []:
             lemma = word
         else:
-            filteredwordinfos = [wi for wi in wordinfos if wi[3] not in excluded_lemmas]
+            filteredwordinfos = [
+                wi for wi in wordinfos if wi[3] not in excluded_lemmas]
             if filteredwordinfos == []:
                 lemma = wordinfos[0][3]
             else:

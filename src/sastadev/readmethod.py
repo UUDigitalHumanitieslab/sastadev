@@ -4,7 +4,7 @@ This module defines the function read_method to read in a method:
 * read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
 '''
 
-from typing import List, Tuple
+from typing import List
 
 from sastadev import xlsx
 from sastadev.conf import settings
@@ -43,8 +43,8 @@ def getint(fase: str) -> int:
 
 
 def get_pages(val: str) -> str:
-    #pages = val.split(pagesep)
-    #result = pages
+    # pages = val.split(pagesep)
+    # result = pages
     result = val
     return result
 
@@ -127,11 +127,12 @@ def empty(row: list) -> bool:
             return False
     return True
 
+
 def read_method(methodname: str, methodfilename: FileName) -> Method:
     header, data = xlsx.getxlsxdata(methodfilename)
 
     idcol, catcol, subcatcol, levelcol, itemcol, altcol, impliescol, \
-        originalcol, pagescol, fasecol, querycol, informcol, screeningcol, processcol, starscol, filtercol,\
+        originalcol, pagescol, fasecol, querycol, informcol, screeningcol, processcol, starscol, filtercol, \
         variantscol, unused1col, unused2col, commentscol = \
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 
@@ -172,12 +173,14 @@ def read_method(methodname: str, methodfilename: FileName) -> Method:
             lcitem = item.lower()
             lclevel = level.lower()
             if (lcitem, lclevel) in item2idmap:
-                settings.LOGGER.error('Duplicate (item, level) pair for {} and {}'.format(item2idmap[(lcitem, lclevel)], id))
+                settings.LOGGER.error('Duplicate (item, level) pair for {} and {}'.format(
+                    item2idmap[(lcitem, lclevel)], id))
             item2idmap[(lcitem, lclevel)] = id
             for altitem in altitems:
                 lcaltitem = altitem.lower()
                 if (lcaltitem, lclevel) in altcodes:
-                    settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
+                    settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(
+                        altcodes[(lcaltitem, lclevel)], id))
                 altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 
     defaultfilter = defaultfilters[methodname]

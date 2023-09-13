@@ -1,7 +1,7 @@
 import re
 import unicodedata
-from typing import Any, Callable, List, Match, Optional, Sequence, Set
 from collections import Counter
+from typing import Any, Callable, List, Match, Optional, Sequence, Set
 
 vertbar = '|'
 space = ' '
@@ -10,7 +10,8 @@ slash = '/'
 tab = '\t'
 comma = ','
 
-csvre = "'[^']+'|[^,' ]+"  # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
+# for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
+csvre = "'[^']+'|[^,' ]+"
 csvpat = re.compile(csvre)
 
 wpat = r'^.*\w.*$'
@@ -25,14 +26,18 @@ tremavowels = 'äëïöüÿ'
 circumflexvowels = 'âêîôû\u0177'
 
 consonants = 'bcdfghjklmnpqrstvwxz\u00E7'  # \u00E7 is c cedilla
-dutch_base_vowels = barevowels + aiguvowels + gravevowels + tremavowels + circumflexvowels
+dutch_base_vowels = barevowels + aiguvowels + \
+    gravevowels + tremavowels + circumflexvowels
 vowels = dutch_base_vowels
-dutch_base_diphthongs = ['aa', 'ee', 'ie', 'oo', 'uu', 'ij', 'ei', 'au', 'ou', 'ui', 'eu', 'oe']
+dutch_base_diphthongs = ['aa', 'ee', 'ie', 'oo',
+                         'uu', 'ij', 'ei', 'au', 'ou', 'ui', 'eu', 'oe']
 dutch_y_diphthongs = ['y' + d for d in dutch_base_vowels] + [d + 'y' for d in
                                                              dutch_base_vowels]  # ryen gaat nog fout ye alleen samen nemen aan begin van woord
-dutch_y_triphthongs = ['y' + d for d in dutch_base_diphthongs] + [d + 'y' for d in dutch_base_diphthongs]
+dutch_y_triphthongs = ['y' + d for d in dutch_base_diphthongs] + \
+    [d + 'y' for d in dutch_base_diphthongs]
 dutch_trema_diphthongs = ['äa', "ëe", 'ïe', 'öo', 'üu', 'ëi']
-dutch_diphthongs = dutch_base_diphthongs + dutch_y_diphthongs + dutch_trema_diphthongs
+dutch_diphthongs = dutch_base_diphthongs + \
+    dutch_y_diphthongs + dutch_trema_diphthongs
 dutch_base_triphthongs = ['aai', 'eeu', 'ooi', 'oei']
 dutch_y_tetraphthongs = ['y' + d for d in dutch_base_triphthongs]
 dutch_triphthongs = dutch_base_triphthongs + dutch_y_triphthongs
@@ -92,10 +97,12 @@ def charrange(string: str) -> str:
 
 consonants_star = star(charrange(consonants))
 
-syllableheadspat = alt([alt(dutch_tetraphthongs), alt(dutch_triphthongs), alt(dutch_diphthongs), alt(vowels)])
+syllableheadspat = alt([alt(dutch_tetraphthongs), alt(
+    dutch_triphthongs), alt(dutch_diphthongs), alt(vowels)])
 syllableheadsre = re.compile(syllableheadspat)
 
-monosyllabicpat = r'^' + consonants_star + syllableheadspat + consonants_star + r'$'
+monosyllabicpat = r'^' + consonants_star + \
+    syllableheadspat + consonants_star + r'$'
 monosyllabicre = re.compile(monosyllabicpat)
 
 
@@ -129,7 +136,8 @@ def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str
     newwords: List[str] = []
     if word in exceptions:
         newwords = []
-    elif wre.match(word):  # we want to exclude tokens consisting of interpunction symbols only e.g  ---, --
+    # we want to exclude tokens consisting of interpunction symbols only e.g  ---, --
+    elif wre.match(word):
         newword = dupre.sub(r'\1', word)
         if inlexicon(newword):
             newwords.append(newword)
@@ -200,11 +208,14 @@ def delhyphenprefix(word: str, inlexicon: Callable[[str], bool]) -> List[str]:
         mwinlex = inlexicon(mainword)
         pfinlex = inlexicon(prefix)
         deduppf = barededup(prefix)
-        if prefix in hyphenprefixes and mwinlex:  # the word starts wit ha known prefix that uses hyphen such as ex (ex-vrouw)
+        # the word starts wit ha known prefix that uses hyphen such as ex (ex-vrouw)
+        if prefix in hyphenprefixes and mwinlex:
             result = []
-        elif mainword.startswith(prefix) and mwinlex:  # this is the core case  e.g. ver-verkoop
+        # this is the core case  e.g. ver-verkoop
+        elif mainword.startswith(prefix) and mwinlex:
             result = [mainword]
-        elif pfinlex and mwinlex:  # for compounds with a hyphen: kat-oorbellen, generaal-majoor and for tennis-baan(?)
+        # for compounds with a hyphen: kat-oorbellen, generaal-majoor and for tennis-baan(?)
+        elif pfinlex and mwinlex:
             result = []
         elif mainword.startswith(deduppf) and mwinlex:  # vver-verkoop
             result = [mainword]
@@ -450,6 +461,7 @@ def getallrealwords(allresults):
         words = [w for w in allresults.allutts[uttid] if realwordstring(w)]
         result[uttid] = Counter(words)
     return result
+
 
 if __name__ == '__main__':
     test()

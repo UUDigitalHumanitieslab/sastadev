@@ -17,11 +17,12 @@ ScoresByUttDict = Dict[UttId, List[Tuple[float, float, float]]]
 
 
 def getresultsbyutt(results: ResultsDict) -> ResultsByUttDict:
-    resultsbyuttdict : ResultsByUttDict = defaultdict(Counter)
+    resultsbyuttdict: ResultsByUttDict = defaultdict(Counter)
     for qid in results:
         for uttid in results[qid]:
             resultsbyuttdict[uttid].update([qid])
     return resultsbyuttdict
+
 
 def getscoresbyutt2(results: ResultsByUttDict, reference: ResultsByUttDict) -> ScoresByUttDict:
     scores = {}
@@ -39,10 +40,11 @@ def getscoresbyutt2(results: ResultsByUttDict, reference: ResultsByUttDict) -> S
             settings.LOGGER.error(f'No results data for uttid {uttid}')
     return scores
 
+
 def getreference(goldscores: GoldResults) -> ResultsDict:
     reference = {}
     for qid in goldscores:
-         reference[qid] = goldscores[qid][2]
+        reference[qid] = goldscores[qid][2]
     return reference
 
 
