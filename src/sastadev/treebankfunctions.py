@@ -1226,7 +1226,7 @@ def indextransform2(stree: SynTree, indexednodesmap: Dict[str, SynTree]) -> SynT
         return newstree
 
 
-def getstree(fullname: FileName) -> SynTree:
+def getstree(fullname: FileName) -> etree._ElementTree:
     try:
         thefile = open(fullname, 'r', encoding='utf8')
     except FileNotFoundError as e:
