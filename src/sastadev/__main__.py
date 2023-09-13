@@ -1196,6 +1196,7 @@ def main():
                  'method']
     logname = 'sastalog.txt'
     logpath = os.path.join(codepath, '../../sastalog')
+    os.makedirs(logpath, exist_ok=True)
     logfullname = os.path.join(logpath, logname)
     biglogfile = open(logfullname, 'a', encoding='utf8')
 
