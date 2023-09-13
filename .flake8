@@ -10,6 +10,8 @@ ignore =
     F841
     # Line break occurs before binary operator (deprecated)
     W503
+    # Invalid espace sequence
+    W605
 exclude =
     __pycache__
     env

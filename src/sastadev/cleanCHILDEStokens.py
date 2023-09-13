@@ -132,6 +132,7 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False) -> Tuple[Clean
     newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
     newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
     newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
+    #newmeta4 = Meta('cleantext',  'done')
     metadata += [newmeta1, newmeta2, newmeta3]
     resultmetadata = metadata
     if tokenoutput:

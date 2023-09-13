@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.7', '3.10']
+        python-version: ['3.8', '3.10']
 
     steps:
     - uses: actions/checkout@v3
@@ -28,14 +28,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Prepare PIP package
-      run: |
-        cd pypi
-        ./prepare.sh
     - name: Lint with flake8
       run: |
-        flake8  $(cat pypi/include.txt | grep \.py\$) --count --max-complexity=12 --max-line-length=127 --statistics
-    # - name: Run unit tests
-    #   run: |
-    #     pip install pytest
-    #     python -m pytest
+        flake8  src/**/*.py --count --max-line-length=127 --statistics
+    - name: Run unit tests
+      run: |
+        pip install pytest
+        pip install -e .
+        python -m pytest

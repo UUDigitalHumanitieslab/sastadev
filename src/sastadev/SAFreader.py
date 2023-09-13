@@ -40,7 +40,7 @@ firstwordcolheaderpattern = r'^\s*word0*1\s*$'
 firstwordcolheaderre = re.compile(firstwordcolheaderpattern)
 
 speakerheaders = ['speaker', 'spreker', 'spk']
-uttidheaders = ['id', 'utt', 'uttid']
+uttidheaders = ['id', 'utt', 'uttid', 'uiting']
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
@@ -360,11 +360,11 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
         curuttwlist = []
         for colctr in range(firstwordcol, len(row)):
             if thelevel == uttlevel:
-                curcellval = row[colctr]
+                curcellval = str(row[colctr])
                 if curcellval != '':
                     curuttwlist.append(curcellval)
             elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
-                thelabel = row[colctr]
+                thelabel = str(row[colctr])
                 if colctr > lastwordcol:
                     tokenposition = 0
                 else:
