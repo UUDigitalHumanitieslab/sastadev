@@ -47,7 +47,8 @@ commentsheaders = ['comments', 'commentaar']
 unalignedheaders = ['unaligned', 'hele zin', 'hele uiting']
 
 
-def nested_dict(n: int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
+def nested_dict(n: int,
+                type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
         return defaultdict(type)
     else:
@@ -419,7 +420,8 @@ def getitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Level
     resultmap: Dict[Item, Level] = {}
     for (item, level) in mapping:
         if item in resultmap:
-            settings.LOGGER.error('Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
+            settings.LOGGER.error(
+                'Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
         else:
             resultmap[item] = level
     return resultmap
@@ -446,7 +448,8 @@ def mkpatterns(allcodes: List[str]) -> Tuple[Pattern, Pattern]:
     return (re.compile(basepattern), re.compile(fullpattern))
 
 
-def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]],
+def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
+                 altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]],
                  queries: QueryDict, includeimplies: bool = False) \
         -> Tuple[UttWordDict, Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]]]:
     # item2levelmap = {}
@@ -461,12 +464,12 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
     for thelevel, theitem in basicdata:
         thecounter = basicdata[(thelevel, theitem)]
         # unclear why this below here is needed
-#        if (theitem, thelevel) in mapping:
-#            mappingitem = theitem
-#        elif (varitem, thelevel) in mapping:
-#            mappingitem = varitem
-#        else:
-#            mappingitem = theitem
+        #        if (theitem, thelevel) in mapping:
+        #            mappingitem = theitem
+        #        elif (varitem, thelevel) in mapping:
+        #            mappingitem = varitem
+        #        else:
+        #            mappingitem = theitem
         if thelevel in literallevels:
             # we still have to determine how to deal with this
             pass
@@ -480,7 +483,8 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif (theitem, thelevel) in altcodes:
             (altitem, altlevel) = altcodes[(theitem, thelevel)]
             qid = mapping[(altitem, altlevel)]
@@ -494,8 +498,9 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
-        elif theitem in mappingitem2levelmap:   # valid item but wrong level
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+        elif theitem in mappingitem2levelmap:  # valid item but wrong level
             thecorrectlevel = mappingitem2levelmap[theitem]
             qid = mapping[(theitem, thecorrectlevel)]
             update(results, qid, (thecorrectlevel, theitem, thecounter))
@@ -508,7 +513,8 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif theitem in altcodesitem2levelmap:  # valid alternative item but wrong level
             theitemlevel = altcodesitem2levelmap[theitem]
             (thecorrectitem, thecorrectlevel) = altcodes[(theitem, theitemlevel)]
@@ -525,7 +531,8 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId], alt
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, impliedqid, (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
 
         else:
             settings.LOGGER.error('{} of level {} not a valid coding'.format(theitem, thelevel))
