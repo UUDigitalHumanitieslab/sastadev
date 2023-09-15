@@ -44,7 +44,7 @@ uttidheaders = ['id', 'utt', 'uttid']
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
-unalignedheaders = ['unaligned']
+unalignedheaders = ['unaligned', 'hele zin', 'hele uiting']
 
 
 def nested_dict(n: int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
