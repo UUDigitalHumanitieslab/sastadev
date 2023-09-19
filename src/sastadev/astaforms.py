@@ -18,7 +18,6 @@ nounreskey = mkresultskey(nounqid)
 lexreskey = mkresultskey(lexqid)
 
 
->>>>>>> lemmas:astaforms.py
 
 green = '#00FF00'
 red = '#FF0000'

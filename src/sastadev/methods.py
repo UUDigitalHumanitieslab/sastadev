@@ -1,4 +1,4 @@
-
+from sastadev.conf import settings
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
@@ -110,7 +110,7 @@ def getmethodfromfile(filename: str) -> str:
 
 def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
     if methodname is None and methodfilename is None:
-        SDLOGGER.error('Specify a method using -m ')
+        settings.LOGGER.error('Specify a method using -m ')
         exit(-1)
     elif methodname is None and methodfilename is not None:
         resultmethodfilename = methodfilename
@@ -123,13 +123,13 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
         else:
             resultmethodfilename = methodname
             resultmethodname = getmethodfromfile(methodname)
-            SDLOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+            settings.warning('Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is not None:
         if methodname.lower() in supported_methods:
             resultmethodname = methodname.lower()
             resultmethodfilename = methodfilename
         else:
-            SDLOGGER.error('Unsupported method specified {}'.format(methodname))
+            settings.LOGGER.error('Unsupported method specified {}'.format(methodname))
             exit(-1)
     return resultmethodname, resultmethodfilename
 
@@ -143,7 +143,6 @@ supported_methods = {}
 supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
 supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
 supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
->>>>>>> lemmas:methods.py
 
 
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}
