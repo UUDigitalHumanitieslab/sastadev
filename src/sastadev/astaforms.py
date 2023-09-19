@@ -1,12 +1,24 @@
 
 from collections import Counter, defaultdict
 from io import BytesIO
+from typing import Dict
 
 import xlsxwriter
 
+from sastadev.allresults import mkresultskey
 from sastadev.ASTApostfunctions import (nounlemmaqid, verblemmaqid,
                                         wordcountperutt)
 from sastadev.forms import getformfilename
+
+
+nounqid = 'A021'
+lexqid = 'A018'
+lemmaqid = 'A051'
+nounreskey = mkresultskey(nounqid)
+lexreskey = mkresultskey(lexqid)
+
+
+>>>>>>> lemmas:astaforms.py
 
 green = '#00FF00'
 red = '#FF0000'
@@ -21,6 +33,11 @@ grey = '#B0B0B0'
 # orange = '#9C6500'
 # orange = 'yellow'
 
+
+def condnoun(lemmapositions, exactresults):
+    nounpositions = exactresults[nounreskey]
+    result = lemmapositions in nounpositions   # something is wrong here JO
+    return result
 
 class ExcelForm:
     def __init__(self, tabel, scores):
@@ -334,10 +351,12 @@ def astaform(allresults, _, in_memory=False):
     #             # theword = normalizedword(amatch[0])
     #             theword = getattval(amatch[0], 'lemma')
     #             verbdict[theword] += 1
-    for (lemma, uttid) in allresults.postresults[nounlemmaqid]:
-        noundict[lemma] += 1
-    for (lemma, uttid) in allresults.postresults[verblemmaqid]:
-        verbdict[lemma] += 1
+    noundict = getlemmafreqs(allresults, nounreskey)
+    # for (lemma, uttid) in allresults.postresults[nounlemmaqid]:
+    #    noundict[lemma] += 1
+    verbdict = getlemmafreqs(allresults, lexreskey)
+    # for (lemma, uttid) in allresults.postresults[verblemmaqid]:
+    #    verbdict[lemma] += 1
     vardict = getvardict(allresults)
     uttlist = getuttlist(allresults)
     astadata = AstaFormData(noundict, verbdict, vardict, uttlist)
@@ -351,3 +370,16 @@ def astaform(allresults, _, in_memory=False):
     theworkbook, target = make_astaform(theform, astadata, target)
     theworkbook.close()
     return target
+
+def getlemmafreqs(allresults, lexicalreskey) -> Dict[str, int]:
+    dict = defaultdict(int)
+    for reskey in allresults.exactresults:
+        qid = reskey[0]
+        if qid == lemmaqid:
+            lemma = reskey[1]
+            for position in allresults.exactresults[reskey]:
+                if position in allresults.exactresults[lexicalreskey]:
+                    dict[lemma] += 1
+    return dict
+
+

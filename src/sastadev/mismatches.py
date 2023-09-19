@@ -4,7 +4,11 @@ from copy import copy
 from lxml import etree
 
 from sastadev.conf import settings
-from sastadev.treebankfunctions import getattval, getmarkedyield, getyield
+from sastadev.treebankfunctions import getattval, getmarkedyield, getyield, find1
+from sastadev.sastatoken import deflate
+from sastadev.allresults import mkresultskey, ResultsKey, showreskey
+from typing import Tuple
+from sastadev.sastatypes import UttId, Position
 
 tab = '\t'
 space = ' '
@@ -85,14 +89,16 @@ def getfirstwordposition(matchtree):
 #     return resultlist
 
 
-def mismatches(queryid, queries, theresultsminusgold, goldminustheresults, allmatches, allutts, platinumcheckfile):
+def mismatches(reskey, queries, theresultsminusgold, goldminustheresults, allmatches, allutts, platinumcheckfile):
+    reskeystr = showreskey(reskey)
+    queryid = reskey[0]
     if theresultsminusgold != {}:
         print('More examples', file=platinumcheckfile)
     for uttid in theresultsminusgold:
-        if (queryid, uttid) in allmatches:
-            for (m, syntree) in allmatches[(queryid, uttid)]:
+        if (reskey, uttid) in allmatches:
+            for (m, syntree) in allmatches[(reskey, uttid)]:
                 markedutt = getmarkedutt(m, syntree)
-                platinumcheckrow1 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
+                platinumcheckrow1 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
                                      uttid, markedutt]
                 print(tab.join(platinumcheckrow1), file=platinumcheckfile)
 
@@ -103,7 +109,7 @@ def mismatches(queryid, queries, theresultsminusgold, goldminustheresults, allma
             uttstr = space.join(allutts[uttid])
         else:
             settings.LOGGER.warning('uttid {} not in alluts'.format(uttid))
-        platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid,
+        platinumcheckrow2 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid,
                              uttstr]
         print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
@@ -122,35 +128,80 @@ def getmarkposition(position, nodeendmap, uttid):
         result = 1
     return result
 
+def isliteralreskey(reskey: ResultsKey):
+    (key, val) = reskey
+    result = key != val
+    return result
+def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
+                         permsilverdatadict={}, annotationinput=False):
+    newrows = []
+    for reskey in exactgoldscores:
+        if isliteralreskey(reskey) and reskey not in exactresults:
+            print('Missed examples', file=platinumcheckfile)
+            reskeystr = showreskey(reskey)
+            queryid = reskey[0]
+            for hit in exactgoldscores[reskey]:
+                (uttid, position) = hit
+                if uttid in allutts:
+                    # markposition = 1 if position == 0 else position
+                    markposition = position
+                    markedwordlist = getmarkedyield(allutts[uttid], [markposition])
+                    uttstr = space.join(markedwordlist)
+                    tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
+                    origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
+                else:
+                    SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
+                    uttstr = ""
+                    markposition = 0
+                    tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
+                    origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
+                platinumcheckrow2 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
+                                     str(uttid),
+                                     str(markposition),
+                                     uttstr, origutt]
+                print(tab.join(platinumcheckrow2), file=platinumcheckfile)
+                key = (reskey, uttid, position)
+                usercomments = getusercomments(permsilverdatadict, key, report=False)
+                xlplatinumcheckrow2 = usercomments + ['Missed examples'] + platinumcheckrow2
+                newrows.append(xlplatinumcheckrow2)
+    return newrows
 
-def exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
+
+def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
                     permsilverdatadict={}, annotationinput=False):
-    theexactresults = exactresults[queryid] if queryid in exactresults else Counter()
-    theexactgoldscores = exactgoldscores[queryid] if queryid in exactgoldscores else Counter()
+    reskeystr = showreskey(reskey)
+    queryid = reskey[0]
+    theexactresults = exactresults[reskey] if reskey in exactresults else Counter()
+    theexactgoldscores = exactgoldscores[reskey] if reskey in exactgoldscores else Counter()
     (theresultsminusgold, goldminustheresults, intersection) = exactcompare(theexactresults, theexactgoldscores)
     newrows = []
     if theresultsminusgold != []:
         print('More examples', file=platinumcheckfile)
     for hit in theresultsminusgold:
         uttid, position = hit
-        if (queryid, uttid) in allmatches or annotationinput:
+        if (reskey, uttid) in allmatches or annotationinput:
             #markposition = 1 if position == 0 else position
+            tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
+            origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
             markposition = position
-            markedwordlist = getmarkedyield(allutts[uttid], [markposition])
-            uttstr = space.join(markedwordlist)
-            platinumcheckrow1 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
-                                 str(uttid), str(markposition), uttstr]
-            print(tab.join(platinumcheckrow1), file=platinumcheckfile)
-            key = (queryid, uttid, position)
-            usercomments = getusercomments(permsilverdatadict, key, report=True)
-            xlplatinumcheckrow1 = usercomments + ['More examples'] + platinumcheckrow1
-            newrows.append(xlplatinumcheckrow1)
-            # for (m, syntree) in allmatches[(queryid, uttid)]:
-            #    if getfirstwordposition(m) == position:
-            #        markedutt = getmarkedutt(m, syntree)
-            #       platinumcheckrow1 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
-            #                            uttid), markedutt]
-            #        print(tab.join(platinumcheckrow1), file=platinumcheckfile)
+            if uttid in allutts:
+                markedwordlist = getmarkedyield(allutts[uttid], [markposition])
+                uttstr = space.join(markedwordlist)
+                platinumcheckrow1 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
+                                     str(uttid), str(markposition), uttstr, origutt]
+                print(tab.join(platinumcheckrow1), file=platinumcheckfile)
+                key = (reskey, uttid, position)
+                usercomments = getusercomments(permsilverdatadict, key, report=True)
+                xlplatinumcheckrow1 = usercomments + ['More examples'] + platinumcheckrow1
+                newrows.append(xlplatinumcheckrow1)
+                # for (m, syntree) in allmatches[(queryid, uttid)]:
+                #    if getfirstwordposition(m) == position:
+                #        markedutt = getmarkedutt(m, syntree)
+                #       platinumcheckrow1 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
+                #                            uttid), markedutt]
+                #        print(tab.join(platinumcheckrow1), file=platinumcheckfile)
+            else:
+                SDLOGGER.error(f'Uttid {uttid} not in allutts; reporting ignored')
 
     if goldminustheresults != []:
         print('Missed examples', file=platinumcheckfile)
@@ -161,15 +212,19 @@ def exactmismatches(queryid, queries, exactresults, exactgoldscores, allmatches,
             markposition = position
             markedwordlist = getmarkedyield(allutts[uttid], [markposition])
             uttstr = space.join(markedwordlist)
+            tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
+            origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
         else:
             settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
             uttstr = ""
             markposition = 0
-        platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, str(uttid),
+            tree = allmatches[(reskey, uttid)][0][1] if (queryid, uttid) in allmatches else None
+            origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
+        platinumcheckrow2 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, str(uttid),
                              str(markposition),
-                             uttstr]
+                             uttstr, origutt]
         print(tab.join(platinumcheckrow2), file=platinumcheckfile)
-        key = (queryid, uttid, position)
+        key = (reskey, uttid, position)
         usercomments = getusercomments(permsilverdatadict, key, report=False)
         xlplatinumcheckrow2 = usercomments + ['Missed examples'] + platinumcheckrow2
         newrows.append(xlplatinumcheckrow2)
@@ -241,9 +296,15 @@ def counter2list(ctr):
     return result
 
 
-def getusercomments(permsilverdict, key, report=False):
+def getusercomments(permsilverdict, key: Tuple[ResultsKey, UttId, Position], report=False):
+    reskey, uttid, pos = key
+    olderkey = (reskey[0], uttid, pos)
     if key in permsilverdict:
         therow = permsilverdict[key]
+        usercomments = therow[usercommentbegin:usercommentuntil]
+        result = usercomments
+    elif olderkey in permsilverdict:
+        therow = permsilverdict[olderkey]
         usercomments = therow[usercommentbegin:usercommentuntil]
         result = usercomments
     else:

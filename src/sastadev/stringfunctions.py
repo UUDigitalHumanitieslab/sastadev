@@ -1,6 +1,7 @@
 import re
 import unicodedata
 from typing import Any, Callable, List, Match, Optional, Sequence, Set
+from collections import Counter
 
 vertbar = '|'
 space = ' '
@@ -36,6 +37,7 @@ dutch_base_triphthongs = ['aai', 'eeu', 'ooi', 'oei']
 dutch_y_tetraphthongs = ['y' + d for d in dutch_base_triphthongs]
 dutch_triphthongs = dutch_base_triphthongs + dutch_y_triphthongs
 dutch_tetraphthongs = dutch_y_tetraphthongs
+foreign_triphthongs = ['eau', 'oeu']
 
 hyphenprefixes = ['anti', 'contra', 'ex']
 
@@ -432,7 +434,7 @@ def string2list(liststr: str, quoteignore=False) -> List[str]:
 
 def realwordstring(w: str) -> bool:
     '''
-    The function realwordstrin gcheck whether the string w @@ to be extended@@
+    The function *realwordstring* checks whether the string w @@ to be extended@@
 
     '''
     if len(w) != 1:
@@ -441,6 +443,13 @@ def realwordstring(w: str) -> bool:
         result = not unicodedata.category(w).startswith('P')
     return result
 
+
+def getallrealwords(allresults):
+    result = {}
+    for uttid in allresults.allutts:
+        words = [w for w in allresults.allutts[uttid] if realwordstring(w)]
+        result[uttid] = Counter(words)
+    return result
 
 if __name__ == '__main__':
     test()

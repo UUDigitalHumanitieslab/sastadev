@@ -1,31 +1,36 @@
 from collections import defaultdict
 from copy import copy, deepcopy
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Sequence, Tuple, Union
 
 from lxml import etree
 
+from sastadev.alpinoparsing import parse
 from sastadev.basicreplacements import basicreplacements
+from sastadev.CHAT_Annotation import omittedword
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.lexicon import de, dets, known_word
+from sastadev.lexicon import de, dets, known_word, getwordinfo
 from sastadev.macros import expandmacros
-from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
-                               bpl_none, bpl_word, bpl_wordlemma, insertion)
+from sastadev.metadata import (Meta,  bpl_delete, bpl_indeze, bpl_node,
+                               bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, insertion)
+from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
 from sastadev.sva import phicompatible
+from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
+from sastadev.sastatoken import inflate, deflate, tokeninflate, insertinflate
 from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
-                                        getcompoundcount, getnodeyield,
+                                        getcompoundcount, getnodeyield, getptsubclass,
                                         getsentid, gettokposlist, getuttid,
                                         getyield, myfind, showflatxml,
-                                        showtree, simpleshow, transplant_node,
+                                        showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
 
@@ -59,6 +64,9 @@ errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['altid', 'altsent', 'score'] + \
     altpropertiesheader
 
+
+smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn')]
+smartreplacedict = {w1:w2 for w1, w2 in smartreplacepairs}
 
 class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
@@ -176,6 +184,70 @@ def get_origandparsedas(metadatalist: List[MetaElement]) -> Tuple[Optional[str],
                 origutt = meta.attrib['value']
     return origutt, parsed_as
 
+
+def isrobustnoun(node: SynTree) -> bool:
+    pt = getattval(node, 'pt')
+    if pt != 'n':
+        result = False
+    else:
+        ntype = getattval(node, 'ntype')
+        getal = getattval(node, 'getal')
+        graad = getattval(node, 'graad')
+        result = ntype == 'both' and getal == 'both' and graad == 'both'
+    return result
+
+def issamewordclass(node1, node2):
+    pt1 = getattval(node1, 'pt')
+    pt2 = getattval(node2, 'pt')
+    result = pt1 == pt2
+    if result:
+        subclass = getptsubclass(pt1)
+        if subclass is not None:
+            subclass1 = getattval(node1, subclass)
+            subclass2 = getattval(node2, subclass)
+            result = subclasscompatible(subclass1, subclass2)
+    return result
+
+def infpvpair(newnode, node):
+    newnodewvorm = getattval(newnode, 'wvorm')
+    nodewvorm = getattval(node, 'wvorm')
+    result = newnodewvorm == 'inf' and nodewvorm == 'pv'
+    return result
+
+def adaptpv(node):
+    if getattval(node, 'pt') == 'ww':
+        node.attrib['wvorm'] = 'pv'
+        node.attrib['pvagr'] = 'mv'
+        node.attrib['pvtijd'] = 'tgw'
+        node.attrib['postag'] = 'WW(pv,tgw,mv)'
+
+def smartreplace(node: SynTree, word: str) -> SynTree:
+    '''
+    replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class, otherwise by
+    a node with *word* and *lemma* attributes replaced by *word*
+    :param node:
+    :param word:
+    :return:
+    '''
+    wordtree = parse(word)
+    newnode = find1(wordtree, './/node[@pt]')
+    newnodept = getattval(newnode, 'pt')
+    nodept = getattval(node, 'pt')
+    if isvalidword(word) and issamewordclass(node, newnode) and not isrobustnoun(newnode):
+        result = newnode
+        result.attrib['begin'] = getattval(node, 'begin')
+        result.attrib['end'] = getattval(node, 'end')
+        result.attrib['rel'] = getattval(node, 'rel')
+        if 'index' in node.attrib:
+            result.attrib['index'] = getattval(node, 'index')
+        if infpvpair(newnode, node):
+            adaptpv(result)
+    else:
+        result = copy(node)
+        result.attrib['word'] = word
+        if '_' in node.attrib['lemma'] and countsyllables(word) == 1:
+           result.attrib['lemma'] = word
+    return result
 
 def mkmetarecord(meta: MetaElement, origutt: Optional[str], parsed_as: Optional[str]) -> Tuple[
         Optional[str], List[str]]:
@@ -394,6 +466,13 @@ def getomittedwordbegins(metalist: List[Meta]) -> List[Position]:
     return results
 
 
+def cleantextdone(metadataelement):
+    for meta in metadataelement:
+        if meta.tag == 'xmeta' and 'name' in meta.attrib and meta.attrib['name'] == 'cleantext' and \
+                'value' in meta.attrib and meta.attrib['value'] == 'done':
+            return True
+    return False
+
 def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
 
@@ -490,12 +569,16 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     elif lmetadatalist > 1:
         settings.LOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
     else:
+        if lmetadatalist > 1:
+            SDLOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
         origmetadata = metadatalist[0]
 
     # allmetadata += origmetadata
     # clean in the tokenized manner
 
     cleanutttokens, chatmetadata = cleantext(origutt, False, tokenoutput=True)
+    # if not cleantextdone(origmetadata):  # otherwise we get double metadata for cleantext maar werkt niet goed
+    #    allmetadata += chatmetadata
     allmetadata += chatmetadata
     # cleanutttokens = sasta_tokenize(cleanutt)
     cleanuttwordlist = [t.word for t in cleanutttokens]
@@ -523,13 +606,15 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         showtree(fatstree, text='2:')
     debug = False
 
+    fatstreewordlist = getyield(fatstree)
     ptmds = []
     for correctiontokenlist, cwmdmetadata in ctmds:
         cwmdmetadata += allmetadata
         correctionwordlist = tokenlist2stringlist(correctiontokenlist, skip=True)
 
         # parse the corrections
-        if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
+        # if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
+        if correctionwordlist != fatstreewordlist and correctionwordlist != []:
             correction, tokenposlist = mkuttwithskips(correctiontokenlist)
             cwmdmetadata += [Meta('parsed_as', correction, cat='Correction', source='SASTA', penalty=0)]
             reducedcorrectiontokenlist = [token for token in correctiontokenlist if not token.skip]
@@ -579,8 +664,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
 
     thetree = deepcopy(thecorrection[1])
 
-    # debuga = True
     debuga = False
+    # debuga = False
     if debuga:
         print('4: (fatstree)')
         etree.dump(fatstree, pretty_print=True)
@@ -607,8 +692,11 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     thetree = treewithtokenpos(thetree, correctiontokenlist)
     if debug:
         showtree(thetree, text='thetree after treewithtokenpos')
+    if debug:
+        showtree(fatstree, text='fatstree')
     for meta in thecorrection[2]:
-        if meta.backplacement == bpl_node:
+        curbackplacement = meta.backplacement
+        if curbackplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
             oldnode = myfind(fatstree, './/node[@pt and @end="{}"]'.format(nodeend))
@@ -616,7 +704,33 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 # adapt oldnode1 for contextual features
                 contextoldnode = contextualise(oldnode, newnode)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
-        elif meta.backplacement == bpl_word or meta.backplacement == bpl_wordlemma:
+        elif curbackplacement == bpl_replacement:
+            #showtree(fatstree, 'fatstree')
+            nodeend = meta.annotationposlist[-1] + 1
+            newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [] else None
+            if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
+                SDLOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+
+            if newnode is not None and oldword is not None:
+                # wproplist = getwordinfo(oldword)
+                # wprop = wproplist[0] if wproplist != [] else None
+                # # (pt, dehet, infl, lemma)
+                # newnode.attrib['word'] = oldword
+                # if wprop is None:
+                #    newnode.attrib['lemma'] = oldword
+                # else:
+                #    newnode.attrib['lemma'] = wprop[3]
+                substnode = smartreplace(newnode, oldword)
+
+                newnodeparent = newnode.getparent()
+                newnodeparent.remove(newnode)
+                newnodeparent.append(substnode)
+                #showtree(thetree, 'thetree after smart replace')
+
+
+
+        elif curbackplacement in [bpl_word,  bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
             nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(nodeend - 1, nodeend)
             newnode = myfind(thetree, nodexpath)
@@ -632,7 +746,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                     if 'word' not in newnode.attrib:
                         settings.LOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
                         simpleshow(oldnode, showchildren=False)
-            if meta.backplacement == bpl_wordlemma:
+            if curbackplacement == bpl_wordlemma:
                 if newnode is not None and oldnode is not None:
                     if 'lemma' in newnode.attrib and 'lemma' in oldnode.attrib:
                         newnode.attrib['lemma'] = oldnode.attrib['lemma']
@@ -646,12 +760,12 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                                 'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid, newnode))
                             simpleshow(oldnode, showchildren=False)
 
-        elif meta.backplacement == bpl_none:
+        elif curbackplacement == bpl_none:
             pass
-        elif meta.backplacement == bpl_delete:
+        elif curbackplacement == bpl_delete:
             orignodebegin = str(meta.annotatedposlist[-1])
             nodes2deletebegins.append(orignodebegin)  # just gather the begin sof the nodes to be deleted
-        elif meta.backplacement == bpl_indeze:
+        elif curbackplacement == bpl_indeze:
             nodebegin = meta.annotatedposlist[-1]
             nodeend = nodebegin + 1
             oldnode = myfind(fatstree, './/node[@pt and @end="{}"]'.format(nodeend))

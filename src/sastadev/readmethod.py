@@ -11,6 +11,7 @@ from sastadev.conf import settings
 from sastadev.query import Query, form_process, post_process
 from sastadev.sastatypes import (AltCodeDict, FileName, Item_Level2QIdDict,
                                  QId, QueryDict)
+from sastadev.methods import defaultfilters, Method
 
 comma = ','
 
@@ -126,13 +127,13 @@ def empty(row: list) -> bool:
             return False
     return True
 
-
-def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
+def read_method(methodname: str, methodfilename: FileName) -> Method:
     header, data = xlsx.getxlsxdata(methodfilename)
 
     idcol, catcol, subcatcol, levelcol, itemcol, altcol, impliescol, \
-        originalcol, pagescol, fasecol, querycol, informcol, screeningcol, processcol, special1col, special2col, commentscol = \
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+        originalcol, pagescol, fasecol, querycol, informcol, screeningcol, processcol, literalcol, starscol, filtercol,\
+        variantscol, unused1col, unused2col, commentscol = \
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 
     headerrow = 0
 
@@ -157,12 +158,17 @@ def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict
             inform: str = row[informcol]
             screening: str = row[screeningcol]
             process: str = row[processcol].strip()
-            special1: str = row[special1col].strip()
-            special2: str = row[special2col].strip()
+            literal: str = row[literalcol].strip()
+            stars: str = row[starscol].strip()
+            filter: str = row[filtercol].strip()
+            variants: str = row[variantscol]
+            unused1: str = row[unused1col]
+            unused2: str = row[unused2col]
             comments: str = row[commentscol]
 
-            queries[id] = Query(id, cat, subcat, level, item, altitems, implies, original, pages, fase, query, inform, screening, process,
-                                special1, special2, comments)
+            queries[id] = Query(id, cat, subcat, level, item, altitems, implies, original, pages, fase, query,
+                                inform, screening, process, literal,
+                                stars, filter, variants, unused1, unused2, comments)
             if queries[id].process in [post_process, form_process]:
                 postquerylist.append(id)
             lcitem = item.lower()
@@ -176,4 +182,8 @@ def read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict
                     settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(altcodes[(lcaltitem, lclevel)], id))
                 altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 
-    return (queries, item2idmap, altcodes, postquerylist)
+    defaultfilter = defaultfilters[methodname]
+    themethod = Method(methodname, queries, item2idmap, altcodes, postquerylist,
+                       methodfilename, defaultfilter)
+
+    return themethod

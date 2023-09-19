@@ -134,23 +134,34 @@ Sastadev logs its actions through:
 # to do
 # -Excel output, cleanup output code
 
+<<<<<<< HEAD:src/sastadev/__main__.py
 import datetime
 import logging
+=======
+from typing import Dict, List, Any, Tuple, Callable, Pattern, Optional, DefaultDict
+# import sastatypes
+from sastatypes import QId, UttId, Position, SynTree, GoldTuple, Match, Matches,  ExactResult, \
+    ExactResults,  QueryDict, QIdCount, MethodName, FileName, ResultsCounter, ResultsDict, \
+    AltCodeDict, PositionStr, SampleSizeTuple
+
+
+#import xlrd
+from lxml import etree
+>>>>>>> lemmas:mysastadev.py
 import os
 import re
 import sys
-
 from collections import Counter, defaultdict
+# from altcodes import altcodes
 from optparse import OptionParser
-from typing import Any, Callable, DefaultDict, Dict, List, Optional, Pattern, Tuple
+<<<<<<< HEAD:src/sastadev/__main__.py
+from typing import Any, Callable, Dict, List, Pattern, Tuple
 
 import xlsxwriter
 from lxml import etree
 
 from sastadev import compounds
-from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
-from sastadev.allresults import AllResults, ExactResultsDict, MatchesDict, ResultsKey, mkresultskey, showreskey, scores2counts
-from sastadev.asta_queries import astalemmafunction
+from sastadev.allresults import AllResults, scores2counts
 from sastadev.conf import settings
 from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
                                 loggingfolder, outtreebanksfolder,
@@ -161,28 +172,58 @@ from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros
-from sastadev.methods import astamethods, Method, SampleSize, defaultfilters, stapmethods, supported_methods, tarspmethods, treatmethod
-from sastadev.mismatches import exactmismatches, getmarkposition, literalmissedmatches
+from sastadev.methods import Method, defaultfilters
+from sastadev.mismatches import exactmismatches, getmarkposition
 from sastadev.mksilver import getsilverannotations, permprefix
-from sastadev.query import (Query, form_process, is_core, is_literal, is_pre, is_preorcore,
+from sastadev.query import (Query, form_process, is_core, is_pre, is_preorcore,
                             post_process, query_exists, query_inform)
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.reduceresults import exact2results, reduceallresults, reduceexactgoldscores, reduceresults
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
+from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
+                                 GoldTuple, MatchesDict, MethodName, QId,
+                                 QIdCount, QueryDict, ResultsCounter,
+                                 ResultsDict, SynTree, UttId)
 from sastadev.SRFreader import read_referencefile
-from sastadev.sasta_explanation import finalexplanation_adapttreebank
-from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResults, ExactResultsDict, FileName,
-                                 GoldTuple, Match, Matches, MatchesDict, MethodName, Position, PositionStr, QId,
-                                 QIdCount, QueryDict, ResultsCounter, ResultsDict,
-                                 ResultsDict, SampleSizeTuple, SynTree, UttId)
-from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets
 from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
                                         getyield, showtree)
 from sastadev.xlsx import mkworkbook
+=======
+import logging
+from config import SDLOGGER
+from asta_queries import astalemmafunction
+from SAFreader import get_golddata, richscores2scores,  richexact2global
+from external_functions import str2functionmap
+from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
+    showtree, getnodeendmap, getxselseuttid
+from SRFreader import read_referencefile
+from goldcountreader import get_goldcounts
+from TARSPscreening import screening4stage
+from allresults import AllResults, scores2counts, ExactResultsDict, MatchesDict, ResultsKey, mkresultskey, showreskey
+from readmethod import read_method, itemseppattern
+from methods import allok, treatmethod, astamethods, stapmethods, tarspmethods
+from query import Query, pre_process, core_process, post_process, form_process, is_preorcore, query_inform, query_exists, \
+    is_pre, is_core, is_literal
+from macros import expandmacros
+from mismatches import mismatches, exactmismatches, getmarkposition, literalmissedmatches
+from xlsx import mkworkbook
+import xlsxwriter
+from counterfunctions import counter2liststr
+from mksilver import getsilverannotations, permprefix
+from rpf1 import getscores, getevalscores, sumfreq
+from targets import get_mustbedone, get_targets
+from correcttreebank import correcttreebank, corr0, corr1, corrn, validcorroptions, errorwbheader
+from methods import Method, defaultfilters, supported_methods, SampleSize
+from dataconfig import bronzefolder, formsfolder, intreebanksfolder, loggingfolder, outtreebanksfolder, \
+    resultsfolder, silverfolder, silverpermfolder
+from sasta_explanation import finalexplanation_adapttreebank
+from ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
+from reduceresults import reduceallresults, exact2results, reduceexactgoldscores, reduceresults
+from stringfunctions import getallrealwords
+>>>>>>> lemmas:mysastadev.py
 
 listDir = False
 if listDir:
@@ -196,7 +237,10 @@ asta = 'asta'
 gramat = 'gramat'
 
 codepath = os.path.dirname(os.path.abspath(__file__))
+<<<<<<< HEAD:src/sastadev/__main__.py
 methodspath = os.path.join(codepath, 'data', 'methods')
+=======
+>>>>>>> lemmas:mysastadev.py
 
 
 # moved to methods.py
@@ -271,7 +315,11 @@ def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[Re
             if query_exists(queries[qid]):
                 diff1 = goldscores[reskey] - platinumscores[reskey]
                 if diff1 != Counter():
-                    settings.LOGGER.warning('{} has goldscores not in platinum: {}'.format(str(reskey), diff1))
+<<<<<<< HEAD:src/sastadev/__main__.py
+                    settings.LOGGER.warning('{} has goldscores not in platinum: {}'.format(qid, diff1))
+=======
+                    SDLOGGER.warning('{} has goldscores not in platinum: {}'.format(str(reskey), diff1))
+>>>>>>> lemmas:mysastadev.py
 
 
 def mkerrorreport(errordict, errorreportfilename: str):
@@ -563,6 +611,7 @@ def get_comparison(resultscounts: QIdCount, goldcounts: QIdCount, queries: Query
     return comparison
 
 
+<<<<<<< HEAD:src/sastadev/__main__.py
 def getmethodfromfile(filename: str) -> str:
     result = ''
     path, base = os.path.split(filename.lower())
@@ -601,6 +650,8 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
             exit(-1)
     return resultmethodname, resultmethodfilename
 
+=======
+>>>>>>> lemmas:mysastadev.py
 
 topnodequery = './/node[@cat="top"]'
 
@@ -823,6 +874,13 @@ def main():
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
+<<<<<<< HEAD:src/sastadev/__main__.py
+    # @@adapt this so that the method is read in directly as a Method object
+    (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodfilename)
+    defaultfilter = defaultfilters[options.methodname]
+    themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
+                       options.methodfilename, defaultfilter)
+=======
 
     # adapted this so that the method is read in directly as a Method object
     # (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodname, options.methodfilename)
@@ -830,6 +888,7 @@ def main():
     # themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
     #                   options.methodfilename, defaultfilter)
     themethod = read_method(options.methodname, options.methodfilename)
+>>>>>>> lemmas:mysastadev.py
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
 
@@ -970,10 +1029,13 @@ def main():
         for syntree in treebank:
             temputtid = getuttid(syntree)
             uttcount += 1
-
+<<<<<<< HEAD:src/sastadev/__main__.py
+            #settings.LOGGER.error('uttcount={}'.format(uttcount))
+=======
             # if temputtid == '118':
             #     showtree(syntree, 'tree 118')
-            # settings.LOGGER.error('uttcount={}'.format(uttcount))
+            #SDLOGGER.error('uttcount={}'.format(uttcount))
+>>>>>>> lemmas:mysastadev.py
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
                 # uttid = getuttid(syntree)
@@ -1062,12 +1124,32 @@ def main():
     outrowctr = outstartrow
     outworksheet.freeze_panes('E2')
 
+<<<<<<< HEAD:src/sastadev/__main__.py
+    platinuminfilefound = False
+    if os.path.exists(options.platinuminfilename):
+        platinuminfilefound = True
+        platinumresults = read_referencefile(options.platinuminfilename, logfile)
+        checkplatinum(goldscores, platinumresults, queries)
+    else:
+        settings.LOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
+        platinumresults = {}
+
+    # platinumoutfilename = base + platinumsuffix + txtext
+    platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
+    # platinumcheckfilename = base + platinumchecksuffix + txtext
+    platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
+=======
+>>>>>>> lemmas:mysastadev.py
 
     countcomparisonfilename = os.path.join(resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
     # print the invalid queries
     for q in invalidqueries:
-        settings.LOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], themethod.queries[q].query))
+<<<<<<< HEAD:src/sastadev/__main__.py
+        settings.LOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], queries[q].query))
+=======
+        SDLOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], themethod.queries[q].query))
+>>>>>>> lemmas:mysastadev.py
 
     # print the header
     print(resultsheaderstring, file=outfile)
@@ -1202,9 +1284,15 @@ def main():
                 if uttid in allutts:
                     uttstr = space.join(allutts[uttid])
                 else:
+<<<<<<< HEAD:src/sastadev/__main__.py
                     settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
+                platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid,
+                                     uttstr]
+=======
+                    SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
                 platinumcheckrow2 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                                      themethod.queries[queryid].item, uttid, uttstr]
+>>>>>>> lemmas:mysastadev.py
                 print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
     #platinumcheckfullname = platinumcheckfile.name
@@ -1302,7 +1390,11 @@ def main():
                 if thequery.original and queryfunction(thequery):
                     platinumcount += sum(platinumresults[reskey].values())
             else:
-                settings.LOGGER.warning(f'Query {reskey} found in platinumresults but {queryid} not in queries')
+<<<<<<< HEAD:src/sastadev/__main__.py
+                settings.LOGGER.warning('Query {} found in platinumresults but not in queries'.format(queryid))
+=======
+                SDLOGGER.warning(f'Query {reskey} found in platinumresults but {queryid} not in queries')
+>>>>>>> lemmas:mysastadev.py
 
         # resultsgoldintersectiocount
         resultsgoldintersectioncount = 0
@@ -1316,7 +1408,11 @@ def main():
                     resultsgoldintersectioncount += sum(intersection.values())
                 else:
                     pass
-                    # settings.LOGGER.warning(f'Query {reskey} found in results but not in goldscores')
+<<<<<<< HEAD:src/sastadev/__main__.py
+                    # settings.LOGGER.warning('Query {} found in results but not in goldscores'.format(queryid))
+=======
+                    # SDLOGGER.warning(f'Query {reskey} found in results but not in goldscores')
+>>>>>>> lemmas:mysastadev.py
 
         # resultsplatinumintersectioncount
         resultsplatinumintersectioncount = 0
@@ -1346,7 +1442,11 @@ def main():
                         pass
                         # settings.LOGGER.warning('Query {} in platinumresults but not in goldscores'.format(queryid))
             else:
-                settings.LOGGER.warning(f'Query {reskey} in platinumresults but {queryid} not in queries')
+<<<<<<< HEAD:src/sastadev/__main__.py
+                settings.LOGGER.warning('Query {} in platinumresults but not in queries'.format(queryid))
+=======
+                SDLOGGER.warning(f'Query {reskey} in platinumresults but {queryid} not in queries')
+>>>>>>> lemmas:mysastadev.py
 
         (recall, precision, f1score) = getevalscores(resultscount, goldcount, resultsgoldintersectioncount)
         (platinumrecall, platinumprecision, platinumf1score) = getevalscores(resultscount, platinumcount,
@@ -1388,9 +1488,14 @@ def main():
 
     definedqcount = qcount - undefinedqcount
 
+<<<<<<< HEAD:src/sastadev/__main__.py
+    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, queries)
+    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, queries)
+=======
 
     (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, themethod.queries)
     (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, themethod.queries)
+>>>>>>> lemmas:mysastadev.py
 
     lgoldscores = len(goldscores)
 

@@ -1,16 +1,33 @@
-from typing import Dict, List
 
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
                                  Item_Level2QIdDict, MethodName, QId, Query,
                                  QueryDict)
+from typing import Callable, List, Dict, Optional, Tuple
+from sastadev.allresults import ExactResultsDict, ExactResultsFilter, mkresultskey
+import os
+
+lemmaqid = 'A051'
+lexreskey = mkresultskey('A018')
+nreskey = mkresultskey('A021')
 
 asta = 'asta'
 stap = 'stap'
 tarsp = 'tarsp'
 
-validmethods = [asta, stap, tarsp]
+tarspmethods = [tarsp]
+astamethods = [asta]
+stapmethods = [stap]
+
+validmethods = astamethods + stapmethods +  tarspmethods
+
+astalexicalmeasures = [mkresultskey('A018'), mkresultskey('A021')]  # LEX and N
+
+class SampleSize:
+    def __init__(self, maxuttcount=None, maxwordcount=None):
+        self.maxuttcount : Optional[int] = maxuttcount
+        self.maxwordcount: Optional[int] = maxwordcount
 
 
 def validmethod(rawmethod: str) -> bool:
@@ -52,17 +69,94 @@ class Method:
 
 
 def implies(a: bool, b: bool) -> bool:
-    return (not a or b)
+    return (not a) or b
+
+
+
+def astalemmafilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
+    for (qid, val) in xrs:
+        if qid == lemmaqid:
+            if xr in xrs[(qid, val)]:
+                result1 =  xr in xrs[lexreskey] or xr in xrs[nreskey]
+                result = query.process == pre_process or result1
+                return result
+
+    return True
+
 
 
 #filter specifies what passes the filter
 def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
-    return query.process == pre_process or \
-        (implies('A029' in xrs, xr not in xrs['A029'])
-         and implies('A045' in xrs, xr not in xrs['A045']))
+    a029 = mkresultskey('A029')
+    a045 = mkresultskey('A045')
+    result1 = query.process == pre_process
+    result2 = xr not in xrs[a029] if a029 in xrs else True
+    result3 = xr not in xrs[a045] if a045 in xrs else True
+    result = result1 or (result2 and result3)
+    return result
+
+def getmethodfromfile(filename: str) -> str:
+    result = ''
+    path, base = os.path.split(filename.lower())
+    for m in supported_methods:
+        if m in base:
+            result = m
+    if result == '':
+        SDLOGGER.error('No supported method found in filename')
+        exit(-1)
+    else:
+        return result
+
+
+def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
+    if methodname is None and methodfilename is None:
+        SDLOGGER.error('Specify a method using -m ')
+        exit(-1)
+    elif methodname is None and methodfilename is not None:
+        resultmethodfilename = methodfilename
+        resultmethodname = getmethodfromfile(methodfilename)
+        SDLOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = supported_methods[methodname]
+        else:
+            resultmethodfilename = methodname
+            resultmethodname = getmethodfromfile(methodname)
+            SDLOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is not None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = methodfilename
+        else:
+            SDLOGGER.error('Unsupported method specified {}'.format(methodname))
+            exit(-1)
+    return resultmethodname, resultmethodfilename
+
+
+
+codepath = os.path.dirname(os.path.abspath(__file__))
+methodspath = os.path.join(codepath, 'methods')
+
+
+supported_methods = {}
+supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
+supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
+>>>>>>> lemmas:methods.py
 
 
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}
 defaultfilters[asta] = astadefaultfilter
 defaultfilters[tarsp] = allok
 defaultfilters[stap] = allok
+
+maxsamplesize: Dict[MethodName, SampleSize] = {}
+maxsamplesize[asta] = SampleSize(maxwordcount=300)
+maxsamplesize[tarsp] = SampleSize(maxuttcount=100) # reset when utterance selection is automated
+maxsamplesize[stap] = SampleSize(maxuttcount=100)  # reset when utterance selection is automated
+
+lastuttqidcondition: Dict[MethodName, Callable] = {}
+lastuttqidcondition[asta] = lambda q:  q in astalexicalmeasures
+lastuttqidcondition[tarsp] = lambda q: True
+lastuttqidcondition[stap] = lambda q: True
