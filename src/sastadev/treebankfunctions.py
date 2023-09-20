@@ -22,6 +22,7 @@ from sastadev.sastatypes import (FileName, OptPhiTriple, PhiTriple, Position,
                                  PositionMap, PositionStr, Span, SynTree,
                                  UttId)
 from sastadev.stringfunctions import allconsonants
+#from sastadev.tblex import recognised_wordnode, recognised_lemmanode, recognised_wordnodepos, recognised_lemmanodepos
 
 
 class Metadata:
@@ -882,23 +883,23 @@ def onbvnwdet(node: SynTree) -> bool:
     result = getattval(node, 'lemma') in potentialdet_onbvnws
     return result
 
-
-def asta_recognised_lexnode(node: SynTree) -> bool:
-    '''
-    The function *asta_recognised_lexnode* determines whether *node* should count as a
-    lexical verb in the ASTA method.
-
-    This is the case if *pt* equals *ww* and the node is not a substantivised verb as
-    determined by the function *issubstantivised_verb*:
-
-    .. autofunction:: treebankfunctions::issubstantivised_verb
-
-    '''
-    if issubstantivised_verb(node):
-        result = False
-    else:
-        result = getattval(node, 'pt') == 'ww'
-    return result
+# this function moved to tblex
+# def asta_recognised_lexnode(node: SynTree) -> bool:
+#     '''
+#     The function *asta_recognised_lexnode* determines whether *node* should count as a
+#     lexical verb in the ASTA method.
+#
+#     This is the case if *pt* equals *ww* and the node is not a substantivised verb as
+#     determined by the function *issubstantivised_verb*:
+#
+#     .. autofunction:: treebankfunctions::issubstantivised_verb
+#
+#     '''
+#     if issubstantivised_verb(node):
+#         result = False
+#     else:
+#         result = getattval(node, 'pt') == 'ww'
+#     return result
 
 
 def isspecdeeleigen(node: SynTree) -> bool:
@@ -912,85 +913,86 @@ def ismonthname(node: SynTree) -> bool:
     result = lemma in monthnames
     return result
 
-def asta_recognised_nounnode(node: SynTree) -> bool:
-    '''
-    The function *asta_recognised_nounnode* determines whether *node* should count as a
-    noun in the ASTA method.
+# this function moved to tblex
+# def asta_recognised_nounnode(node: SynTree) -> bool:
+#     '''
+#     The function *asta_recognised_nounnode* determines whether *node* should count as a
+#     noun in the ASTA method.
+#
+#     This is the case if
+#
+#     * either the node meets the conditions of *sasta_pseudonym*
+#
+#        .. autofunction:: treebankfunctions::sasta_pseudonym
+#
+#     * or the node is part of name (pt = *spec*, spectype= *deeleigen*)
+#
+#        .. autofunction:: treebankfunctions::isspecdeeleigen
+#
+#     * or the node is a month name (these are not always nouns in Alpino)
+#
+#        .. autofunction:: treebankfunctions::ismonthname
+#
+#     * or the node meets the conditions of *spec_noun*
+#
+#        .. autofunction:: treebankfunctions::spec_noun
+#
+#     * or the node meets the conditions of *is_duplicate_spec_noun*
+#
+#        .. autofunction:: treebankfunctions::is_duplicate_spec_noun
+#
+#     * or the node meets the conditions of *sasta_long*
+#
+#        .. autofunction:: treebankfunctions::sasta_long
+#
+#     * or the node meets the conditions of *recognised_wordnodepos*
+#
+#        .. autofunction:: treebankfunctions::recognised_wordnodepos
+#
+#     * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
+#
+#        .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
+#
+#     However, the node should:
+#
+#     * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
+#
+#        .. autofunction:: treebankfunctions::all_lower_consonantsnode
+#
+#     * nor satisfy the conditions of *short_nucl_n*:
+#
+#        .. autofunction:: treebankfunctions::short_nucl_n
+#
+#     '''
+#
+#     if issubstantivised_verb(node):
+#         pos = 'ww'
+#     else:
+#         pos = 'n'
+#     result = sasta_pseudonym(node)
+#     result = result or isspecdeeleigen(node)
+#     result = result or ismonthname(node)
+#     result = result or spec_noun(node)
+#     result = result or is_duplicate_spec_noun(node)
+#     result = result or sasta_long(node)
+#     result = result or recognised_wordnodepos(node, pos)
+#     result = result or recognised_lemmanodepos(node, pos)
+#     result = result and not (all_lower_consonantsnode(node))
+#     result = result and not (short_nucl_n(node))
+#     return result
 
-    This is the case if
-
-    * either the node meets the conditions of *sasta_pseudonym*
-
-       .. autofunction:: treebankfunctions::sasta_pseudonym
-
-    * or the node is part of name (pt = *spec*, spectype= *deeleigen*)
-
-       .. autofunction:: treebankfunctions::isspecdeeleigen
-
-    * or the node is a month name (these are not always nouns in Alpino)
-
-       .. autofunction:: treebankfunctions::ismonthname
-
-    * or the node meets the conditions of *spec_noun*
-
-       .. autofunction:: treebankfunctions::spec_noun
-
-    * or the node meets the conditions of *is_duplicate_spec_noun*
-
-       .. autofunction:: treebankfunctions::is_duplicate_spec_noun
-
-    * or the node meets the conditions of *sasta_long*
-
-       .. autofunction:: treebankfunctions::sasta_long
-
-    * or the node meets the conditions of *recognised_wordnodepos*
-
-       .. autofunction:: treebankfunctions::recognised_wordnodepos
-
-    * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
-
-       .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
-
-    However, the node should:
-
-    * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
-
-       .. autofunction:: treebankfunctions::all_lower_consonantsnode
-
-    * nor satisfy the conditions of *short_nucl_n*:
-
-       .. autofunction:: treebankfunctions::short_nucl_n
-
-    '''
-
-    if issubstantivised_verb(node):
-        pos = 'ww'
-    else:
-        pos = 'n'
-    result = sasta_pseudonym(node)
-    result = result or isspecdeeleigen(node)
-    result = result or ismonthname(node)
-    result = result or spec_noun(node)
-    result = result or is_duplicate_spec_noun(node)
-    result = result or sasta_long(node)
-    result = result or recognised_wordnodepos(node, pos)
-    result = result or recognised_lemmanodepos(node, pos)
-    result = result and not (all_lower_consonantsnode(node))
-    result = result and not (short_nucl_n(node))
-    return result
-
-
-def asta_recognised_wordnode(node: SynTree) -> bool:
-    result = sasta_pseudonym(node)
-    result = result or spec_noun(node)
-    result = result or is_duplicate_spec_noun(node)
-    result = result or sasta_long(node)
-    result = result or recognised_wordnode(node)
-    result = result or recognised_lemmanode(node)
-    result = result or isnumber(node)
-    result = result and not (all_lower_consonantsnode(node))
-    result = result and not (short_nucl_n(node))
-    return result
+# this function moved to tblex
+# def asta_recognised_wordnode(node: SynTree) -> bool:
+#     result = sasta_pseudonym(node)
+#     result = result or spec_noun(node)
+#     result = result or is_duplicate_spec_noun(node)
+#     result = result or sasta_long(node)
+#     result = result or recognised_wordnode(node)
+#     result = result or recognised_lemmanode(node)
+#     result = result or isnumber(node)
+#     result = result and not (all_lower_consonantsnode(node))
+#     result = result and not (short_nucl_n(node))
+#     return result
 
 
 def isnumber(node: SynTree) -> bool:

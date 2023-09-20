@@ -710,7 +710,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
             newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
             oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [] else None
             if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
-                SDLOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+                settings.LOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
 
             if newnode is not None and oldword is not None:
                 # wproplist = getwordinfo(oldword)

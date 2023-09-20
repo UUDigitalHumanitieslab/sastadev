@@ -150,7 +150,7 @@ def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, all
                     tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
                     origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
                 else:
-                    SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
+                    settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
                     uttstr = ""
                     markposition = 0
                     tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
@@ -201,7 +201,7 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
                 #                            uttid), markedutt]
                 #        print(tab.join(platinumcheckrow1), file=platinumcheckfile)
             else:
-                SDLOGGER.error(f'Uttid {uttid} not in allutts; reporting ignored')
+                settings.LOGGER.error(f'Uttid {uttid} not in allutts; reporting ignored')
 
     if goldminustheresults != []:
         print('Missed examples', file=platinumcheckfile)

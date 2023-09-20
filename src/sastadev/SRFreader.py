@@ -1,7 +1,6 @@
 from collections import Counter
-from allresults import mkresultskey
-from config import SDLOGGER
-from allresults import ResultsKey
+from sastadev.allresults import mkresultskey, ResultsKey
+from sastadev.conf import settings
 
 qidcolheader = 'id'
 uttcolheader = 'uttids'
@@ -24,7 +23,7 @@ def getreskey(rawcell:str) -> ResultsKey:
         result = mkresultskey(cell)
     else:
         result = cell
-        SDLOGGER.error(f'Unknown value {cell} encountered')
+        settings.LOGGER.error(f'Unknown value {cell} encountered')
     return result
 
 

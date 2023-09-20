@@ -18,7 +18,6 @@ from sastadev.dedup import (cleanwordofnort, find_duplicates2,
                             getprefixwords, getrepeatedtokens,
                             getunwantedtokens, nodesfindjaneenou)
 from sastadev.deregularise import correctinflection
-from sasta_explanation import explanationasreplacement
 from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
                                  ngram10, ngram11, ngram16, ngram17)
 from sastadev.iedims import getjeforms
@@ -32,6 +31,7 @@ from sastadev.metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                janeenou, longrep, mkSASTAMeta, repeated,
                                repeatedjaneenou, repeatedseqtoken, shortrep,
                                substringrep, unknownsymbol)
+from sastadev.sasta_explanation import explanationasreplacement
 from sastadev.sastatoken import Token, tokenlist2stringlist
 from sastadev.sastatypes import (BackPlacement, MethodName, Nort, Penalty,
                                  Position, SynTree, UttId)

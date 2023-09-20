@@ -20,7 +20,7 @@ from sastadev.lexicon import known_word
 from sastadev.metadata import bpl_node, bpl_word, mkSASTAMeta, MetaValue, fromElement
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.alpinoparsing import parse
-from config import SDLOGGER
+
 
 defaultsettings = AlignmentSettings()
 
@@ -240,7 +240,7 @@ def finalexplanation_adapttreebank(treebank):
         newtree = finalexplanation_adapttree(tree)
         if newtree is None:
             newtreebank.append(tree)
-            SDLOGGER.warning('Final Explanation correction failed')
+            settings.LOGGER.warning('Final Explanation correction failed')
         else:
             newtreebank.append(newtree)
     return newtreebank
@@ -286,7 +286,7 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         # tbf.showtree(newtree, 'newly parsed tree')
         if newtree is None:
             newtree = tree
-            SDLOGGER.warning('Parsing for <{cleanutt}> failed. No changes applied')
+            settings.LOGGER.warning('Parsing for <{cleanutt}> failed. No changes applied')
         else:
             newmetaelements = [meta.toElement() for meta in newmetadata ]
             newmetadataElement = etree.Element('metadata')

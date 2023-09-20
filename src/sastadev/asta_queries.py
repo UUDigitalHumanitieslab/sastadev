@@ -9,8 +9,7 @@ from sastadev.normalise_lemma import normaliselemma
 from sastadev.sastatypes import SynTree
 from sastadev.stringfunctions import string2list
 from sastadev.tblex import asta_recognised_lexnode, asta_recognised_nounnode
-from sastadev.treebankfunctions import (asta_recognised_lexnode,
-                               asta_recognised_nounnode, clausecats, find1,
+from sastadev.treebankfunctions import (clausecats, find1,
                                getattval, getnodeyield, getyield, showtns)
 
 
