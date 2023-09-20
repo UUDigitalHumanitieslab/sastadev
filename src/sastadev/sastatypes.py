@@ -11,7 +11,21 @@ from typing_extensions import TypeAlias
 from sastadev.query import Query
 from sastadev.sastatoken import Token
 
+Level = str  # in the future perhaps NewType('Level', str)
+Position = int  # in the future perhapos NewType('Position', int)
+PhiTriple = Tuple[str, str, str]
+QId = str  # in the futute perhaps NewType('QId', str)
+SynTree = etree.Element  # type: ignore
+UttId = str  # in the future perhaps NewType('UttId', str)
+
+
+Item = str  # in the future perhaps NewType('Item', str)
+Item2LevelsDict = Dict[Item, List[Level]]
+Item_Level = Tuple[Item, Level]
+
+AltCodeDict = Dict[Item_Level, Item_Level]
 AltId: TypeAlias = int
+AnalysedTrees = List[Tuple[UttId, SynTree]]
 BackPlacement: TypeAlias = int
 CapitalName: TypeAlias = str
 CountryName: TypeAlias = str
@@ -38,6 +52,7 @@ PositionStr: TypeAlias = str
 Stage: TypeAlias = int
 SynTree: TypeAlias = etree._Element  # type: ignore
 GoldTuple: TypeAlias = Tuple[str, str, Counter]
+GoldResults = Dict[QId, GoldTuple]
 Item2LevelsDict: TypeAlias = Dict[Item, List[Level]]
 Match: TypeAlias = Tuple[SynTree, SynTree]
 Matches: TypeAlias = List[Match]
@@ -58,6 +73,7 @@ FileName: TypeAlias = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode: TypeAlias = int
 ResultsCounter: TypeAlias = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
+SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
 Nort: TypeAlias = Union[SynTree, Token]

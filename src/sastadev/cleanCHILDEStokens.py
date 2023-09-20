@@ -9,7 +9,8 @@ import re
 from copy import deepcopy
 from typing import List, Optional, Pattern, TextIO, Tuple, Union
 
-from sastadev import CHAT_Annotation, sastatok
+import sastadev
+#from sastadev import CHAT_Annotation, sastatok
 from sastadev.conf import settings
 from sastadev.metadata import Meta, Metadata, bpl_none
 from sastadev.sastatoken import Token, show
@@ -119,7 +120,7 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False) -> Tuple[Clean
     :return:
     '''
     newutt = robustness(utt)
-    tokens = sastatok.sasta_tokenize(newutt)
+    tokens = sastadev.sastatok.sasta_tokenize(newutt)
     inwordlist = [t.word for t in tokens]
     intokenstrings = [str(token) for token in tokens]
     # print(space.join(intokenstrings))
@@ -148,7 +149,7 @@ def cleantokens(tokens: List[Token], repkeep: bool) -> Tuple[List[Token], Metada
     (newtokens, nestingmetadata) = clearnesting(newtokens, repkeep)
     metadata += nestingmetadata
 
-    for annotation in CHAT_Annotation.annotations:
+    for annotation in sastadev.CHAT_Annotation.annotations:
         (newtokens, annotationmetadata) = annotation.apply(newtokens, repkeep)
         metadata += annotationmetadata
         tokenstrings = [str(token) for token in newtokens]

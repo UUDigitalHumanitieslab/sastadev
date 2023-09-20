@@ -102,7 +102,7 @@ def getmethodfromfile(filename: str) -> str:
         if m in base:
             result = m
     if result == '':
-        SDLOGGER.error('No supported method found in filename')
+        settings.LOGGER.error('No supported method found in filename')
         exit(-1)
     else:
         return result
@@ -115,7 +115,7 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
     elif methodname is None and methodfilename is not None:
         resultmethodfilename = methodfilename
         resultmethodname = getmethodfromfile(methodfilename)
-        SDLOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+        settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is None:
         if methodname.lower() in supported_methods:
             resultmethodname = methodname.lower()
@@ -136,7 +136,8 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
 
 
 codepath = os.path.dirname(os.path.abspath(__file__))
-methodspath = os.path.join(codepath, 'methods')
+datapath = os.path.join(codepath, 'data')
+methodspath = os.path.join(datapath, 'methods')
 
 
 supported_methods = {}

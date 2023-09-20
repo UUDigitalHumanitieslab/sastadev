@@ -2,7 +2,7 @@
 from typing import Any, Callable, Counter, Dict, List, Tuple, Union
 
 from sastadev.sastatypes import (ExactResult, ExactResults, ExactResultsDict, FileName, Matches,
-                                 MatchesDict, Query, QId, ResultsCounter, SynTree, UttWordDict)
+                                 MatchesDict, Query, QId, ResultsCounter, SynTree, UttId, UttWordDict)
 
 slash = '/'
 reskeysep = slash
