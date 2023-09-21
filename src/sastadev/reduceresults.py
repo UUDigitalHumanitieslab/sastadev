@@ -1,11 +1,11 @@
 from collections import Counter
-from allresults import AllResults, ResultsKey, mkresultskey
-from sastatypes import AnalysedTrees, ExactResult,  ExactResults,  FileName, GoldResults, GoldTuple, \
+from sastadev.allresults import AllResults, ResultsKey, mkresultskey
+from sastadev.sastatypes import AnalysedTrees, ExactResult,  ExactResults,  FileName, GoldResults, GoldTuple, \
     Match, Matches,  MethodName, Position, \
     QId, ResultsDict, ResultsCounter, SampleSizeTuple, SynTree, UttId, UttWordDict
-from allresults import ExactResultsDict, MatchesDict
-from methods import maxsamplesize, SampleSize, MethodName, lastuttqidcondition
-from treebankfunctions import getnodeyield, find1
+from sastadev.allresults import ExactResultsDict, MatchesDict
+from sastadev.methods import maxsamplesize, SampleSize, MethodName, lastuttqidcondition
+from sastadev.treebankfunctions import getnodeyield, find1
 from typing import Any, Dict, List
 
 def exact2results(exactresults: ExactResultsDict) -> ResultsDict:
