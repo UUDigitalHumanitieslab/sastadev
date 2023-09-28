@@ -24,7 +24,7 @@ from sastadev.ASTApostfunctions import (KMcount, countwordsandcutoff,
                                         wordcountperutt)
 from sastadev.asta_queries import asta_noun, asta_bijzin, asta_lex, asta_delpv, asta_lemma, astalemmafunction
 from sastadev.compounds import getcompounds
-from sastadev.dedup import correct, mlux, neologisme, onvolledig, samplesize
+from sastadev.dedup import correct, mlux,  onvolledig, samplesize
 from sastadev.imperatives import wond4, wond5plus, wondx, wx, wxy, wxyz, wxyz5
 from sastadev.methods import allok, astalemmafilter
 from sastadev.queryfunctions import VzN, vobij, voslashbij, xneg_neg, xneg_x
@@ -74,7 +74,7 @@ thestapfunctions = [BB_totaal, GLVU, GL5LVU, makestapform]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
-                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, neologisme, astalemmafilter, asta_lemma,
+                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar,  astalemmafilter, asta_lemma,
                     astalemmafunction]
 
 thefunctions = thetarspfunctions + thestapfunctions + theastafunctions

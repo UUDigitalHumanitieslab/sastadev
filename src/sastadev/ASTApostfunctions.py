@@ -27,6 +27,7 @@ kqid = 'A013'
 mqid = 'A020'
 tijdfoutpvqid = 'A041'
 nounlemmaqid = 'A046'
+formqid = 'A047'
 verblemmaqid = 'A049'
 
 nounreskey = mkresultskey(nounqid)
@@ -41,6 +42,7 @@ subpvreskey = mkresultskey(subpvqid)
 tijdfoutpvreskey = mkresultskey(tijdfoutpvqid)
 kreskey = mkresultskey(kqid)
 mreskey = mkresultskey(mqid)
+formreskey = mkresultskey(formqid)
 
 
 specialform = 'Special Form'
@@ -200,9 +202,9 @@ def finietheidsindex(allresults, _):
 def countwordsandcutoff(allresults, _):
     # @@to be adapted
     result = (None, 0)
-    if 'A047' in allresults.postresults:
+    if formreskey in allresults.postresults:
         paddedlist = []
-        for key, val in allresults.postresults['A047'].items():
+        for key, val in allresults.postresults[formreskey].items():
             paddedkey = key.rjust(lpad, zero)
             paddedlist.append((paddedkey, val))
         sortedlist = sorted(paddedlist)

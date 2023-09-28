@@ -5,7 +5,7 @@ from shutil import copyfile, copyfileobj
 
 from openpyxl import load_workbook
 
-from sastadev.allresults import AllResults
+from sastadev.allresults import AllResults, mkresultskey
 from sastadev.conf import settings
 from sastadev.forms import getformfilename
 
@@ -14,18 +14,18 @@ maxutt = 50
 zerocount = 0
 basexl = os.path.join(settings.SD_DIR, 'data', 'form_templates', 'STAP Excel VUmc 2018.xlsx')
 
-NS = 'S001'
-OS = 'S002'
-PV = 'S003'
-SGG = 'S004'
-VT = 'S005'
-VD = 'S006'
-N = 'S007'
-BvBep = 'S008'
-zelfvnw3 = 'S009'
-BBp = 'S010'
-BBt = 'S011'
-BBo = 'S012'
+NS = mkresultskey('S001')
+OS = mkresultskey('S002')
+PV = mkresultskey('S003')
+SGG = mkresultskey('S004')
+VT = mkresultskey('S005')
+VD = mkresultskey('S006')
+N = mkresultskey('S007')
+BvBep = mkresultskey('S008')
+zelfvnw3 = mkresultskey('S009')
+BBp = mkresultskey('S010')
+BBt = mkresultskey('S011')
+BBo = mkresultskey('S012')
 
 AG = 33
 Ucol = 21

@@ -33,7 +33,7 @@ tab = '\t'
 all_levels = set()
 
 # @@next must be made dependent on the method
-literallevels = ['lemma']
+literallevels = ['literal', 'lemma']
 
 semicolon = ';'
 labelsep = semicolon
@@ -48,7 +48,7 @@ uttidheaders = ['id', 'utt', 'uttid', 'uiting']
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
-unalignedheaders = ['unaligned']
+unalignedheaders = ['unaligned', 'hele uiting', 'hele zin']
 
 
 def nested_dict(n: int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type

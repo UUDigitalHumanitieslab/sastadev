@@ -10,12 +10,50 @@ from sastadev.ASTApostfunctions import (nounlemmaqid, verblemmaqid,
                                         wordcountperutt)
 from sastadev.forms import getformfilename
 
-
-nounqid = 'A021'
+bijzinqid = 'A003'
+correctqid = 'A004'
+fonparqid = 'A008'
+delpvqid = 'A009'
+kopqid = 'A013'
 lexqid = 'A018'
+modalqid = 'A020'
+nounqid = 'A021'
+neoqid = 'A022'
+pvqid = 'A024'
+semparqid = 'A026'
+subpvqid = 'A032'
+tijdfoutpvqid = 'A041'
 lemmaqid = 'A051'
-nounreskey = mkresultskey(nounqid)
+
+bijzinqid = 'A003'
+correctqid = 'A004'
+fonparqid = 'A008'
+delpvqid = 'A009'
+kopqid = 'A013'
+lexqid = 'A018'
+modalqid = 'A020'
+nounqid = 'A021'
+neoqid = 'A022'
+pvqid = 'A024'
+semparqid = 'A026'
+subpvqid = 'A032'
+tijdfoutpvqid = 'A041'
+lemmaqid = 'A051'
+
+bijzinreskey = mkresultskey(bijzinqid)
+correctreskey = mkresultskey(correctqid)
+fonparreskey = mkresultskey(fonparqid)
+delpvreskey = mkresultskey(delpvqid)
+kopreskey = mkresultskey(kopqid)
 lexreskey = mkresultskey(lexqid)
+modalreskey = mkresultskey(modalqid)
+nounreskey = mkresultskey(nounqid)
+neoreskey = mkresultskey(neoqid)
+pvreskey = mkresultskey(pvqid)
+semparreskey = mkresultskey(semparqid)
+subpvreskey = mkresultskey(subpvqid)
+tijdfoutpvreskey = mkresultskey(tijdfoutpvqid)
+lemmareskey = mkresultskey(lemmaqid)
 
 
 
@@ -256,11 +294,11 @@ def getvardict(allresults):
     phonpar = 'B7'
     neo = 'B8'
     KM = 'B9'
-    semparcount = sumctr(allresults.coreresults['A026']) if 'A026' in allresults.coreresults else 0
-    phonparcount = sumctr(allresults.coreresults['A008']) if 'A008' in allresults.coreresults else 0
-    neocount = sumctr(allresults.coreresults['A022']) if 'A022' in allresults.coreresults else 0
-    Kcount = sumctr(allresults.coreresults['A013']) if 'A013' in allresults.coreresults else 0
-    Mcount = sumctr(allresults.coreresults['A020']) if 'A020' in allresults.coreresults else 0
+    semparcount = sumctr(allresults.coreresults[semparreskey]) if semparreskey in allresults.coreresults else 0
+    phonparcount = sumctr(allresults.coreresults[fonparreskey]) if fonparreskey in allresults.coreresults else 0
+    neocount = sumctr(allresults.coreresults[neoreskey]) if neoreskey in allresults.coreresults else 0
+    Kcount = sumctr(allresults.coreresults[kopreskey]) if kopreskey in allresults.coreresults else 0
+    Mcount = sumctr(allresults.coreresults[modalreskey]) if modalreskey in allresults.coreresults else 0
     KMcount = Kcount + Mcount
     result = {sempar: semparcount, phonpar: phonparcount, neo: neocount, KM: KMcount}
     return result
@@ -321,14 +359,14 @@ def getuttlist(allresults):
     for uttid in wordcountdict:
         resultdict[uttid]['wc'] = wordcountdict[uttid]
     # update(resultdict, allresults.postresults, 'A046', 'wc')
-    update(resultdict, allresults.coreresults, 'A004', 'correct')
-    update(resultdict, allresults.coreresults, 'A024', 'allpvs')
-    subpvs = allresults.coreresults['A032'] if 'A032' in allresults.coreresults else Counter()
-    delpvs = allresults.coreresults['A009'] if 'A009' in allresults.coreresults else Counter()
-    tijdfoutpvs = allresults.coreresults['A041'] if 'A041' in allresults.coreresults else Counter()
+    update(resultdict, allresults.coreresults, correctreskey, 'correct')
+    update(resultdict, allresults.coreresults, pvreskey, 'allpvs')
+    subpvs = allresults.coreresults[subpvreskey] if subpvreskey in allresults.coreresults else Counter()
+    delpvs = allresults.coreresults[delpvreskey] if delpvreskey in allresults.coreresults else Counter()
+    tijdfoutpvs = allresults.coreresults[tijdfoutpvreskey] if tijdfoutpvreskey in allresults.coreresults else Counter()
     foutepvs = subpvs + delpvs + tijdfoutpvs
     updatewithctr(resultdict, foutepvs, 'foutepvs')
-    update(resultdict, allresults.coreresults, 'A003', 'bijzincount')
+    update(resultdict, allresults.coreresults, bijzinreskey, 'bijzincount')
 
     result = resultdict2table(resultdict)
     return result

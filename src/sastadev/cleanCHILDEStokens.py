@@ -10,7 +10,7 @@ from copy import deepcopy
 from typing import List, Optional, Pattern, TextIO, Tuple, Union
 
 import sastadev
-from sastadev import CHAT_Annotation, sastatok
+# from sastadev import CHAT_Annotation, sastatok
 from sastadev.conf import settings
 from sastadev.metadata import Meta, Metadata, bpl_none
 from sastadev.sastatoken import Token, show
