@@ -16,6 +16,7 @@ Position = int  # in the future perhapos NewType('Position', int)
 PhiTriple = Tuple[str, str, str]
 QId = str  # in the futute perhaps NewType('QId', str)
 SynTree = etree.Element  # type: ignore
+TreeBank = etree.Element
 UttId = str  # in the future perhaps NewType('UttId', str)
 
 
