@@ -3,7 +3,7 @@ This module contains definitions of types used in multiple modules
 '''
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from lxml import etree  # type: ignore
 from typing_extensions import TypeAlias
@@ -61,7 +61,8 @@ ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
 Nort: TypeAlias = Union[SynTree, Token]
-ExactResultsFilter: TypeAlias = Callable[[Query, ExactResultsDict, ExactResult], bool]
+ExactResultsFilter: TypeAlias = Callable[[
+    Query, ExactResultsDict, ExactResult], bool]
 Targets: TypeAlias = int
 Treebank: TypeAlias = etree.Element
 TreePredicate: TypeAlias = Callable[[SynTree], bool]
@@ -69,8 +70,14 @@ TokenTreePredicate: TypeAlias = Callable[[Token, SynTree], bool]
 URL: TypeAlias = str
 UttTokenDict: TypeAlias = Dict[UttId, List[Token]]
 UttWordDict: TypeAlias = Dict[UttId, List[str]]
-WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
+WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode],
+                            Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
 # moved the following to allresuls.py
-#CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
-#PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
-#QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
+# CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
+# PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
+# QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]
+
+AnalysedTrees = List[Tuple[UttId, SynTree]]
+SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
+# TODO: fix
+GoldResults = Any

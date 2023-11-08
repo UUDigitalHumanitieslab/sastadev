@@ -4,16 +4,26 @@ from auchann.align_words import align_words
 import sastadev.treebankfunctions as tbf
 from sastadev import sasta_explanation
 
+space = ' '
 
 @pytest.mark.skip(reason='test code does not work')
 def test():
+    # treetotest = 9
     infullname = r"D:\Dropbox\jodijk\Utrecht\Projects\SASTADATA\Auris\outtreebanks\DLD07_corrected.xml"
     fulltreebank = tbf.getstree(infullname)
     treebank = fulltreebank.getroot()
+    treecount = 0
     for tree in treebank:
+        treecount += 1
+        # if treecount != treetotest:
+        #     continue
         origutt = tbf.find1(tree, './/meta[@name="origutt"]/@value')
-        cleanutt = tbf.find(tree, './/sentence/@value')
-        explanationstr = sasta_explanation.finalmultiwordexplanation(tree)
+        # print(origutt)
+        cleanuttelem = tbf.find1(tree, './/sentence')
+        cleanutt = cleanuttelem.text
+        explanationlist, postexplanationlist = sasta_explanation.finalmultiwordexplanation(tree)
+        explanationstr = space.join(explanationlist + postexplanationlist) if explanationlist is not None else None
+        # print(f'explanationstr={explanationstr}')
         if explanationstr is not None:
             alignment = align_words(cleanutt, explanationstr)
         else:

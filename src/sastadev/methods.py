@@ -1,5 +1,7 @@
-from typing import Dict, List
+import os
+from typing import Callable, Dict, List, Optional, Tuple
 
+from sastadev.conf import settings
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
@@ -10,7 +12,19 @@ asta = 'asta'
 stap = 'stap'
 tarsp = 'tarsp'
 
-validmethods = [asta, stap, tarsp]
+tarspmethods = [tarsp]
+astamethods = [asta]
+stapmethods = [stap]
+
+validmethods = astamethods + stapmethods + tarspmethods
+
+astalexicalmeasures = ['A018', 'A021']  # LEX and N
+
+
+class SampleSize:
+    def __init__(self, maxuttcount=None, maxwordcount=None):
+        self.maxuttcount: Optional[int] = maxuttcount
+        self.maxwordcount: Optional[int] = maxwordcount
 
 
 def validmethod(rawmethod: str) -> bool:
@@ -55,14 +69,80 @@ def implies(a: bool, b: bool) -> bool:
     return (not a or b)
 
 
-#filter specifies what passes the filter
+# filter specifies what passes the filter
 def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
     return query.process == pre_process or \
         (implies('A029' in xrs, xr not in xrs['A029'])
          and implies('A045' in xrs, xr not in xrs['A045']))
 
 
+def getmethodfromfile(filename: str) -> str:
+    result = ''
+    path, base = os.path.split(filename.lower())
+    for m in supported_methods:
+        if m in base:
+            result = m
+    if result == '':
+        settings.LOGGER.error('No supported method found in filename')
+        exit(-1)
+    else:
+        return result
+
+
+def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
+    if methodname is None and methodfilename is None:
+        settings.LOGGER.error('Specify a method using -m ')
+        exit(-1)
+    elif methodname is None and methodfilename is not None:
+        resultmethodfilename = methodfilename
+        resultmethodname = getmethodfromfile(methodfilename)
+        settings.LOGGER.warning(
+            'Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = supported_methods[methodname]
+        else:
+            resultmethodfilename = methodname
+            resultmethodname = getmethodfromfile(methodname)
+            settings.LOGGER.warning(
+                'Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is not None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = methodfilename
+        else:
+            settings.LOGGER.error(
+                'Unsupported method specified {}'.format(methodname))
+            exit(-1)
+    return resultmethodname, resultmethodfilename
+
+
+codepath = settings.SD_DIR
+datapath = os.path.join(codepath, 'data')
+methodspath = os.path.join(datapath, 'methods')
+
+
+supported_methods = {}
+supported_methods[tarsp] = os.path.join(
+    methodspath, 'TARSP Index Current.xlsx')
+supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
+
+
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}
 defaultfilters[asta] = astadefaultfilter
 defaultfilters[tarsp] = allok
 defaultfilters[stap] = allok
+
+maxsamplesize: Dict[MethodName, SampleSize] = {}
+maxsamplesize[asta] = SampleSize(maxwordcount=300)
+# reset when utterance selection is automated
+maxsamplesize[tarsp] = SampleSize(maxuttcount=100)
+# reset when utterance selection is automated
+maxsamplesize[stap] = SampleSize(maxuttcount=100)
+
+lastuttqidcondition: Dict[MethodName, Callable] = {}
+lastuttqidcondition[asta] = lambda q: q in astalexicalmeasures
+lastuttqidcondition[tarsp] = lambda q: True
+lastuttqidcondition[stap] = lambda q: True
