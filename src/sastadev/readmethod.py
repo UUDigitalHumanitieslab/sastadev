@@ -153,7 +153,7 @@ def read_method(methodname: str, methodfilename: FileName) -> Method:
             altitems: List[str] = getaltitems(row[altcol])
             implies: List[str] = getimplies(row[impliescol])
             original: bool = getboolean(row[originalcol])
-            pages: str = get_pages(row[pagescol])
+            pages: str = str(get_pages(row[pagescol]))
             fase: int = getint(row[fasecol])
             query: str = row[querycol]
             inform: str = row[informcol]
