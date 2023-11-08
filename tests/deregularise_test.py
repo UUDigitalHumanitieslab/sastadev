@@ -8,7 +8,7 @@ from sastadev.deregularise import (correctionfilename, getcorrections,
 
 
 @pytest.mark.skip(reason='test code does not work')
-def test_deregularise():
+def test_deregularise():  # noqa: C901
     # read the irregular verbs
 
     irregverbfilename = 'DutchIrregularVerbs.tsv'
@@ -86,7 +86,7 @@ def test_deregularise():
             print(w, corrected, m)
 
     correctionfile = open(os.path.join(
-        settngs.settngs.settings.SD_DIR, correctionfilename), 'w', encoding='utf8')
+        settings.SD_DIR, correctionfilename), 'w', encoding='utf8')
     for w in correction:
         print(w, correction[w][0], correction[w]
               [1], sep=tab, file=correctionfile)
