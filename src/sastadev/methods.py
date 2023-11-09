@@ -126,7 +126,7 @@ methodspath = os.path.join(datapath, 'methods')
 supported_methods = {}
 supported_methods[tarsp] = os.path.join(
     methodspath, 'TARSP Index Current.xlsx')
-supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+supported_methods[asta] = os.path.join(methodspath, 'ASTA_Index_Current.xlsx')
 supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 
