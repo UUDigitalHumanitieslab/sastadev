@@ -26,7 +26,7 @@ def clean(valstr):
 
 class Query:
     def __init__(self, id, cat, subcat, level, item, altitems, implies, original, pages, fase, query, inform,
-                 screening, process, stars, filter, variants, unused1, unused2, comments):
+                 screening, process, literal, stars, filter, variants, unused1, unused2, comments):
         self.id = id
         self.cat = cat
         self.subcat = subcat
@@ -41,6 +41,7 @@ class Query:
         self.inform = inform
         self.screening = screening
         self.process = getprocess(process)
+        self.literal = literal
         self.stars = clean(stars)
         self.filter = filter
         self.variants = variants
@@ -76,4 +77,8 @@ def is_post(query):
 
 def query_exists(query):
     result = query.query != "" and query.query is not None
+    return result
+
+def is_literal(query):
+    result = query.literal != ''
     return result

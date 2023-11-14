@@ -2,17 +2,11 @@ import logging
 import re
 import urllib.parse
 import urllib.request
+from typing import Optional
 
 from lxml import etree  # type: ignore
 
 from sastadev.treebankfunctions import showtree
-
-# from memoize import memoize
-
-# from sastatypes import SynTree, URL
-
-# from config import SDLOGGER
-# from sastatypes import SynTree, URL
 
 urllibrequestversion = urllib.request.__version__
 
@@ -20,9 +14,8 @@ alpino_special_symbols_pattern = r'[\[\]]'
 alpino_special_symbols_re = re.compile(alpino_special_symbols_pattern)
 
 gretelurl = 'https://gretel.hum.uu.nl/api/src/router.php/parse_sentence/'
-# gretelurl = 'http://gretel.hum.uu.nl/api/src/router.php/parse_sentence/'
 previewurltemplate = 'https://gretel.hum.uu.nl/ng/tree?sent={sent}&xml={xml}'
-# previewurltemplate = 'http://gretel.hum.uu.nl/ng/tree?sent={sent}&xml={xml}'
+
 
 emptypattern = r'^\s*$'
 emptyre = re.compile(emptypattern)
@@ -75,7 +68,6 @@ def parse(origsent: str, escape: bool = True):
         else:
             logging.error('parsing failed:', r1.status, r1.reason, sent)
             return None
-
 
 def escape_alpino_input(instr: str) -> str:
     '''

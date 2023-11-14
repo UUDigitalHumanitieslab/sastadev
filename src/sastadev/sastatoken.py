@@ -84,3 +84,4 @@ def insertinflate(n: int):
     dm = n % 10
     result = ((n - dm) + 1) * 10 + dm
     return result
+

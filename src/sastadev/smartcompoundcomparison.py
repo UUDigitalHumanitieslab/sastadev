@@ -7,7 +7,7 @@ It works for nouns only!
 '''
 import editdistance
 
-# from sastadev.normalise_lemma import normaliselemma
+from sastadev.normalise_lemma import normaliselemma
 
 
 def reldistance(word, corr):
@@ -15,11 +15,9 @@ def reldistance(word, corr):
     result = thedistance / max(len(word), len(corr))
     return result
 
-
 def iscompound(word, corr, rawcorrlemma):
     debug = False
-    corrlemma = rawcorrlemma
-    # corrlemma = normaliselemma(corr, rawcorrlemma, keeplastsep=True) TODO: fix
+    corrlemma = normaliselemma(corr, rawcorrlemma, keeplastsep=True)
     corrlemmaparts = corrlemma.split('_')
     if len(corrlemmaparts) == 1:
         return False
@@ -31,6 +29,7 @@ def iscompound(word, corr, rawcorrlemma):
     if corr[:lcorrlemmaprefix] == corrlemmaprefix:
         corrleft = corrlemmaprefix
         corright = corr[lcorrlemmaprefix:]
+
 
         corrleftdistance = editdistance.distance(word, corrleft)
         corrrightdistance = editdistance.distance(word, corright)
@@ -47,7 +46,6 @@ def iscompound(word, corr, rawcorrlemma):
         print(word, corr, corrlemma, corrdistance,
               corrleftdistance, corrrightdistance)
     return result
-
 
 def main():
     testlist = [
@@ -77,12 +75,12 @@ def main():
         ('sampejonnetje', 'lampionnetje', 'lampion_net', True),
         ('babykijn', 'babykonijn', 'baby_konijn', True),
         ('twemles', 'zwemles', 'zwem_les', True),
-        ('laapkamer', 'slaapkamer', 'slaap_kamer', True),
-        ('sintetlaaspaatje', 'sinterklaaspaardje',
-         'sinterklaas_paardje', True),
-        ('kippes', 'kippies', 'kip_pies', True),
-        ('diehoek', 'driehoek', 'drie_hoek', True),
-        ('jantauto', 'brandweerauto', 'brandweer_auto', True)
+                ('laapkamer', 'slaapkamer', 'slaap_kamer', True),
+                ('sintetlaaspaatje', 'sinterklaaspaardje',
+                 'sinterklaas_paardje', True),
+                ('kippes', 'kippies', 'kip_pies', True),
+                ('diehoek', 'driehoek', 'drie_hoek', True),
+                ('jantauto', 'brandweerauto', 'brandweer_auto', True)
 
     ]
     # testlist = [('risstengeltjes', 'rietstengeltjes', 'riet_stengel', True)]

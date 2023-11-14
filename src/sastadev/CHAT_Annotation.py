@@ -1,6 +1,7 @@
 import re
 
 from sastadev import cleanCHILDEStokens
+# import sastadev.cleanCHILDEStokens
 from sastadev.conf import settings
 from sastadev.metadata import Meta, bpl_delete, bpl_replacement
 from sastadev.sastatoken import Token, show
@@ -265,6 +266,54 @@ class CHAT_NoncompletionRegex(CHAT_Regex):
 
         return (newtokens, metadata)
 
+
+class CHAT_NoncompletionRegex(CHAT_Regex):
+    def __init__(self, regex, replacement, original):
+        self.regex = regex
+        self.replacement = replacement
+        self.original = original
+        self.compiledre = re.compile(refunction(self.regex))
+
+    def apply(self, tokens, annotation, repkeep):
+        newtokens = []
+        metadata = []
+        insidebrackets, outsidebrackets = 0, 1
+        state = outsidebrackets
+        for token in tokens:
+            if self.compiledre.search(token.word):
+                if state == outsidebrackets:
+                    if self.replacement == keep:
+                        newtoken = token
+                        newtokens.append(newtoken)
+                    elif callable(self.replacement):
+                        newtokenword = self.replacement(token.word)
+                        newtoken = Token(newtokenword, token.pos)
+                        newtokens.append(newtoken)
+                    elif isinstance(self.replacement, str):
+                        newtokenword = self.compiledre.sub(self.replacement, token.word)
+                        if newtokenword != '':
+                            newtoken = Token(newtokenword, token.pos)
+                            newtokens.append(newtoken)
+                        else:
+                            pass  # token is removed
+                    else:
+                        pass  # token is removed
+                    if isinstance(self.original, str):
+                        originalword = self.compiledre.sub(self.original, token.word)
+
+                    metadata.append(annotation.metadatafunction(annotation, newtoken.word, newtoken.pos, originalword))
+                else:
+                    newtokens.append(token)
+            elif isopenbracket(token.word):
+                state = insidebrackets
+                newtokens.append(token)
+            elif isclosebracket(token.word):
+                state = outsidebrackets
+                newtokens.append(token)
+            else:
+                newtokens.append(token)
+
+        return (newtokens, metadata)
 
 class CHAT_SimpleScopedRegex(CHAT_Regex):
     def __init__(self, regex, replacement, scoped, arity):
@@ -538,14 +587,10 @@ def simplemetafunction(f):
 
 def noncompletionmetafunction(ann, annotationword, annotationpos, annotatedword):
     return Meta(ann.name, annotationwordlist=[annotationword], annotationposlist=[annotationpos],
-                annotatedwordlist=[annotatedword], annotatedposlist=[
-                    annotationpos], value=annotationword,
+                  annotatedwordlist=[annotatedword], annotatedposlist=[annotationpos], value=annotationword,
                 source=CHAT, backplacement=bpl_replacement)
-
-
 def simple_bpldel_metafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos],
-                                                                   annotatedwordlist=[
-                                                                       w], source=CHAT,
+                                                                   annotatedwordlist=[w], source=CHAT,
                                                                    backplacement=bpl_delete)
 
 
@@ -559,6 +604,10 @@ def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedword
     return Meta(ann.name, annotationwordlist,
                 annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
                 annotatedposlist=annotatedposlist, source=CHAT)
+
+def complexmetafunction_replbpl(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
+    Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
+         annotatedposlist=annotatedposlist, source=CHAT, backplacement=bpl_replacement)
 
 
 def complexmetafunction_replbpl(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
@@ -762,8 +811,7 @@ annotations = [
                         (r'\[=', anybutrb, r'\]'), (keep, eps), False),
                     complexmetafunction),
     CHAT_Annotation('Replacement', '8.3:69', '10.3:73',
-                    CHAT_ComplexRegex(
-                        (r'\[:\s', r'([^\]]+)', r'\]'), (eps, keep), True, containswords=True),
+                    CHAT_ComplexRegex((r'\[:\s', r'([^\]]+)', r'\]'), (eps, keep), True, containswords=True),
                     complexmetafunction_replbpl),
     CHAT_Annotation('Replacement of Real Word', '8.3:70', '10.3:73',
                     CHAT_ComplexRegex((r'\[::', r'([^\]]+)', r'\]'), (eps, keep), True), complexmetafunction),

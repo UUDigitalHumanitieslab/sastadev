@@ -2,7 +2,8 @@
 The *imply* module implements the function *removeimplies* to remove matches that are implied by a given match
 '''
 
-from sastadev.sastatypes import Match, MatchesDict, QueryDict
+from sastadev.sastatypes import (Match, Matches, MatchesDict, QId, Query,
+                                 QueryDict)
 from sastadev.treebankfunctions import getattval as gav
 from sastadev.treebankfunctions import getnodeyield
 
@@ -22,7 +23,6 @@ def removeimplies(matches: MatchesDict, queries: QueryDict) -> MatchesDict:
     newmatches = {key: val for key,
                   val in matches.items() if key not in toremovekeys}
     return newmatches
-
 
 def contains(match: Match, impliedmatch: Match) -> bool:
     matchnodeyield = getnodeyield(match)

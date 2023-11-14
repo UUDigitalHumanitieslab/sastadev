@@ -1,6 +1,7 @@
 import re
 from typing import List, Tuple
 
+import sastadev
 import sastadev.CHAT_Annotation as sastachat
 import sastadev.cleanCHILDEStokens
 from sastadev.metadata import Meta
@@ -74,7 +75,6 @@ def sasta_tokenize(instring):
     result = stringlist2tokenlist(tokenstring, start=10, inc=10)
     return result
 
-
 def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     '''
     converts the origutt into  list of xmeta elements
@@ -83,6 +83,5 @@ def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     '''
     origutt = find1(tree, './/meta[@name="origutt"]/@value')
     tokens1 = sasta_tokenize(origutt)
-    tokens2, metadata = sastadev.cleanCHILDEStokens.cleantokens(
-        tokens1, repkeep=False)
+    tokens2, metadata = sastadev.cleanCHILDEStokens.cleantokens(tokens1, repkeep=False)
     return tokens2, metadata

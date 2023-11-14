@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from sastadev.alpino import getdehetwordinfo
 from sastadev.basicreplacements import (basicexpansions, basicreplacements,
                                         getdisambiguationdict)
-from sastadev.cleanCHILDEStokens import cleantokens
+from sastadev.cleanCHILDEStokens import cleantext, cleantokens
 from sastadev.conf import settings
 from sastadev.dedup import (cleanwordofnort, find_duplicates2,
                             find_janeenouduplicates, find_simpleduplicates,
@@ -473,6 +473,7 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
     # check whether there is a utterance final multiword explanation, and if so, align it with the utterance
     # use this aligned utterance as the correction, clean it, parse it
 
+
     # reducedtokens, allremovedtokens, metadata = reduce(tokens)
     reducedtokens, metadata = reduce(tokens, tree)
     reducedtokensmd = TokenListMD(reducedtokens, [])
@@ -496,11 +497,15 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
 def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId):
 
+
+
+
     newtokensmd = explanationasreplacement(origtokensmd, tree)
     if newtokensmd is not None:
         tokensmd = newtokensmd
     else:
         tokensmd = origtokensmd
+
 
     tokens = tokensmd.tokens
     allmetadata = tokensmd.metadata
@@ -884,7 +889,11 @@ def findxmetaatt(xmetalist: List[Meta], name: str, cond: MetaCondition = lambda 
     return result
 
 
+
+
 # def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[TokenListMD]: moved to sasta_explanation
+
+
 # some words are known but very unlikely as such
 #: The constant *specialdevoicingwords* contains known words that start with a
 #: voiceless consonant for which the word starting with the corresponding voiced
