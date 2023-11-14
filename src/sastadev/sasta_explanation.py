@@ -5,7 +5,6 @@ import copy
 from typing import List, Optional
 
 from auchann.align_words import AlignmentSettings, align_words
-from auchannsettings import settings
 from lxml import etree
 
 # import find1, iswordnode, getattval
@@ -158,7 +157,7 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
         utt = space.join(prefixwordlist + words + postexplanationwords)
         expl = space.join(prefixwordlist + finalexpl.annotationwordlist + postexplanationwords)
         #print(settings.replacements)
-        resultalignment = align_words(utt, expl, settings)
+        resultalignment = align_words(utt, expl, auchannsettings)
         result = str(resultalignment)
     else:
         result = None
@@ -231,7 +230,7 @@ def getalignment(tree: SynTree)-> Optional[str]:
     explanationstr = space.join(explanationlist + postexplanationlist) if explanationlist is not None else None
     # print(f'explanationstr={explanationstr}')
     if explanationstr is not None:
-        alignment = align_words(cleanutt, explanationstr, settings)
+        alignment = align_words(cleanutt, explanationstr, auchannsettings)
     else:
         alignment = None
     return alignment

@@ -16,13 +16,10 @@ The function has been tested against all noun compounds in Lassy-Klein
 # documentatie
 
 
-
 import re
-import readcsv
-
-import xlsx
-
 from typing import List
+
+from sastadev import readcsv, xlsx
 
 hyphen = '-'
 tab = '\t'

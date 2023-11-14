@@ -179,12 +179,10 @@ from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
 from sastadev.sasta_explanation import finalexplanation_adapttreebank
-from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResults,
-                                 ExactResultsDict, FileName, GoldTuple, Match,
-                                 Matches, MatchesDict, MethodName, Position,
-                                 PositionStr, QId, QIdCount, QueryDict,
-                                 ResultsCounter, ResultsDict, SampleSizeTuple,
-                                 SynTree, UttId)
+from sastadev.sastatypes import (AltCodeDict, FileName, GoldTuple, MethodName,
+                                 Position, QId, QIdCount, QueryDict,
+                                 ResultsCounter, SampleSizeTuple, SynTree,
+                                 UttId)
 from sastadev.SRFreader import read_referencefile
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets

@@ -1,13 +1,15 @@
 
 from typing import Any, Callable, Counter, Dict, List, Tuple, Union
 
-from sastadev.sastatypes import (ExactResult, ExactResults, ExactResultsDict, FileName, Matches,
-                                 MatchesDict, Query, QId, ResultsCounter, SynTree, UttId, UttWordDict)
+from sastadev.sastatypes import (ExactResult, ExactResults, FileName, Matches,
+                                 QId, Query, ResultsCounter, SynTree, UttId,
+                                 UttWordDict)
 
 slash = '/'
 reskeysep = slash
 
 ResultsKey = Tuple[QId, str]
+
 
 # class ResultsKey:  # we do not use it anymore because two instantiations with the same value are dfferent objects
 #     def __init__(self, qid: QId, value: str = None):
@@ -64,6 +66,8 @@ def scores2counts(scores: Dict[ResultsKey, Counter]) -> Dict[QId, int]:
     return counts
 
 
+
+
 CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 PostQueryFunction = Callable[[AllResults, SynTree], List[SynTree]]
 QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
@@ -71,5 +75,3 @@ QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
 MatchesDict = Dict[Tuple[ResultsKey, UttId], Matches]
 ExactResultsDict = Dict[ResultsKey, ExactResults]  # qid
 ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
-
-

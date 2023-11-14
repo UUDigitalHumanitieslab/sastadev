@@ -5,8 +5,7 @@ from sastadev.allresults import (ExactResultsDict, ExactResultsFilter,
                                  mkresultskey)
 from sastadev.conf import settings
 from sastadev.query import pre_process
-from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
-                                 ExactResultsFilter, FileName,
+from sastadev.sastatypes import (AltCodeDict, ExactResult, FileName,
                                  Item_Level2QIdDict, MethodName, QId, Query,
                                  QueryDict)
 

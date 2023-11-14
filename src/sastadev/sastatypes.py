@@ -2,11 +2,13 @@
 This module contains definitions of types used in multiple modules
 '''
 
-from typing import Dict, List, Any, Tuple, Callable, Pattern, Optional, NewType, Union
-from lxml import etree # type: ignore
 from collections import Counter
-from query import Query
-from sastatoken import Token
+from typing import Callable, Dict, List, Optional, Tuple, Union
+
+from lxml import etree
+
+from sastadev.query import Query
+from sastadev.sastatoken import Token
 
 Level = str  # in the future perhaps NewType('Level', str)
 Position = int  # in the future perhapos NewType('Position', int)
@@ -76,11 +78,3 @@ UttWordDict = Dict[UttId, List[str]]
 Word = str
 WordInfo = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
 WordLower = str
-
-# moved the following to allresuls.py
-# CoreQueryFunction = Callable[[SynTree], List[SynTree]]
-# PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]
-# QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
-
-
-
