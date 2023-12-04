@@ -33,10 +33,30 @@ class SastaCoreParameters:
     themethod: Method = None
     includeimplies: bool = False
     infilename: FileName = None
+    targets: int = None
 
 
-# def sastacore(infilename: FileName, scp: SastaCoreParameters):
-def sastacore(origtreebank: Optional[TreeBank],
+
+def doauchann(intreebank: SynTree) -> SynTree:
+
+    # deal with final explanations
+    fexplanations = True
+    if fexplanations:
+        outtreebank = finalexplanation_adapttreebank(intreebank)
+    else:
+        outtreebank = intreebank
+
+    # for tree in treebank1:
+    #     showtree(tree, 'na fexplanations')
+
+    # deal with %xlit, %xint
+    # @@ to be implemented @@
+
+    return outtreebank
+
+
+
+def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
               annotatedfileresults: Optional[AllResults],
               scp: SastaCoreParameters):
 
@@ -55,6 +75,7 @@ def sastacore(origtreebank: Optional[TreeBank],
     includeimplies = scp.includeimplies
     infilename = scp.infilename
     nodeendmap = {}
+    targets = scp.targets
 
     rawexactresults: ExactResultsDict = {}
     allmatches: MatchesDict = {}
@@ -79,29 +100,10 @@ def sastacore(origtreebank: Optional[TreeBank],
             exit(-1)
         allutts = {}
         uttcount = 0
-        # determine targets
-        targets = get_targets(origtreebank)
-
-        # for tree in origtreebank:
-        #     showtree(tree, 'voor fexplanations')
-
-        # deal with final explanations
-        fexplanations = True
-        if fexplanations:
-            treebank1 = finalexplanation_adapttreebank(origtreebank)
-        else:
-            treebank1 = origtreebank
-
-        # for tree in treebank1:
-        #     showtree(tree, 'na fexplanations')
-        treebank, errordict, allorandalts = correcttreebank(treebank1, targets, methodname, corr)
-
-        # for tree in treebank:
-        #    showtree(tree, 'na correcties')
 
         # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
         analysedtrees: List[(UttId, SynTree)] = []
-        for syntree in treebank:
+        for syntree in correctedtreebank:
             temputtid = getuttid(syntree)
             uttcount += 1
 
@@ -160,7 +162,7 @@ def sastacore(origtreebank: Optional[TreeBank],
 
     dopostqueries(allresults, formquerylist, themethod.queries)
 
-    return allresults, treebank, errordict, allorandalts, samplesizetuple
+    return allresults, samplesizetuple
 
 
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,

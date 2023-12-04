@@ -154,7 +154,7 @@ from sastadev.conf import settings
 from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
                                 loggingfolder, outtreebanksfolder,
                                 resultsfolder, silverfolder, silverpermfolder)
-from sastadev.correcttreebank import (corrn, errorwbheader, validcorroptions)
+from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
@@ -169,12 +169,13 @@ from sastadev.reduceresults import exact2results,  reduceexactgoldscores, reduce
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
-from sastadev.sastacore import dopostqueries,  getreskey, isxpathquery, SastaCoreParameters, sastacore
+from sastadev.sastacore import doauchann, dopostqueries,  getreskey, isxpathquery, SastaCoreParameters, sastacore
 from sastadev.SRFreader import read_referencefile
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
                                  GoldTuple,  MatchesDict, MethodName,  QId,
                                  QIdCount, QueryDict, ResultsCounter,
                                   SynTree, UttId)
+from sastadev.targets import  get_targets
 from sastadev.treebankfunctions import (getattval,  getuttid,
                                         getxmetatreepositions,
                                         getyield, showtree)
@@ -883,16 +884,25 @@ def main():
         tree = etree.parse(options.infilename)
         origtreebank = tree.getroot()
         annotatedfileresults = None
+        targets = get_targets(origtreebank)
         if origtreebank.tag != 'treebank':
             settings.LOGGER.error("Input treebank file does not contain a treebank element")
             exit(-1)
 
 
     scp = SastaCoreParameters(annotationinput, options.corr,  themethod,
-                              options.includeimplies, options.infilename)
+                              options.includeimplies, options.infilename, targets)
 
+    if not annotationinput:
+        treebank1 = doauchann(origtreebank)
 
-    allresults, treebank, errordict, allorandalts, samplesizetuple  = sastacore(origtreebank, annotatedfileresults,  scp)
+        methodname = scp.themethod.name
+        corr = scp.corr
+        themethod = scp.themethod
+
+        treebank, errordict, allorandalts = correcttreebank(treebank1, targets, methodname, corr)
+
+    allresults,  samplesizetuple  = sastacore(origtreebank, treebank, annotatedfileresults,  scp)
 
     exactresults = allresults.exactresults
     allutts = allresults.allutts
