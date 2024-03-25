@@ -57,6 +57,7 @@ basicimpmod = """(node[@rel="mod" and (@lemma="maar" or @lemma="eens")])"""
 impmodfound = """(%basicimpmod% or node[%nonfinvc% and %basicimpmod%])"""
 nonfincat = """(@cat="inf" or @cat="ppart")"""
 
+
 nonfinvc = """(@rel="vc" and %nonfincat%) """
 
 realcomplormodnode = """node[%realcomplormod%]"""

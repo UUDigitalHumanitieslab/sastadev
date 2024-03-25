@@ -65,8 +65,22 @@ def clean(label: str) -> str:
     result = result.lower()
     return result
 
+def getlabels(labelstr: str, allvaliditems: List[str]) -> List[str]:
+    rawlabels = re.split('[;,]', labelstr)
+    labels = [rawlabel.strip() for rawlabel in rawlabels]
+    validlabels = []
+    for label in labels:
+        if label in allvaliditems:
+            validlabels.append(label)
+        elif label == '':
+            pass
+        else:
+            settings.LOGGER.warning(f'Cannot interpret {label} in {labelstr}; ignored')
+    return validlabels
 
-def getlabels(labelstr: str, patterns: Tuple[Pattern, Pattern]) -> List[str]:
+
+
+def oldgetlabels(labelstr: str, patterns: Tuple[Pattern, Pattern]) -> List[str]:
     results = []
     (pattern, fullpattern) = patterns
     if fullpattern.match(labelstr):
@@ -105,7 +119,7 @@ def enrich(labelstr: str, lcprefix: str) -> str:
     return result
 
 
-def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, patterns: Tuple[Pattern, Pattern]) \
+def oldgetcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, patterns: Tuple[Pattern, Pattern]) \
         -> List[Tuple[str, str]]:
     results: List[Tuple[str, str]] = []
     lcthelabelstr = thelabelstr.lower()
@@ -121,193 +135,25 @@ def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, patter
 
     return results
 
+def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, allvaliditems: List[str]) \
+        -> List[Tuple[str, str]]:
+    results: List[Tuple[str, str]] = []
+    lcthelabelstr = thelabelstr.lower()
+    lcprefix = prefix.lower().strip()
+    lcthelabelstr = enrich(lcthelabelstr, lcprefix)
+    thelabels = getlabels(lcthelabelstr, allvaliditems)
+    for thelabel in thelabels:
+        if thelabel != "":
+            cleanlabel = thelabel
+            cleanlevel = clean(thelevel)
+            result = (cleanlevel, cleanlabel)
+            results.append(result)
 
-# def oldget_annotations(infilename, patterns):
-#     '''
-#     Reads the file with name filename in SASTA Annotation Format
-#     :param infilename:
-#     :param patterns
-#     :return: a dictionary  with as  key a tuple (level, item) and as value a Counter  with key uttid and value its count
-#     '''
-#
-#     thedata = defaultdict(list)
-#     exactdata = defaultdict(list)
-#     cdata = {}
-#
-#     # To open Workbook
-#     wb = xlrd.open_workbook(infilename)
-#     sheet = wb.sheet_by_index(0)
-#
-#     startrow = 0
-#     startcol = 0
-#     headerrow = 0
-#     headers = {}
-#     lastrow = sheet.nrows
-#     lastcol = sheet.ncols
-#     #    firstwordcol = 2
-#     #    lastwordcol = lastcol - 4
-#     levelcol = 1
-#     uttidcol = 0
-#     stagescol = -1
-#     commentscol = -1
-#
-#     uttlevel = 'utt'
-#
-#     for rowctr in range(startrow, lastrow):
-#         if rowctr == headerrow:
-#             for colctr in range(startcol, lastcol):
-#                 headers[colctr] = sheet.cell_value(rowctr, colctr)
-#                 if iswordcolumn(headers[colctr]):
-#                     lastwordcol = colctr
-#                     if isfirstwordcolumn(headers[colctr]):
-#                         firstwordcol = colctr
-#                 elif clean(headers[colctr]) in speakerheaders:
-#                     spkcol = colctr
-#                 elif clean(headers[colctr]) in uttidheaders:
-#                     uttidcol = colctr
-#                 elif clean(headers[colctr]) in levelheaders:
-#                     levelcol = colctr
-#                 elif clean(headers[colctr]) in stagesheaders:
-#                     stagescol = colctr
-#                 elif clean(headers[colctr]) in commentsheaders:
-#                     commentscol = colctr
-#         else:
-#             if sheet.cell_value(rowctr, uttidcol) != "":
-#                 uttid = str(int(sheet.cell_value(rowctr, uttidcol)))
-#             thelevel = sheet.cell_value(rowctr, levelcol)
-#             thelevel = clean(thelevel)
-#             all_levels.add(thelevel)
-#             for colctr in range(firstwordcol, sheet.ncols):
-#                 if thelevel in literallevels and colctr != stagescol and colctr != commentscol:
-#                     thelabel = sheet.cell_value(rowctr, colctr)
-#                     if colctr > lastwordcol:
-#                         tokenposition = 0
-#                     else:
-#                         tokenposition = colctr - firstwordcol + 1
-#                     thedata[(thelevel, thelabel)].append(uttid)
-#                     exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-#                 elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
-#                     thelabelstr = sheet.cell_value(rowctr, colctr)
-#                     thelevel = sheet.cell_value(rowctr, levelcol)
-#                     if lastwordcol + 1 <= colctr < sheet.ncols:
-#                         # prefix = headers[colctr] aangepast om het simpeler te houden
-#                         prefix = ""
-#                     else:
-#                         prefix = ""
-#                     cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
-#                     if colctr > lastwordcol:
-#                         tokenposition = 0
-#                     else:
-#                         tokenposition = colctr - firstwordcol + 1
-#                     for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
-#                         thedata[(cleanlevel, cleanlabel)].append(uttid)
-#                         exactdata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-#     # wb.close() there is no way to close the workbook
-#     for atuple in thedata:
-#         cdata[atuple] = Counter(thedata[atuple])
-#     return cdata
-#
-#
-# def old2get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
-#         -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
-#     '''
-#     Reads the file with name filename in SASTA Annotation Format
-#     :param infilename:
-#     :param patterns
-#     :return: a dictionary  with as  key a tuple (level, item) and as value a list of (uttid, tokenposition) pairs
-#     '''
-#
-#     thedata = defaultdict(list)
-#     #cdata = {}
-#
-#     allutts = {}
-#
-#     # To open Workbook
-#     wb = xlrd.open_workbook(infilename)
-#     sheet = wb.sheet_by_index(0)
-#
-#     startrow = 0
-#     startcol = 0
-#     headerrow = 0
-#     headers = {}
-#     lastrow = sheet.nrows
-#     lastcol = sheet.ncols
-#     #    firstwordcol = 2
-#     #    lastwordcol = lastcol - 4
-#     levelcol = 1
-#     uttidcol = 0
-#     stagescol = -1
-#     commentscol = -1
-#
-#     uttlevel = 'utt'
-#
-#     uttcount = 0
-#
-#     for rowctr in range(startrow, lastrow):
-#         if rowctr == headerrow:
-#             for colctr in range(startcol, lastcol):
-#                 headers[colctr] = sheet.cell_value(rowctr, colctr)
-#                 if iswordcolumn(headers[colctr]):
-#                     lastwordcol = colctr
-#                     if isfirstwordcolumn(headers[colctr]):
-#                         firstwordcol = colctr
-#                 elif clean(headers[colctr]) in speakerheaders:
-#                     spkcol = colctr
-#                 elif clean(headers[colctr]) in uttidheaders:
-#                     uttidcol = colctr
-#                 elif clean(headers[colctr]) in levelheaders:
-#                     levelcol = colctr
-#                 elif clean(headers[colctr]) in stagesheaders:
-#                     stagescol = colctr
-#                 elif clean(headers[colctr]) in commentsheaders:
-#                     commentscol = colctr
-#         else:
-#             if sheet.cell_value(rowctr, uttidcol) != "":
-#                 uttid = str(int(sheet.cell_value(rowctr, uttidcol)))
-#             thelevel = sheet.cell_value(rowctr, levelcol)
-#             thelevel = clean(thelevel)
-#             all_levels.add(thelevel)
-#             # if thelevel == uttlevel:
-#             #    uttcount += 1
-#             curuttwlist = []
-#             for colctr in range(firstwordcol, sheet.ncols):
-#                 if thelevel == uttlevel:
-#                     curcellval = sheet.cell_value(rowctr, colctr)
-#                     if curcellval != '':
-#                         curuttwlist.append(curcellval)
-#                 elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
-#                     thelabel = sheet.cell_value(rowctr, colctr)
-#                     if colctr > lastwordcol:
-#                         tokenposition = 0
-#                     else:
-#                         tokenposition = colctr - firstwordcol + 1
-#                     # thedata[(thelevel, thelabel)].append(uttid)
-#                     cleanlevel = thelevel
-#                     cleanlabel = thelabel
-#                     if cleanlabel != '':
-#                         thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-#                 elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
-#                     thelabelstr = sheet.cell_value(rowctr, colctr)
-#                     thelevel = sheet.cell_value(rowctr, levelcol)
-#                     if lastwordcol + 1 <= colctr < sheet.ncols:
-#                         # prefix = headers[colctr] aangepast om het simpeler te houden
-#                         prefix = ""
-#                     else:
-#                         prefix = ""
-#                     cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, patterns)
-#                     if colctr > lastwordcol:
-#                         tokenposition = 0
-#                     else:
-#                         tokenposition = colctr - firstwordcol + 1
-#                     for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
-#                         thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-#             if curuttwlist != []:
-#                 allutts[uttid] = curuttwlist
-#     # wb.close() there is no way to close the workbook
-#     return allutts, thedata
+    return results
 
 
-def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
+
+def oldget_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
         -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
     '''
     Reads the file with name filename in SASTA Annotation Format
@@ -400,6 +246,99 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
             allutts[uttid] = curuttwlist
     return allutts, thedata
 
+def get_annotations(infilename: FileName, allitems:List[str]) \
+        -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
+    '''
+    Reads the file with name filename in SASTA Annotation Format
+    :param infilename:
+    :param allitems: list of all valid items
+    :return: a dictionary  with as  key a tuple (level, item) and as value a list of (uttid, tokenposition) pairs
+    '''
+
+    thedata = defaultdict(list)
+
+    allutts = {}
+
+    # To open Workbook
+    header, data = xlsx.getxlsxdata(infilename)
+
+    levelcol = 1
+    uttidcol = 0
+    stagescol = -1
+    commentscol = -1
+    unalignedcol = -1
+
+    uttlevel = 'utt'
+
+    uttcount = 0
+
+    for col, val in enumerate(header):
+        if iswordcolumn(val):
+            lastwordcol = col
+            if isfirstwordcolumn(val):
+                firstwordcol = col
+        elif clean(val) in speakerheaders:
+            spkcol = col
+        elif clean(val) in uttidheaders:
+            uttidcol = col
+        elif clean(val) in levelheaders:
+            levelcol = col
+        elif clean(val) in stagesheaders:
+            stagescol = col
+        elif clean(val) in commentsheaders:
+            commentscol = col
+        elif clean(val) in unalignedheaders:
+            unalignedcol = col
+        else:
+            pass  # maybe warn here that an unknow column header has been encountered?
+
+    for row in data:
+        if row[uttidcol] != "":
+            uttid = str(int(row[uttidcol]))   # this might go wrong if there is no integer there @@make it robust
+        thelevel = row[levelcol]
+        thelevel = clean(thelevel)
+        all_levels.add(thelevel)
+        # if thelevel == uttlevel:
+        #    uttcount += 1
+        curuttwlist = []
+        for colctr in range(firstwordcol, len(row)):
+            if thelevel == uttlevel:
+                rawcurcellval = str(row[colctr])
+                curcellval = getname(rawcurcellval)
+                if curcellval != '':
+                    curuttwlist.append(curcellval)
+            elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
+                rawthelabel = str(row[colctr])
+                thelabel = getname(rawthelabel)
+                if colctr > lastwordcol:
+                    tokenposition = 0
+                else:
+                    tokenposition = colctr - firstwordcol + 1
+                cleanlevel = thelevel
+                cleanlabel = thelabel
+                if cleanlabel != '':
+                    thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+            elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+                thelabelstr = row[colctr]
+                thelevel = row[levelcol]
+                if colctr == unalignedcol:
+                    prefix = ''
+                if lastwordcol + 1 <= colctr < len(row):
+                    # prefix = headers[colctr] aangepast om het simpeler te houden
+                    prefix = ""
+                else:
+                    prefix = ""
+                cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, allitems)
+                if colctr > lastwordcol or colctr == unalignedcol:
+                    tokenposition = 0
+                else:
+                    tokenposition = colctr - firstwordcol + 1
+                for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
+                    thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+        if curuttwlist != []:
+            allutts[uttid] = curuttwlist
+    return allutts, thedata
+
 
 def update(thedict: Dict[ResultsKey, Tuple[Level, Item, ExactResults]], reskey: ResultsKey,
            goldtuple: Tuple[Level, Item, ExactResults]):
@@ -457,13 +396,14 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
                  queries: QueryDict, includeimplies: bool=False) \
         -> Tuple[UttWordDict, Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]]]:
     # item2levelmap = {}
+    includeimplies = False  # temporarily put off to test different implementation
     mappingitem2levelmap = getitem2levelmap(mapping)
     altcodesitem2levelmap = getitem2levelmap(altcodes)
     allmappingitems = [item for (item, _) in mapping]
     allaltcodesitems = [item for (item, _) in altcodes]
     allitems = allmappingitems + allaltcodesitems
     patterns = mkpatterns(allitems)
-    allutts, basicdata = get_annotations(filename, patterns)
+    allutts, basicdata = get_annotations(filename, allitems)
     results: Dict[ResultsKey, Tuple[Level, Item, ExactResults]] = {}
     for thelevel, theitem in basicdata:
         thecounter = basicdata[(thelevel, theitem)]

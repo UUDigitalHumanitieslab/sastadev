@@ -24,6 +24,9 @@ from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
                                         getyield, showtree)
 
+from sastadev.imply import removeimplies
+
+singlewordWquery = """//node[@pt="ww"]/ancestor::node[@cat="top" and count(.//node[@pt!="let" and @pt!="tsw"]) = 1 ] """
 
 
 @dataclass
@@ -72,7 +75,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     themethod = scp.themethod
     methodname = themethod.name
     altcodes = themethod.altcodes
-    includeimplies = scp.includeimplies
+    includeimplies = False
     infilename = scp.infilename
     nodeendmap = {}
     targets = scp.targets
@@ -100,6 +103,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
             exit(-1)
         allutts = {}
         uttcount = 0
+        # if includeimplies:   # not needed anymore, now part of the Tarsp Index
+        #    themethod.queries['T120'].query = singlewordWquery
 
         # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
         analysedtrees: List[(UttId, SynTree)] = []
@@ -140,7 +145,11 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
     # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
 
+    if includeimplies:
+        allmatches, rawexactresults = removeimplies(allmatches, exactresults, themethod)
+
     # adapt the exactresults  positions to the reference
+    exactresults = adaptpositions(rawexactresults, nodeendmap)
 
     coreresults = exact2results(exactresults)
 

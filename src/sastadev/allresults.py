@@ -1,11 +1,13 @@
-
+from collections import defaultdict
 from typing import Any, Callable, Counter, Dict, List, Tuple, Union
 
 from sastadev.sastatypes import (ExactResult, ExactResults, ExactResultsDict, FileName, Matches,
-                                 MatchesDict, Query, QId, ResultsCounter, SynTree, UttId, UttWordDict)
-
+                                 MatchesDict, Query, QId, ResultsCounter, ResultsKey, SynTree, UttId, UttWordDict)
+from sastadev.treebankfunctions import getattval as gav
 slash = '/'
 reskeysep = slash
+
+
 
 ResultsKey = Tuple[QId, str]
 
@@ -52,6 +54,13 @@ class AllResults:
         self.allutts: UttWordDict = allutts
         self.annotationinput: bool = annotationinput
 
+
+CoreQueryFunction = Callable[[SynTree], List[SynTree]]
+PostQueryFunction = Callable[[AllResults, SynTree], List[SynTree]]
+QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
+
+
+
 def scores2counts(scores: Dict[ResultsKey, Counter]) -> Dict[QId, int]:
     '''
     input is a dictionary of Counter()s
@@ -64,12 +73,17 @@ def scores2counts(scores: Dict[ResultsKey, Counter]) -> Dict[QId, int]:
     return counts
 
 
-CoreQueryFunction = Callable[[SynTree], List[SynTree]]
-PostQueryFunction = Callable[[AllResults, SynTree], List[SynTree]]
-QueryFunction = Union[CoreQueryFunction, PostQueryFunction]
 
-MatchesDict = Dict[Tuple[ResultsKey, UttId], Matches]
-ExactResultsDict = Dict[ResultsKey, ExactResults]  # qid
-ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
 
+def matches2exactresults(matchesdict: MatchesDict) -> ExactResultsDict:
+    exactresultsdict = defaultdict(list)
+    for resultskey, uttid in matchesdict:
+        for match in matchesdict[(resultskey, uttid)]:
+            position = getposition(match[0])
+            exactresultsdict[resultskey].append((uttid, position))
+    return exactresultsdict
+
+def getposition(node: SynTree) -> int:
+    result = int(gav(node, 'begin')) + 1
+    return result
 

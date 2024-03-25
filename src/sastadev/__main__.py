@@ -670,7 +670,7 @@ def main():
     parser.add_option("-p", "--plat", dest="platinuminfilename",
                       help="File containing a platinum reference in SASTA Reference Format")
     parser.add_option("-i", "--impl", dest="includeimplies", action="store_true",
-                      help="Use the implies column of the method", default=False)
+                      help="Use the implies column of the method (deprecated)", default=True)
     parser.add_option("-l", "--log", dest="logfilename",
                       help="File for logging")
     parser.add_option("--corr", dest="corr", default='n',
@@ -680,6 +680,8 @@ def main():
                       help="File containing definition of assessment method (SAM)")
 
     (options, args) = parser.parse_args()
+
+    options.includeimplies = True   # parameter is deprecated, now always assumed to be true
 
     if options.corr is None:
         options.corr = corrn

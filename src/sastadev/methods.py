@@ -5,7 +5,7 @@ from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  Item_Level2QIdDict, MethodName, QId, Query,
                                  QueryDict)
 from typing import Callable, List, Dict, Optional, Tuple
-from sastadev.allresults import ExactResultsDict, ExactResultsFilter, mkresultskey
+from sastadev.allresults import ExactResultsDict,  mkresultskey
 import os
 
 lemmaqid = 'A051'
@@ -63,6 +63,7 @@ class Method:
         self.queries: QueryDict = queries
         self.defaultfilter: ExactResultsFilter = defaultfilter
         self.item2idmap: Item_Level2QIdDict = item2idmap
+        self.simpleitem2idmap = {item: id for ((item, level), id) in item2idmap.items() }
         self.altcodes: AltCodeDict = altcodes
         self.postquerylist: List[QId] = postquerylist
         self.methodfilename: FileName = methodfilename
