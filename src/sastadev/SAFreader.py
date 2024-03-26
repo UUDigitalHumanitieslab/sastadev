@@ -416,7 +416,7 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
 #            mappingitem = theitem
         if thelevel in literallevels and (thelevel, thelevel) in mapping:
             #we still have to determine how to deal with this this is an attempt
-            qid = mapping[(thelevel, thelevel)]  ## for literal item and level must be identical; check whether this will work and make it work in mapping
+            qid = mapping[thelevel, thelevel]
             reskey = mkresultskey(qid, theitem)
             update(results, reskey, (thelevel, theitem, thecounter))
         elif (theitem, thelevel) in mapping:

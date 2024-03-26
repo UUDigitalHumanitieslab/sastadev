@@ -110,9 +110,8 @@ def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) 
         # find the obj1node
         obj1node = find1(RPnode, 'node[@rel="obj1"]')
 
-        # check if they are adjacent
         if headnode is not None and obj1node is not None:
-            if pred(headnode, obj1node, stree):
+            if pred(obj1node, headnode, stree):
                 results.append(RPnode)
     return results
 
@@ -135,7 +134,7 @@ def vobij(stree: SynTree) -> List[SynTree]:
 
     '''
     results1 = stree.xpath(vobijxpath)
-    results2 = auxvobij(stree, adjacent)
+    results2 = auxvobij(stree, vobijpred)
     results = results1 + results2
     return results
 
@@ -155,3 +154,15 @@ def voslashbij(stree: SynTree) -> List[SynTree]:
     '''
     results = auxvobij(stree, notadjacent)
     return results
+
+def vobijpred(obj1node, headnode, stree) -> bool:
+    #check for adjacency  (er naar is ok, er gisteren naar not)
+    cond1 = adjacent(headnode, obj1node, stree)
+
+    # check whether the obj1node precedes the headnode: daar naar is ok, naar daar is not ok
+    headposition = int(getattval(headnode, 'end'))
+    obj1position = int(getattval(obj1node, 'end'))
+    cond2 = headposition < obj1position
+    result = cond1 and cond2
+    return result
+
