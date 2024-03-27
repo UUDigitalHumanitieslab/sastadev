@@ -15,7 +15,6 @@ alpino_special_symbols_re = re.compile(alpino_special_symbols_pattern)
 gretelurl = 'https://gretel.hum.uu.nl/api/src/router.php/parse_sentence/'
 previewurltemplate = 'https://gretel.hum.uu.nl/ng/tree?sent={sent}&xml={xml}'
 
-
 emptypattern = r'^\s*$'
 emptyre = re.compile(emptypattern)
 
