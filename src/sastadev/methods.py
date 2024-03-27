@@ -129,7 +129,7 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
         else:
             resultmethodfilename = methodname
             resultmethodname = getmethodfromfile(methodname)
-            settings.warning(
+            settings.LOGGER.warning(
                 'Method derived from the method file name: {}'.format(resultmethodname))
     elif methodname is not None and methodfilename is not None:
         if methodname.lower() in supported_methods:

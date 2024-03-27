@@ -5,15 +5,14 @@
 import copy
 from typing import List, Optional
 
-from auchann.align_words import align_words
+from auchann.align_words import AlignmentSettings, align_words
 from lxml import etree
 
 # import find1, iswordnode, getattval
 import sastadev.stringfunctions as strf
 import sastadev.treebankfunctions as tbf
-from auchannsettings import settings
 from sastadev.alpinoparsing import parse
-from sastadev.auchannsettings import AlignmentSettings
+from sastadev.auchannsettings import settings
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings as sdsettings
 from sastadev.lexicon import known_word
