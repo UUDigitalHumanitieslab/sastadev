@@ -2,7 +2,6 @@ import logging
 import re
 import urllib.parse
 import urllib.request
-from typing import Optional
 
 from lxml import etree  # type: ignore
 
@@ -68,6 +67,7 @@ def parse(origsent: str, escape: bool = True):
         else:
             logging.error('parsing failed:', r1.status, r1.reason, sent)
             return None
+
 
 def escape_alpino_input(instr: str) -> str:
     '''

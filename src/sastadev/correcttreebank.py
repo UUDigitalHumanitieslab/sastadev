@@ -1,24 +1,21 @@
 from collections import defaultdict
 from copy import copy, deepcopy
-from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple
 
 from lxml import etree
 
 from sastadev.alpinoparsing import parse
 from sastadev.basicreplacements import basicreplacements
-from sastadev.CHAT_Annotation import omittedword
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.lexicon import de, dets, getwordinfo, known_word
+from sastadev.lexicon import de, dets, known_word
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
                                bpl_none, bpl_replacement, bpl_word,
                                bpl_wordlemma, insertion)
-from sastadev.sastatok import sasta_tokenize
-from sastadev.sastatoken import (Token, deflate, inflate, insertinflate,
-                                 tokeninflate, tokenlist2stringlist)
+from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
@@ -68,7 +65,8 @@ errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
 
 
 smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn')]
-smartreplacedict = {w1:w2 for w1, w2 in smartreplacepairs}
+smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
+
 
 class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
@@ -201,6 +199,7 @@ def isrobustnoun(node: SynTree) -> bool:
         result = ntype == 'both' and getal == 'both' and graad == 'both'
     return result
 
+
 def issamewordclass(node1, node2):
     pt1 = getattval(node1, 'pt')
     pt2 = getattval(node2, 'pt')
@@ -213,11 +212,13 @@ def issamewordclass(node1, node2):
             result = subclasscompatible(subclass1, subclass2)
     return result
 
+
 def infpvpair(newnode, node):
     newnodewvorm = getattval(newnode, 'wvorm')
     nodewvorm = getattval(node, 'wvorm')
     result = newnodewvorm == 'inf' and nodewvorm == 'pv'
     return result
+
 
 def adaptpv(node):
     if getattval(node, 'pt') == 'ww':
@@ -225,6 +226,7 @@ def adaptpv(node):
         node.attrib['pvagr'] = 'mv'
         node.attrib['pvtijd'] = 'tgw'
         node.attrib['postag'] = 'WW(pv,tgw,mv)'
+
 
 def smartreplace(node: SynTree, word: str) -> SynTree:
     '''
@@ -251,8 +253,9 @@ def smartreplace(node: SynTree, word: str) -> SynTree:
         result = copy(node)
         result.attrib['word'] = word
         if '_' in node.attrib['lemma'] and countsyllables(word) == 1:
-           result.attrib['lemma'] = word
+            result.attrib['lemma'] = word
     return result
+
 
 def mkmetarecord(meta: MetaElement, origutt: Optional[str], parsed_as: Optional[str]) -> Tuple[
         Optional[str], List[str]]:
@@ -480,6 +483,7 @@ def cleantextdone(metadataelement):
                 'value' in meta.attrib and meta.attrib['value'] == 'done':
             return True
     return False
+
 
 def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
@@ -720,12 +724,15 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 contextoldnode = contextualise(oldnode, newnode)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
         elif curbackplacement == bpl_replacement:
-            #showtree(fatstree, 'fatstree')
+            # showtree(fatstree, 'fatstree')
             nodeend = meta.annotationposlist[-1] + 1
-            newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
-            oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [] else None
+            newnode = myfind(
+                thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [
+            ] else None
             if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
-                settings.LOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+                settings.LOGGER.error(
+                    f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
 
             if newnode is not None and oldword is not None:
                 # wproplist = getwordinfo(oldword)
@@ -741,11 +748,9 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 newnodeparent = newnode.getparent()
                 newnodeparent.remove(newnode)
                 newnodeparent.append(substnode)
-                #showtree(thetree, 'thetree after smart replace')
+                # showtree(thetree, 'thetree after smart replace')
 
-
-
-        elif curbackplacement in [bpl_word,  bpl_wordlemma]:
+        elif curbackplacement in [bpl_word, bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(
                 thetree, './/node[@pt and @end="{}"]'.format(nodeend))
@@ -809,7 +814,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
             pass
         elif curbackplacement == bpl_delete:
             orignodebegin = str(meta.annotatedposlist[-1])
-            nodes2deletebegins.append(orignodebegin)  # just gather the begin sof the nodes to be deleted
+            # just gather the begin sof the nodes to be deleted
+            nodes2deletebegins.append(orignodebegin)
         elif curbackplacement == bpl_indeze:
             nodebegin = meta.annotatedposlist[-1]
             nodeend = nodebegin + 1

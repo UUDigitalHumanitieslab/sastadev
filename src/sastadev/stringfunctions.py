@@ -462,5 +462,6 @@ def getallrealwords(allresults):
         result[uttid] = Counter(words)
     return result
 
+
 if __name__ == '__main__':
     test()

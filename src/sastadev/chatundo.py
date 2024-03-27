@@ -1,11 +1,20 @@
 import re
-from cleanCHILDESMD import scopedtimes, scopedinlinecom, pauses1, pauses2, pauses3, leftbracket, rightbracket, \
-    times, atsignletters, inlinecom, scopedreformul, wreformul, errormark1, errormark2, dependenttier, postcodes, \
-    precodes, bch, trn, plusdotdotdot, ltreplre1, ltreplre2, gtreplre1, gtreplre2, doubleslash1, doubleslash2, \
-    exclam1, exclam2, slash1, slash2, qre1, qre2, eqexclam, eqtext1, eqtext2, colonre, filledpause, phonfrag0, \
-    phonfrag1, phonfrag2, zerostr, www, barezero, doubleexclam, endquote, plus2, plus3, plusquote, syllablepause, \
-    complexlocalevent, cliticlink, chat_ca_syms, timealign, segmentrep, blocking, internalpause, squarebracketseen, \
-    squarebracketstwee, interpunction, whitespace
+
+from chamd.cleanCHILDESMD import (atsignletters, barezero, bch, blocking,
+                                  chat_ca_syms, cliticlink, complexlocalevent,
+                                  dependenttier, doubleexclam, doubleslash1,
+                                  doubleslash2, endquote, eqexclam, eqtext1,
+                                  eqtext2, errormark1, errormark2, exclam1,
+                                  exclam2, gtreplre1, gtreplre2, inlinecom,
+                                  internalpause, interpunction, ltreplre1,
+                                  ltreplre2, pauses1, pauses2, pauses3,
+                                  phonfrag1, plus2, plus3, plusdotdotdot,
+                                  postcodes, precodes, qre1, qre2,
+                                  scopedinlinecom, scopedreformul, scopedtimes,
+                                  segmentrep, slash1, slash2,
+                                  squarebracketseen, squarebracketstwee,
+                                  syllablepause, times, trn, whitespace, www,
+                                  zerostr)
 
 space = ' '
 eps = ''
@@ -28,38 +37,39 @@ nve = re.compile(r'&{n=[\w:]+(.*?)&}n=[\w:]+')
 
 picbullet = re.compile(r'\u00b7%pic:\s*[\w\.]+\u00b7')
 txtbullet = re.compile(r'\u00b7%txt:\s*[\w\.]+\u00b7')
-bulletedtimealign = re.compile(r'\u00b7[0123456789_ ]+\u00b7') #  bullet code (Unicode middle dot)
-bulletedtimealign2 = re.compile(r'\u0015[0123456789_ ]+\u0015')  # NAK is sometimes used
+# bullet code (Unicode middle dot)
+bulletedtimealign = re.compile(r'\u00b7[0123456789_ ]+\u00b7')
+bulletedtimealign2 = re.compile(
+    r'\u0015[0123456789_ ]+\u0015')  # NAK is sometimes used
 
 pluscompoundmarker = re.compile(r'\+')
 
 blockingsequence = re.compile(r'\u2260.*?\u2260')
 interposedword = re.compile(r'&\*\w\w\w:[\w:]+')
 
+
 def chatundo(instr):
     result = instr
 
     result = interposedword.sub(eps, result)
 
-    #blockingsequence
+    # blockingsequence
     result = blockingsequence.sub(eps, result)
 
     # remove time alignment p. 67
     result = bulletedtimealign.sub(space, result)
     result = bulletedtimealign2.sub(space, result)
 
-
-    #picbullet
+    # picbullet
     result = picbullet.sub(eps, result)
 
-    #txtbullet
+    # txtbullet
     result = txtbullet.sub(eps, result)
 
-
-    #long vocal event
+    # long vocal event
     result = lve.sub(r'\1', result)
 
-    #long nonvocal event
+    # long nonvocal event
     result = nve.sub(r'\1', result)
 
     # remove scoped times <...> [x ...] keeping the ... between <> not officially defined
@@ -88,7 +98,7 @@ def chatundo(instr):
     #  remove scoped reformulation symbols [///] p 73
     result = scopedreformul.sub(r'\1', result)
 
-    #result = wreformul.sub(r'\1', result)   #checked this one not
+    # result = wreformul.sub(r'\1', result)   #checked this one not
 
     # remover errormark1 [*] and preceding <>
     result = errormark1.sub(r'\1 ', result)
@@ -143,7 +153,7 @@ def chatundo(instr):
     result = slash2.sub(r'\1', result)
 
     # remove [/] keep the word before or delete it depending on repkeep option
-    result = slash1.sub(eps, result)   ##  checked
+    result = slash1.sub(eps, result)  # checked
 
     #    result = re.sub(r'\[<\]', '', result)
 
@@ -165,15 +175,12 @@ def chatundo(instr):
     # replace word [: text] by word
     result = undocolonre.sub(r'\1 ', result)
 
-
     # remove phonological fragments p. 61 &= (simple events)
     result = phonfrag1.sub(eps, result)
-
 
     # remove  fileld pause and phonological fragment markers &- &+ &
     #    https://talkbank.org/manuals/Clin-CLAN.pdf states &+ for phonological fragments(p. 18)
     result = phonfragmarker.sub(eps, result)
-
 
     # remove www intentionally after phonological fragments
     result = www.sub(eps, result)
@@ -202,7 +209,6 @@ def chatundo(instr):
     # remove +.  +^ +< +, ++ +" (p. 64-66)
     result = plus2.sub(r' ', result)
 
-
     # remove silence marks (.) (..) (...) done above see pauses
     #    result = re.sub(r'\(\.(\.)?(\.)?\)', r' ', result)
 
@@ -218,7 +224,6 @@ def chatundo(instr):
     # replace chat-ca codes by space p. 86,87
     result = chat_ca_syms.sub(space, result)
 
-
     # remove segment repetitions p89 Unicode 21AB UTF8 e2 86 ab
     result = segmentrep.sub(eps, result)
 
@@ -228,11 +233,10 @@ def chatundo(instr):
     # remove  internal pausing ^  p. 89
     result = internalpause.sub(eps, result)
 
-    #remove primary stress, secondary stress, lengthening
+    # remove primary stress, secondary stress, lengthening
     result = prosody.sub(eps, result)
 
     result = plusvaria.sub(eps, result)
-
 
     # next is an ad-hoc extension for Lotti
     # replace [een], [twee] by space
@@ -246,7 +250,7 @@ def chatundo(instr):
     result = leftangle.sub(eps, result)
     result = rightangle.sub(eps, result)
 
-    #remove + compound marker
+    # remove + compound marker
     result = pluscompoundmarker.sub(eps, result)
 
     # surround interpunction with whitespace
@@ -258,13 +262,12 @@ def chatundo(instr):
     return (result)
 
 
-
-
 def cleanspaces(instr):
     instr2 = cleaninterpunction(instr)
     resultrow = instr2.split()
     result = space.join(resultrow)
     return result
+
 
 def cleaninterpunction(instr):
     result = instr

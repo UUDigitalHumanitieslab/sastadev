@@ -4,9 +4,9 @@ from typing import Dict, List, Optional, Tuple
 
 from sastadev.allresults import AllResults, ResultsKey, mkresultskey
 from sastadev.lexicon import getwordinfo, getwordposinfo
-from sastadev.sastatypes import Position, QId, SynTree, UttId
+from sastadev.sastatypes import Position, SynTree, UttId
 from sastadev.stringfunctions import getallrealwords, realwordstring
-from sastadev.treebankfunctions import getattval, getnodeyield, getuttid
+from sastadev.treebankfunctions import getattval, getnodeyield
 
 lpad = 3
 zero = '0'
@@ -136,53 +136,12 @@ def wordcountperutt(allresults):
     result = {uttid: ctr for uttid, ctr in result.items() if ctr != 0}
     return result
 
+
 def getignorewordcount(allresults, uttid):
     result = 0
     if samplesizereskey in allresults.coreresults:
         if uttid in allresults.coreresults[samplesizereskey]:
             result = allresults.coreresults[samplesizereskey][uttid]
-    return result
-
-def getastamaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
-    cutoffpoint = None
-    words = getallrealwords(allresults)
-    cumwordcount = 0
-    wordcounts: Dict[UttId, Tuple[int, int, int]] = {}
-    uttidlist = []
-    for uttid in allresults.allutts:
-        basewordcount = sum(words[uttid].values())
-        ignorewordcount = getignorewordcount(allresults, uttid)
-        wordcount = basewordcount - ignorewordcount
-        wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
-        uttidlist.append(uttid)
-        if cumwordcount + wordcount <= astamaxwordcount:
-            cumwordcount += wordcount
-        else:
-            diff = astamaxwordcount - cumwordcount
-            cumwordcount = astamaxwordcount
-            cutoffpoint = getcutoffpoint(allresults, uttid, diff)
-            break
-    result = (uttidlist, cumwordcount, cutoffpoint)
-    return result
-
-
-def getcutoffpoint(allresults: AllResults,  uttid: UttId, diff: int) -> int:
-    theutt = allresults.allutts[uttid]
-    final = diff
-    for i, w in enumerate(theutt):
-        if (uttid, i+1) in allresults.exactresults[samplesizereskey]:
-            final += 1
-        if i + 1 == final:
-            break
-    return final
-
-
-
-def getignorewordcount(allresults, uttid):
-    result = 0
-    if samplesizeqid in allresults.coreresults:
-        if uttid in allresults.coreresults[samplesizeqid]:
-            result = allresults.coreresults[samplesizeqid][uttid]
     return result
 
 
@@ -261,17 +220,17 @@ def countwordsandcutoff(allresults, _):
 
 
 def KMcount(allresults, _):
-    Kcount = sumctr(allresults.coreresults[kreskey]) if kreskey in allresults.coreresults else 0
-    Mcount = sumctr(allresults.coreresults[mreskey]) if mreskey in allresults.coreresults else 0
+    Kcount = sumctr(
+        allresults.coreresults[kreskey]) if kreskey in allresults.coreresults else 0
+    Mcount = sumctr(
+        allresults.coreresults[mreskey]) if mreskey in allresults.coreresults else 0
     result = Kcount + Mcount
     return result
 
 
-
-
-
 def getlemmas(allresults, _):
-    result = getcondlemmas(allresults, _, lambda reskey: reskey in [nounreskey, lexreskey])
+    result = getcondlemmas(allresults, _, lambda reskey: reskey in [
+                           nounreskey, lexreskey])
     return result
 
 
@@ -319,10 +278,6 @@ def getalllemmas(allresults):
                       realword(node)]
             result[uttid] = Counter(lemmas)
     return result
-
-
-
-
 
 
 def getposfromqid(qid):

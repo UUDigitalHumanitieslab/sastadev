@@ -65,18 +65,17 @@ testset = [('water_pok', 'waterpokken'),
            ]
 
 
-
-
 def iscompound(lemma: str) -> bool:
     result = cmpsep in lemma
     return result
 
+
 def apply(regex, sub, rawform, lemma, lemmatest=False, keeplastsep=False):
 
     if not lemmatest and not iscompound(lemma):
-            return lemma
+        return lemma
     else:
-        #form = rawform.lower() if all([c.isupper() for c in rawform]) else rawform
+        # form = rawform.lower() if all([c.isupper() for c in rawform]) else rawform
         form = rawform
         candlemma = regex.sub(sub, form)
         lemmaparts = lemma.split(cmpsep)
@@ -84,11 +83,12 @@ def apply(regex, sub, rawform, lemma, lemmatest=False, keeplastsep=False):
         if candlemma.endswith(lastpart):
             if keeplastsep:
                 llastpart = len(lastpart)
-                result = candlemma[: -llastpart] + cmpsep + candlemma[-llastpart:]
+                result = candlemma[: -llastpart] + \
+                    cmpsep + candlemma[-llastpart:]
                 return result
             else:
                 return candlemma
-        elif candlemma.endswith(lastpart.lower()):     #poepchinees v. poep_Chinees
+        elif candlemma.endswith(lastpart.lower()):  # poepchinees v. poep_Chinees
             sep = cmpsep if keeplastsep else ''
             return candlemma[:-len(lastpart)] + sep + lastpart.lower()
         else:
@@ -101,15 +101,15 @@ def apply(regex, sub, rawform, lemma, lemmatest=False, keeplastsep=False):
 
             return None
 
-#het gelid	de gelederen
-#het lid	de leden
-#het schip	de schepen
-#de smid	de smeden
-#de gelegenheid	de gelegenheden
-#de overheid	de overheden
-#de moeilijkheid	de moeilijkheden
-#de aanwezigheid	de aanwezigheden
-#scheepjes
+# het gelid	de gelederen
+# het lid	de leden
+# het schip	de schepen
+# de smid	de smeden
+# de gelegenheid	de gelegenheden
+# de overheid	de overheden
+# de moeilijkheid	de moeilijkheden
+# de aanwezigheid	de aanwezigheden
+# scheepjes
 
 # koe - koeien
 # vlo - vlooien
@@ -173,103 +173,107 @@ def apply(regex, sub, rawform, lemma, lemmatest=False, keeplastsep=False):
 # vogelman - vogellui, vogellieden, vogelmannen
 # zeeman - zeelui, zeelieden, zeemannen
 
+
 patterns = [
-             #listed exceptions
-             (r'kleertjes?$', 'kleed'),
-             (r'kleren$', 'kleed'),
-             (r'klederen$', 'kleed'),
-             (r'steden$', 'stad'),
-             (r'jongetjes?$', 'jongen'),
-             (r'excuses$', 'excuus'),
-             # e/i alternatiom
-             (fr'{bc}e{bc}en$', r'\1i\2'),  # schepen - schip, leden -lid
-             (fr'{bc}e{bc}eren$', r'\1i\2'),  # gelederen - gelid
-             (fr'ee{bc}jes?$', r'i\1'), # scheepje - schip;  scheepjes - schip
-             #dimunitives
-             (r'tjes?$', r''), # keutje, keutjes
-             (r'pjes?$', r''), # boompje, boompjes
-             (r'kjes?$', r'g'), # koninkje, koningkjes
-             (r'jes?$', r''), # kapje, kapjes
-             (r'etjes?$', r''), # tekeningetje, tekeningetjes
-             (r"'tjes?$",""), # auto'tje, auto'tjes
-             (fr'{bv}\1tjes?', r'\1'), #autootje(s) - auto
-             (fr'{bc}\1etjes?$', r'\1'), # bolletje, bolletjes
-             (fr'{bc}\1ekes?$', r'\1'), # bolleke, bollekes
-             (fr'{bv}\1([dt])jes?$', r'\1\2'), # vaatje -> vat, gaatje -> gat, paadje -> pad
-             (r'ientjes?$', 'ine'), # machientje(s) -> machine
-             (r'ietjes?$', 'y'), # babietje(s) -> baby
-             # plural
-             (fr'{bc}\1en?$', r'\1'),  # bakken (ter) wille
-             (r'en?$', '' ),  # leeuwen, banden, woorden, dienste
-             (r'en$', 'e'), # ribben - ribbe,
-             (fr'en$', 'os'), # epen - epos
-             (r'a$', r'um'),  # musea
-             (r'a$', 'on'), # lexica - lexicon
-             (r'zen?$', r's'), # vaarzen, muizen, huize
-             (r'ven?$', r'f'), # larven, duiven, halve
-             (fr'{bv}zen?$',   r'\1\1s'),  #vazen, loze, Genuezen
-             (fr'{bv}ven?$',   r'\1\1f'),  #raven,
-             (fr'{bc}ven?$', r'\1f'), # kalven, halve
-             (fr'{bc}zen?$', r'\1f'), # vaarzen,
-             (fr'{bc}veren$', r'\1f'), # kalveren
-             (fr'{bc}zeren$', r'\1f'), # ??
-             (fr'{bv}{bc}en?$', r'\1\1\2'), # manen, Antillianen, rare,
-             (r'den', ''),  # getijden, weiden
-             (r'iën$', 'ium'), # mitochondriën / mitochondrium
-             (r's$', ''),   # appels, oudooms  plural and genitive
-             (r"s'$", "s"), # genitive plural generaals', Hans'
-             (r"z'$", 'z'), # Chavez'
-             (r"sh'$", "sh"), # Bush'
-             (r"ce'$", 'ce'),  # Prince'
-             (r"'s$", ""),  # azalea's
-             (fr'{bdf}ien$', r'\1'),   # koeien
-             (fr'{bv}\1ien$', r'\1'), # vlooien
-             (r'iën$', 'ie'), # provinciën
-             (r'ën$', ''),   # zeeën genieën
-             (fr'{bc}{bv}{bc}iën$', r'\1\2\2\3'), # kleinodiën, sieradiën
-             (r'i$', 'us'), # politici
-             (r'era$', 'us'), # genera
-             (r'lui$', 'man'), # timmerman
-             (r'lieden$', 'man'), # timmerman
-             (r'mensen$', 'man'), #brandweermensen
-             (r'en$', 'man'),  # Engelsen/Engelsman, Fransen, Fransman
-             (r'ices$', 'ex'), # indices
-             (r'ices$', 'ix'), # matrices
-             (r'heden$', 'heid'),  # gelegenheden
-             (r'eren$', ''),   # kinderen
-             (r'es$', 'is'),  # bases  -> basis
-             (r'ies$', 'y'), # babies -> baby
-             (fr'{bc}\1eren$', r'\1'),  # lammeren
-             (r'deren$', ''),  # hoenderen
-             (r'nen$', ''), # lendenen
-             (r'iën', 'ius'), # geniën - genius
-             ('ia$', 'e'), # singularia
-             ('ora$', 'us'), # tempora
-             ('ae$', 'a'), # collegae
-             ('es$', ''), # praetores
-             (r'ides$', 'es'), # presides
-             (r'i$', 'o'),  # saldi
-             (r'sters?$', 'er'), # werkster(s) -> werker
-             (fr'{bv}\1{bc}sters?$', r'\1\2er'), # maakster(s) -> maker
-             (r'stertjes?$', 'er'),  # werkstertje(s) -> werker
-             (fr'{bv}\1{bc}stertjes?$', r'\1\2er')  # maakstertje(s) -> maker
+    # listed exceptions
+    (r'kleertjes?$', 'kleed'),
+    (r'kleren$', 'kleed'),
+    (r'klederen$', 'kleed'),
+    (r'steden$', 'stad'),
+    (r'jongetjes?$', 'jongen'),
+    (r'excuses$', 'excuus'),
+    # e/i alternatiom
+    (fr'{bc}e{bc}en$', r'\1i\2'),  # schepen - schip, leden -lid
+    (fr'{bc}e{bc}eren$', r'\1i\2'),  # gelederen - gelid
+    (fr'ee{bc}jes?$', r'i\1'),  # scheepje - schip;  scheepjes - schip
+    # dimunitives
+    (r'tjes?$', r''),  # keutje, keutjes
+    (r'pjes?$', r''),  # boompje, boompjes
+    (r'kjes?$', r'g'),  # koninkje, koningkjes
+    (r'jes?$', r''),  # kapje, kapjes
+    (r'etjes?$', r''),  # tekeningetje, tekeningetjes
+    (r"'tjes?$", ""),  # auto'tje, auto'tjes
+    (fr'{bv}\1tjes?', r'\1'),  # autootje(s) - auto
+    (fr'{bc}\1etjes?$', r'\1'),  # bolletje, bolletjes
+    (fr'{bc}\1ekes?$', r'\1'),  # bolleke, bollekes
+    # vaatje -> vat, gaatje -> gat, paadje -> pad
+    (fr'{bv}\1([dt])jes?$', r'\1\2'),
+    (r'ientjes?$', 'ine'),  # machientje(s) -> machine
+    (r'ietjes?$', 'y'),  # babietje(s) -> baby
+    # plural
+    (fr'{bc}\1en?$', r'\1'),  # bakken (ter) wille
+    (r'en?$', ''),  # leeuwen, banden, woorden, dienste
+    (r'en$', 'e'),  # ribben - ribbe,
+    (r'en$', 'os'),  # epen - epos
+    (r'a$', r'um'),  # musea
+    (r'a$', 'on'),  # lexica - lexicon
+    (r'zen?$', r's'),  # vaarzen, muizen, huize
+    (r'ven?$', r'f'),  # larven, duiven, halve
+    (fr'{bv}zen?$', r'\1\1s'),  # vazen, loze, Genuezen
+    (fr'{bv}ven?$', r'\1\1f'),  # raven,
+    (fr'{bc}ven?$', r'\1f'),  # kalven, halve
+    (fr'{bc}zen?$', r'\1f'),  # vaarzen,
+    (fr'{bc}veren$', r'\1f'),  # kalveren
+    (fr'{bc}zeren$', r'\1f'),  # ??
+    (fr'{bv}{bc}en?$', r'\1\1\2'),  # manen, Antillianen, rare,
+    (r'den', ''),  # getijden, weiden
+    (r'iën$', 'ium'),  # mitochondriën / mitochondrium
+    (r's$', ''),   # appels, oudooms  plural and genitive
+    (r"s'$", "s"),  # genitive plural generaals', Hans'
+    (r"z'$", 'z'),  # Chavez'
+    (r"sh'$", "sh"),  # Bush'
+    (r"ce'$", 'ce'),  # Prince'
+    (r"'s$", ""),  # azalea's
+    (fr'{bdf}ien$', r'\1'),   # koeien
+    (fr'{bv}\1ien$', r'\1'),  # vlooien
+    (r'iën$', 'ie'),  # provinciën
+    (r'ën$', ''),   # zeeën genieën
+    (fr'{bc}{bv}{bc}iën$', r'\1\2\2\3'),  # kleinodiën, sieradiën
+    (r'i$', 'us'),  # politici
+    (r'era$', 'us'),  # genera
+    (r'lui$', 'man'),  # timmerman
+    (r'lieden$', 'man'),  # timmerman
+    (r'mensen$', 'man'),  # brandweermensen
+    (r'en$', 'man'),  # Engelsen/Engelsman, Fransen, Fransman
+    (r'ices$', 'ex'),  # indices
+    (r'ices$', 'ix'),  # matrices
+    (r'heden$', 'heid'),  # gelegenheden
+    (r'eren$', ''),   # kinderen
+    (r'es$', 'is'),  # bases  -> basis
+    (r'ies$', 'y'),  # babies -> baby
+    (fr'{bc}\1eren$', r'\1'),  # lammeren
+    (r'deren$', ''),  # hoenderen
+    (r'nen$', ''),  # lendenen
+    (r'iën', 'ius'),  # geniën - genius
+    ('ia$', 'e'),  # singularia
+    ('ora$', 'us'),  # tempora
+    ('ae$', 'a'),  # collegae
+    ('es$', ''),  # praetores
+    (r'ides$', 'es'),  # presides
+    (r'i$', 'o'),  # saldi
+    (r'sters?$', 'er'),  # werkster(s) -> werker
+    (fr'{bv}\1{bc}sters?$', r'\1\2er'),  # maakster(s) -> maker
+    (r'stertjes?$', 'er'),  # werkstertje(s) -> werker
+    (fr'{bv}\1{bc}stertjes?$', r'\1\2er')  # maakstertje(s) -> maker
 
 ]
 
 spellingcorrections = [
-                        (fr'{bv}\1\1+{bc}({notv}|$)', r'\1\1\2\3'),   # heeeeel -> heel
-                        (fr'{bv}\1\1+{bc}{bv}', r'\1\2\3'),    # heeeele -> hele
+    (fr'{bv}\1\1+{bc}({notv}|$)', r'\1\1\2\3'),   # heeeeel -> heel
+    # heeeele -> hele
+    (fr'{bv}\1\1+{bc}{bv}', r'\1\2\3'),
 
-                      ]
+]
 
 subs = [(re.compile(pat), sub) for pat, sub in patterns]
 spellsubs = [(re.compile(pat), sub) for pat, sub in spellingcorrections]
 
-lemma_alternatives = [ ('c', 'k'),    # productie -> produktie
-                       ('k', 'c'),  # helikopter -< helicopter
-                       ('eau', 'o'),  # bureau -> buro]
-                       ('pannenkoek', 'pannekoek')]
+lemma_alternatives = [('c', 'k'),    # productie -> produktie
+                      ('k', 'c'),  # helikopter -< helicopter
+                      ('eau', 'o'),  # bureau -> buro]
+                      ('pannenkoek', 'pannekoek')]
 lemmasubs = [(re.compile(pat), sub) for pat, sub in lemma_alternatives]
+
 
 def istitlecase(wrd: str) -> bool:
     if wrd == '':
@@ -279,11 +283,14 @@ def istitlecase(wrd: str) -> bool:
     else:
         return False
 
+
 def spellcorr(word: str) -> List[str]:
-    return spellcorr2(word,  spellsubs)
+    return spellcorr2(word, spellsubs)
+
 
 def lemma_alt(lemma: str) -> List[str]:
     return spellcorr2(lemma, lemmasubs)
+
 
 def spellcorr2(word: str, spellsubs: list) -> List[str]:
     results = []
@@ -297,17 +304,19 @@ def spellcorr2(word: str, spellsubs: list) -> List[str]:
         finalresults = spellcorr(wrd)
     return finalresults + results
 
-def longestcommonprefix(word1: str, word2:str) -> str:
-        result = ''
-        max = min(len(word1), len(word2))
-        for c1,c2 in zip(word1[:max], word2[:max]):
-            if c1 == c2:
-                result += c1
-            else:
-                return result
-        return result
 
-def adaptcase(rawword: str, lemma:str) -> str:
+def longestcommonprefix(word1: str, word2: str) -> str:
+    result = ''
+    max = min(len(word1), len(word2))
+    for c1, c2 in zip(word1[:max], word2[:max]):
+        if c1 == c2:
+            result += c1
+        else:
+            return result
+    return result
+
+
+def adaptcase(rawword: str, lemma: str) -> str:
     result = ''
     lcrawword = rawword.lower()
     lclemma = lemma.lower()
@@ -324,6 +333,7 @@ def adaptcase(rawword: str, lemma:str) -> str:
         result += newwc
     result += rawword[prefixlen:].lower()
     return result
+
 
 def adapt_diacritics(rawword: str, lemma: str) -> str:
     result = ''
@@ -348,43 +358,45 @@ def undiacritic(wrd: str) -> str:
     return result
 
 
-
-
-def normaliselemma(rawword: str, lemma:str, lemmatest=False, keeplastsep=False) -> str:
+def normaliselemma(rawword: str, lemma: str, lemmatest=False, keeplastsep=False) -> str:
     rawwordparts = rawword.split(hyphen)
     lemmaparts = lemma.split(hyphen)
     if len(lemmaparts) != len(rawwordparts):
-        #print(f'Hyphen mismatch: {rawword} v. {lemma}')
-        result = normaliselemma_simple(rawword, lemma, lemmatest=lemmatest, keeplastsep=keeplastsep)
+        # print(f'Hyphen mismatch: {rawword} v. {lemma}')
+        result = normaliselemma_simple(
+            rawword, lemma, lemmatest=lemmatest, keeplastsep=keeplastsep)
     else:
         results = []
         for lm, wrd in zip(lemmaparts, rawwordparts):
-            newresultpart = normaliselemma_simple(wrd, lm, lemmatest=lemmatest, keeplastsep=keeplastsep)
+            newresultpart = normaliselemma_simple(
+                wrd, lm, lemmatest=lemmatest, keeplastsep=keeplastsep)
             if newresultpart is not None:
                 results.append(newresultpart)
             else:
-                #print(f'No lemma found for {wrd}')
+                # print(f'No lemma found for {wrd}')
                 results.append('<None>')
         result = hyphen.join(results)
     return result
 
 
-def normaliselemma_simple(rawword: str, lemma:str, lemmatest=False, keeplastsep=False) -> str:
+def normaliselemma_simple(rawword: str, lemma: str, lemmatest=False, keeplastsep=False) -> str:
     result = None
 
     word = adaptcase(rawword, lemma)
-    word = adapt_diacritics(word,lemma)
+    word = adapt_diacritics(word, lemma)
 
     for regex, sub in subs:
         if result is None:
-            result = apply(regex, sub, word, lemma, lemmatest=lemmatest, keeplastsep=keeplastsep)
+            result = apply(regex, sub, word, lemma,
+                           lemmatest=lemmatest, keeplastsep=keeplastsep)
 
     if result is None:
         altwords = spellcorr(word)
         for regex, sub in subs:
             for altword in altwords:
                 if result is None:
-                    result = apply(regex, sub, altword, lemma, lemmatest=lemmatest)
+                    result = apply(regex, sub, altword,
+                                   lemma, lemmatest=lemmatest)
 
     return result
 
@@ -399,21 +411,20 @@ def treatitem(lemma, word, file=None, store=False):
         print(cleanword, cleanlemma, newlemma, file=file)
 
 
-
 if __name__ == '__main__':
 
-    localtest =   True
+    localtest = True
     test1 = False
     test2 = False
     test3 = False
-    test4 = False # True
-    reftest =    False # True
-    lemmatest = False # True
+    test4 = False  # True
+    reftest = False  # True
+    lemmatest = False  # True
 
     if localtest:
-        alemma = 'staat_bos_beheer' # 'bewind_man' # 'kleuter_bureau'
-        word =  'staatsbossenbeheer' # 'bewindslieden' # 'kleuterburo'
-        reflemma = 'staatsbossenbeheer' # 'kleuterbureau'
+        alemma = 'staat_bos_beheer'  # 'bewind_man' # 'kleuter_bureau'
+        word = 'staatsbossenbeheer'  # 'bewindslieden' # 'kleuterburo'
+        reflemma = 'staatsbossenbeheer'  # 'kleuterbureau'
         newlemma = normaliselemma(word, alemma, keeplastsep=True)
         print(newlemma)
 
@@ -433,11 +444,12 @@ if __name__ == '__main__':
             newlemma = normaliselemma(word, alemma)
             if newlemma != reflemma:
                 mismatchctr += 1
-                print (f'Mismatch: {newlemma} =/= {reflemma} for {alemma}/{word}')
-            if newlemma is not None :
+                print(
+                    f'Mismatch: {newlemma} =/= {reflemma} for {alemma}/{word}')
+            if newlemma is not None:
                 newrec = [word, alemma, newlemma]
             else:
-                newrec = [word,alemma, reflemma]
+                newrec = [word, alemma, reflemma]
             newrecs.append(newrec)
         print(f'{mismatchctr} mismatches found')
         with open(outgoldfilename, 'w', encoding='utf8') as outgoldfile:
@@ -478,24 +490,25 @@ if __name__ == '__main__':
             mismatchctr = 0
             if newlemma != alemma:
                 mismatchctr += 1
-                print (f'Mismatch: {newlemma} =/= {alemma} for {word}')
+                print(f'Mismatch: {newlemma} =/= {alemma} for {word}')
         print(f'{mismatchctr} mismatches found')
 
     if test4:
-        spelltestlist = ['buro',  'produktie', 'kado', 'appelstrooop']
+        spelltestlist = ['buro', 'produktie', 'kado', 'appelstrooop']
         spelltestlist = ['strooop', 'heeeeele', 'deeeelde', 'strooompje']
         for wrd in spelltestlist:
             corrections = spellcorr(wrd)
             print(corrections)
-        lemmalist = [ 'bureau', 'productie', 'pannenkoek']
+        lemmalist = ['bureau', 'productie', 'pannenkoek']
         for lemma in lemmalist:
             alternatives = lemma_alt(lemma)
             print(alternatives)
 
     if lemmatest:
-        #newlemma = normaliselemma('A-elementen', 'A-element', lemmatest=True)
-        #newlemma = normaliselemma('Antillianen', 'Antilliaan', lemmatest=True)
-        newlemma = normaliselemma('Parlementslid', 'parlementslid', lemmatest=True)
+        # newlemma = normaliselemma('A-elementen', 'A-element', lemmatest=True)
+        # newlemma = normaliselemma('Antillianen', 'Antilliaan', lemmatest=True)
+        newlemma = normaliselemma(
+            'Parlementslid', 'parlementslid', lemmatest=True)
         print(newlemma)
         lassytyposfn = './lemmatests/lassytypos.xlsx'
         lassytypoheader, lassytypos = xlsx.getxlsxdata(lassytyposfn)

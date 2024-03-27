@@ -141,8 +141,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from optparse import OptionParser
-from typing import (Any, Callable, DefaultDict, Dict, List, Optional, Pattern,
-                    Tuple)
+from typing import Any, Callable, Dict, List, Pattern, Tuple
 
 import xlsxwriter
 from lxml import etree
@@ -151,7 +150,6 @@ from sastadev import compounds
 from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
                                  ResultsKey, mkresultskey, scores2counts,
                                  showreskey)
-from sastadev.asta_queries import astalemmafunction
 from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from sastadev.conf import settings
 from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
@@ -163,9 +161,8 @@ from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros
-from sastadev.methods import (Method, SampleSize, astamethods, defaultfilters,
-                              stapmethods, supported_methods, tarspmethods,
-                              treatmethod)
+from sastadev.methods import (Method, astamethods, stapmethods,
+                              supported_methods, tarspmethods, treatmethod)
 from sastadev.mismatches import (exactmismatches, getmarkposition,
                                  literalmissedmatches)
 from sastadev.mksilver import getsilverannotations, permprefix
@@ -179,10 +176,9 @@ from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
 from sastadev.sasta_explanation import finalexplanation_adapttreebank
-from sastadev.sastatypes import (AltCodeDict, FileName, GoldTuple, MethodName,
-                                 Position, QId, QIdCount, QueryDict,
-                                 ResultsCounter, SampleSizeTuple, SynTree,
-                                 UttId)
+from sastadev.sastatypes import (AltCodeDict, GoldTuple, MethodName, Position,
+                                 QId, QIdCount, QueryDict, ResultsCounter,
+                                 SampleSizeTuple, SynTree, UttId)
 from sastadev.SRFreader import read_referencefile
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets
@@ -281,7 +277,8 @@ def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[Re
             if query_exists(queries[qid]):
                 diff1 = goldscores[reskey] - platinumscores[reskey]
                 if diff1 != Counter():
-                    settings.LOGGER.warning('{} has goldscores not in platinum: {}'.format(str(reskey), diff1))
+                    settings.LOGGER.warning(
+                        '{} has goldscores not in platinum: {}'.format(str(reskey), diff1))
 
 
 def mkerrorreport(errordict, errorreportfilename: str):
@@ -408,7 +405,7 @@ def logprint(str: str):
         print(str, file=sys.stderr)
 
 
-##@@ types to be reconsidered
+# @@ types to be reconsidered
 
 
 def getitem2levelmap(mapping):
@@ -458,7 +455,7 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
     # print(uttid)
     # core queries
     junk = 0
-    for queryid in queries:  ## @@ dit aanpassen voor literals en voor Resultskey; check read_referencefile
+    for queryid in queries:  # @@ dit aanpassen voor literals en voor Resultskey; check read_referencefile
         # if queryid not in exactresults: # not needed becaysetaken care of below
         #     exactresults[queryid] = []
         thequeryobj = queries[queryid]
@@ -588,32 +585,6 @@ def getmethodfromfile(filename: str) -> str:
         return result
 
 
-def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
-    if methodname is None and methodfilename is None:
-        settings.LOGGER.error('Specify a method using -m ')
-        exit(-1)
-    elif methodname is None and methodfilename is not None:
-        resultmethodfilename = methodfilename
-        resultmethodname = getmethodfromfile(methodfilename)
-        settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
-    elif methodname is not None and methodfilename is None:
-        if methodname.lower() in supported_methods:
-            resultmethodname = methodname.lower()
-            resultmethodfilename = supported_methods[methodname]
-        else:
-            resultmethodfilename = methodname
-            resultmethodname = getmethodfromfile(methodname)
-            settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
-    elif methodname is not None and methodfilename is not None:
-        if methodname.lower() in supported_methods:
-            resultmethodname = methodname.lower()
-            resultmethodfilename = methodfilename
-        else:
-            settings.LOGGER.error('Unsupported method specified {}'.format(methodname))
-            exit(-1)
-    return resultmethodname, resultmethodfilename
-
-
 def getsortedgolduttscore(reskey: ResultsKey, goldscores) -> str:
     if reskey in goldscores:
         # (goldlevel, golditem, goldcounter) = goldscores[queryid]
@@ -666,18 +637,26 @@ def getfullscoreandplatinumstr(reskey, themethod, theresults, resultstr, goldsco
         if platinuminfilefound and reskey in platinumresults:
             theplatinumresults = platinumresults[reskey]
             sortedplatinumliststr = counter2liststr(theplatinumresults)
-            liststarplatinumstr = counter2liststr(theresults & theplatinumresults)
-            platinumminusliststr = counter2liststr(theplatinumresults - theresults)
-            listminusplatinumliststr = counter2liststr(theresults - theplatinumresults)
-            (platinumrecall, platinumprecision, platinumf1score) = getscores(theresults, theplatinumresults)
+            liststarplatinumstr = counter2liststr(
+                theresults & theplatinumresults)
+            platinumminusliststr = counter2liststr(
+                theplatinumresults - theresults)
+            listminusplatinumliststr = counter2liststr(
+                theresults - theplatinumresults)
+            (platinumrecall, platinumprecision, platinumf1score) = getscores(
+                theresults, theplatinumresults)
 
-            goldstarplatinumstr = counter2liststr(goldcounter & theplatinumresults)
-            platinumminusgoldstr = counter2liststr(theplatinumresults - goldcounter)
-            goldminusplatinumstr = counter2liststr(goldcounter - theplatinumresults)
-            (gprecall, gpprecision, gpf1score) = getscores(goldcounter, theplatinumresults)
+            goldstarplatinumstr = counter2liststr(
+                goldcounter & theplatinumresults)
+            platinumminusgoldstr = counter2liststr(
+                theplatinumresults - goldcounter)
+            goldminusplatinumstr = counter2liststr(
+                goldcounter - theplatinumresults)
+            (gprecall, gpprecision, gpf1score) = getscores(
+                goldcounter, theplatinumresults)
         else:
             sortedplatinumliststr, liststarplatinumliststr, platinumminusliststr, \
-            listminusplatinumliststr = '', '', '', ''
+                listminusplatinumliststr = '', '', '', ''
             (platinumrecall, platinumprecision, platinumf1score) = (na, na, na)
 
             goldstarplatinumstr, platinumminusgoldstr, goldminusplatinumstr = '', '', ''
@@ -700,14 +679,17 @@ def getfullscoreandplatinumstr(reskey, themethod, theresults, resultstr, goldsco
 
     queryinforow = [reskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                     themethod.queries[queryid].item]
-    queryresultsrow = [str(sumfreq(theresults)), resultstr, str(goldcount), sortedgolduttstr, qex]
-    queryRGscorerow = [sf(recall), sf(precision), sf(f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
+    queryresultsrow = [str(sumfreq(theresults)), resultstr,
+                       str(goldcount), sortedgolduttstr, qex]
+    queryRGscorerow = [sf(recall), sf(precision), sf(
+        f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
     queryRPscorerow = [sortedplatinumliststr, sf(platinumrecall), sf(platinumprecision), sf(platinumf1score),
                        platinumminusliststr, listminusplatinumliststr]
     queryGPscorerow = [sf(gprecall), sf(gpprecision), sf(gpf1score), goldstarplatinumstr, platinumminusgoldstr,
                        goldminusplatinumstr]
 
-    fullresultrow = queryinforow + queryresultsrow + queryRGscorerow + queryRPscorerow + queryGPscorerow
+    fullresultrow = queryinforow + queryresultsrow + \
+        queryRGscorerow + queryRPscorerow + queryGPscorerow
 
     platinumrow = [reskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                    themethod.queries[queryid].item, platinumoutresultsstring, listminusgoldstr, '', '']
@@ -775,7 +757,8 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
         queryid = reskey[0]
         query = queries[queryid]
         queryfilter = query.filter
-        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[queryfilter]
+        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[
+            queryfilter]
         exactresults[reskey] = [r for r in rawexactresults[reskey] if reskey in rawexactresults and
                                 thefilter(query, rawexactresults, r)]
     return exactresults
@@ -1072,7 +1055,8 @@ def main():
 
         # for tree in treebank1:
         #     showtree(tree, 'na fexplanations')
-        treebank, errordict, allorandalts = correcttreebank(treebank1, targets, options.methodname, options.corr)
+        treebank, errordict, allorandalts = correcttreebank(
+            treebank1, targets, options.methodname, options.corr)
 
         # for tree in treebank:
         #    showtree(tree, 'na correcties')
@@ -1117,8 +1101,10 @@ def main():
                 uttid = getxselseuttid(syntree)
                 analysedtrees.append((uttid, syntree))
 
-                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
-                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                doprequeries(syntree, themethod.queries,
+                             rawexactresults, allmatches)
+                docorequeries(syntree, themethod.queries,
+                              rawexactresults, allmatches)
 
                 # showtree(syntree)
                 if uttid in nodeendmap:
@@ -1148,10 +1134,12 @@ def main():
     platinuminfilefound = False
     if os.path.exists(options.platinuminfilename):
         platinuminfilefound = True
-        platinumresults: Dict[ResultsKey, Counter] = read_referencefile(options.platinuminfilename, logfile)
+        platinumresults: Dict[ResultsKey, Counter] = read_referencefile(
+            options.platinuminfilename, logfile)
         checkplatinum(goldscores, platinumresults, themethod.queries)
     else:
-        settings.LOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
+        settings.LOGGER.info('Platinum file {} not found.'.format(
+            options.platinuminfilename))
         platinumresults = {}
 
     # platinumoutfilename = base + platinumsuffix + txtext
@@ -1167,19 +1155,24 @@ def main():
     samplesizefunction = getsamplesizefunction(options.methodname)
     samplesizetuple: SampleSizeTuple = samplesizefunction(allresults)
 
-    postquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
-    formquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
+    postquerylist: List[QId] = [
+        q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
+    formquerylist: List[QId] = [
+        q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
 
     # we assume the reduction must be done before the postqueries
-    allresults = reduceallresults(allresults, samplesizetuple, options.methodname)
+    allresults = reduceallresults(
+        allresults, samplesizetuple, options.methodname)
 
     # bronze reduction
-    exactgoldscores = reduceexactgoldscores(exactgoldscores, samplesizetuple, options.methodname)  # ongoing
+    exactgoldscores = reduceexactgoldscores(
+        exactgoldscores, samplesizetuple, options.methodname)  # ongoing
     goldscores = exact2results(exactgoldscores)  # ongoing
     goldcounts = scores2counts(goldscores)
 
     # silver / platinumreduction
-    platinumresults: Dict[ResultsKey, Counter] = reduceresults(platinumresults, samplesizetuple, options.methodname)
+    platinumresults: Dict[ResultsKey, Counter] = reduceresults(
+        platinumresults, samplesizetuple, options.methodname)
 
     dopostqueries(allresults, postquerylist, themethod.queries)
 
@@ -1198,11 +1191,13 @@ def main():
     outrowctr = outstartrow
     outworksheet.freeze_panes('E2')
 
-    countcomparisonfilename = os.path.join(resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
+    countcomparisonfilename = os.path.join(
+        resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
     # print the invalid queries
     for q in invalidqueries:
-        settings.LOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], themethod.queries[q].query))
+        settings.LOGGER.error("{}: {}: <{}>".format(
+            q, invalidqueries[q], themethod.queries[q].query))
 
     # print the header
     print(resultsheaderstring, file=outfile)
@@ -1269,7 +1264,8 @@ def main():
                             platinumcheckrow1 = [reskey, themethod.queries[queryid].cat,
                                                  themethod.queries[queryid].subcat,
                                                  themethod.queries[queryid].item, uttid, markedutt]
-                            print(tab.join(platinumcheckrow1), file=platinumcheckfile)
+                            print(tab.join(platinumcheckrow1),
+                                  file=platinumcheckfile)
 
                 if goldminustheresults != {}:
                     print('Missed examples', file=platinumcheckfile)
@@ -1277,7 +1273,8 @@ def main():
                     if uttid in allutts:
                         uttstr = space.join(allutts[uttid])
                     else:
-                        settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
+                        settings.LOGGER.warning(
+                            'uttid {} not in allutts'.format(uttid))
                     platinumcheckrow2 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                                          themethod.queries[queryid].item, uttid, uttstr]
                     print(tab.join(platinumcheckrow2), file=platinumcheckfile)
@@ -1290,7 +1287,8 @@ def main():
                                              platinumcheckfile, silverannotationsdict, annotationinput)
     allrows += literalmissedrows
 
-    wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
+    wb = mkworkbook(platinumcheckxlfullname, pcheaders,
+                    allrows, freeze_panes=(1, 9))
     wb.close()
 
     # compute the gold postresults
@@ -1323,7 +1321,8 @@ def main():
         queryreskeystr = showreskey(queryreskey)
         queryinforow = [queryreskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                         themethod.queries[queryid].item]
-        queryresultsrow = ['', resultposval, '', goldpostval, qex] + erow(6) + [platinumpostval] + erow(11)
+        queryresultsrow = ['', resultposval, '', goldpostval,
+                           qex] + erow(6) + [platinumpostval] + erow(11)
 
         postrow = queryinforow + queryresultsrow
         postrowstring = tab.join(queryinforow + queryresultsrow)
@@ -1380,7 +1379,8 @@ def main():
                 if thequery.original and queryfunction(thequery):
                     platinumcount += sum(platinumresults[reskey].values())
             else:
-                settings.LOGGER.warning(f'Query {reskey} found in platinumresults but {queryid} not in queries')
+                settings.LOGGER.warning(
+                    f'Query {reskey} found in platinumresults but {queryid} not in queries')
 
         # resultsgoldintersectiocount
         resultsgoldintersectioncount = 0
@@ -1404,7 +1404,8 @@ def main():
             if thequery.original and queryfunction(thequery):
                 if reskey in platinumresults:
                     intersection = results[reskey] & platinumresults[reskey]
-                    resultsplatinumintersectioncount += sum(intersection.values())
+                    resultsplatinumintersectioncount += sum(
+                        intersection.values())
                 else:
                     pass
                     # settings.LOGGER.warning('queryid {} not in platinumresults'.format(queryid))
@@ -1419,12 +1420,14 @@ def main():
                     if reskey in goldscores:
                         goldcounter = goldscores[reskey]
                         intersection = goldcounter & platinumresults[reskey]
-                        goldplatinumintersectioncount += sum(intersection.values())
+                        goldplatinumintersectioncount += sum(
+                            intersection.values())
                     else:
                         pass
                         # settings.LOGGER.warning('Query {} in platinumresults but not in goldscores'.format(queryid))
             else:
-                settings.LOGGER.warning(f'Query {reskey} in platinumresults but {queryid} not in queries')
+                settings.LOGGER.warning(
+                    f'Query {reskey} in platinumresults but {queryid} not in queries')
 
         (recall, precision, f1score) = getevalscores(
             resultscount, goldcount, resultsgoldintersectioncount)
@@ -1457,7 +1460,8 @@ def main():
 
     resultscounts = scores2counts(results)
 
-    countcomparison = get_comparison(resultscounts, goldcounts, themethod.queries)
+    countcomparison = get_comparison(
+        resultscounts, goldcounts, themethod.queries)
     if countcomparison != []:
         countcomparisonfile = open(
             countcomparisonfilename, 'w', encoding='utf8')
@@ -1470,8 +1474,10 @@ def main():
 
     definedqcount = qcount - undefinedqcount
 
-    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, themethod.queries)
-    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, themethod.queries)
+    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(
+        goldscores, themethod.queries)
+    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(
+        goldcounts, themethod.queries)
 
     lgoldscores = len(goldscores)
 

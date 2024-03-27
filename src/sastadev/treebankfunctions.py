@@ -7,11 +7,11 @@ import re
 # import logging
 from copy import copy, deepcopy
 # import sys
-from typing import Any, AnyStr, Callable, Dict, List, Match, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from lxml import etree
 
-from sastadev.anonymization import pseudonymre, sasta_pseudonyms
+from sastadev.anonymization import pseudonymre
 # from sastadev.lexicon import informlexiconpos, isa_namepart_uc, informlexicon, isa_namepart
 # import lexicon as lex
 from sastadev.conf import settings
@@ -22,7 +22,7 @@ from sastadev.sastatypes import (FileName, OptPhiTriple, PhiTriple, Position,
                                  UttId)
 from sastadev.stringfunctions import allconsonants
 
-#from sastadev.tblex import recognised_wordnode, recognised_lemmanode, recognised_wordnodepos, recognised_lemmanodepos
+# from sastadev.tblex import recognised_wordnode, recognised_lemmanode, recognised_wordnodepos, recognised_lemmanodepos
 
 
 class Metadata:
@@ -88,8 +88,8 @@ complrels = ['su', 'obj1', 'pobj1', 'obj2',
 mainclausecats = ['smain', 'whq', 'sv1']
 
 ptsubclasspairs = [('n', 'ntype'), ('tw', 'numtype'), ('vnw', 'vwtype'), ('lw', 'lwtype'), ('vz', 'vztype'),
-                   ('vg' , 'conjtype'), ('spec', 'spectype')]
-ptsubclassdict = {pt:subclass for (pt, subclass) in ptsubclasspairs}
+                   ('vg', 'conjtype'), ('spec', 'spectype')]
+ptsubclassdict = {pt: subclass for (pt, subclass) in ptsubclasspairs}
 
 pluralcrds = [('en',)]
 
@@ -123,6 +123,8 @@ countcompoundxpath = 'count(.//node[contains(@lemma, "_")])'
 
 monthnames = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus',
               'september', 'oktober', 'november', 'december']
+
+
 def adjacent(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     '''
     :param node1:
@@ -922,6 +924,7 @@ def isspecdeeleigen(node: SynTree) -> bool:
     result = pt == 'spec' and spectype == 'deeleigeb'
     return result
 
+
 def ismonthname(node: SynTree) -> bool:
     lemma = getattval(node, 'lemma')
     result = lemma in monthnames
@@ -1041,17 +1044,6 @@ def short_nucl_n(node: SynTree) -> bool:
     word = getattval(node, 'word')
     result = pt == 'n' and rel == 'nucl' and sasta_short(word)
     return result
-
-
-#: The constant *sasta_pseudonyms* list the strings that replace names for
-#: pseudonymisation purposes.
-sasta_pseudonyms = ['NAAM', 'VOORNAAM', 'ACHTERNAAM', 'ZIEKENHUIS', 'STRAAT', 'PLAATS', 'PLAATSNAAM', 'KIND', 'BEROEP',
-                    'OPLEIDING']
-#: The constant *pseudonym_patternlist* contains regular expressions for pseudonyms
-#: based on elements from the *sasta_pseudonyms* (pseudonym + number).
-pseudonym_patternlist = [r'^{}\d?$'.format(el) for el in sasta_pseudonyms]
-pseudonym_pattern = vertbar.join(pseudonym_patternlist)
-pseudonymre = re.compile(pseudonym_pattern)
 
 
 def sasta_pseudonym(node: SynTree) -> bool:
@@ -2068,6 +2060,7 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
     return resulttree
 
+
 def getptsubclass(pt):
     if pt in ptsubclassdict:
         return ptsubclassdict[pt]
@@ -2081,6 +2074,8 @@ def subclasscompatible(sc1, sc2):
              (sc1 in ['pr', 'pers'] and sc2 in ['pr', 'pers']) or \
              (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm'])
     return result
+
+
 def fatparse(utterance: str, tokenlist: List[Token]) -> SynTree:
     stree = settings.PARSE_FUNC(utterance)
     fatstree = deepcopy(stree)

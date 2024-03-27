@@ -10,7 +10,7 @@ import re
 
 vertbar = '|'
 
-anonymisationtablejsonstr = """ 
+anonymisationtablejsonstr = """
 [
     {
         "category": "place",
@@ -64,7 +64,8 @@ anonymisationtablejsonstr = """
 
 anonymisationlist = json.loads(anonymisationtablejsonstr)
 
-anonymisationdict = {key: dct["common"] for dct in anonymisationlist for key in dct["codes"] }
+anonymisationdict = {key: dct["common"]
+                     for dct in anonymisationlist for key in dct["codes"]}
 
 #: The constant *sasta_pseudonyms* list the strings that replace names for
 #: pseudonymisation purposes.
@@ -78,6 +79,7 @@ pseudonymre = re.compile(pseudonym_pattern)
 
 
 junk = 0
+
 
 def getname(rawcode: str) -> str:
     code = rawcode.upper()    # the code must be in all uppercase otherwise we do too much

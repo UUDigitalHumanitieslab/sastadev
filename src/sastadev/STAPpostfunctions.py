@@ -3,11 +3,13 @@ defines functions for the STAP post part of the methods
 
 '''
 from collections import Counter
+
 from sastadev.allresults import mkresultskey
 
 BB_ids = ['S010', 'S011', 'S012']
 S013qid = 'S013'
 S013reskey = mkresultskey(S013qid)
+
 
 def BB_totaal(allresults, _):
     scores = []

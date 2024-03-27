@@ -22,6 +22,7 @@ def getresultsbyutt(results: ResultsDict) -> ResultsByUttDict:
             resultsbyuttdict[uttid].update([qid])
     return resultsbyuttdict
 
+
 def getscoresbyutt2(results: ResultsByUttDict, reference: ResultsByUttDict) -> ScoresByUttDict:
     scores = {}
     doneuttids = []
@@ -37,6 +38,7 @@ def getscoresbyutt2(results: ResultsByUttDict, reference: ResultsByUttDict) -> S
             scores[uttid] = notapplicable
             settings.LOGGER.error(f'No results data for uttid {uttid}')
     return scores
+
 
 def getreference(goldscores: GoldResults) -> ResultsDict:
     reference = {}

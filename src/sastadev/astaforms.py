@@ -6,8 +6,7 @@ from typing import Dict
 import xlsxwriter
 
 from sastadev.allresults import mkresultskey
-from sastadev.ASTApostfunctions import (nounlemmaqid, verblemmaqid,
-                                        wordcountperutt)
+from sastadev.ASTApostfunctions import wordcountperutt
 from sastadev.forms import getformfilename
 
 bijzinqid = 'A003'
@@ -56,7 +55,6 @@ tijdfoutpvreskey = mkresultskey(tijdfoutpvqid)
 lemmareskey = mkresultskey(lemmaqid)
 
 
-
 green = '#00FF00'
 red = '#FF0000'
 orange = '#FFBB9A'
@@ -76,6 +74,7 @@ def condnoun(lemmapositions, exactresults):
     result = lemmapositions in nounpositions   # something is wrong here JO
     return result
 
+
 class ExcelForm:
     def __init__(self, tabel, scores):
         self.tabel = tabel
@@ -94,7 +93,8 @@ formulatemplate1 = '=IF(B{}="Niet gevuld",B{},(B{}-Tabel!B{})/Tabel!C{})'
 
 
 def applytemplate1(rowctr):
-    result = formulatemplate1.format(rowctr, rowctr, rowctr, rowctr + 1, rowctr + 1)
+    result = formulatemplate1.format(
+        rowctr, rowctr, rowctr, rowctr + 1, rowctr + 1)
     return result
 
 
@@ -132,10 +132,13 @@ tabel = [['', 'GEM', 'SD'],
          ['Aantal bijzinnen', 4.8, 2.78]]
 
 scores = [['', 'Score', 'SD'],
-          ['Aantal zelfstandige naamwoorden', "='ZNW & WW'!B1", "=(B2-Tabel!B3)/Tabel!C3"],
-          ['TTR zelfstandige naamwoorden', applytemplate3('ZNW & WW', 'B'), applytemplate1(3)],
+          ['Aantal zelfstandige naamwoorden',
+              "='ZNW & WW'!B1", "=(B2-Tabel!B3)/Tabel!C3"],
+          ['TTR zelfstandige naamwoorden', applytemplate3(
+              'ZNW & WW', 'B'), applytemplate1(3)],
           ['Aantal lexicale werkwoorden', "='ZNW & WW'!F1", applytemplate2(4)],
-          ['TTR lexicale werkwoorden', applytemplate3('ZNW & WW', 'F'), applytemplate1(5)],
+          ['TTR lexicale werkwoorden', applytemplate3(
+              'ZNW & WW', 'F'), applytemplate1(5)],
           ['Semantische parafasieën', '', applytemplate2(6)],
           ['Fonologische parafasieën', '', applytemplate2(7)],
           ['Neologismen', '', '=IF(B8=0,"Normaal","Afwijkend")'],
@@ -146,13 +149,15 @@ scores = [['', 'Score', 'SD'],
           ['Aantal bijzinnen', '=Uitingen!F2', applytemplate2(13)]]
 
 sheet2hiddenrows = [['Totaal', '=SUM(D6:D105)', '', '', '', '=SUM(H6:H105)'],
-                    ['Aantal uniek', '=COUNTA(B6:B105)', '', '', '', '=COUNTA(F6:F105)'],
+                    ['Aantal uniek', '=COUNTA(B6:B105)',
+                     '', '', '', '=COUNTA(F6:F105)'],
                     ['TTR', '=B2/B1', '', '', '', '=F2/F1'],
                     ['', '', '', '', '', '']
                     ]
 
 sheet3hiddenrows = [['Aantal', '=COUNTA(B6:B105)', '', 'Som', 'Som', 'Som'],
-                    ['Totaal', '=SUM(B6:B105)', '', '=SUM(D6:D105)', '=SUM(E6:E105)', '=SUM(F6:F105)'],
+                    ['Totaal', '=SUM(B6:B105)', '', '=SUM(D6:D105)',
+                     '=SUM(E6:E105)', '=SUM(F6:F105)'],
                     ['MLU', '=B2/B1', '', '=(D2/(D2+E2))', '', ''],
                     ['Correct', '=COUNTIF(C6:C105,"J")', '', '', '', '']
                     ]
@@ -190,12 +195,18 @@ def make_astaform(theform, astadata, target):
     unfilledformat = workbook.add_format({'bg_color': orange})
     bggrey = workbook.add_format({'bg_color': grey})
 
-    condformat1a = {'type': 'cell', 'criteria': 'between', 'minimum': -2, 'maximum': 2, 'format': okformat}
-    condformat1b = {'type': 'cell', 'criteria': 'not between', 'minimum': -2, 'maximum': 2, 'format': wrongformat}
-    condformat1c = {'type': 'cell', 'criteria': 'equal to', 'value': '"Niet gevuld"', 'format': unfilledformat}
-    condformat2a = {'type': 'formula', 'criteria': '=$B$8<>0', 'format': wrongformat}
-    condformat2b = {'type': 'formula', 'criteria': '=$B$8=0', 'format': okformat}
-    condformat2c = {'type': 'cell', 'criteria': 'equal to', 'value': '"Niet gevuld"', 'format': unfilledformat}
+    condformat1a = {'type': 'cell', 'criteria': 'between',
+                    'minimum': -2, 'maximum': 2, 'format': okformat}
+    condformat1b = {'type': 'cell', 'criteria': 'not between',
+                    'minimum': -2, 'maximum': 2, 'format': wrongformat}
+    condformat1c = {'type': 'cell', 'criteria': 'equal to',
+                    'value': '"Niet gevuld"', 'format': unfilledformat}
+    condformat2a = {'type': 'formula',
+                    'criteria': '=$B$8<>0', 'format': wrongformat}
+    condformat2b = {'type': 'formula',
+                    'criteria': '=$B$8=0', 'format': okformat}
+    condformat2c = {'type': 'cell', 'criteria': 'equal to',
+                    'value': '"Niet gevuld"', 'format': unfilledformat}
 
     worksheet1 = workbook.add_worksheet('Uitkomstentabel')
     worksheet2 = workbook.add_worksheet('ZNW & WW')
@@ -219,7 +230,8 @@ def make_astaform(theform, astadata, target):
     worksheet1.conditional_format('$C$8', condformat2b)
     worksheet1.conditional_format('$C$8', condformat2c)
 
-    writetable(theform.scores, worksheet1, rhformat=bold, chformat=bold, cellformat=dd2)
+    writetable(theform.scores, worksheet1, rhformat=bold,
+               chformat=bold, cellformat=dd2)
     worksheet1.write('$B$6', '', bggrey)
     worksheet1.write('$B$7', '', bggrey)
     worksheet1.write('$B$8', '', bggrey)
@@ -294,13 +306,19 @@ def getvardict(allresults):
     phonpar = 'B7'
     neo = 'B8'
     KM = 'B9'
-    semparcount = sumctr(allresults.coreresults[semparreskey]) if semparreskey in allresults.coreresults else 0
-    phonparcount = sumctr(allresults.coreresults[fonparreskey]) if fonparreskey in allresults.coreresults else 0
-    neocount = sumctr(allresults.coreresults[neoreskey]) if neoreskey in allresults.coreresults else 0
-    Kcount = sumctr(allresults.coreresults[kopreskey]) if kopreskey in allresults.coreresults else 0
-    Mcount = sumctr(allresults.coreresults[modalreskey]) if modalreskey in allresults.coreresults else 0
+    semparcount = sumctr(
+        allresults.coreresults[semparreskey]) if semparreskey in allresults.coreresults else 0
+    phonparcount = sumctr(
+        allresults.coreresults[fonparreskey]) if fonparreskey in allresults.coreresults else 0
+    neocount = sumctr(
+        allresults.coreresults[neoreskey]) if neoreskey in allresults.coreresults else 0
+    Kcount = sumctr(
+        allresults.coreresults[kopreskey]) if kopreskey in allresults.coreresults else 0
+    Mcount = sumctr(
+        allresults.coreresults[modalreskey]) if modalreskey in allresults.coreresults else 0
     KMcount = Kcount + Mcount
-    result = {sempar: semparcount, phonpar: phonparcount, neo: neocount, KM: KMcount}
+    result = {sempar: semparcount, phonpar: phonparcount,
+              neo: neocount, KM: KMcount}
     return result
 
 
@@ -347,7 +365,8 @@ def resultdict2table(resultdict):
         bijzincount = dictget(uttid_dict, 'bijzincount')
         remarks = dictget(uttid_dict, 'remarks')
         paddeduttid = str(uttid).rjust(3, '0')
-        newrow = [paddeduttid, wc, correct, okpvs, foutepvs, bijzincount, remarks]
+        newrow = [paddeduttid, wc, correct,
+                  okpvs, foutepvs, bijzincount, remarks]
         table.append(newrow)
     sortedtable = sorted(table, key=lambda row: row[0])
     return sortedtable
@@ -361,9 +380,12 @@ def getuttlist(allresults):
     # update(resultdict, allresults.postresults, 'A046', 'wc')
     update(resultdict, allresults.coreresults, correctreskey, 'correct')
     update(resultdict, allresults.coreresults, pvreskey, 'allpvs')
-    subpvs = allresults.coreresults[subpvreskey] if subpvreskey in allresults.coreresults else Counter()
-    delpvs = allresults.coreresults[delpvreskey] if delpvreskey in allresults.coreresults else Counter()
-    tijdfoutpvs = allresults.coreresults[tijdfoutpvreskey] if tijdfoutpvreskey in allresults.coreresults else Counter()
+    subpvs = allresults.coreresults[subpvreskey] if subpvreskey in allresults.coreresults else Counter(
+    )
+    delpvs = allresults.coreresults[delpvreskey] if delpvreskey in allresults.coreresults else Counter(
+    )
+    tijdfoutpvs = allresults.coreresults[tijdfoutpvreskey] if tijdfoutpvreskey in allresults.coreresults else Counter(
+    )
     foutepvs = subpvs + delpvs + tijdfoutpvs
     updatewithctr(resultdict, foutepvs, 'foutepvs')
     update(resultdict, allresults.coreresults, bijzinreskey, 'bijzincount')
@@ -408,6 +430,7 @@ def astaform(allresults, _, in_memory=False):
     theworkbook.close()
     return target
 
+
 def getlemmafreqs(allresults, lexicalreskey) -> Dict[str, int]:
     dict = defaultdict(int)
     for reskey in allresults.exactresults:
@@ -418,5 +441,3 @@ def getlemmafreqs(allresults, lexicalreskey) -> Dict[str, int]:
                 if position in allresults.exactresults[lexicalreskey]:
                     dict[lemma] += 1
     return dict
-
-

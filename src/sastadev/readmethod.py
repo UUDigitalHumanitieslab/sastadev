@@ -127,11 +127,12 @@ def empty(row: list) -> bool:
             return False
     return True
 
+
 def read_method(methodname: str, methodfilename: FileName) -> Method:
     header, data = xlsx.getxlsxdata(methodfilename)
 
     idcol, catcol, subcatcol, levelcol, itemcol, altcol, impliescol, \
-        originalcol, pagescol, fasecol, querycol, informcol, screeningcol, processcol, literalcol, starscol, filtercol,\
+        originalcol, pagescol, fasecol, querycol, informcol, screeningcol, processcol, literalcol, starscol, filtercol, \
         variantscol, unused1col, unused2col, commentscol = \
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 

@@ -22,19 +22,22 @@ ResultsKey = Tuple[QId, str]
 #     def __repr__(self):
 #         return f"ResultsKey('{self.qid}','{self.value}')"
 
-def mkresultskey(qid: QId, value:str = None) -> Tuple[QId, str]:
+def mkresultskey(qid: QId, value: str = None) -> Tuple[QId, str]:
     if value is None:
         return (qid, str(qid))
     else:
         return (qid, value)
 
+
 def showreskey(reskey):
     return f'{reskey[0]}{reskeysep}{reskey[1]}'
+
 
 def reskeystr2reskey(reskeystr: str) -> ResultsKey:
     parts = reskeystr.split(reskeysep)
     result = tuple(parts)
     return result
+
 
 def getqueryid(reskeystr: str) -> QId:
     reskey = reskeystr2reskey(reskeystr)
@@ -54,6 +57,7 @@ class AllResults:
         self.allutts: UttWordDict = allutts
         self.annotationinput: bool = annotationinput
 
+
 def scores2counts(scores: Dict[ResultsKey, Counter]) -> Dict[QId, int]:
     '''
     input is a dictionary of Counter()s
@@ -64,8 +68,6 @@ def scores2counts(scores: Dict[ResultsKey, Counter]) -> Dict[QId, int]:
         countval = len(scores[el])
         counts[el] = countval
     return counts
-
-
 
 
 CoreQueryFunction = Callable[[SynTree], List[SynTree]]

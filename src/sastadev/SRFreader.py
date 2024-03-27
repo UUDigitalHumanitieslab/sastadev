@@ -1,5 +1,6 @@
 from collections import Counter
-from sastadev.allresults import mkresultskey, ResultsKey
+
+from sastadev.allresults import ResultsKey, mkresultskey
 from sastadev.conf import settings
 
 qidcolheader = 'id'
@@ -9,7 +10,7 @@ comma = ','
 platinumheaderrows = 0
 
 
-def getreskey(rawcell:str) -> ResultsKey:
+def getreskey(rawcell: str) -> ResultsKey:
     '''
     older / manually created versions of a reference file can contain simply a QId here, newer ones have a ResultKey string
     :param cell:
