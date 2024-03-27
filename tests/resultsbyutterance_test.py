@@ -1,6 +1,6 @@
 from collections import Counter
 
-from sastadev.resultsbyutterance import getscoresbyutt
+from resultsbyutterance import getscoresbyutt
 
 results = {'T001': Counter(), 'T003': Counter(), 'T004': Counter(), 'T005': Counter(),
            'T006': Counter({'2': 1, '3': 1, '8': 1, '14': 1, '16': 1, '20': 1, '23': 1, '27': 1, '32': 1}),
@@ -101,7 +101,6 @@ def main():
     scoresbyutt = getscoresbyutt(results, goldscores)
     for uttid, triple in scoresbyutt.items():
         print(uttid, triple)
-
 
 
 if __name__ == '__main__':
