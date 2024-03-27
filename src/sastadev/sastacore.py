@@ -1,29 +1,28 @@
-from dataclasses import dataclass, field
-import os
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from lxml import etree
-from sastadev.conf import settings
-from sastadev.sastatypes import AltCodeDict, FileName, MethodName, Position,  QId, QueryDict, SampleSizeTuple, \
-    SynTree, TreeBank, UttId
 
-from sastadev.allresults import AllResults, ExactResultsDict, MatchesDict, ResultsKey, mkresultskey
+from lxml import etree
+
+from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
+                                 ResultsKey, mkresultskey)
 from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
-from sastadev.correcttreebank import correcttreebank
+from sastadev.conf import settings
 from sastadev.external_functions import str2functionmap
 from sastadev.macros import expandmacros
-from sastadev.methods import astamethods, Method,  stapmethods, tarspmethods
-from sastadev.mismatches import  getmarkposition
+from sastadev.methods import Method, astamethods, stapmethods, tarspmethods
+from sastadev.mismatches import getmarkposition
 from sastadev.query import (Query, form_process, is_core, is_literal, is_pre,
                             post_process, query_exists)
 from sastadev.reduceresults import exact2results, reduceallresults
-from sastadev.SAFreader import (get_golddata, richscores2scores)
 from sastadev.sasta_explanation import finalexplanation_adapttreebank
+from sastadev.sastatypes import (FileName, MethodName, Position, QId,
+                                 QueryDict, SampleSizeTuple, SynTree, TreeBank,
+                                 UttId)
 from sastadev.stringfunctions import getallrealwords
-from sastadev.targets import get_mustbedone, get_targets
+from sastadev.targets import get_mustbedone
 from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
                                         getyield, showtree)
-
 
 
 @dataclass
@@ -34,7 +33,6 @@ class SastaCoreParameters:
     includeimplies: bool = False
     infilename: FileName = None
     targets: int = None
-
 
 
 def doauchann(intreebank: SynTree) -> SynTree:
@@ -55,17 +53,16 @@ def doauchann(intreebank: SynTree) -> SynTree:
     return outtreebank
 
 
-
 def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
               annotatedfileresults: Optional[AllResults],
               scp: SastaCoreParameters):
 
     annotationinput = scp.annotationinput
     if annotationinput:
-        if not(origtreebank is None and annotatedfileresults is not None):
+        if not (origtreebank is None and annotatedfileresults is not None):
             pass  # report an error and exit
     else:
-        if not(origtreebank is not None and annotatedfileresults is None):
+        if not (origtreebank is not None and annotatedfileresults is None):
             pass  # report an error and exit
 
     corr = scp.corr
@@ -96,7 +93,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         allorandalts = {}
     else:
         if origtreebank.tag != 'treebank':
-            settings.LOGGER.error("Input treebank file does not contain a treebank element")
+            settings.LOGGER.error(
+                "Input treebank file does not contain a treebank element")
             exit(-1)
         allutts = {}
         uttcount = 0
@@ -117,12 +115,15 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
                 uttid = getxselseuttid(syntree)
                 analysedtrees.append((uttid, syntree))
 
-                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
-                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                doprequeries(syntree, themethod.queries,
+                             rawexactresults, allmatches)
+                docorequeries(syntree, themethod.queries,
+                              rawexactresults, allmatches)
 
                 # showtree(syntree)
                 if uttid in nodeendmap:
-                    settings.LOGGER.error('Duplicate uttid in sample: {}'.format(uttid))
+                    settings.LOGGER.error(
+                        'Duplicate uttid in sample: {}'.format(uttid))
                 nodeendmap[uttid] = getnodeendmap(syntree)
 
                 # uttno = getuttno(syntree)
@@ -152,8 +153,10 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     samplesizefunction = getsamplesizefunction(methodname)
     samplesizetuple: SampleSizeTuple = samplesizefunction(allresults)
 
-    postquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
-    formquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
+    postquerylist: List[QId] = [
+        q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
+    formquerylist: List[QId] = [
+        q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
 
     # we assume the reduction must be done before the postqueries
     allresults = reduceallresults(allresults, samplesizetuple, methodname)
@@ -170,11 +173,12 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
     global invalidqueries
     uttid = getuttid(syntree)
     # uttid = getuttidorno(syntree)
-    omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
+    omittedwordpositions = getxmetatreepositions(
+        syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)
     # core queries
     junk = 0
-    for queryid in queries:  ## @@ dit aanpassen voor literals en voor Resultskey; check read_referencefile
+    for queryid in queries:  # @@ dit aanpassen voor literals en voor Resultskey; check read_referencefile
         # if queryid not in exactresults: # not needed becaysetaken care of below
         #     exactresults[queryid] = []
         thequeryobj = queries[queryid]
@@ -251,9 +255,9 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
         queryid = reskey[0]
         query = queries[queryid]
         queryfilter = query.filter
-        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[queryfilter]
-        exactresults[reskey] = [r for r in rawexactresults[reskey] if reskey in rawexactresults and
-                                thefilter(query, rawexactresults, r)]
+        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[
+            queryfilter]
+        exactresults[reskey] = [r for r in rawexactresults[reskey] if reskey in rawexactresults and thefilter(query, rawexactresults, r)]
     return exactresults
 
 

@@ -2058,8 +2058,7 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
         settings.LOGGER.error('intbegins={}'.format(intbegins))
         settings.LOGGER.error('tokenlistbegins ={}'.format(tokenlistbegins))
     pospairs = zip(intbegins, tokenlistbegins)
-    thetreetokenposdict = {treepos + 1: tokenpos +
-                           1 for treepos, tokenpos in pospairs}
+    thetreetokenposdict = {treepos + 1: tokenpos + 1 for treepos, tokenpos in pospairs}
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
     return resulttree
 

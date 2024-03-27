@@ -19,7 +19,7 @@ The function has been tested against all noun compounds in Lassy-Klein
 import re
 from typing import List
 
-import sastadev.xlsx
+from sastadev import readcsv, xlsx
 
 hyphen = '-'
 tab = '\t'
