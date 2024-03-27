@@ -1,6 +1,7 @@
 import re
 
 from sastadev import cleanCHILDEStokens
+# import sastadev.cleanCHILDEStokens
 from sastadev.conf import settings
 from sastadev.metadata import Meta, bpl_delete, bpl_replacement
 from sastadev.sastatoken import Token, show

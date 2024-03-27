@@ -353,7 +353,7 @@ The query is defined as //node[%new_STAP_BB_t%], where the macro *new_STAP_BB_t*
    %geledenBBt% or
    %temporal_mwu%
    ) and %STAP_geen_BB%)
-""" 
+  """
 
    
 We discuss each of the macros used inside this query

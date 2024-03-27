@@ -1,4 +1,6 @@
 
+
+# import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
 import copy
 from typing import List, Optional
 
@@ -8,6 +10,7 @@ from lxml import etree
 # import find1, iswordnode, getattval
 import sastadev.stringfunctions as strf
 import sastadev.treebankfunctions as tbf
+from sastadev.alpinoparsing import parse
 from sastadev.auchannsettings import AlignmentSettings
 from sastadev.auchannsettings import settings as auchannsettings
 from sastadev.cleanCHILDEStokens import cleantext
@@ -16,11 +19,10 @@ from sastadev.lexicon import known_word
 from sastadev.metadata import (MetaValue, bpl_node, bpl_word, fromElement,
                                mkSASTAMeta)
 from sastadev.sastatok import gettokensplusxmeta
+# import find1, iswordnode, getattval
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.tokenmd import TokenListMD
-
-# import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
 
 defaultsettings = AlignmentSettings()
 
@@ -289,7 +291,7 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         newmetadata += chatmetadata
         cleanutt = space.join([token.word for token in cleanutttokens])
 
-        newtree = settings.PARSE_FUNC(cleanutt)
+        newtree = parse(cleanutt)
         sentelem = tbf.find1(tree, './/sentence')
         sentid = sentelem.attrib['sentid']
         newsentelem = tbf.find1(newtree, './/sentence')

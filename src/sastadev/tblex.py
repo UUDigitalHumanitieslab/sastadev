@@ -1,5 +1,5 @@
 """
-The module *tblex* contains functiond that require function
+The module *tblex* contains functions that require functions
 from the lexicon module and from the treebankfunctions module
 """
 

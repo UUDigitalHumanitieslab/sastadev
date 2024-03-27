@@ -9,6 +9,7 @@ from sastadev import xlsx
 from sastadev.conf import settings
 from sastadev.counterfunctions import counter2liststr
 from sastadev.forms import getformfilename
+from sastadev.allresults import mkresultskey
 
 ordA = ord('A')
 comma = ','
@@ -117,13 +118,15 @@ def mktarspform(allresults, _, in_memory=False):
     for (rowctr, colctr) in basesheet:
         curval = str(basesheet[(rowctr, colctr)])
         if is_id(curval):
-            newval = getval(allresults, curval)
+            curvalreskey = mkresultskey(curval)
+            newval = getval(allresults, curvalreskey)
             # write newval to the new sheet
             newvalstr = val2str(newval)
             worksheet.write(rowctr, colctr, newvalstr)
         elif is_idc(curval):
             urval = idc2id(curval)
-            newval = getval(allresults, urval)
+            urvalreskey = mkresultskey(urval)
+            newval = getval(allresults, urvalreskey)
             cval = len(newval)
             newvalstr = val2str(cval)
             worksheet.write(rowctr, colctr, newvalstr)

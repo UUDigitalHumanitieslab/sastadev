@@ -86,6 +86,11 @@ innereplacements = [('inne', 'erin', pron, wrongpron, erdrop, dp6),
 #:
 innureplacements = [(w1[:-1] + 'u', w2, c, n, v, p) for (w1, w2, c, n, v, p) in innereplacements]
 
+#@@to add@:zn, dr. wa, tie, mn, zun, dur, se, dese, naartoe, maa(r), isda -> is dat, wi(l), goe(d), datte shwa+n. sij,
+# dez, eeft, 'savonds, tisda ('t is dat), jamaar, jahoor, oeveel, geten-> gegeten/ vergeten,
+# tzelfde-> hetelfde, neehoor, elemaal, annere -> andere, zteen -> zometeen, hunnie-> hun, hep -> heb, oera -> hoera,
+# rijje
+
 #: The constant *basicreplacementlist* contains 6-tuples of strings with:
 #:
 #: * frequent deviant spelling of a word, usually to indicate how the word was (incorrectly) pronounced. together with (e.g. "as", "effe")
@@ -156,7 +161,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('lape', 'slapen', pron, infpron, f'{onsetred}+{fndrop}', dp),
                                                 ('vas', 'vast', pron, infpron, codared, dp),
                                                 ('datte', 'dat', pron, infpron, emphasis, dp),
-                                                ('omdatte', 'dat', pron, infpron, emphasis, dp),
+                                                ('omdatte', 'omdat', pron, infpron, emphasis, dp),
                                                 ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp)
 
                                                 ] + \

@@ -5,6 +5,7 @@ from lxml import etree
 
 bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma, \
     bpl_cond, bpl_replacement = tuple(range(9))
+
 defaultpenalty = 10
 defaultbackplacement = bpl_none
 

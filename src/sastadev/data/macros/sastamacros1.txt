@@ -331,6 +331,7 @@ spec_noun = """ (@pt="spec" and (@pos="name" or starts-with(@frame,"proper_name"
  asta_numvrij = """(@pt="tw" and @positie="vrij" and @rel!="mwp" and @rel!="det" and @rel!="mod" )"""
  
  asta_noun = """ ((@pt="n" and not(%ASTA_filled_pause%) and not(%ASTA_numeral%)) or 
+                   (@lemma="112") or
                   (@pt="ww" and @positie="nom") or 
 				  (%monthname%) or 
 				  @pos="name" )

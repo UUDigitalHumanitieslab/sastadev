@@ -1,6 +1,7 @@
 import re
 from typing import List, Tuple
 
+import sastadev
 import sastadev.CHAT_Annotation as sastachat
 import sastadev.cleanCHILDEStokens
 from sastadev.metadata import Meta

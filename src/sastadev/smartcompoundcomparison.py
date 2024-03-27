@@ -7,7 +7,7 @@ It works for nouns only!
 '''
 import editdistance
 
-# from sastadev.normalise_lemma import normaliselemma
+from sastadev.normalise_lemma import normaliselemma
 
 
 def reldistance(word, corr):
@@ -18,8 +18,7 @@ def reldistance(word, corr):
 
 def iscompound(word, corr, rawcorrlemma):
     debug = False
-    corrlemma = rawcorrlemma
-    # corrlemma = normaliselemma(corr, rawcorrlemma, keeplastsep=True) TODO: fix
+    corrlemma = normaliselemma(corr, rawcorrlemma, keeplastsep=True)
     corrlemmaparts = corrlemma.split('_')
     if len(corrlemmaparts) == 1:
         return False
