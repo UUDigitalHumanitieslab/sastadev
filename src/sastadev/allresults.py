@@ -10,7 +10,6 @@ reskeysep = slash
 
 ResultsKey = Tuple[QId, str]
 
-
 # class ResultsKey:  # we do not use it anymore because two instantiations with the same value are dfferent objects
 #     def __init__(self, qid: QId, value: str = None):
 #         self.qid: QId = qid
@@ -21,6 +20,7 @@ ResultsKey = Tuple[QId, str]
 #
 #     def __repr__(self):
 #         return f"ResultsKey('{self.qid}','{self.value}')"
+
 
 def mkresultskey(qid: QId, value: str = None) -> Tuple[QId, str]:
     if value is None:

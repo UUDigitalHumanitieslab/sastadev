@@ -495,7 +495,6 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
 
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
 def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId):
-
     newtokensmd = explanationasreplacement(origtokensmd, tree)
     if newtokensmd is not None:
         tokensmd = newtokensmd
@@ -1219,7 +1218,8 @@ def correctPdit(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[Toke
                                                                                               'die'}:
             tokenrel = getattval(tokennode, 'rel')
             tokenpt = getattval(tokennode, 'pt')
-            prevtokennode = tokennodes[nonskiptokenctr - 1] if tokenctr > 0 else None
+            prevtokennode = tokennodes[nonskiptokenctr -
+                                       1] if tokenctr > 0 else None
             if prevtokennode is not None:
                 prevpt = getattval(prevtokennode, 'pt')
                 prevparent = prevtokennode.getparent()

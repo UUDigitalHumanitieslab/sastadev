@@ -3,7 +3,7 @@ This module contains definitions of types used in multiple modules
 '''
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, TypeAlias, Union
 
 from lxml import etree
 
@@ -15,6 +15,7 @@ Position = int  # in the future perhapos NewType('Position', int)
 PhiTriple = Tuple[str, str, str]
 QId = str  # in the futute perhaps NewType('QId', str)
 SynTree = etree.Element  # type: ignore
+TreeBank = etree.Element
 UttId = str  # in the future perhaps NewType('UttId', str)
 
 
@@ -22,59 +23,70 @@ Item = str  # in the future perhaps NewType('Item', str)
 Item2LevelsDict = Dict[Item, List[Level]]
 Item_Level = Tuple[Item, Level]
 
-
 AltCodeDict = Dict[Item_Level, Item_Level]
-AltId = int
+AltId: TypeAlias = int
 AnalysedTrees = List[Tuple[UttId, SynTree]]
-BackPlacement = int
-CELEXPosCode = str
-CELEX_INFL = str
-CapitalName = str
-ContinentName = str
-CorrectionMode = str  # Literal['0','1','n']
-CountryName = str
-DCOIPt = str
-DCOITuple = Tuple
-DeHet = str
-ErrorDict = Dict[str, List[List[str]]]
-ExactResult = Tuple[UttId, Position]
-ExactResults = List[ExactResult]
-FileName = str  # perhaps in the future NewType('FileName', str)
-FirstName = str
-Gender = str
-GoldTuple = Tuple[str, str, Counter]
+BackPlacement: TypeAlias = int
+CapitalName: TypeAlias = str
+CountryName: TypeAlias = str
+ContinentName: TypeAlias = str
+CELEXPosCode: TypeAlias = str
+FirstName: TypeAlias = str
+LocationName: TypeAlias = str
+DCOIPt: TypeAlias = str
+DeHet: TypeAlias = str
+CELEX_INFL: TypeAlias = str
+DCOITuple: TypeAlias = Tuple
+Lemma: TypeAlias = str
+CorrectionMode: TypeAlias = str  # Literal['0','1','n']
+ErrorDict: TypeAlias = Dict[str, List[List[str]]]
+Level: TypeAlias = str  # in the future perhaps NewType('Level', str)
+Item: TypeAlias = str  # in the future perhaps NewType('Item', str)
+Item_Level: TypeAlias = Tuple[Item, Level]
+IntSpan: TypeAlias = Tuple[int, int]
+AltCodeDict: TypeAlias = Dict[Item_Level, Item_Level]
+QId: TypeAlias = str  # in the futute perhaps NewType('QId', str)
+UttId: TypeAlias = str  # in the future perhaps NewType('UttId', str)
+Position: TypeAlias = int  # in the future perhapos NewType('Position', int)
+PositionStr: TypeAlias = str
+Stage: TypeAlias = int
+SynTree: TypeAlias = etree._Element  # type: ignore
+GoldTuple: TypeAlias = Tuple[str, str, Counter]
 GoldResults = Dict[QId, GoldTuple]
-IntSpan = Tuple[int, int]
-Item_Level2QIdDict = Dict[Item_Level, QId]
-Lemma = str
-LocationName = str
-Match = Tuple[SynTree, SynTree]
-Matches = List[Match]
-MetaElement = etree.Element
-MethodName = str  # perhaps in the future NewType('MethodName', str)
-Nort = Union[SynTree, Token]
-OptPhiTriple = Optional[PhiTriple]
-Penalty = int
-PositionMap = Dict[Position, Position]
-PositionStr = str
-Postag = str
-Pt = str
-QIdCount = Dict[QId, int]
-QueryDict = Dict[QId, Query]
-ReplacementMode = int
-ResultsCounter = Counter  # Counter[UttId]  # Dict[UttId, int]
-ResultsDict = Dict[QId, ResultsCounter]
+Item2LevelsDict: TypeAlias = Dict[Item, List[Level]]
+Match: TypeAlias = Tuple[SynTree, SynTree]
+Matches: TypeAlias = List[Match]
+MatchesDict: TypeAlias = Dict[Tuple[QId, UttId], Matches]
+MetaElement: TypeAlias = etree.Element
+ExactResult: TypeAlias = Tuple[UttId, Position]
+ExactResults: TypeAlias = List[ExactResult]
+ExactResultsDict: TypeAlias = Dict[QId, ExactResults]  # qid
+Gender: TypeAlias = str
+Penalty: TypeAlias = int
+PhiTriple: TypeAlias = Tuple[str, str, str]
+OptPhiTriple: TypeAlias = Optional[PhiTriple]
+PositionMap: TypeAlias = Dict[Position, Position]
+QueryDict: TypeAlias = Dict[QId, Query]
+QIdCount: TypeAlias = Dict[QId, int]
+MethodName: TypeAlias = str  # perhaps in the future NewType('MethodName', str)
+FileName: TypeAlias = str  # perhaps in the future NewType('FileName', str)
+ReplacementMode: TypeAlias = int
+ResultsCounter: TypeAlias = Counter  # Counter[UttId]  # Dict[UttId, int]
+ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
 SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
-Source = str
-Span = Tuple[PositionStr, PositionStr]
-Stage = int
-Targets = int
-TokenTreePredicate = Callable[[Token, SynTree], bool]
-TreePredicate = Callable[[SynTree], bool]
-Treebank = etree.Element
-URL = str
-UttTokenDict = Dict[UttId, List[Token]]
-UttWordDict = Dict[UttId, List[str]]
-Word = str
-WordInfo = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
-WordLower = str
+Span: TypeAlias = Tuple[PositionStr, PositionStr]
+Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
+Nort: TypeAlias = Union[SynTree, Token]
+ExactResultsFilter: TypeAlias = Callable[[Query, ExactResultsDict, ExactResult], bool]
+Targets: TypeAlias = int
+Treebank: TypeAlias = etree.Element
+TreePredicate: TypeAlias = Callable[[SynTree], bool]
+TokenTreePredicate: TypeAlias = Callable[[Token, SynTree], bool]
+URL: TypeAlias = str
+UttTokenDict: TypeAlias = Dict[UttId, List[Token]]
+UttWordDict: TypeAlias = Dict[UttId, List[str]]
+WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode], Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
+# moved the following to allresuls.py
+#CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
+#PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]
+#QueryFunction: TypeAlias = Union[CoreQueryFunction, PostQueryFunction]

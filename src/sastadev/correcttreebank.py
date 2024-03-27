@@ -581,8 +581,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         origmetadata = []
     else:
         if lmetadatalist > 1:
-            settings.LOGGER.error(
-                'Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
+            settings.LOGGER.error('Multiple metadata ({}) in utterance {}'.format(
+                lmetadatalist, uttid))
         origmetadata = metadatalist[0]
 
     # allmetadata += origmetadata
@@ -725,6 +725,32 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 thetree = transplant_node(newnode, contextoldnode, thetree)
         elif curbackplacement == bpl_replacement:
             # showtree(fatstree, 'fatstree')
+            nodeend = meta.annotationposlist[-1] + 1
+            newnode = myfind(
+                thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [
+            ] else None
+            if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
+                settings.LOGGER.error(
+                    f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+
+            if newnode is not None and oldword is not None:
+                # wproplist = getwordinfo(oldword)
+                # wprop = wproplist[0] if wproplist != [] else None
+                # # (pt, dehet, infl, lemma)
+                # newnode.attrib['word'] = oldword
+                # if wprop is None:
+                #    newnode.attrib['lemma'] = oldword
+                # else:
+                #    newnode.attrib['lemma'] = wprop[3]
+                substnode = smartreplace(newnode, oldword)
+
+                newnodeparent = newnode.getparent()
+                newnodeparent.remove(newnode)
+                newnodeparent.append(substnode)
+                # showtree(thetree, 'thetree after smart replace')
+
+        elif curbackplacement in [bpl_word, bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(
                 thetree, './/node[@pt and @end="{}"]'.format(nodeend))

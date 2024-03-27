@@ -79,7 +79,8 @@ def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist:
         newexactresults = []
         for uttid, position in exactresultsdict[reskey]:
             if (uttid in uttidlist and uttid != lastuttid) or \
-               (uttid == lastuttid and cutoffpoint is not None and not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
+               (uttid == lastuttid and cutoffpoint is not None and
+                    not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
                 newexactresults.append((uttid, position))
         newexactresultsdict[reskey] = newexactresults
     return newexactresultsdict

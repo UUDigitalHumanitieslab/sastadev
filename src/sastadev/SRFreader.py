@@ -44,12 +44,14 @@ def read_referencefile(infilename, logfile):
             try:
                 qidcol = rowlist.index(qidcolheader)
             except ValueError:
-                print('Error reading reference file; no ID column header', infilename, file=logfile)
+                print('Error reading reference file; no ID column header',
+                      infilename, file=logfile)
                 exit(-1)
             try:
                 uttcol = rowlist.index(uttcolheader)
             except ValueError:
-                print('Error reading reference file: no uttids column header in', infilename, file=logfile)
+                print('Error reading reference file: no uttids column header in',
+                      infilename, file=logfile)
                 exit(-1)
         elif rowctr > platinumheaderrows:
             rowstr = line[:-1]

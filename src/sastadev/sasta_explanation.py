@@ -1,6 +1,7 @@
 
 
 # import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
+# import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
 import copy
 from typing import List, Optional
 
@@ -10,15 +11,16 @@ from lxml import etree
 # import find1, iswordnode, getattval
 import sastadev.stringfunctions as strf
 import sastadev.treebankfunctions as tbf
+from auchannsettings import settings
 from sastadev.alpinoparsing import parse
 from sastadev.auchannsettings import AlignmentSettings
-from sastadev.auchannsettings import settings as auchannsettings
 from sastadev.cleanCHILDEStokens import cleantext
-from sastadev.conf import settings
+from sastadev.conf import settings as sdsettings
 from sastadev.lexicon import known_word
 from sastadev.metadata import (MetaValue, bpl_node, bpl_word, fromElement,
                                mkSASTAMeta)
 from sastadev.sastatok import gettokensplusxmeta
+# import find1, iswordnode, getattval
 # import find1, iswordnode, getattval
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
@@ -164,7 +166,7 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
         expl = space.join(
             prefixwordlist + finalexpl.annotationwordlist + postexplanationwords)
         # print(settings.replacements)
-        resultalignment = align_words(utt, expl, auchannsettings)
+        resultalignment = align_words(utt, expl, settings)
         result = str(resultalignment)
     else:
         result = None
@@ -240,7 +242,7 @@ def getalignment(tree: SynTree) -> Optional[str]:
         explanationlist + postexplanationlist) if explanationlist is not None else None
     # print(f'explanationstr={explanationstr}')
     if explanationstr is not None:
-        alignment = align_words(cleanutt, explanationstr, auchannsettings)
+        alignment = align_words(cleanutt, explanationstr, settings)
     else:
         alignment = None
     return alignment
@@ -252,7 +254,7 @@ def finalexplanation_adapttreebank(treebank):
         newtree = finalexplanation_adapttree(tree)
         if newtree is None:
             newtreebank.append(tree)
-            settings.LOGGER.warning('Final Explanation correction failed')
+            sdsettings.LOGGER.warning('Final Explanation correction failed')
         else:
             newtreebank.append(newtree)
     return newtreebank
@@ -299,7 +301,7 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         # tbf.showtree(newtree, 'newly parsed tree')
         if newtree is None:
             newtree = tree
-            settings.LOGGER.warning(
+            sdsettings.LOGGER.warning(
                 'Parsing for <{cleanutt}> failed. No changes applied')
         else:
             newmetaelements = [meta.toElement() for meta in newmetadata]

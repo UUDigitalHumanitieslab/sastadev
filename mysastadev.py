@@ -134,22 +134,34 @@ Sastadev logs its actions through:
 # to do
 # -Excel output, cleanup output code
 
+<<<<<<< HEAD:src/sastadev/__main__.py
 import datetime
 import logging
+=======
+from typing import Dict, List, Any, Tuple, Callable, Pattern, Optional, DefaultDict
+# import sastatypes
+from sastatypes import QId, UttId, Position, SynTree, GoldTuple, Match, Matches,  ExactResult, \
+    ExactResults,  QueryDict, QIdCount, MethodName, FileName, ResultsCounter, ResultsDict, \
+    AltCodeDict, PositionStr, SampleSizeTuple
+
+
+#import xlrd
+from lxml import etree
+>>>>>>> lemmas:mysastadev.py
 import os
 import re
 import sys
 from collections import Counter, defaultdict
+# from altcodes import altcodes
 from optparse import OptionParser
-from typing import Any, Dict, List, Pattern, Tuple
+<<<<<<< HEAD:src/sastadev/__main__.py
+from typing import Any, Callable, Dict, List, Pattern, Tuple
 
 import xlsxwriter
 from lxml import etree
 
 from sastadev import compounds
-from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
-                                 ResultsKey, mkresultskey, scores2counts,
-                                 showreskey)
+from sastadev.allresults import AllResults, scores2counts
 from sastadev.conf import settings
 from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
                                 loggingfolder, outtreebanksfolder,
@@ -157,31 +169,67 @@ from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
 from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader,
                                       validcorroptions)
 from sastadev.counterfunctions import counter2liststr
+from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
-from sastadev.methods import supported_methods, treatmethod
-from sastadev.mismatches import exactmismatches, literalmissedmatches
+from sastadev.macros import expandmacros
+from sastadev.methods import Method, defaultfilters
+from sastadev.mismatches import exactmismatches, getmarkposition
 from sastadev.mksilver import getsilverannotations, permprefix
-from sastadev.query import (is_preorcore, post_process, query_exists,
-                            query_inform)
+from sastadev.query import (Query, form_process, is_core, is_pre, is_preorcore,
+                            post_process, query_exists, query_inform)
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.reduceresults import (exact2results, reduceexactgoldscores,
-                                    reduceresults)
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
-from sastadev.sastacore import (SastaCoreParameters, doauchann, dopostqueries,
-                                sastacore)
-from sastadev.sastatypes import (AltCodeDict, GoldTuple, QId, QIdCount,
-                                 QueryDict, ResultsCounter, SynTree, UttId)
+from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
+                                 GoldTuple, MatchesDict, MethodName, QId,
+                                 QIdCount, QueryDict, ResultsCounter,
+                                 ResultsDict, SynTree, UttId)
 from sastadev.SRFreader import read_referencefile
-from sastadev.targets import get_targets
-from sastadev.treebankfunctions import getattval, getyield
+from sastadev.targets import get_mustbedone, get_targets
+from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
+                                        getxmetatreepositions, getxselseuttid,
+                                        getyield, showtree)
 from sastadev.xlsx import mkworkbook
+=======
+import logging
+from config import SDLOGGER
+from asta_queries import astalemmafunction
+from SAFreader import get_golddata, richscores2scores,  richexact2global
+from external_functions import str2functionmap
+from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
+    showtree, getnodeendmap, getxselseuttid
+from SRFreader import read_referencefile
+from goldcountreader import get_goldcounts
+from TARSPscreening import screening4stage
+from allresults import AllResults, scores2counts, ExactResultsDict, MatchesDict, ResultsKey, mkresultskey, showreskey
+from readmethod import read_method, itemseppattern
+from methods import allok, treatmethod, astamethods, stapmethods, tarspmethods
+from query import Query, pre_process, core_process, post_process, form_process, is_preorcore, query_inform, query_exists, \
+    is_pre, is_core, is_literal
+from macros import expandmacros
+from mismatches import mismatches, exactmismatches, getmarkposition, literalmissedmatches
+from xlsx import mkworkbook
+import xlsxwriter
+from counterfunctions import counter2liststr
+from mksilver import getsilverannotations, permprefix
+from rpf1 import getscores, getevalscores, sumfreq
+from targets import get_mustbedone, get_targets
+from correcttreebank import correcttreebank, corr0, corr1, corrn, validcorroptions, errorwbheader
+from methods import Method, defaultfilters, supported_methods, SampleSize
+from dataconfig import bronzefolder, formsfolder, intreebanksfolder, loggingfolder, outtreebanksfolder, \
+    resultsfolder, silverfolder, silverpermfolder
+from sasta_explanation import finalexplanation_adapttreebank
+from ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
+from reduceresults import reduceallresults, exact2results, reduceexactgoldscores, reduceresults
+from stringfunctions import getallrealwords
+>>>>>>> lemmas:mysastadev.py
 
 listDir = False
 if listDir:
     print(dir())
     exit(0)
+
 
 tarsp = 'tarsp'
 stap = 'stap'
@@ -189,7 +237,11 @@ asta = 'asta'
 gramat = 'gramat'
 
 codepath = os.path.dirname(os.path.abspath(__file__))
+<<<<<<< HEAD:src/sastadev/__main__.py
 methodspath = os.path.join(codepath, 'data', 'methods')
+=======
+>>>>>>> lemmas:mysastadev.py
+
 
 # moved to methods.py
 # methodspath = os.path.join(codepath, 'methods')
@@ -197,7 +249,7 @@ methodspath = os.path.join(codepath, 'data', 'methods')
 # supported_methods = {}
 # supported_methods[tarsp] = os.path.join(methodspath, 'TARSP Index Current.xlsx')
 # supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
-# supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
+#supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 platinumchecksuffix = '_platinum.check.tsv'
 platinumcheckeditedsuffix = '_platinum.check-edited.tsv'
@@ -207,6 +259,7 @@ bronzesuffix = '_bronze'
 silversuffix = '_silver'
 
 path2permfolder = silverpermfolder
+
 
 # target_intarget, target_xsid, target_all = 0, 1, 2
 # intargetxpath = '//meta[@name="intarget"]'
@@ -236,20 +289,15 @@ na = 'na'
 getwordsxpath = ".//node[@pt or @pos]"
 
 queryinfoheaderrow = ['id', 'cat', 'subcat', 'item']
-queryresultsheaderrow = ['count', 'results',
-                         'GoldCount', 'Goldresults', 'queryExists']
-queryRGscoreheaderrow = ['recall', 'precision', 'f1score',
-                         'intersection', 'gold-results', 'results-gold']
+queryresultsheaderrow = ['count', 'results', 'GoldCount', 'Goldresults', 'queryExists']
+queryRGscoreheaderrow = ['recall', 'precision', 'f1score', 'intersection', 'gold-results', 'results-gold']
 queryRPscoreheaderrow = ['platinum', 'plat_recall', 'plat_precision',
                          'plat_f1score', 'plat-results', 'results-plat']
-queryGPscoreheaderrow = ['GP recall', 'GP precision',
-                         'GP F1-score', 'GP intersection', 'P minus G', 'G minus P']
+queryGPscoreheaderrow = ['GP recall', 'GP precision', 'GP F1-score', 'GP intersection', 'P minus G', 'G minus P']
 
-resultsheaderrow = queryinfoheaderrow + queryresultsheaderrow + \
-    queryRGscoreheaderrow + queryRPscoreheaderrow + queryGPscoreheaderrow
+resultsheaderrow = queryinfoheaderrow + queryresultsheaderrow + queryRGscoreheaderrow + queryRPscoreheaderrow + queryGPscoreheaderrow
 resultsheaderstring = tab.join(resultsheaderrow)
-platinumheaderrow = ['id', 'cat', 'subcat', 'item',
-                     'uttids', 'results-gold', 'status', 'remarks']
+platinumheaderrow = ['id', 'cat', 'subcat', 'item', 'uttids', 'results-gold', 'status', 'remarks']
 platinumheaderstring = tab.join(platinumheaderrow)
 
 allmatches: MatchesDict = {}
@@ -259,8 +307,7 @@ emptycounter: Counter = Counter()
 invalidqueries: Dict[QId, Exception] = {}
 
 
-def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[ResultsKey, Counter],
-                  queries: QueryDict) -> None:
+def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[ResultsKey, Counter], queries: QueryDict) -> None:
     for reskey in goldscores:
         if reskey in platinumscores:
             # all values of gold must be in platinum
@@ -268,13 +315,15 @@ def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[Re
             if query_exists(queries[qid]):
                 diff1 = goldscores[reskey] - platinumscores[reskey]
                 if diff1 != Counter():
-                    settings.LOGGER.warning(
-                        '{} has goldscores not in platinum: {}'.format(str(reskey), diff1))
+<<<<<<< HEAD:src/sastadev/__main__.py
+                    settings.LOGGER.warning('{} has goldscores not in platinum: {}'.format(qid, diff1))
+=======
+                    SDLOGGER.warning('{} has goldscores not in platinum: {}'.format(str(reskey), diff1))
+>>>>>>> lemmas:mysastadev.py
 
 
 def mkerrorreport(errordict, errorreportfilename: str):
-    header = ['name', 'count', 'uttid', 'value',
-              'source', 'cat', 'subcat', 'origutt', 'parsed_as']
+    header = ['name', 'count', 'uttid', 'value', 'source', 'cat', 'subcat', 'origutt', 'parsed_as']
     allrows = []
     for item in errordict:
         count = len(errordict[item])
@@ -285,8 +334,7 @@ def mkerrorreport(errordict, errorreportfilename: str):
             fullrow = [item, ''] + instancerow
             allrows.append(fullrow)
 
-    wb = mkworkbook(errorreportfilename, [
-                    header], allrows, freeze_panes=(1, 1))
+    wb = mkworkbook(errorreportfilename, [header], allrows, freeze_panes=(1, 1))
     wb.close()
 
 
@@ -313,7 +361,7 @@ def getpostval(qid, thepostresults):
 #    return counts
 
 def sf(number):
-    if isinstance(number, float) or isinstance(number, int):
+    if type(number) == float or type(number) == int:
         result = '{0:.1f}'.format(number)
     else:
         result = number
@@ -395,8 +443,7 @@ def logprint(str: str):
     if logfile != sys.stderr:
         print(str, file=sys.stderr)
 
-
-# @@ types to be reconsidered
+##@@ types to be reconsidered
 
 
 def getitem2levelmap(mapping):
@@ -417,6 +464,97 @@ def getcompounds(syntree: SynTree) -> List[SynTree]:
         if compounds.iscompound(w):
             results.append(t)
     return results
+
+
+def isxpathquery(query: str) -> bool:
+    cleanquery = query.lstrip()
+    return cleanquery.startswith('//')
+
+
+
+
+
+def getreskey(qid: QId, m: SynTree, queries: QueryDict) -> ResultsKey:
+    if m is None:
+        return mkresultskey(qid)
+    thequery = queries[qid]
+    if is_literal(thequery):
+        litfunc= str2functionmap[thequery.literal]
+        thevalue = litfunc(m)
+        return mkresultskey(qid, thevalue)
+    else:
+        return mkresultskey(qid)
+
+
+def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict, criterion: Callable[[Query], bool]):
+    global invalidqueries
+    uttid = getuttid(syntree)
+    # uttid = getuttidorno(syntree)
+    omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
+    # print(uttid)
+    # core queries
+    junk = 0
+    for queryid in queries:  ## @@ dit aanpassen voor literals en voor Resultskey; check read_referencefile
+       # if queryid not in exactresults: # not needed becaysetaken care of below
+       #     exactresults[queryid] = []
+        thequeryobj = queries[queryid]
+        if criterion(thequeryobj):
+            if query_exists(thequeryobj):
+                thelistedquery = thequeryobj.query
+                if isxpathquery(thelistedquery):
+                    expandedquery = expandmacros(thelistedquery)
+                    thequery = "." + expandedquery
+                    try:
+                        matches = syntree.xpath(thequery)
+                    except etree.XPathEvalError as e:
+                        invalidqueries[queryid] = e
+                        matches = []
+                else:
+                    thef = str2functionmap[thelistedquery]
+                    matches = thef(syntree)
+            else:
+                matches = []
+                exactresults[mkresultskey(queryid)] = []
+            # matchingids = [uttid for x in matches]
+            for m in matches:
+                # showtree(m)
+                reskey = getreskey(queryid, m, queries)
+                if m is None:
+                    showtree(syntree, text='in doqueries: Nonematch')
+                if (reskey, uttid) in allmatches:
+                    allmatches[(reskey, uttid)].append((m, syntree))
+                else:
+                    allmatches[(reskey, uttid)] = [(m, syntree)]
+                exactresult = (uttid, int(getattval(m, 'begin')) + 1)
+                if reskey in exactresults:
+                    exactresults[reskey].append(exactresult)
+                else:
+                    exactresults[reskey] = [exactresult]
+            # if queryid in results:
+            #    results[queryid].update(matchingids)
+            # else:
+            #    results[queryid] = Counter(matchingids)
+
+
+def docorequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
+    doqueries(syntree, queries, results, allmatches, is_core)
+
+
+def doprequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
+    doqueries(syntree, queries, results, allmatches, is_pre)
+
+
+def dopostqueries(allresults: AllResults, postquerylist: List[QId], queries: QueryDict):
+    # post queries
+    for queryid in postquerylist:
+        thequeryobj = queries[queryid]
+        if query_exists(thequeryobj):
+            thelistedquery = thequeryobj.query
+
+            # it is assumed that these are all python functions
+            thef = str2functionmap[thelistedquery]
+            result = thef(allresults, queries)
+            allresults.postresults[queryid] = result
 
 
 def codeadapt(c: str) -> str:
@@ -473,6 +611,7 @@ def get_comparison(resultscounts: QIdCount, goldcounts: QIdCount, queries: Query
     return comparison
 
 
+<<<<<<< HEAD:src/sastadev/__main__.py
 def getmethodfromfile(filename: str) -> str:
     result = ''
     path, base = os.path.split(filename.lower())
@@ -486,117 +625,33 @@ def getmethodfromfile(filename: str) -> str:
         return result
 
 
-def getsortedgolduttscore(reskey: ResultsKey, goldscores) -> str:
-    if reskey in goldscores:
-        # (goldlevel, golditem, goldcounter) = goldscores[queryid]
-        goldcounter = goldscores[reskey]
-        goldcount = sumfreq(goldcounter)
-        sortedgolduttstr = counter2liststr(goldcounter)
-    else:
-        goldcount = 0
-        sortedgolduttstr = ''
-    return sortedgolduttstr
-
-
-def updatequerycounts(queryid, themethod, invalidqcount, undefinedqcount) -> Tuple[str, int, int]:
-    thequery = themethod.queries[queryid]
-    if query_exists(thequery):
-        if queryid not in invalidqueries:
-            qex = 'yes'
+def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[MethodName, FileName]:
+    if methodname is None and methodfilename is None:
+        settings.LOGGER.error('Specify a method using -m ')
+        exit(-1)
+    elif methodname is None and methodfilename is not None:
+        resultmethodfilename = methodfilename
+        resultmethodname = getmethodfromfile(methodfilename)
+        settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = supported_methods[methodname]
         else:
-            qex = 'invalid'
-            invalidqcount += 1
-    else:
-        qex = 'no'
-        undefinedqcount += 1
-    return qex, invalidqcount, undefinedqcount
-
-
-def getfullscoreandplatinumstr(reskey, themethod, theresults, resultstr, goldscores,
-                               platinuminfilefound, platinumresults, sortedgolduttstr, qex) -> Tuple[str, str]:
-
-    queryid = reskey[0]
-    thequery = themethod.queries[queryid]
-    if reskey in goldscores:
-        goldcounter = goldscores[reskey]
-        goldcount = sumfreq(goldcounter)
-    else:
-        goldcount = 0
-
-    if query_exists(thequery) and queryid not in invalidqueries:
-        # print(queryid, file=logfile)
-        if reskey in goldscores:
-            goldcounter = goldscores[reskey]
+            resultmethodfilename = methodname
+            resultmethodname = getmethodfromfile(methodname)
+            settings.LOGGER.warning('Method derived from the method file name: {}'.format(resultmethodname))
+    elif methodname is not None and methodfilename is not None:
+        if methodname.lower() in supported_methods:
+            resultmethodname = methodname.lower()
+            resultmethodfilename = methodfilename
         else:
-            goldcounter = Counter()
-        (recall, precision, f1score) = getscores(theresults, goldcounter)
-        liststargoldstr = counter2liststr(theresults & goldcounter)
-        goldminustheresults = goldcounter - theresults
-        goldminusliststr = counter2liststr(goldminustheresults)
-        theresultsminusgold = theresults - goldcounter
-        listminusgoldstr = counter2liststr(theresultsminusgold)
-        if platinuminfilefound and reskey in platinumresults:
-            theplatinumresults = platinumresults[reskey]
-            sortedplatinumliststr = counter2liststr(theplatinumresults)
-            liststarplatinumstr = counter2liststr(
-                theresults & theplatinumresults)
-            platinumminusliststr = counter2liststr(
-                theplatinumresults - theresults)
-            listminusplatinumliststr = counter2liststr(
-                theresults - theplatinumresults)
-            (platinumrecall, platinumprecision, platinumf1score) = getscores(
-                theresults, theplatinumresults)
+            settings.LOGGER.error('Unsupported method specified {}'.format(methodname))
+            exit(-1)
+    return resultmethodname, resultmethodfilename
 
-            goldstarplatinumstr = counter2liststr(
-                goldcounter & theplatinumresults)
-            platinumminusgoldstr = counter2liststr(
-                theplatinumresults - goldcounter)
-            goldminusplatinumstr = counter2liststr(
-                goldcounter - theplatinumresults)
-            (gprecall, gpprecision, gpf1score) = getscores(
-                goldcounter, theplatinumresults)
-        else:
-            sortedplatinumliststr, liststarplatinumliststr, platinumminusliststr, \
-                listminusplatinumliststr = '', '', '', ''
-            (platinumrecall, platinumprecision, platinumf1score) = (na, na, na)
-
-            goldstarplatinumstr, platinumminusgoldstr, goldminusplatinumstr = '', '', ''
-            (gprecall, gpprecision, gpf1score) = (na, na, na)
-
-    else:
-        goldcounter = Counter()
-        (recall, precision, f1score) = (na, na, na)
-        liststargoldstr, goldminusliststr, listminusgoldstr = '', '', ''
-        sortedplatinumliststr, liststarplatinumliststr, platinumminusliststr, listminusplatinumliststr = '', '', '', ''
-        (platinumrecall, platinumprecision, platinumf1score) = (na, na, na)
-        theresultsminusgold = {}
-        goldminustheresults = {}
-        goldstarplatinumstr, platinumminusgoldstr, goldminusplatinumstr = '', '', ''
-        (gprecall, gpprecision, gpf1score) = (na, na, na)
-
-    platinumoutresults = theresults | goldcounter
-    platinumoutresultsstring = counter2liststr(platinumoutresults)
-    reskeystr = showreskey(reskey)
-
-    queryinforow = [reskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
-                    themethod.queries[queryid].item]
-    queryresultsrow = [str(sumfreq(theresults)), resultstr,
-                       str(goldcount), sortedgolduttstr, qex]
-    queryRGscorerow = [sf(recall), sf(precision), sf(
-        f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
-    queryRPscorerow = [sortedplatinumliststr, sf(platinumrecall), sf(platinumprecision), sf(platinumf1score),
-                       platinumminusliststr, listminusplatinumliststr]
-    queryGPscorerow = [sf(gprecall), sf(gpprecision), sf(gpf1score), goldstarplatinumstr, platinumminusgoldstr,
-                       goldminusplatinumstr]
-
-    fullresultrow = queryinforow + queryresultsrow + \
-        queryRGscorerow + queryRPscorerow + queryGPscorerow
-
-    platinumrow = [reskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
-                   themethod.queries[queryid].item, platinumoutresultsstring, listminusgoldstr, '', '']
-
-    return fullresultrow, platinumrow
-
+=======
+>>>>>>> lemmas:mysastadev.py
 
 topnodequery = './/node[@cat="top"]'
 
@@ -632,11 +687,72 @@ def getexactresults(allmatches: MatchesDict) -> ExactResultsDict:
     return result
 
 
-# defaulttarsp = r"TARSP Index Current.xlsx"
+
+
+def adaptpositions(rawexactresults: ExactResultsDict, nodeendmap) -> ExactResultsDict:
+    newexactresults: ExactResultsDict = {}
+    for qid in rawexactresults:
+        newlist = []
+        for (uttid, position) in rawexactresults[qid]:
+            newposition = getmarkposition(position, nodeendmap, uttid)
+            newtuple = (uttid, newposition)
+            newlist.append(newtuple)
+        newexactresults[qid] = newlist
+    return newexactresults
+
+
+def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResultsDict:
+    """
+    let only those through that satisfy the filter
+    :param rawexactresults: dictionary with ResultsKey as key and a Counter as value, exact results
+    :param method: Method object
+    :return: a filtered version of rawexactresults: results that pass the filter
+    """
+#    exactresults: ExactResultsDict = defaultdict(list)  # hiermee ontstaat een probleem: dictionary size changed in iteration
+    exactresults: ExactResultsDict = {}
+    queries = method.queries
+    for reskey in rawexactresults:
+        queryid = reskey[0]
+        query = queries[queryid]
+        queryfilter = query.filter
+        thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[queryfilter]
+        exactresults[reskey] = [r for r in rawexactresults[reskey] if reskey in rawexactresults and
+                                thefilter(query, rawexactresults, r)]
+    return exactresults
+
+
+def getmaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+    cutoffpoint = None
+    words = getallrealwords(allresults)
+    cumwordcount = 0
+    wordcounts: Dict[UttId, Tuple[int, int, int]] = {}
+    uttidlist = []
+    for uttid in allresults.allutts:
+        basewordcount = sum(words[uttid].values())
+        ignorewordcount = 0 # getignorewordcount(allresults, uttid)
+        wordcount = basewordcount - ignorewordcount
+        wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
+        uttidlist.append(uttid)
+        cumwordcount += wordcount
+    result = (uttidlist, cumwordcount, cutoffpoint)
+    return result
+def getsamplesizefunction(methodname: MethodName) -> Callable:
+    if methodname in astamethods:
+        result = getastamaxsamplesizeuttidsandcutoff
+    elif methodname in tarspmethods:
+        # @@to be implemented
+        result = getmaxsamplesizeuttidsandcutoff
+    elif methodname in stapmethods:
+        # @@to be implemented
+        result = getmaxsamplesizeuttidsandcutoff
+    return result
+
+#defaulttarsp = r"TARSP Index Current.xlsx"
 defaulttarsp = supported_methods[tarsp]
 
 
 def main():
+
     parser = OptionParser()
     parser.add_option("-f", "--file", dest="infilename",
                       help="Treebank File to be analysed")
@@ -667,18 +783,15 @@ def main():
         options.corr = corrn
     if options.corr not in validcorroptions:
         validcorrstr = comma.join(validcorroptions)
-        settings.LOGGER.error(
-            'Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
+        settings.LOGGER.error('Illegal value for -c/--corr option: only the following are allowed: {}'.format(validcorrstr))
         exit(1)
 
     # @ hier ook toestaan dat er een annotatiefile als input komt (.xlsx)-done
     if options.infilename is None:  # an XML file or an.xlsx file
-        settings.LOGGER.error(
-            'Specify an input treebank file name to analyse (.xml) or the name of an annotationfile (.xlsx)')
+        settings.LOGGER.error('Specify an input treebank file name to analyse (.xml) or the name of an annotationfile (.xlsx)')
         exit(1)
     elif not os.path.exists(options.infilename):
-        settings.LOGGER.error(
-            'File {} not found. Aborting'.format(options.infilename))
+        settings.LOGGER.error('File {} not found. Aborting'.format(options.infilename))
         exit(1)
     (inbase, inext) = os.path.splitext(options.infilename)
     basepath, basefilename = os.path.split(options.infilename)
@@ -696,8 +809,7 @@ def main():
         loggingpath = os.path.join(corepath, loggingfolder)
         formspath = os.path.join(corepath, formsfolder)
 
-        outpaths = [analysespath, outtreebankspath, resultspath,
-                    silverpermpath, loggingpath, formspath, silverpath]
+        outpaths = [analysespath, outtreebankspath, resultspath, silverpermpath, loggingpath, formspath, silverpath]
 
         for outpath in outpaths:
             try:
@@ -710,8 +822,7 @@ def main():
         silverpermpath = os.path.join(basepath, path2permfolder)
 
     if inext not in ['.xml', '.xlsx']:
-        settings.LOGGER.error(
-            'Illegal input file type: must be a treebank (.xml) or an annotationfile (.xlsx)')
+        settings.LOGGER.error('Illegal input file type: must be a treebank (.xml) or an annotationfile (.xlsx)')
         exit(1)
     elif inext in ['.xlsx']:
         annotationinput = True
@@ -721,8 +832,7 @@ def main():
     if options.logfilename is None:
         options.logfilename = os.path.join(loggingpath, corefilename + logext)
 
-    options.methodname, options.methodfilename = treatmethod(
-        options.methodname, options.methodfilename)
+    options.methodname, options.methodfilename = treatmethod(options.methodname, options.methodfilename)
 
     # Configure logging
     handler = logging.FileHandler(options.logfilename, 'w', encoding='utf8')
@@ -735,41 +845,42 @@ def main():
     settings.LOGGER.info('Start of logging')
 
     if options.annotationfilename is not None and options.goldcountsfilename is not None:
-        settings.LOGGER.info(
-            'Annotation file and Gold counts file found; gold counts file ignored')
+        settings.LOGGER.info('Annotation file and Gold counts file found; gold counts file ignored')
     elif options.goldfilename is not None and options.goldcountsfilename is not None:
-        settings.LOGGER.info(
-            'Gold Reference file and Gold counts file found; gold counts file ignored')
+        settings.LOGGER.info('Gold Reference file and Gold counts file found; gold counts file ignored')
 
     # this is not needed anymore because of treatmethod
-    # if options.methodfilename is None:  # an xslx file
+    #if options.methodfilename is None:  # an xslx file
     #    options.methodfilename = defaulttarsp
     if options.annotationfilename is None:  # an xlsx file
-        options.annotationfilename = os.path.join(
-            bronzepath, corefilename + bronzesuffix + xlsxext)
+        options.annotationfilename = os.path.join(bronzepath, corefilename + bronzesuffix + xlsxext)
     if options.platinuminfilename is None:
         if intreebankinput:
-            options.platinuminfilename = os.path.join(
-                silverpath, corefilename + platinumeditedsuffix + txtext)
+            options.platinuminfilename = os.path.join(silverpath, corefilename + platinumeditedsuffix + txtext)
         else:
             options.platinuminfilename = inbase + platinumeditedsuffix + txtext
 
     if options.goldfilename is not None and options.annotationfilename is not None:
-        settings.LOGGER.info(
-            'annotationfile and goldfile specified. Annotationfile will be used.')
+        settings.LOGGER.info('annotationfile and goldfile specified. Annotationfile will be used.')
 
     if options.goldfilename is None:
         if intreebankinput:
-            options.goldfilename = os.path.join(
-                bronzepath, corefilename + ".gold" + ".tsv" + ".txt")
+            options.goldfilename = os.path.join(bronzepath, corefilename + ".gold" + ".tsv" + ".txt")
         else:
             options.goldfilename = inbase + ".gold" + ".tsv" + ".txt"
     if options.goldcountsfilename is None:
         if intreebankinput:
-            options.goldcountsfilename = os.path.join(
-                bronzepath, corefilename + ".goldcounts" + xlsxext)
+            options.goldcountsfilename = os.path.join(bronzepath, corefilename + ".goldcounts" + xlsxext)
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
+
+<<<<<<< HEAD:src/sastadev/__main__.py
+    # @@adapt this so that the method is read in directly as a Method object
+    (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodfilename)
+    defaultfilter = defaultfilters[options.methodname]
+    themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
+                       options.methodfilename, defaultfilter)
+=======
 
     # adapted this so that the method is read in directly as a Method object
     # (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodname, options.methodfilename)
@@ -777,6 +888,7 @@ def main():
     # themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
     #                   options.methodfilename, defaultfilter)
     themethod = read_method(options.methodname, options.methodfilename)
+>>>>>>> lemmas:mysastadev.py
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
 
@@ -808,8 +920,7 @@ def main():
         else:
             reffilename = options.goldcountsfilename
     else:
-        settings.LOGGER.error(
-            'Neither an annotationfile nor a goldfile, nor a gold count file specified. Aborting')
+        settings.LOGGER.error('Neither an annotationfile nor a goldfile, nor a gold count file specified. Aborting')
         exit(1)
 
     # rawcoreresults = {}
@@ -818,19 +929,18 @@ def main():
 
     # @dit aanpassen , vooral de message-done
     if not os.path.exists(options.infilename):
-        settings.LOGGER.error(
-            'Input treebank or annotationfile {} not found. Aborting'.format(options.infilename))
+        settings.LOGGER.error('Input treebank or annotationfile {} not found. Aborting'.format(options.infilename))
         exit(1)
 
     # gather remarks on results of earlier runs, write them to a perm_file  and adapt the silverscore file
 
-    # (pathname, barefilename) = os.path.split(options.infilename)
-    # (base, ext) = os.path.splitext(barefilename)
-    # (fullbase, _) = os.path.splitext(options.infilename)
-    # permpath = os.path.join(pathname, path2permfolder)
+    #(pathname, barefilename) = os.path.split(options.infilename)
+    #(base, ext) = os.path.splitext(barefilename)
+    #(fullbase, _) = os.path.splitext(options.infilename)
+    #permpath = os.path.join(pathname, path2permfolder)
 
-    # pathname = basepath
-    # barefilename = basefilename
+    #pathname = basepath
+    #barefilename = basefilename
     base = corefilename
     ext = inext
     permpath = silverpermpath
@@ -844,15 +954,11 @@ def main():
     perm_silverfilename = permprefix + corefilename + '.xlsx'
     perm_silverfullname = os.path.join(permpath, perm_silverfilename)
     #
-    platinumcheckeditedfullname = os.path.join(
-        resultspath, corefilename + platinumcheckeditedsuffix + '.xlsx')
+    platinumcheckeditedfullname = os.path.join(resultspath, corefilename + platinumcheckeditedsuffix + '.xlsx')
 
-    platinumoutfilename = os.path.join(
-        resultspath, corefilename + platinumsuffix + txtext)
-    platinumcheckfilename = os.path.join(
-        resultspath, corefilename + platinumchecksuffix + txtext)
-    silvercheckfilename = os.path.join(
-        resultspath, corefilename + platinumchecksuffix + '.xlsx')
+    platinumoutfilename = os.path.join(resultspath, corefilename + platinumsuffix + txtext)
+    platinumcheckfilename = os.path.join(resultspath, corefilename + platinumchecksuffix + txtext)
+    silvercheckfilename = os.path.join(resultspath, corefilename + platinumchecksuffix + '.xlsx')
 
     (platbase, platext) = os.path.splitext(platinumcheckfilename)
     platinumcheckxlfullname = platbase + '.xlsx'
@@ -864,86 +970,113 @@ def main():
     analysedtrees: List[SynTree] = []
     nodeendmap = {}
 
+    # @vanaf nu gaat het om een treebank, dus hier een if statement toevoegen-done
     if annotationinput:
-        allutts, richexactscores = get_golddata(options.infilename, themethod.item2idmap, themethod.altcodes,
-                                                themethod.queries, options.includeimplies)
+        allutts, richexactscores = get_golddata(options.infilename, themethod.item2idmap, altcodes, themethod.queries,
+                                                options.includeimplies)
         uttcount = len(allutts)
         exactresults = richscores2scores(richexactscores)
-        annotatedfileresults = AllResults(uttcount=uttcount,
-                                          coreresults={},
-                                          exactresults=exactresults,
-                                          postresults={},
-                                          allmatches={},
-                                          filename=options.infilename,
-                                          analysedtrees=[],
-                                          allutts=allutts,
-                                          annotationinput=annotationinput)
-        origtreebank = None
     else:
         tree = etree.parse(options.infilename)
         origtreebank = tree.getroot()
-        annotatedfileresults = None
-        targets = get_targets(origtreebank)
         if origtreebank.tag != 'treebank':
-            settings.LOGGER.error(
-                "Input treebank file does not contain a treebank element")
+            settings.LOGGER.error("Input treebank file does not contain a treebank element")
             exit(-1)
+        allutts = {}
+        uttcount = 0
+        # determine targets
+        targets = get_targets(origtreebank)
 
-    scp = SastaCoreParameters(annotationinput, options.corr, themethod,
-                              options.includeimplies, options.infilename, targets)
+        # for tree in origtreebank:
+        #     showtree(tree, 'voor fexplanations')
 
-    if not annotationinput:
-        treebank1 = doauchann(origtreebank)
+        # deal with final explanations
+        fexplanations = True
+        if fexplanations:
+            treebank1 = finalexplanation_adapttreebank(origtreebank)
+        else:
+            treebank1 = origtreebank
 
-        methodname = scp.themethod.name
-        corr = scp.corr
-        themethod = scp.themethod
+        # for tree in treebank1:
+        #     showtree(tree, 'na fexplanations')
+        treebank, errordict, allorandalts = correcttreebank(treebank1, targets, options.methodname, options.corr)
 
-        treebank, errordict, allorandalts = correcttreebank(
-            treebank1, targets, methodname, corr)
+        # for tree in treebank:
+        #    showtree(tree, 'na correcties')
 
-    allresults, samplesizetuple = sastacore(
-        origtreebank, treebank, annotatedfileresults, scp)
-
-    exactresults = allresults.exactresults
-    allutts = allresults.allutts
-    uttcount = allresults.uttcount
-    allmatches = allresults.allmatches
-
-    # create the new treebank
-    if treebank is not None:
+        # create the new treebank
         fulltreebank = etree.ElementTree(treebank)
-        newtreebankfullname = os.path.join(
-            outtreebankspath, corefilename + '_corrected' + '.xml')
+        newtreebankfullname = os.path.join(outtreebankspath, corefilename + '_corrected' + '.xml')
         fulltreebank.write(newtreebankfullname, encoding="UTF8", xml_declaration=False,
                            pretty_print=True)
 
-    # create error file
-    errorreportfilename = os.path.join(
-        resultspath, corefilename + '_errorreport' + '.xlsx')
-    mkerrorreport(errordict, errorreportfilename)
+        # create error file
+        errorreportfilename = os.path.join(resultspath, corefilename + '_errorreport' + '.xlsx')
+        mkerrorreport(errordict, errorreportfilename)
 
-    # create error logging
-    errorloggingfullname = os.path.join(
-        loggingpath, corefilename + '_errorlogging' + '.xlsx')
+        # create error logging
+        errorloggingfullname = os.path.join(loggingpath, corefilename + '_errorlogging' + '.xlsx')
 
-    allerrorrows: List[str] = []
-    for orandalts in allorandalts:
-        if orandalts is not None:
-            allerrorrows += orandalts.OrigandAlts2rows(corefilename)
-    errorwb = mkworkbook(errorloggingfullname, [
-                         errorwbheader], allerrorrows, freeze_panes=(1, 1))
-    errorwb.close()
+        allerrorrows: List[str] = []
+        for orandalts in allorandalts:
+            if orandalts is not None:
+                allerrorrows += orandalts.OrigandAlts2rows(corefilename)
+        errorwb = mkworkbook(errorloggingfullname, [errorwbheader], allerrorrows, freeze_panes=(1, 1))
+        errorwb.close()
+
+        # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
+        analysedtrees: List[(UttId, SynTree)] = []
+        for syntree in treebank:
+            temputtid = getuttid(syntree)
+            uttcount += 1
+<<<<<<< HEAD:src/sastadev/__main__.py
+            #settings.LOGGER.error('uttcount={}'.format(uttcount))
+=======
+            # if temputtid == '118':
+            #     showtree(syntree, 'tree 118')
+            #SDLOGGER.error('uttcount={}'.format(uttcount))
+>>>>>>> lemmas:mysastadev.py
+            mustbedone = get_mustbedone(syntree, targets)
+            if mustbedone:
+                # uttid = getuttid(syntree)
+                # analysedtrees consists of (uttid, syntree) pairs in order
+                uttid = getxselseuttid(syntree)
+                analysedtrees.append((uttid, syntree))
+
+                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
+
+                # showtree(syntree)
+                if uttid in nodeendmap:
+                    settings.LOGGER.error('Duplicate uttid in sample: {}'.format(uttid))
+                nodeendmap[uttid] = getnodeendmap(syntree)
+
+                # uttno = getuttno(syntree)
+                # allutts[uttno] = getyield(syntree)
+                allutts[uttid] = getyield(syntree)
+
+        # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
+        # rawexactresults = getexactresults(allmatches)
+        rawexactresults2 = passfilter(rawexactresults, themethod)
+        exactresults = adaptpositions(rawexactresults2, nodeendmap)
+
+        #pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
+        #@@to be implemented @@ of misschien in de loop hierboven al?
+
+    # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
+    # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
+
+    # adapt the exactresults  positions to the reference
+
+    coreresults = exact2results(exactresults)
 
     platinuminfilefound = False
     if os.path.exists(options.platinuminfilename):
         platinuminfilefound = True
-        platinumresults: Dict[ResultsKey, Counter] = read_referencefile(
-            options.platinuminfilename, logfile)
+        platinumresults: Dict[ResultsKey, Counter] = read_referencefile(options.platinuminfilename, logfile)
         checkplatinum(goldscores, platinumresults, themethod.queries)
     else:
-        settings.LOGGER.info('Platinum file {} not found.'.format(
-            options.platinuminfilename))
+        SDLOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
         platinumresults = {}
 
     # platinumoutfilename = base + platinumsuffix + txtext
@@ -951,19 +1084,36 @@ def main():
     # platinumcheckfilename = base + platinumchecksuffix + txtext
     platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
 
+
+    postresults: Dict[ResultsKey, Any] = {}
+    allresults = AllResults(uttcount, coreresults, exactresults, postresults, allmatches, options.infilename, analysedtrees,
+                            allutts, annotationinput)
+
+    samplesizefunction = getsamplesizefunction(options.methodname)
+    samplesizetuple: SampleSizeTuple = samplesizefunction(allresults)
+
+    postquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
+    formquerylist: List[QId] = [q for q in themethod.postquerylist if themethod.queries[q].process == form_process]
+
+    # we assume the reduction must be done before the postqueries
+    allresults = reduceallresults(allresults, samplesizetuple, options.methodname)
+
     # bronze reduction
-    exactgoldscores = reduceexactgoldscores(
-        exactgoldscores, samplesizetuple, options.methodname)  # ongoing
-    goldscores = exact2results(exactgoldscores)  # ongoing
+    exactgoldscores = reduceexactgoldscores(exactgoldscores, samplesizetuple, options.methodname)  # ongoing
+    goldscores = exact2results(exactgoldscores) # ongoing
     goldcounts = scores2counts(goldscores)
 
+
     # silver / platinumreduction
-    platinumresults: Dict[ResultsKey, Counter] = reduceresults(
-        platinumresults, samplesizetuple, options.methodname)
+    platinumresults: Dict[ResultsKey, Counter] = reduceresults(platinumresults, samplesizetuple, options.methodname)
+
+    dopostqueries(allresults, postquerylist, themethod.queries)
+
+
+    dopostqueries(allresults, formquerylist, themethod.queries)
 
     (base, ext) = os.path.splitext(options.infilename)
-    outputfullname = os.path.join(
-        resultspath, corefilename + "_analysis" + tsvext + txtext)
+    outputfullname = os.path.join(resultspath, corefilename + "_analysis" + tsvext + txtext)
     outfile = open(outputfullname, 'w', encoding='utf8')
 
     outxlsx = os.path.join(resultspath, corefilename + "_analysis" + xlsxext)
@@ -974,13 +1124,32 @@ def main():
     outrowctr = outstartrow
     outworksheet.freeze_panes('E2')
 
-    countcomparisonfilename = os.path.join(
-        resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
+<<<<<<< HEAD:src/sastadev/__main__.py
+    platinuminfilefound = False
+    if os.path.exists(options.platinuminfilename):
+        platinuminfilefound = True
+        platinumresults = read_referencefile(options.platinuminfilename, logfile)
+        checkplatinum(goldscores, platinumresults, queries)
+    else:
+        settings.LOGGER.info('Platinum file {} not found.'.format(options.platinuminfilename))
+        platinumresults = {}
+
+    # platinumoutfilename = base + platinumsuffix + txtext
+    platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
+    # platinumcheckfilename = base + platinumchecksuffix + txtext
+    platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
+=======
+>>>>>>> lemmas:mysastadev.py
+
+    countcomparisonfilename = os.path.join(resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
     # print the invalid queries
     for q in invalidqueries:
-        settings.LOGGER.error("{}: {}: <{}>".format(
-            q, invalidqueries[q], themethod.queries[q].query))
+<<<<<<< HEAD:src/sastadev/__main__.py
+        settings.LOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], queries[q].query))
+=======
+        SDLOGGER.error("{}: {}: <{}>".format(q, invalidqueries[q], themethod.queries[q].query))
+>>>>>>> lemmas:mysastadev.py
 
     # print the header
     print(resultsheaderstring, file=outfile)
@@ -998,80 +1167,143 @@ def main():
     # exactresults = getexactresults(allmatches)
     exact = True
 
-    pcheaders = [
-        ['User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt', 'origutt']]
+    pcheaders = [['User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt', 'origutt']]
     allrows = []
 
-    reskeyindex = defaultdict(list)
     for reskey in results:
-        reskeyindex[reskey[0]].append(reskey)
-
-    for queryid in themethod.queries:
+        sortedgolduttlist: List[str] = []
+        platinumoutresults: Dict[UttId, int] = Counter()
+        platinumoutresultsstring = ''
         qcount += 1
-        if queryid not in reskeyindex:
-            reskeys = [mkresultskey(queryid)]
+        theresults = results[reskey]
+        resultstr = counter2liststr(theresults)
+        if reskey in goldscores:
+            # (goldlevel, golditem, goldcounter) = goldscores[queryid]
+            goldcounter = goldscores[reskey]
+            goldcount = sumfreq(goldcounter)
+            sortedgolduttstr = counter2liststr(goldcounter)
         else:
-            reskeys = reskeyindex[queryid]
-        for reskey in reskeys:
-            theresults = results[reskey] if reskey in results else Counter()
-            resultstr = counter2liststr(theresults)
-
-            sortedgolduttstr = getsortedgolduttscore(reskey, goldscores)
-
-            qex, invalidqcount, undefinedqcount = updatequerycounts(queryid, themethod, invalidqcount,
-                                                                    undefinedqcount)
-
-            fullresultrow, platinumrow = getfullscoreandplatinumstr(reskey, themethod, theresults, resultstr,
-                                                                    goldscores, platinuminfilefound,
-                                                                    platinumresults, sortedgolduttstr, qex)
-
-            print(tab.join(fullresultrow), file=outfile)
-            outworksheet.write_row(outrowctr, outstartcol, fullresultrow)
-            outrowctr += 1
-
-            print(tab.join(platinumrow), file=platinumoutfile)
-
-            # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
-            if exact:
-                newrows = exactmismatches(reskey, themethod.queries, exactresults, exactgoldscores, allmatches,
-                                          allutts,
-                                          platinumcheckfile, silverannotationsdict, annotationinput)
-                allrows += newrows
+            goldcount = 0
+            sortedgolduttstr = ''
+        queryid = reskey[0]
+        thequery = themethod.queries[queryid]
+        if query_exists(thequery):
+            if queryid not in invalidqueries:
+                qex = 'yes'
             else:
-                if theresultsminusgold != {}:
-                    print('More examples', file=platinumcheckfile)
-                for uttid in theresultsminusgold:
-                    if (reskey, uttid) in allmatches:
-                        for (m, syntree) in allmatches[(reskey, uttid)]:
-                            markedutt = getmarkedutt(m, syntree)
-                            platinumcheckrow1 = [reskey, themethod.queries[queryid].cat,
-                                                 themethod.queries[queryid].subcat,
-                                                 themethod.queries[queryid].item, uttid, markedutt]
-                            print(tab.join(platinumcheckrow1),
-                                  file=platinumcheckfile)
+                qex = 'invalid'
+                invalidqcount += 1
+        else:
+            qex = 'no'
+            undefinedqcount += 1
+        if query_exists(thequery) and queryid not in invalidqueries:
+            # print(queryid, file=logfile)
+            if reskey in goldscores:
+                goldcounter = goldscores[reskey]
+            else:
+                goldcounter = Counter()
+            (recall, precision, f1score) = getscores(theresults, goldcounter)
+            liststargoldstr = counter2liststr(theresults & goldcounter)
+            goldminustheresults = goldcounter - theresults
+            goldminusliststr = counter2liststr(goldminustheresults)
+            theresultsminusgold = theresults - goldcounter
+            listminusgoldstr = counter2liststr(theresultsminusgold)
+            if platinuminfilefound and reskey in platinumresults:
+                theplatinumresults = platinumresults[reskey]
+                sortedplatinumliststr = counter2liststr(theplatinumresults)
+                liststarplatinumstr = counter2liststr(theresults & theplatinumresults)
+                platinumminusliststr = counter2liststr(theplatinumresults - theresults)
+                listminusplatinumliststr = counter2liststr(theresults - theplatinumresults)
+                (platinumrecall, platinumprecision, platinumf1score) = getscores(theresults, theplatinumresults)
 
-                if goldminustheresults != {}:
-                    print('Missed examples', file=platinumcheckfile)
-                for uttid in goldminustheresults:
-                    if uttid in allutts:
-                        uttstr = space.join(allutts[uttid])
-                    else:
-                        settings.LOGGER.warning(
-                            'uttid {} not in allutts'.format(uttid))
-                    platinumcheckrow2 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
-                                         themethod.queries[queryid].item, uttid, uttstr]
-                    print(tab.join(platinumcheckrow2), file=platinumcheckfile)
+                goldstarplatinumstr = counter2liststr(goldcounter & theplatinumresults)
+                platinumminusgoldstr = counter2liststr(theplatinumresults - goldcounter)
+                goldminusplatinumstr = counter2liststr(goldcounter - theplatinumresults)
+                (gprecall, gpprecision, gpf1score) = getscores(goldcounter, theplatinumresults)
+            else:
+                sortedplatinumliststr, liststarplatinumliststr, platinumminusliststr, \
+                listminusplatinumliststr = '', '', '', ''
+                (platinumrecall, platinumprecision, platinumf1score) = (na, na, na)
 
-    # platinumcheckfullname = platinumcheckfile.name
-    # (base, ext) = os.path.splitext(platinumcheckfilename)
+                goldstarplatinumstr, platinumminusgoldstr, goldminusplatinumstr = '', '', ''
+                (gprecall, gpprecision, gpf1score) = (na, na, na)
+
+        else:
+            goldcounter = Counter()
+            (recall, precision, f1score) = (na, na, na)
+            liststargoldstr, goldminusliststr, listminusgoldstr = '', '', ''
+            sortedplatinumliststr, liststarplatinumliststr, platinumminusliststr, listminusplatinumliststr = '', '', '', ''
+            (platinumrecall, platinumprecision, platinumf1score) = (na, na, na)
+            theresultsminusgold = {}
+            goldminustheresults = {}
+            goldstarplatinumstr, platinumminusgoldstr, goldminusplatinumstr = '', '', ''
+            (gprecall, gpprecision, gpf1score) = (na, na, na)
+
+        platinumoutresults = theresults | goldcounter
+        platinumoutresultsstring = counter2liststr(platinumoutresults)
+        reskeystr = showreskey(reskey)
+
+        queryinforow = [reskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                        themethod.queries[queryid].item]
+        queryresultsrow = [str(sumfreq(theresults)), resultstr, str(goldcount), sortedgolduttstr, qex]
+        queryRGscorerow = [sf(recall), sf(precision), sf(f1score), liststargoldstr, goldminusliststr, listminusgoldstr]
+        queryRPscorerow = [sortedplatinumliststr, sf(platinumrecall), sf(platinumprecision), sf(platinumf1score),
+                           platinumminusliststr, listminusplatinumliststr]
+        queryGPscorerow = [sf(gprecall), sf(gpprecision), sf(gpf1score), goldstarplatinumstr, platinumminusgoldstr,
+                           goldminusplatinumstr]
+
+        fullresultrow = queryinforow + queryresultsrow + queryRGscorerow + queryRPscorerow + queryGPscorerow
+        print(tab.join(fullresultrow), file=outfile)
+        outworksheet.write_row(outrowctr, outstartcol, fullresultrow)
+        outrowctr += 1
+
+        platinumrow = [reskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                       themethod.queries[queryid].item, platinumoutresultsstring, listminusgoldstr, '', '']
+
+        print(tab.join(platinumrow), file=platinumoutfile)
+
+        # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
+        if exact:
+            newrows = exactmismatches(reskey, themethod.queries, exactresults, exactgoldscores, allmatches, allutts,
+                                      platinumcheckfile, silverannotationsdict, annotationinput)
+            allrows += newrows
+        else:
+            if theresultsminusgold != {}:
+                print('More examples', file=platinumcheckfile)
+            for uttid in theresultsminusgold:
+                if (reskey, uttid) in allmatches:
+                    for (m, syntree) in allmatches[(reskey, uttid)]:
+                        markedutt = getmarkedutt(m, syntree)
+                        platinumcheckrow1 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                                             themethod.queries[queryid].item, uttid, markedutt]
+                        print(tab.join(platinumcheckrow1), file=platinumcheckfile)
+
+            if goldminustheresults != {}:
+                print('Missed examples', file=platinumcheckfile)
+            for uttid in goldminustheresults:
+                if uttid in allutts:
+                    uttstr = space.join(allutts[uttid])
+                else:
+<<<<<<< HEAD:src/sastadev/__main__.py
+                    settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
+                platinumcheckrow2 = [queryid, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, uttid,
+                                     uttstr]
+=======
+                    SDLOGGER.warning('uttid {} not in allutts'.format(uttid))
+                platinumcheckrow2 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
+                                     themethod.queries[queryid].item, uttid, uttstr]
+>>>>>>> lemmas:mysastadev.py
+                print(tab.join(platinumcheckrow2), file=platinumcheckfile)
+
+    #platinumcheckfullname = platinumcheckfile.name
+    #(base, ext) = os.path.splitext(platinumcheckfilename)
     # platinumcheckxlfullname = base + '.xlsx'
     # add missed literal hits
     literalmissedrows = literalmissedmatches(themethod.queries, exactresults, exactgoldscores, allmatches, allutts,
-                                             platinumcheckfile, silverannotationsdict, annotationinput)
+                                      platinumcheckfile, silverannotationsdict, annotationinput)
     allrows += literalmissedrows
 
-    wb = mkworkbook(platinumcheckxlfullname, pcheaders,
-                    allrows, freeze_panes=(1, 9))
+    wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
     wb.close()
 
     # compute the gold postresults
@@ -1080,11 +1312,8 @@ def main():
     allgoldmatches: MatchesDict = {}
     for reskey in goldscores:
         goldcounters[reskey] = goldscores[reskey]
-    allgoldresults = AllResults(uttcount, goldcounters, exactgoldscores, goldpostresults, allgoldmatches, reffilename,
-                                [],
+    allgoldresults = AllResults(uttcount, goldcounters, exactgoldscores, goldpostresults, allgoldmatches, reffilename, [],
                                 allannutts, annotationinput)
-    postquerylist: List[QId] = [
-        q for q in themethod.postquerylist if themethod.queries[q].process == post_process]
     dopostqueries(allgoldresults, postquerylist, themethod.queries)
 
     # compute the platinum postresults
@@ -1106,8 +1335,7 @@ def main():
         queryreskeystr = showreskey(queryreskey)
         queryinforow = [queryreskeystr, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
                         themethod.queries[queryid].item]
-        queryresultsrow = ['', resultposval, '', goldpostval,
-                           qex] + erow(6) + [platinumpostval] + erow(11)
+        queryresultsrow = ['', resultposval, '', goldpostval, qex] + erow(6) + [platinumpostval] + erow(11)
 
         postrow = queryinforow + queryresultsrow
         postrowstring = tab.join(queryinforow + queryresultsrow)
@@ -1125,12 +1353,10 @@ def main():
                        lambda x: is_preorcore(x) and query_exists(x)),
                       (4, 'Overall (all original pre and core measures)', lambda x: is_preorcore(x))]
 
-    logheader = ['datetime', 'treebank', 'scorenr,' 'R', 'P', 'F1', 'P-R', 'P-P', 'P-F1', 'GP-R', 'GP-P', 'GP-F1',
-                 'ref',
+    logheader = ['datetime', 'treebank', 'scorenr,' 'R', 'P', 'F1', 'P-R', 'P-P', 'P-F1', 'GP-R', 'GP-P', 'GP-F1', 'ref',
                  'method']
     logname = 'sastalog.txt'
-    logpath = os.path.join(codepath, '../../sastalog')
-    os.makedirs(logpath, exist_ok=True)
+    logpath = r'.'
     logfullname = os.path.join(logpath, logname)
     biglogfile = open(logfullname, 'a', encoding='utf8')
 
@@ -1164,8 +1390,11 @@ def main():
                 if thequery.original and queryfunction(thequery):
                     platinumcount += sum(platinumresults[reskey].values())
             else:
-                settings.LOGGER.warning(
-                    f'Query {reskey} found in platinumresults but {queryid} not in queries')
+<<<<<<< HEAD:src/sastadev/__main__.py
+                settings.LOGGER.warning('Query {} found in platinumresults but not in queries'.format(queryid))
+=======
+                SDLOGGER.warning(f'Query {reskey} found in platinumresults but {queryid} not in queries')
+>>>>>>> lemmas:mysastadev.py
 
         # resultsgoldintersectiocount
         resultsgoldintersectioncount = 0
@@ -1179,7 +1408,11 @@ def main():
                     resultsgoldintersectioncount += sum(intersection.values())
                 else:
                     pass
-                    # settings.LOGGER.warning(f'Query {reskey} found in results but not in goldscores')
+<<<<<<< HEAD:src/sastadev/__main__.py
+                    # settings.LOGGER.warning('Query {} found in results but not in goldscores'.format(queryid))
+=======
+                    # SDLOGGER.warning(f'Query {reskey} found in results but not in goldscores')
+>>>>>>> lemmas:mysastadev.py
 
         # resultsplatinumintersectioncount
         resultsplatinumintersectioncount = 0
@@ -1189,8 +1422,7 @@ def main():
             if thequery.original and queryfunction(thequery):
                 if reskey in platinumresults:
                     intersection = results[reskey] & platinumresults[reskey]
-                    resultsplatinumintersectioncount += sum(
-                        intersection.values())
+                    resultsplatinumintersectioncount += sum(intersection.values())
                 else:
                     pass
                     # settings.LOGGER.warning('queryid {} not in platinumresults'.format(queryid))
@@ -1205,25 +1437,24 @@ def main():
                     if reskey in goldscores:
                         goldcounter = goldscores[reskey]
                         intersection = goldcounter & platinumresults[reskey]
-                        goldplatinumintersectioncount += sum(
-                            intersection.values())
+                        goldplatinumintersectioncount += sum(intersection.values())
                     else:
                         pass
                         # settings.LOGGER.warning('Query {} in platinumresults but not in goldscores'.format(queryid))
             else:
-                settings.LOGGER.warning(
-                    f'Query {reskey} in platinumresults but {queryid} not in queries')
+<<<<<<< HEAD:src/sastadev/__main__.py
+                settings.LOGGER.warning('Query {} in platinumresults but not in queries'.format(queryid))
+=======
+                SDLOGGER.warning(f'Query {reskey} in platinumresults but {queryid} not in queries')
+>>>>>>> lemmas:mysastadev.py
 
-        (recall, precision, f1score) = getevalscores(
-            resultscount, goldcount, resultsgoldintersectioncount)
+        (recall, precision, f1score) = getevalscores(resultscount, goldcount, resultsgoldintersectioncount)
         (platinumrecall, platinumprecision, platinumf1score) = getevalscores(resultscount, platinumcount,
                                                                              resultsplatinumintersectioncount)
-        (gprecall, gpprecision, gpf1score) = getevalscores(
-            goldcount, platinumcount, goldplatinumintersectioncount)
+        (gprecall, gpprecision, gpf1score) = getevalscores(goldcount, platinumcount, goldplatinumintersectioncount)
 
         overallrow = ['', '', '', message, '', '', '', '', '', sf(recall), sf(precision), sf(f1score),
-                      '', '', '', '', sf(platinumrecall), sf(
-                          platinumprecision), sf(platinumf1score), '', '',
+                      '', '', '', '', sf(platinumrecall), sf(platinumprecision), sf(platinumf1score), '', '',
                       sf(gprecall), sf(gpprecision), sf(gpf1score), '', '', '']
 
         print(tab.join(overallrow), file=outfile)
@@ -1245,11 +1476,9 @@ def main():
 
     resultscounts = scores2counts(results)
 
-    countcomparison = get_comparison(
-        resultscounts, goldcounts, themethod.queries)
+    countcomparison = get_comparison(resultscounts, goldcounts, themethod.queries)
     if countcomparison != []:
-        countcomparisonfile = open(
-            countcomparisonfilename, 'w', encoding='utf8')
+        countcomparisonfile = open(countcomparisonfilename, 'w', encoding='utf8')
         ccheader = ['Measure', 'result', 'gold', 'diff']
         ccheaderstr = tab.join(ccheader)
         print(ccheaderstr, file=countcomparisonfile)
@@ -1259,10 +1488,14 @@ def main():
 
     definedqcount = qcount - undefinedqcount
 
-    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(
-        goldscores, themethod.queries)
-    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(
-        goldcounts, themethod.queries)
+<<<<<<< HEAD:src/sastadev/__main__.py
+    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, queries)
+    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, queries)
+=======
+
+    (definedfornonemptygoldscore, undefinedqueries) = get_definedfornonemptygold(goldscores, themethod.queries)
+    (definedfornonemptygoldcounts, undefinedqueries) = get_definedfornonemptygold(goldcounts, themethod.queries)
+>>>>>>> lemmas:mysastadev.py
 
     lgoldscores = len(goldscores)
 
@@ -1282,12 +1515,9 @@ def main():
     finalmessagetemplate1 = '{} measures, {} undefined, {} defined,  of which {} invalid.'
     finalmessagetemplate2 = '{} measures defined for a non empty gold score out of {} ({}).'
     finalmessagetemplate3 = '{} measures defined for a non empty gold count out of {} ({}).'
-    print(finalmessagetemplate1.format(
-        qcount, undefinedqcount, definedqcount, invalidqcount))
-    print(finalmessagetemplate2.format(
-        definedfornonemptygoldscore, lgoldscores, percentagecompletion1str))
-    print(finalmessagetemplate3.format(
-        definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
+    print(finalmessagetemplate1.format(qcount, undefinedqcount, definedqcount, invalidqcount))
+    print(finalmessagetemplate2.format(definedfornonemptygoldscore, lgoldscores, percentagecompletion1str))
+    print(finalmessagetemplate3.format(definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
     print('Undefined queries:', undefinedqueries)
     settings.LOGGER.info("Done!")
 

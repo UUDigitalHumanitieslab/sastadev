@@ -43,12 +43,12 @@ wordcolheaderre = re.compile(wordcolheaderpattern)
 firstwordcolheaderpattern = r'^\s*word0*1\s*$'
 firstwordcolheaderre = re.compile(firstwordcolheaderpattern)
 
-speakerheaders = ['spreker', 'speaker', 'spk']
-uttidheaders = ['uiting', 'id', 'utt', 'uttid', 'utt_id']
+speakerheaders = ['speaker', 'spreker', 'spk']
+uttidheaders = ['id', 'utt', 'uttid', 'uiting']
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
-commentsheaders = ['opmerkingen', 'comments', 'commentaar']
-unalignedheaders = ['hele uiting', 'unaligned', 'hele zin']
+commentsheaders = ['comments', 'commentaar']
+unalignedheaders = ['unaligned', 'hele uiting', 'hele zin']
 
 
 def nested_dict(n: int,
