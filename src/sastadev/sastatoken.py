@@ -12,7 +12,8 @@ class Token:
 
     def __repr__(self):
         fmtstr = 'Token(word={},pos={}, skip={}, subpos={})'
-        result = fmtstr.format(repr(self.word), repr(self.pos), repr(self.skip), repr(self.subpos))
+        result = fmtstr.format(repr(self.word), repr(
+            self.pos), repr(self.skip), repr(self.subpos))
         return result
 
     def __str__(self):

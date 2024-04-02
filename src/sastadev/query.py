@@ -79,6 +79,7 @@ def query_exists(query):
     result = query.query != "" and query.query is not None
     return result
 
+
 def is_literal(query):
     result = query.literal != ''
     return result

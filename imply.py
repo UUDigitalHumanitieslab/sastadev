@@ -3,7 +3,7 @@ The *imply* module implements the function *removeimplies* to remove matches tha
 '''
 
 from sastatypes import MatchesDict, Query, QId, QueryDict, Matches, Match
-from treebankfunctions import getnodeyield, getattval as gav
+from treebanks import getnodeyield, getattval as gav
 
 def removeimplies(matches: MatchesDict, queries: QueryDict) -> MatchesDict:
     toremovekeys = []

@@ -4,21 +4,21 @@ The *imply* module implements the function *removeimplies* to remove matches tha
 from typing import Dict, Tuple
 from typing_extensions import TypeAlias
 from collections import defaultdict
-from sastatypes import ExactResults,  QId, QueryDict, Matches, Match,  SynTree, UttId
+from sastatypes import ExactResults, QId, QueryDict, Matches, Match, SynTree, UttId
 from sastadev.query import Query
 from sastadev.treebankfunctions import getnodeyield, getattval as gav
-from methods import Method
-from allresults import matches2exactresults, ResultsKey
+from sastadev.methods import Method
+from sastadev.allresults import matches2exactresults, ResultsKey
 
 MatchesDict: TypeAlias = Dict[Tuple[ResultsKey, UttId], Matches]
 
 
-def removeimplies(matches: MatchesDict, exactresults:ExactResults, method: Method) -> Tuple[MatchesDict, ExactResults]:
+def removeimplies(matches: MatchesDict, exactresults: ExactResults, method: Method) -> Tuple[MatchesDict, ExactResults]:
     toremovekeys = []
     toremovematches = defaultdict(list)
     queries = method.queries
     for qid, uttid in matches:
-        thematches = matches[(qid,uttid)]
+        thematches = matches[(qid, uttid)]
         thequery = queries[qid[0]]
         for item in thequery.implies:
             simpleimpliedqid = method.simpleitem2idmap[item]
@@ -36,6 +36,7 @@ def removeimplies(matches: MatchesDict, exactresults:ExactResults, method: Metho
     newexactresults = matches2exactresults(newmatches)
     return newmatches, newexactresults
 
+
 def contains(match: Match, impliedmatch: Match) -> bool:
     matchnode, topnode = match
     matchnodeyield = getnodeyield(matchnode)
@@ -45,6 +46,7 @@ def contains(match: Match, impliedmatch: Match) -> bool:
     impliedmatchpositions = {gav(node, 'end') for node in impliedmatchnodeyield}
     result = impliedmatchpositions.issubset(matchpositions)  # of moeten de laagste identiek zijn?
     return result
+
 
 def removematches(matches: MatchesDict, toremovematches: MatchesDict) -> MatchesDict:
     newmatchesdict = defaultdict(list)
@@ -56,4 +58,3 @@ def removematches(matches: MatchesDict, toremovematches: MatchesDict) -> Matches
                 if matchnode not in toremovematches[key]:
                     newmatchesdict[key].append(matchnode)
     return newmatchesdict
-

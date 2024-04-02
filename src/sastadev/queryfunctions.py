@@ -162,7 +162,7 @@ def vobijpred(obj1node, headnode, stree) -> bool:
     # check whether the obj1node precedes the headnode: daar naar is ok, naar daar is not ok
     headposition = int(getattval(headnode, 'end'))
     obj1position = int(getattval(obj1node, 'end'))
-    cond2 = headposition < obj1position
+    cond2 = obj1position < headposition
     result = cond1 and cond2
     return result
 

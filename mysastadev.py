@@ -197,7 +197,7 @@ from config import SDLOGGER
 from asta_queries import astalemmafunction
 from SAFreader import get_golddata, richscores2scores,  richexact2global
 from external_functions import str2functionmap
-from treebankfunctions import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
+from treebanks import getuttid, getyield, getmeta, getattval, getxmetatreepositions, getuttno, getuttidorno, \
     showtree, getnodeendmap, getxselseuttid
 from SRFreader import read_referencefile
 from goldcountreader import get_goldcounts

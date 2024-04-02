@@ -1,14 +1,13 @@
 from collections import Counter
 from copy import copy
-
 from lxml import etree
-
 from sastadev.conf import settings
-from sastadev.treebankfunctions import getattval, getmarkedyield, getyield, find1
 from sastadev.sastatoken import deflate
 from sastadev.allresults import mkresultskey, ResultsKey, showreskey
 from typing import Tuple
 from sastadev.sastatypes import UttId, Position
+from sastadev.treebankfunctions import (find1, getattval, getmarkedyield,
+                                        getyield)
 
 tab = '\t'
 space = ' '
@@ -76,7 +75,8 @@ def getfirstwordposition(matchtree):
         position = 0
     return position
 
-#moved to treebannkfunctions
+
+# moved to treebannkfunctions
 # def getmarkedyield(wordlist, positions):
 #     pos = 1
 #     resultlist = []
@@ -121,17 +121,21 @@ def getmarkposition(position, nodeendmap, uttid):
         if str(position) in nodeendmap[uttid]:
             result = nodeendmap[uttid][str(position)]
         else:
-            settings.LOGGER.error('getmarkposition: No mapping found for position {} in utterance {}'.format(position, uttid))
+            settings.LOGGER.error(
+                'getmarkposition: No mapping found for position {} in utterance {}'.format(position, uttid))
             result = 1
     else:
         settings.LOGGER.error('getmarkposition: No mappings found for uttid {}'.format(uttid))
         result = 1
     return result
 
+
 def isliteralreskey(reskey: ResultsKey):
     (key, val) = reskey
     result = key != val
     return result
+
+
 def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
                          permsilverdatadict={}, annotationinput=False):
     newrows = []
@@ -182,7 +186,7 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
     for hit in theresultsminusgold:
         uttid, position = hit
         if (reskey, uttid) in allmatches or annotationinput:
-            #markposition = 1 if position == 0 else position
+            # markposition = 1 if position == 0 else position
             tree = allmatches[(reskey, uttid)][0][1] if (reskey, uttid) in allmatches else None
             origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
             markposition = position
@@ -211,7 +215,7 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
     for hit in goldminustheresults:
         (uttid, position) = hit
         if uttid in allutts:
-            #markposition = 1 if position == 0 else position
+            # markposition = 1 if position == 0 else position
             markposition = position
             markedwordlist = getmarkedyield(allutts[uttid], [markposition])
             uttstr = space.join(markedwordlist)
@@ -223,7 +227,8 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
             markposition = 0
             tree = allmatches[(reskey, uttid)][0][1] if (queryid, uttid) in allmatches else None
             origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
-        platinumcheckrow2 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item, str(uttid),
+        platinumcheckrow2 = [reskeystr, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
+                             str(uttid),
                              str(markposition),
                              uttstr, origutt, inform]
         print(tab.join(platinumcheckrow2), file=platinumcheckfile)

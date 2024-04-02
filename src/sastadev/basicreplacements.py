@@ -167,7 +167,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('tan', 'dan', pron, infpron, initdev, dp),
                                                 ('tat', 'dat', pron, infpron, initdev, dp),
                                                 ('tit', 'dit', pron, infpron, initdev, dp),
-                                                ('tie', 'die', pron, infpron, initdev, dp),
+                                                ('tie', 'ie', pron, infpron, initdev, dp),
                                                 ('lape', 'slapen', pron, infpron, f'{onsetred}+{fndrop}', dp),
                                                 ('vas', 'vast', pron, infpron, codared, dp),
                                                 ('datte', 'dat', pron, infpron, emphasis, dp),

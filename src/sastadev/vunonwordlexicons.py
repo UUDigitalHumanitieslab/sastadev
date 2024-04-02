@@ -1,5 +1,4 @@
-from sastadev.readcsv import readcsv
-from sastadev.lexicon import known_word
+from sastadev.lexicon import known_word, initializelexicon
 import re
 import os
 from sastadev.conf import settings
@@ -8,13 +7,6 @@ from sastadev.conf import settings
 space = ' '
 interpunction = """.,/:;?!"'"""
 
-def initializelexicon(lexiconfilename):
-    lexicon = set()
-    fptuples = readcsv(lexiconfilename, header=False)
-    for _, fp in fptuples:
-        strippedword = fp[0].strip()
-        lexicon.add(strippedword)
-    return lexicon
 
 
 

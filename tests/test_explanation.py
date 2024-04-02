@@ -3,6 +3,7 @@ from auchann.align_words import align_words
 import sastadev.treebankfunctions as tbf
 from sastadev import sasta_explanation
 
+space = ' '
 
 #@pytest.mark.skip(reason='test code does not work')
 

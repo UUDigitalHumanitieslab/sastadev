@@ -18,6 +18,7 @@ from sastadev import xlsx
 from sastadev.allresults import ResultsKey, mkresultskey
 from sastadev.anonymization import getname
 from sastadev.conf import settings
+from sastadev.methods import Method
 from sastadev.readmethod import itemseppattern, read_method
 from sastadev.sastatypes import (ExactResults, FileName, Item, Level, Position, QId,
                                  QueryDict, UttId, UttWordDict)
@@ -48,10 +49,11 @@ uttidheaders = ['id', 'utt', 'uttid', 'uiting']
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
-unalignedheaders = ['unaligned', 'hele uiting', 'hele zin']
+unalignedheaders = ['unaligned', 'hele zin', 'hele uiting']
 
 
-def nested_dict(n: int, type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
+def nested_dict(n: int,
+                type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
         return defaultdict(type)
     else:
@@ -65,8 +67,10 @@ def clean(label: str) -> str:
     result = result.lower()
     return result
 
-def getlabels(labelstr: str, allvaliditems: List[str]) -> List[str]:
-    rawlabels = re.split('[;,]', labelstr)
+
+def getlabels(labelstr: str, allvaliditems: List[str], themethod: Method) -> List[str]:
+    separators = themethod.separators
+    rawlabels = re.split(separators, labelstr)
     labels = [rawlabel.strip() for rawlabel in rawlabels]
     validlabels = []
     for label in labels:
@@ -77,7 +81,6 @@ def getlabels(labelstr: str, allvaliditems: List[str]) -> List[str]:
         else:
             settings.LOGGER.warning(f'Cannot interpret {label} in {labelstr}; ignored')
     return validlabels
-
 
 
 def oldgetlabels(labelstr: str, patterns: Tuple[Pattern, Pattern]) -> List[str]:
@@ -135,13 +138,14 @@ def oldgetcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, pat
 
     return results
 
-def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, allvaliditems: List[str]) \
+
+def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, allvaliditems: List[str], themethod: Method) \
         -> List[Tuple[str, str]]:
     results: List[Tuple[str, str]] = []
     lcthelabelstr = thelabelstr.lower()
     lcprefix = prefix.lower().strip()
     lcthelabelstr = enrich(lcthelabelstr, lcprefix)
-    thelabels = getlabels(lcthelabelstr, allvaliditems)
+    thelabels = getlabels(lcthelabelstr, allvaliditems, themethod)
     for thelabel in thelabels:
         if thelabel != "":
             cleanlabel = thelabel
@@ -150,7 +154,6 @@ def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, allval
             results.append(result)
 
     return results
-
 
 
 def oldget_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
@@ -201,7 +204,7 @@ def oldget_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) 
 
     for row in data:
         if row[uttidcol] != "":
-            uttid = str(int(row[uttidcol]))   # this might go wrong if there is no integer there @@make it robust
+            uttid = str(int(row[uttidcol]))  # this might go wrong if there is no integer there @@make it robust
         thelevel = row[levelcol]
         thelevel = clean(thelevel)
         all_levels.add(thelevel)
@@ -246,12 +249,14 @@ def oldget_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) 
             allutts[uttid] = curuttwlist
     return allutts, thedata
 
-def get_annotations(infilename: FileName, allitems:List[str]) \
+
+def get_annotations(infilename: FileName, allitems: List[str], themethod: Method) \
         -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
     '''
     Reads the file with name filename in SASTA Annotation Format
     :param infilename:
     :param allitems: list of all valid items
+    :param themethod: the method
     :return: a dictionary  with as  key a tuple (level, item) and as value a list of (uttid, tokenposition) pairs
     '''
 
@@ -294,7 +299,7 @@ def get_annotations(infilename: FileName, allitems:List[str]) \
 
     for row in data:
         if row[uttidcol] != "":
-            uttid = str(int(row[uttidcol]))   # this might go wrong if there is no integer there @@make it robust
+            uttid = str(int(row[uttidcol]))  # this might go wrong if there is no integer there @@make it robust
         thelevel = row[levelcol]
         thelevel = clean(thelevel)
         all_levels.add(thelevel)
@@ -328,7 +333,7 @@ def get_annotations(infilename: FileName, allitems:List[str]) \
                     prefix = ""
                 else:
                     prefix = ""
-                cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, allitems)
+                cleanlevelsandlabels = getcleanlevelsandlabels(thelabelstr, thelevel, prefix, allitems, themethod)
                 if colctr > lastwordcol or colctr == unalignedcol:
                     tokenposition = 0
                 else:
@@ -364,7 +369,8 @@ def getitem2levelmap(mapping: Dict[Tuple[Item, Level], Any]) -> Dict[Item, Level
     resultmap: Dict[Item, Level] = {}
     for (item, level) in mapping:
         if item in resultmap:
-            settings.LOGGER.error('Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
+            settings.LOGGER.error(
+                'Duplicate level {} for item {} with level {} ignored'.format(level, item, resultmap[item]))
         else:
             resultmap[item] = level
     return resultmap
@@ -391,11 +397,17 @@ def mkpatterns(allcodes: List[str]) -> Tuple[Pattern, Pattern]:
     return (re.compile(basepattern), re.compile(fullpattern))
 
 
-def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
-                 altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]],
-                 queries: QueryDict, includeimplies: bool=False) \
+# def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
+#                  altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]],
+#                  queries: QueryDict, includeimplies: bool = False) \
+#         -> Tuple[UttWordDict, Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]]]:
+def get_golddata(filename: FileName, themethod: Method, includeimplies: bool = False) \
         -> Tuple[UttWordDict, Dict[QId, Tuple[Level, Item, List[Tuple[UttId, Position]]]]]:
+
     # item2levelmap = {}
+    mapping: Dict[Tuple[Item, Level], QId] = themethod.item2idmap
+    altcodes: Dict[Tuple[Item, Level], Tuple[Item, Level]] = themethod.altcodes
+    queries: QueryDict = themethod.queries
     includeimplies = False  # temporarily put off to test different implementation
     mappingitem2levelmap = getitem2levelmap(mapping)
     altcodesitem2levelmap = getitem2levelmap(altcodes)
@@ -403,19 +415,19 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
     allaltcodesitems = [item for (item, _) in altcodes]
     allitems = allmappingitems + allaltcodesitems
     patterns = mkpatterns(allitems)
-    allutts, basicdata = get_annotations(filename, allitems)
+    allutts, basicdata = get_annotations(filename, allitems, themethod)
     results: Dict[ResultsKey, Tuple[Level, Item, ExactResults]] = {}
     for thelevel, theitem in basicdata:
         thecounter = basicdata[(thelevel, theitem)]
         # unclear why this below here is needed
-#        if (theitem, thelevel) in mapping:
-#            mappingitem = theitem
-#        elif (varitem, thelevel) in mapping:
-#            mappingitem = varitem
-#        else:
-#            mappingitem = theitem
+        #        if (theitem, thelevel) in mapping:
+        #            mappingitem = theitem
+        #        elif (varitem, thelevel) in mapping:
+        #            mappingitem = varitem
+        #        else:
+        #            mappingitem = theitem
         if thelevel in literallevels and (thelevel, thelevel) in mapping:
-            #we still have to determine how to deal with this this is an attempt
+            # we still have to determine how to deal with this this is an attempt
             qid = mapping[thelevel, thelevel]
             reskey = mkresultskey(qid, theitem)
             update(results, reskey, (thelevel, theitem, thecounter))
@@ -430,7 +442,8 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, mkresultskey(impliedqid), (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif (theitem, thelevel) in altcodes:
             (altitem, altlevel) = altcodes[(theitem, thelevel)]
             qid = mapping[(altitem, altlevel)]
@@ -445,8 +458,9 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, mkresultskey(impliedqid), (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
-        elif theitem in mappingitem2levelmap:   # valid item but wrong level
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+        elif theitem in mappingitem2levelmap:  # valid item but wrong level
             thecorrectlevel = mappingitem2levelmap[theitem]
             qid = mapping[(theitem, thecorrectlevel)]
             reskey = mkresultskey(qid)
@@ -460,16 +474,18 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, mkresultskey(impliedqid), (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, impliedlevel))
         elif theitem in altcodesitem2levelmap:  # valid alternative item but wrong level
             theitemlevel = altcodesitem2levelmap[theitem]
             (thecorrectitem, thecorrectlevel) = altcodes[(theitem, theitemlevel)]
             qid = mapping[(thecorrectitem, thecorrectlevel)]
             reskey = mkresultskey(qid)
             update(results, reskey, (thecorrectlevel, thecorrectitem, thecounter))
-            settings.LOGGER.info('level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
-                                                                                                thecorrectlevel,
-                                                                                               thecorrectitem))
+            settings.LOGGER.info(
+                'level {} of item {} replaced by correct level {} and item {}'.format(thelevel, theitem,
+                                                                                      thecorrectlevel,
+                                                                                      thecorrectitem))
             if includeimplies:
                 for implieditem in queries[qid].implies:
                     impliedlevel = mappingitem2levelmap[implieditem]
@@ -477,7 +493,8 @@ def get_golddata(filename: FileName, mapping: Dict[Tuple[Item, Level], QId],
                         impliedqid = mapping[(implieditem, impliedlevel)]
                         update(results, mkresultskey(impliedqid), (impliedlevel, implieditem, thecounter))
                     else:
-                        settings.LOGGER.error('Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
+                        settings.LOGGER.error(
+                            'Implied Item ({},{}) not found in mapping'.format(implieditem, thecorrectlevel))
 
         else:
             settings.LOGGER.error('{} of level {} not a valid coding'.format(theitem, thelevel))

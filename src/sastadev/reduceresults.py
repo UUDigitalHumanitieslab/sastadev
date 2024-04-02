@@ -1,12 +1,14 @@
 from collections import Counter
-from sastadev.allresults import AllResults, ResultsKey, mkresultskey
-from sastadev.sastatypes import AnalysedTrees, ExactResult,  ExactResults,  FileName, GoldResults, GoldTuple, \
-    Match, Matches,  MethodName, Position, \
-    QId, ResultsDict, ResultsCounter, SampleSizeTuple, SynTree, UttId, UttWordDict
-from sastadev.allresults import ExactResultsDict, MatchesDict
-from sastadev.methods import maxsamplesize, SampleSize, MethodName, lastuttqidcondition
-from sastadev.treebankfunctions import getnodeyield, find1
 from typing import Any, Dict, List
+
+from sastadev.allresults import AllResults
+from sastadev.methods import lastuttqidcondition, maxsamplesize
+from sastadev.sastatypes import (AnalysedTrees, ExactResultsDict, FileName,
+                                 Matches, MatchesDict, MethodName, Position,
+                                 QId, ResultsCounter, ResultsDict,
+                                 SampleSizeTuple, UttId, UttWordDict)
+from sastadev.treebankfunctions import getnodeyield
+
 
 def exact2results(exactresults: ExactResultsDict) -> ResultsDict:
     """
@@ -30,16 +32,16 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
     '''
     (uttidlist, wordcount, cutoffpoint) = samplesizetuple
     uttcount = len(uttidlist)
-    maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount,  maxsamplesize[methodname].maxwordcount
+    maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount, maxsamplesize[methodname].maxwordcount
     if wordcount is not None and maxwordcount is not None and wordcount < maxwordcount:
         return allresults
     elif maxuttcount is not None and uttcount < maxuttcount:
         return allresults
     elif allresults.annotationinput:
         newexactresults: ExactResultsDict = reduceexactresults(allresults.exactresults,
-                                                               uttidlist, cutoffpoint, methodname) # done
-        newcoreresults: Dict[QId, ResultsCounter] = exact2results(newexactresults)   # done
-        newallutts: UttWordDict = reduceallutts(allresults.allutts, uttidlist) # done
+                                                               uttidlist, cutoffpoint, methodname)  # done
+        newcoreresults: Dict[QId, ResultsCounter] = exact2results(newexactresults)  # done
+        newallutts: UttWordDict = reduceallutts(allresults.allutts, uttidlist)  # done
         newallresults = AllResults(allresults.uttcount, newcoreresults, newexactresults, allresults.postresults,
                                    allresults.allmatches, allresults.filename, allresults.analysedtrees,
                                    newallutts, allresults.annotationinput)
@@ -47,23 +49,22 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
 
         newuttcount: int = len(uttidlist)  # done
         newexactresults: ExactResultsDict = reduceexactresults(allresults.exactresults,
-                                                               uttidlist, cutoffpoint, methodname) # done
-        newcoreresults: Dict[ResultsKey, ResultsCounter] = exact2results(newexactresults)   # done
-        newpostresults: Dict[ResultsKey, Any] = allresults.postresults # @@ I assume these need no change
-        newallmatches: MatchesDict = reducematches(allresults.allmatches, uttidlist, cutoffpoint, methodname) # done
-        newfilename: FileName = allresults.filename # done
-        newanalysedtrees: AnalysedTrees = reduceanalysedtrees(allresults.analysedtrees, uttidlist) # done
-        newallutts: UttWordDict = reduceallutts(allresults.allutts, uttidlist) # done
-        newannotationinput: bool = allresults.annotationinput # done
+                                                               uttidlist, cutoffpoint, methodname)  # done
+        newcoreresults: Dict[ResultsKey, ResultsCounter] = exact2results(newexactresults)  # done
+        newpostresults: Dict[ResultsKey, Any] = allresults.postresults  # @@ I assume these need no change
+        newallmatches: MatchesDict = reducematches(allresults.allmatches, uttidlist, cutoffpoint, methodname)  # done
+        newfilename: FileName = allresults.filename  # done
+        newanalysedtrees: AnalysedTrees = reduceanalysedtrees(allresults.analysedtrees, uttidlist)  # done
+        newallutts: UttWordDict = reduceallutts(allresults.allutts, uttidlist)  # done
+        newannotationinput: bool = allresults.annotationinput  # done
 
         newallresults = AllResults(newuttcount, newcoreresults, newexactresults, newpostresults, newallmatches,
                                    newfilename, newanalysedtrees, newallutts, newannotationinput)
     return newallresults
 
 
-
 def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist: List[UttId],
-                       cutoffpoint: Position,  methodname: MethodName) -> Dict[QId, ResultsCounter]:
+                       cutoffpoint: Position, methodname: MethodName) -> Dict[QId, ResultsCounter]:
     newexactresultsdict = {}
     lastuttid = uttidlist[-1]
 
@@ -71,8 +72,8 @@ def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist:
         newexactresults = []
         for uttid, position in exactresultsdict[reskey]:
             if (uttid in uttidlist and uttid != lastuttid) or \
-               (uttid == lastuttid and cutoffpoint is not None and
-                not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
+                    (uttid == lastuttid and cutoffpoint is not None and
+                     not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
                 newexactresults.append((uttid, position))
         newexactresultsdict[reskey] = newexactresults
     return newexactresultsdict
@@ -81,7 +82,7 @@ def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist:
 def reduceresults(resultsdict: Dict[QId, Counter], samplesizetuple: SampleSizeTuple, methodname: MethodName):
     (uttidlist, wordcount, cutoffpoint) = samplesizetuple
     uttcount = len(uttidlist)
-    maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount,  maxsamplesize[methodname].maxwordcount
+    maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount, maxsamplesize[methodname].maxwordcount
     if wordcount is not None and maxwordcount is not None and wordcount < maxwordcount:
         newresultsdict = resultsdict
     elif maxuttcount is not None and uttcount <= maxuttcount:
@@ -93,11 +94,11 @@ def reduceresults(resultsdict: Dict[QId, Counter], samplesizetuple: SampleSizeTu
             newresults = []
             for uttid in resultsdict[reskey]:
                 if (uttid in uttidlist and uttid != lastuttid) or \
-                        (uttid == lastuttid and lastuttqidcondition[methodname](reskey)): # no condition on the position, we have no info on it
+                        (uttid == lastuttid and lastuttqidcondition[methodname](
+                            reskey)):  # no condition on the position, we have no info on it
                     newresults.append(uttid)
             newresultsdict[reskey] = Counter(newresults)
     return newresultsdict
-
 
 
 def reducematches(matchesdict: MatchesDict, uttidlist: List[UttId], cutoffpoint: Position,
@@ -108,8 +109,8 @@ def reducematches(matchesdict: MatchesDict, uttidlist: List[UttId], cutoffpoint:
         if uttid in uttidlist and uttid != lastuttid:
             newmatchesdict[(reskey, uttid)] = matchesdict[(reskey, uttid)]
         else:
-            if uttid == lastuttid and  lastuttqidcondition[methodname](reskey):
-                newmatches : Matches = []
+            if uttid == lastuttid and lastuttqidcondition[methodname](reskey):
+                newmatches: Matches = []
                 for match in matchesdict[(reskey, uttid)]:
                     (m, tree) = match
                     treeyield = getnodeyield(tree)
@@ -120,12 +121,14 @@ def reducematches(matchesdict: MatchesDict, uttidlist: List[UttId], cutoffpoint:
 
     return newmatchesdict
 
+
 def reduceanalysedtrees(analysedtrees: AnalysedTrees, uttidlist: List[UttId]) -> AnalysedTrees:
     newtrees = []
     for uttid, tree in analysedtrees:
         if uttid in uttidlist:
             newtrees.append((uttid, tree))
     return newtrees
+
 
 def reduceallutts(uttworddict: UttWordDict, uttidlist: List[UttId]) -> UttWordDict:
     newdict = {}
@@ -134,16 +137,17 @@ def reduceallutts(uttworddict: UttWordDict, uttidlist: List[UttId]) -> UttWordDi
             newdict[uttid] = uttworddict[uttid]
     return newdict
 
-def reduceexactgoldscores(exactgoldscores: ExactResultsDict, samplesizetuple: SampleSizeTuple, methodname:MethodName):
+
+def reduceexactgoldscores(exactgoldscores: ExactResultsDict, samplesizetuple: SampleSizeTuple, methodname: MethodName):
     (uttidlist, wordcount, cutoffpoint) = samplesizetuple
     uttcount = len(uttidlist)
-    maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount,  maxsamplesize[methodname].maxwordcount
+    maxuttcount, maxwordcount = maxsamplesize[methodname].maxuttcount, maxsamplesize[methodname].maxwordcount
     if wordcount is not None and maxwordcount is not None and wordcount < maxwordcount:
         newexactgoldscores = exactgoldscores
     elif maxuttcount is not None and uttcount <= maxuttcount:
         newexactgoldscores = exactgoldscores
     else:
         newexactgoldscores: ExactResultsDict = reduceexactresults(exactgoldscores,
-                                                               uttidlist, cutoffpoint, methodname) # ongoing
+                                                                  uttidlist, cutoffpoint, methodname)  # ongoing
         # newcoreresults: Dict[QId, ResultsCounter] = exact2results(newexactresults)   # keep out do ouside
     return newexactgoldscores

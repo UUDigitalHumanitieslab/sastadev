@@ -11,9 +11,9 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.lexicon import de, dets, known_word, getwordinfo
+from sastadev.lexicon import de, dets, known_word, getwordinfo, nochildwords
 from sastadev.macros import expandmacros
-from sastadev.metadata import (Meta,  bpl_delete, bpl_indeze, bpl_node,
+from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
                                bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, insertion)
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
@@ -62,16 +62,18 @@ altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'di
 errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
                 ['altid', 'altsent', 'score'] + \
-    altpropertiesheader
-
+                altpropertiesheader
 
 smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn')]
-smartreplacedict = {w1:w2 for w1, w2 in smartreplacepairs}
+
+smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
+
 
 class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
                  compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, badcatcount,
-                 hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount, dezebwcount):
+                 hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount,
+                 dezebwcount):
         self.stree: SynTree = stree
         self.altid: AltId = altid
         self.altsent: str = altsent
@@ -152,7 +154,8 @@ class Original():
 class OrigandAlts():
     def __init__(self, orig, alts, selected=0):
         self.orig = orig
-        self.alts: Dict[AltId, Alternative] = alts  # a dictionary with altid as key
+        # a dictionary with altid as key
+        self.alts: Dict[AltId, Alternative] = alts
         self.selected: AltId = selected
 
     def OrigandAlts2rows(self, base: str, user1: str = '', user2: str = '', user3: str = '') -> List[str]:
@@ -160,11 +163,13 @@ class OrigandAlts():
         origsent = origrow[-1]
         bestaltids = getbestaltids(self.alts)
         altsrows = [
-            self.alts[altid].alt2row(self.orig.uttid, base, user1, user2, user3, bestaltids, self.selected, origsent)
+            self.alts[altid].alt2row(
+                self.orig.uttid, base, user1, user2, user3, bestaltids, self.selected, origsent)
             for altid in self.alts]
         laltsrows = len(altsrows)
         selectedrow = [base, user1, user2, user3] + \
-                      ['Selected', self.orig.uttid, '', self.alts[self.selected].altsent, str(self.selected)]
+                      ['Selected', self.orig.uttid, '',
+                       self.alts[self.selected].altsent, str(self.selected)]
         if laltsrows > 1:
             rows = [origrow] + altsrows + [selectedrow]
         else:
@@ -196,6 +201,7 @@ def isrobustnoun(node: SynTree) -> bool:
         result = ntype == 'both' and getal == 'both' and graad == 'both'
     return result
 
+
 def issamewordclass(node1, node2):
     pt1 = getattval(node1, 'pt')
     pt2 = getattval(node2, 'pt')
@@ -208,11 +214,13 @@ def issamewordclass(node1, node2):
             result = subclasscompatible(subclass1, subclass2)
     return result
 
+
 def infpvpair(newnode, node):
     newnodewvorm = getattval(newnode, 'wvorm')
     nodewvorm = getattval(node, 'wvorm')
     result = newnodewvorm == 'inf' and nodewvorm == 'pv'
     return result
+
 
 def adaptpv(node):
     if getattval(node, 'pt') == 'ww':
@@ -221,19 +229,26 @@ def adaptpv(node):
         node.attrib['pvtijd'] = 'tgw'
         node.attrib['postag'] = 'WW(pv,tgw,mv)'
 
+
 def smartreplace(node: SynTree, word: str) -> SynTree:
     '''
-    replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class, otherwise by
+    replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class and
+     if it does not occur in nochildwords;  otherwise by
     a node with *word* and *lemma* attributes replaced by *word*
     :param node:
     :param word:
     :return:
     '''
-    wordtree = parse(word)
+
+    wordtree = settings.PARSE_FUNC(word)
     newnode = find1(wordtree, './/node[@pt]')
     newnodept = getattval(newnode, 'pt')
     nodept = getattval(node, 'pt')
-    if isvalidword(word) and issamewordclass(node, newnode) and not isrobustnoun(newnode):
+    newnodelemma = getattval(newnode, 'lemma')
+    if isvalidword(word) and \
+            issamewordclass(node, newnode) and \
+            not isrobustnoun(newnode) and \
+            newnodelemma not in nochildwords:
         result = newnode
         result.attrib['begin'] = getattval(node, 'begin')
         result.attrib['end'] = getattval(node, 'end')
@@ -246,11 +261,12 @@ def smartreplace(node: SynTree, word: str) -> SynTree:
         result = copy(node)
         result.attrib['word'] = word
         if '_' in node.attrib['lemma'] and countsyllables(word) == 1:
-           result.attrib['lemma'] = word
+            result.attrib['lemma'] = word
     return result
 
+
 def mkmetarecord(meta: MetaElement, origutt: Optional[str], parsed_as: Optional[str]) -> Tuple[
-        Optional[str], List[str]]:
+    Optional[str], List[str]]:
     if meta is None:
         return None, []
     key = meta.attrib['name']
@@ -310,7 +326,8 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
                 # to implement
                 newstree, orandalts = correct_stree(stree, method, corr)
                 if newstree is not None:
-                    errordict = updateerrordict(errordict, uttid, stree, newstree)
+                    errordict = updateerrordict(
+                        errordict, uttid, stree, newstree)
                     newtreebank.append(newstree)
                     allorandalts.append(orandalts)
                 else:
@@ -429,7 +446,8 @@ def insertskips(newstree: SynTree, tokenlist: List[Token], stree: SynTree) -> Sy
     topnode = find1(resulttree, './/node[@cat="top"] ')
     topchildren = [ch for ch in topnode]
     allchildren = nodestoinsertcopies + topchildren
-    sortedchildren = sorted(allchildren, key=lambda x: x.attrib['end'], reverse=True)
+    sortedchildren = sorted(
+        allchildren, key=lambda x: x.attrib['end'], reverse=True)
     if debug:
         showtree(resulttree, text='insertskips: resulttree:')
     for ch in topnode:
@@ -437,7 +455,8 @@ def insertskips(newstree: SynTree, tokenlist: List[Token], stree: SynTree) -> Sy
     if debug:
         showtree(resulttree, text='insertskips: resulttree:')
     for node in sortedchildren:
-        node.attrib['rel'] = '--'  # these are now extragrammatical with relation --
+        # these are now extragrammatical with relation --
+        node.attrib['rel'] = '--'
         topnode.insert(0, node)
     if debug:
         showtree(resulttree, text='insertskips: resulttree:')
@@ -472,6 +491,7 @@ def cleantextdone(metadataelement):
                 'value' in meta.attrib and meta.attrib['value'] == 'done':
             return True
     return False
+
 
 def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
@@ -566,11 +586,11 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     lmetadatalist = len(metadatalist)
     if lmetadatalist == 0:
         settings.LOGGER.error('Missing metadata in utterance {}'.format(uttid))
-    elif lmetadatalist > 1:
-        settings.LOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
+        origmetadata = []
     else:
         if lmetadatalist > 1:
-            SDLOGGER.error('Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
+            settings.LOGGER.error(
+                'Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
         origmetadata = metadatalist[0]
 
     # allmetadata += origmetadata
@@ -610,14 +630,17 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     ptmds = []
     for correctiontokenlist, cwmdmetadata in ctmds:
         cwmdmetadata += allmetadata
-        correctionwordlist = tokenlist2stringlist(correctiontokenlist, skip=True)
+        correctionwordlist = tokenlist2stringlist(
+            correctiontokenlist, skip=True)
 
         # parse the corrections
         # if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
         if correctionwordlist != fatstreewordlist and correctionwordlist != []:
             correction, tokenposlist = mkuttwithskips(correctiontokenlist)
-            cwmdmetadata += [Meta('parsed_as', correction, cat='Correction', source='SASTA', penalty=0)]
-            reducedcorrectiontokenlist = [token for token in correctiontokenlist if not token.skip]
+            cwmdmetadata += [Meta('parsed_as', correction,
+                                  cat='Correction', source='SASTA', penalty=0)]
+            reducedcorrectiontokenlist = [
+                token for token in correctiontokenlist if not token.skip]
             fatnewstree = fatparse(correction, reducedcorrectiontokenlist)
             debugb = False
             if debugb:
@@ -628,7 +651,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
             else:
                 # insert the leftout words and adapt the begin/ends of the nodes
                 # simpleshow(stree)
-                fatnewstree = insertskips(fatnewstree, correctiontokenlist, fatstree)
+                fatnewstree = insertskips(
+                    fatnewstree, correctiontokenlist, fatstree)
                 # newstree = insertskips(newstree, correctiontokenlist, stree)
                 # simpleshow(stree)
                 mdcopy = deepcopy(origmetadata)
@@ -659,7 +683,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     elif corr in [corr1, corrn]:
         thecorrection, orandalts = selectcorrection(fatstree, ptmds, corr)
     else:
-        settings.LOGGER.error('Illegal correction value: {}. No corrections applied'.format(corr))
+        settings.LOGGER.error(
+            'Illegal correction value: {}. No corrections applied'.format(corr))
         thecorrection, orandalts = (cleanutt, fatstree, origmetadata), None
 
     thetree = deepcopy(thecorrection[1])
@@ -698,19 +723,22 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         curbackplacement = meta.backplacement
         if curbackplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
-            newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
-            oldnode = myfind(fatstree, './/node[@pt and @end="{}"]'.format(nodeend))
+            newnode = myfind(
+                thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldnode = myfind(
+                fatstree, './/node[@pt and @end="{}"]'.format(nodeend))
             if newnode is not None and oldnode is not None:
                 # adapt oldnode1 for contextual features
                 contextoldnode = contextualise(oldnode, newnode)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
         elif curbackplacement == bpl_replacement:
-            #showtree(fatstree, 'fatstree')
+            # showtree(fatstree, 'fatstree')
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(thetree, './/node[@pt and @end="{}"]'.format(nodeend))
             oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [] else None
             if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
-                settings.LOGGER.error(f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+                settings.LOGGER.error(
+                    f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
 
             if newnode is not None and oldword is not None:
                 # wproplist = getwordinfo(oldword)
@@ -726,13 +754,12 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 newnodeparent = newnode.getparent()
                 newnodeparent.remove(newnode)
                 newnodeparent.append(substnode)
-                #showtree(thetree, 'thetree after smart replace')
+        # showtree(thetree, 'thetree after smart replace')
 
-
-
-        elif curbackplacement in [bpl_word,  bpl_wordlemma]:
+        elif curbackplacement in [bpl_word, bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
-            nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(nodeend - 1, nodeend)
+            nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(
+                nodeend - 1, nodeend)
             newnode = myfind(thetree, nodexpath)
             oldnode = myfind(fatstree, nodexpath)
             if newnode is not None and oldnode is not None:
@@ -741,10 +768,12 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                     thetree = adaptsentence(thetree)
                 else:
                     if 'word' not in oldnode.attrib:
-                        settings.LOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
+                        settings.LOGGER.error(
+                            'Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
                         simpleshow(oldnode, showchildren=False)
                     if 'word' not in newnode.attrib:
-                        settings.LOGGER.error('Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
+                        settings.LOGGER.error(
+                            'Unexpected missing "word" attribute in utterance {}, node: '.format(uttid))
                         simpleshow(oldnode, showchildren=False)
             if curbackplacement == bpl_wordlemma:
                 if newnode is not None and oldnode is not None:
@@ -753,7 +782,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                         thetree = adaptsentence(thetree)
                     else:
                         if 'lemma' not in oldnode.attrib:
-                            settings.LOGGER.error('Unexpected missing "lemma" attribute in utterance {}, node: '.format(uttid))
+                            settings.LOGGER.error(
+                                'Unexpected missing "lemma" attribute in utterance {}, node: '.format(uttid))
                             simpleshow(oldnode, showchildren=False)
                         if 'lemma' not in newnode.attrib:
                             settings.LOGGER.error(
@@ -764,14 +794,18 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
             pass
         elif curbackplacement == bpl_delete:
             orignodebegin = str(meta.annotatedposlist[-1])
-            nodes2deletebegins.append(orignodebegin)  # just gather the begin sof the nodes to be deleted
+
+            # just gather the begin sof the nodes to be deleted
+            nodes2deletebegins.append(orignodebegin)
         elif curbackplacement == bpl_indeze:
             nodebegin = meta.annotatedposlist[-1]
             nodeend = nodebegin + 1
-            oldnode = myfind(fatstree, './/node[@pt and @end="{}"]'.format(nodeend))
+            oldnode = myfind(
+                fatstree, './/node[@pt and @end="{}"]'.format(nodeend))
             if oldnode is not None:
                 nodeid = oldnode.attrib['id']
-                dezeAVnode = etree.fromstring(dezeAVntemplate.format(begin=nodebegin, end=nodeend, id=nodeid))
+                dezeAVnode = etree.fromstring(dezeAVntemplate.format(
+                    begin=nodebegin, end=nodeend, id=nodeid))
                 thetree = transplant_node(oldnode, dezeAVnode, thetree)
 
         # etree.dump(thetree, pretty_print=True)
@@ -790,12 +824,16 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     debug = False
 
     # adapt the metadata
-    cleantokposlist = [meta.annotationwordlist for meta in newcorrection2 if meta.name == 'cleanedtokenpositions']
+    cleantokposlist = [
+        meta.annotationwordlist for meta in newcorrection2 if meta.name == 'cleanedtokenpositions']
     cleantokpos = cleantokposlist[0] if cleantokposlist != [] else []
-    insertbegins = [meta.annotatedposlist for meta in newcorrection2 if meta.name == insertion]
+    insertbegins = [
+        meta.annotatedposlist for meta in newcorrection2 if meta.name == insertion]
     flatinsertbegins = [str(v) for el in insertbegins for v in el]
-    purenodes2deletebegins = [str(v) for v in nodes2deletebegins if str(v) not in flatinsertbegins]
-    newcorrection2 = [updatecleantokmeta(meta, purenodes2deletebegins, cleantokpos) for meta in newcorrection2]
+    purenodes2deletebegins = [
+        str(v) for v in nodes2deletebegins if str(v) not in flatinsertbegins]
+    newcorrection2 = [updatecleantokmeta(
+        meta, purenodes2deletebegins, cleantokpos) for meta in newcorrection2]
 
     # etree.dump(thetree, pretty_print=True)
 
@@ -835,7 +873,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                                                                                         newone=fulltreesentlist))
     rawoldleavenodes = getnodeyield(fatstree)
     omittedwordbegins = getomittedwordbegins(newcorrection2)
-    oldleavenodes = [n for n in rawoldleavenodes if int(getattval(n, 'begin')) not in omittedwordbegins]
+    oldleavenodes = [n for n in rawoldleavenodes if int(
+        getattval(n, 'begin')) not in omittedwordbegins]
     oldleaves = [getattval(n, 'word') for n in oldleavenodes]
     newleaves = getyield(fulltree)
     uttid = getuttid(stree)
@@ -866,7 +905,7 @@ def updatecleantokmeta(meta: Meta, begins: List[str], cleantokpos: List[int]) ->
             intbegin = int(begin)
             beginindex = cleantokpos.index(intbegin)
             newmeta.annotationwordlist = newmeta.annotationwordlist[:beginindex] \
-                + newmeta.annotationwordlist[beginindex + 1:]
+                                         + newmeta.annotationwordlist[beginindex + 1:]
         newmeta.value = newmeta.annotationwordlist
         return newmeta
     else:
@@ -893,10 +932,13 @@ def getorigutt(stree: SynTree) -> Optional[str]:
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
-    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount, -obj.dhyphencount,
-            -obj.complsucount, -obj.badcatcount, -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
+    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount,
+            -obj.dhyphencount,
+            -obj.complsucount, -obj.badcatcount,
+            -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
             -obj.subjunctivecount, obj.dimcount,
-            obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok, -obj.deplusneutcount,
+            obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok,
+            -obj.deplusneutcount,
             -obj.dezebwcount, -obj.penalty)
 
 
@@ -957,20 +999,22 @@ def isvalidword(w: str) -> bool:
 
 def countambigwords(stree: SynTree) -> int:
     leaves = getnodeyield(stree)
-    ambignodes = [leave for leave in leaves if getattval(leave, 'word').lower() in disambiguationdict]
+    ambignodes = [leave for leave in leaves if getattval(
+        leave, 'word').lower() in disambiguationdict]
     result = len(ambignodes)
     return result
 
 
 def getunknownwordcount(nt: SynTree) -> int:
     words = [w for w in nt.xpath('.//node[@pt!="tsw"]/@word')]
-    unknownwords = [w for w in words if not (isvalidword(w.lower()) or isvalidword(w.title()))]
+    unknownwords = [w for w in words if not (
+            isvalidword(w.lower()) or isvalidword(w.title()))]
     result = len(unknownwords)
     return result
 
 
 def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode) -> Tuple[
-        ParsedCorrection, OrigandAlts]:
+    ParsedCorrection, OrigandAlts]:
     # to be implemented@@
     # it is presupposed that ptmds is not []
 
@@ -992,14 +1036,19 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         sucount = countav(nt, 'rel', 'su')
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
-        badcatcount = len([node for node in nt.xpath('.//node[@cat and (@cat="du")]')])
-        hyphencount = len([node for node in nt.xpath('.//node[contains(@word, "-")]')])
+        badcatcount = len(
+            [node for node in nt.xpath('.//node[@cat and (@cat="du")]')])
+        hyphencount = len(
+            [node for node in nt.xpath('.//node[contains(@word, "-")]')])
         basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
                                   if getattval(node, 'word').lower() in basicreplacements])
         ambigwordcount = countambigwords(nt)
-        subjunctivecount = len([node for node in nt.xpath('.//node[@pvtijd="conj"]')])
-        unknownnouncount = len([node for node in nt.xpath('.//node[@pt="n" and @frame="noun(both,both,both)"]')])
-        unknownnamecount = len([node for node in nt.xpath('.//node[@pt="n" and @frame="proper_name(both)"]')])
+        subjunctivecount = len(
+            [node for node in nt.xpath('.//node[@pvtijd="conj"]')])
+        unknownnouncount = len([node for node in nt.xpath(
+            './/node[@pt="n" and @frame="noun(both,both,both)"]')])
+        unknownnamecount = len([node for node in nt.xpath(
+            './/node[@pt="n" and @frame="proper_name(both)"]')])
         complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and
                                                      @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and
                                                not(node[%Rpronoun%])]""")
