@@ -40,13 +40,23 @@ dets = {}
 dets[de] = ['de', 'die', 'deze', 'onze', 'welke', 'iedere', 'elke', 'zulke']
 dets[het] = ['het', 'dat', 'dit', 'ons', 'welk', 'ieder', 'elk', 'zulk']
 
-def initializelexicon(lexiconfilename):
+def initializelexicon(lexiconfilename) -> set:
     lexicon = set()
     fptuples = readcsv(lexiconfilename, header=False)
     for _, fp in fptuples:
         strippedword = fp[0].strip()
         lexicon.add(strippedword)
     return lexicon
+
+def initializelexicondict(lexiconfilename) -> Dict[str,str]:
+    lexicon = {}
+    fptuples = readcsv(lexiconfilename, header=False)
+    for _, fp in fptuples:
+        strippedword = fp[0].strip()
+        strippedreplacement = fp[1].strip()
+        lexicon[strippedword] = strippedreplacement
+    return lexicon
+
 
 def isa_namepart(word: str) -> bool:
     '''
@@ -208,3 +218,8 @@ nochildwordsfilename = 'nochildwords.txt'
 nochildwordsfolder = 'data/nochildwords'
 nochildwordsfullname = os.path.join(settings.SD_DIR, nochildwordsfolder, nochildwordsfilename)
 nochildwords = initializelexicon(nochildwordsfullname)
+
+lexiconfoldername = 'wordsunknowntoalpino'
+wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
+wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
+filledpauseslexicon = initializelexicon(wordsunknowntoalpinofullname)

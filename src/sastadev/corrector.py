@@ -105,6 +105,8 @@ def replacement(inword: str, outword: str) -> str:
 #: vowel and optionally a consonant.
 gaatiepattern = r'^.*' + anychars(vowels) + opt(anychars(consonants)) + 'tie$'
 gaatiere = re.compile(gaatiepattern)
+gaattiepattern = r'^.*' + anychars(vowels) + 'ttie$'
+gaattiere = re.compile(gaattiepattern)
 neutersgnoun = 'boekje'  # select here an unambiguous neuter noun
 
 
@@ -986,6 +988,18 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
 
+    # beurt -> gebeurt
+    if token.word.lower() == 'beurt':
+        newwords = ['gebeurt']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Wrong pronunciation', value='Unstressed syllable drop', cat='Pronunciation',
+                                        backplacement=bpl_word, penalty=5)
+        newwords = ['deed']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
+                                        backplacement=bpl_word)
+
+
     # find document specific replacements
 
     # find organisation specific replacements
@@ -1089,7 +1103,36 @@ def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) ->
     return validnewtokenmds
 
 
+
 def gaatie(word: str) -> List[str]:
+    '''
+    The function *gaatie*
+    * replaces a word of the form *X-ie* by the string f'{X} ie' if X is a verb form
+    * replaces a word of the form *XVttie* by the string f'{X}{V}t ie where V is vowel and XVt is a verb form
+    * replaces  a word that matches with  *gaatiepattern*  (e.g.
+    *gaatie*) by a sequence of two words where the first word equals word[:-2] (
+    *gaat*) and is a known word and the second word equals word[-2:] (*ie*).
+
+    .. autodata:: corrector::gaatiepattern
+    '''
+    results = []
+    # kan-ie, moet-ie, gaat-ie, wil-ie
+    if word.endswith('-ie') and informlexicon(word[:-3]):
+        result = space.join([word[:-3], 'ie'])
+        results.append(result)
+    # moettie, gaattie,
+    if gaattiere.match(word) and informlexicon(word[:-3]):
+        result = space.join([word[:-3], 'ie'])
+        results.append(result)
+    if gaatiere.match(word):
+        # and if it is a verb this is essential because now tie is also split into t ie
+        if informlexicon(word[:-2]):
+            result = space.join([word[:-2], word[-2:]])
+            results.append(result)
+    return results
+
+
+def oldgaatie(word: str) -> List[str]:
     '''
     The function *gaatie* replaces  a word that matches with  *gaatiepattern*  (e.g.
     *gaatie*) by a sequence of two words where the first word equals word[:-2] (

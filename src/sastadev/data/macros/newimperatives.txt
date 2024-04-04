@@ -218,6 +218,7 @@ Tarsp_Hwwi = """(( @pt="ww" and @rel="hd" and @wvorm="pv" and
                    (parent::node[node[@pt="ww" and @rel="vc" and @wvorm="inf"]])
                   )
        ) or
-	   %robusthwwi%   )"""
+	   %robusthwwi%  or
+	   %robusthwwi2%)"""
 	   
 Tarsp_hehe = """ (@lemma="hè" and @end = ancestor::node[@cat="top"]/descendant::node[@lemma="hè"]/@begin)"""

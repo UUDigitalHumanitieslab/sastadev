@@ -22,7 +22,7 @@ a finite verb can be analysed by Alpino. In the resulting parse, SASTA removes t
 again and the resulting parse tree is subjected to the queries for analysis.
 
 For example, by inserting the finite verb *moeten* in the utterance *schoenen aan*,
-resuting in *schoenen moeten aan*, *schoenen* can be analysed as a subject noun and *aan* as predicative adjective,
+resulting in *schoenen moeten aan*, *schoenen* can be analysed as a subject noun and *aan* as predicative adjective,
 and the whole utterance as an instance of TARSP *OndVC*.
 
 The small clause utterances are often very short, and we analysed utterances with 2
@@ -191,7 +191,7 @@ def locadv(node):
     result = getattval(node, 'pt') in ['bw', 'vz']
     frame = getattval(node, 'frame')
     result = result and ('loc' in frame or 'er_adverb' in frame)
-    result = result or rpronoun(node)
+    result = result or (rpronoun(node) and getattval(node, 'lemma') != 'er')   # in samll clauses predicates are no clitics
     return result
 
 

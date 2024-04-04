@@ -533,3 +533,48 @@ Rpronounx = """(%Rpronoun% or @lemma="daarzo" or @lemma="hierzo") """
 followedbydet = """(@end=ancestor::node[@cat="top"]/descendant::node[%det%]/@begin)"""
 
 det = """(@pt="lid" or @lemma="dit" or @lemma="deze" or @lemma="die" or @lemma="dat" or (@pt="vnw" and @vwtype="bez") ) """
+
+
+vrwondplus = """(%whqsv1% or %basicvrwondplus% or %basicvrwondplusnosubj%)"""
+
+whqsv1 = """(@cat="whq") and node[@cat="sv1" and @rel="body"] and count(node)=1"""
+
+basicvrwondplus = """(
+ @cat="sv1" and @rel="--" and ancestor::node[@cat="top" and node[@lemma="?"]] and
+        node[@rel="hd" and (@lemma="zijn" or @lemma="doen" or @lemma="heten" or @lemma="moeten")] and 
+        node[@rel="su" ] and
+        not(node[@rel="su" and node[@rel="mod"]]) and
+        not(node[(@rel="obj1" or @rel="predc" or @rel="obj2" or 
+                  @rel="vc" or @rel="ld" or @rel="pc" or @rel="se")]) and
+        not(node[@rel="hd" and @lemma="zijn"] and node[@rel="mod" and (@cat="pp" or @cat="cp")]) and
+        not(node[@rel="hd" and @lemma="zijn"] and node[@rel="mod" and %Rpronoun%]) and
+		not(node[@rel="mod" and @lemma="niet"] and
+		not(node[@rel="mod" and @lemma!="dan" and @lemma!="nou" and @lemma!="weer"])
+		)
+)"""
+
+basicvrwondplusnosubj = """
+( 
+ @cat="sv1" and @rel="--" and ancestor::node[@cat="top" and node[@lemma="?"]] and
+        node[@rel="hd" and @pt="ww" and @wvorm="pv" and @stype!="imparative"] and 
+        not(node[@rel="vc"]) and
+        not(node[@cat="np" and node[@rel="mod"]]) and
+        not(node[@cat="np" and node[@rel="det" and 
+              (@lemma = "dit" or @lemma="dat" or @lemma="die" or @lemma="het" or @lemma="de") ]]) and
+		not(node[@cat="conj"]) and
+        not(node[@rel="mod" and @cat="sv1"]) and
+        not(node[@rel="su" ]) and
+		not(node[@rel="mod" and @lemma!="dan" and @lemma!="nou" and @lemma!="weer" and @lemma!="er"]) and
+		(not(node[%intrmodalverb%] and node[@rel="obj1"]))
+		and count(node) <= 3
+)
+"""
+
+intrmodalverb = """( @pt="ww" and 
+                       (@lemma="kunnen" or
+					   @lemma="moeten" or
+					   @lemma="mogen" or
+					   @lemma="gaan" 
+					   )
+
+) """ 
