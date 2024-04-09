@@ -969,10 +969,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     #                                         name='Disambiguation', value='Avoid unknown reading',
     #                                         cat='Lexicon', backplacement=bpl_wordlemma)
 
-    moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%) and (@rel="--" or @rel="dp" or @rel="predm" or @rel="nucl")]'
+    moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%)]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
-    # if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != []: # OLD
-    if token.word.lower() == 'moe':
+    if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != [] and (
+            tokenctr == 0 or tokens[tokenctr - 1].word.lower() != 'beetje'):
         newwords = ['moet']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',

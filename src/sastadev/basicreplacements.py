@@ -213,6 +213,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('hoeve', 'hoef', pron, infpron, emphasis, dp),
                                                 ('hoeve', 'hoeft', pron, infpron, emphasis, dp+2),
                                                 ('hebbe', 'heb', pron, infpron, emphasis, dp+2),
+                                                ('kane', 'andere', pron, wrongpron, wrongpron, dp)
                                                 ] + \
     ervzvariants + \
     innereplacements + \
@@ -298,7 +299,8 @@ basicexpansionlist: List[BasicExpansion] = \
      ("jamaar", ['ja', 'maar'], pron, infpron, typo, dp + 2),
      ("jahoor", ['ja', 'hoor'], pron, infpron, typo, dp + 2),
      ("neehoor", ['nee', 'hoor'], pron, infpron, typo, dp + 2),
-     ("kanne", ['kan', 'er'], pron, infpron, codared, dp + 2)
+     ("kanne", ['kan', 'er'], pron, infpron, codared, dp + 2),
+     ("moek", ['moet', "'k"], pron, infpron, contract, dp)
      ]
 # + closesyllshortprepexpansions # put off does not lead to improvement
 # + innuclosedsyllshortprepexpansions # put off does not lead to improvement
