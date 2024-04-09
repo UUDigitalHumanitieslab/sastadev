@@ -62,6 +62,7 @@ def doauchann(intreebank: SynTree) -> SynTree:
 def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
               annotatedfileresults: Optional[AllResults],
               scp: SastaCoreParameters):
+    invalidqueries = {}
 
     annotationinput = scp.annotationinput
     if annotationinput:
@@ -122,8 +123,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
                 uttid = getxselseuttid(syntree)
                 analysedtrees.append((uttid, syntree))
 
-                doprequeries(syntree, themethod.queries, rawexactresults, allmatches)
-                docorequeries(syntree, themethod.queries, rawexactresults, allmatches)
+                doprequeries(syntree, themethod.queries, rawexactresults, allmatches, invalidqueries)
+                docorequeries(syntree, themethod.queries, rawexactresults, allmatches, invalidqueries)
 
                 # showtree(syntree)
                 if uttid in nodeendmap:
@@ -175,8 +176,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
 
 
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
-              criterion: Callable[[Query], bool]):
-    global invalidqueries
+              criterion: Callable[[Query], bool], invalidqueries):
+    # global invalidqueries
     uttid = getuttid(syntree)
     # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
@@ -225,12 +226,12 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
             #    results[queryid] = Counter(matchingids)
 
 
-def docorequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
-    doqueries(syntree, queries, results, allmatches, is_core)
+def docorequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict, invalidqueries):
+    doqueries(syntree, queries, results, allmatches, is_core, invalidqueries)
 
 
-def doprequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
-    doqueries(syntree, queries, results, allmatches, is_pre)
+def doprequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict, invalidqueries):
+    doqueries(syntree, queries, results, allmatches, is_pre, invalidqueries)
 
 
 def dopostqueries(allresults: AllResults, postquerylist: List[QId], queries: QueryDict):

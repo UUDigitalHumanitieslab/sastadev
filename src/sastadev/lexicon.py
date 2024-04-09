@@ -219,7 +219,7 @@ nochildwordsfolder = 'data/nochildwords'
 nochildwordsfullname = os.path.join(settings.SD_DIR, nochildwordsfolder, nochildwordsfilename)
 nochildwords = initializelexicon(nochildwordsfullname)
 
-lexiconfoldername = 'wordsunknowntoalpino'
+lexiconfoldername = 'data/wordsunknowntoalpino'
 wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
 wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
-filledpauseslexicon = initializelexicon(wordsunknowntoalpinofullname)
+wordsunknowntoalpinolexicondict = initializelexicondict(wordsunknowntoalpinofullname)

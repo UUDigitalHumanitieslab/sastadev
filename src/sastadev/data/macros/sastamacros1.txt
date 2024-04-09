@@ -48,7 +48,7 @@ Tarsp_hww = """
   @lemma = "zullen" or   
   @lemma = "doen" or
   @lemma = "gaan" or
-  @lemma = "horen" or
+  (@lemma = "horen" and %horenaux%) or
   @lemma = "komen" or
   @lemma = "laten" or
   @lemma = "liggen" or
@@ -64,7 +64,7 @@ Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
 Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
 
-Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
+oldTarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" 
@@ -74,6 +74,19 @@ Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pv
 
  )
 """
+
+
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
+ ((
+   %Tarsp_hww% or
+   @lemma = "hebben" 
+   ) and 
+   not(%Tarsp_vc_sibling%)) or
+   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
+
+ ))
+"""
+
 
 vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")
 """
@@ -86,13 +99,6 @@ Tarsp_Kop = """
      (@lemma="zijn" and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%) and not(%Tarsp_onlymodR_sibling%))
     )
  )
-"""
-
-robusthwwi = """ (@cat="top" and 
-                  .//node[@pt="ww" and %Tarsp_hww% and @wvorm="pv" and (@rel="--" or @rel="dp")] and
-				  .//node[@pt="ww" and @wvorm="inf" and (@rel="--" or @rel="dp")]
-				  )
-				  
 """
 
 robusthwwvd = """ (@cat="top" and 

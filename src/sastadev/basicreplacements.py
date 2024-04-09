@@ -53,6 +53,8 @@ finaldevoicing = 'Final devoicing'
 assimilation = 'Assimilation'
 reduction = 'Reduction'
 intervocalicd2j = 'Intervocalic d -> j'
+dial = 'Dialectical variation'
+vowellaxing = 'Vowel laxing'
 
 #: The constant *Rvzlist* contains a list of adpositions that can combine with *er* into
 #: a so-called pronominal adverb. Example: *van*, since *er* + * van* = *ervan*.
@@ -151,7 +153,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('wiw', 'wil', pron, wrongpron, phonrepl.format(wrong='w', correct='l'), dp),
                                                 ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der'), dp),
                                                 ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di'), dp),
-                                                ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron), dp),
+                                                ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron), dp-5),
+                                                ('magge', 'mag', pron, infpron, emphasis, dp),
                                                 ('maggen', 'mogen', morph, wronginfl, overgen, dp),
                                                 ('aleen', 'alleen', orth, typo, typorepl.format(wrong='aleen', correct='alleen'), dp),
                                                 ('heef', 'heeft', pron, infpron, codared, dp),
@@ -203,8 +206,13 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('goe', 'goed', pron, infpron, codared, dp),
                                                 ('geten', 'gegeten', morph, infpron, prefixdrop, dp),
                                                 ('geten', 'vergeten', morph, infpron, prefixdrop, dp + 2),
-                                                ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp)
-
+                                                ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp),
+                                                ('ken', 'kan', pron, infpron, dial, dp),
+                                                ('an', 'aan', pron, infpron, vowellaxing, dp),
+                                                ('an', 'kan', pron, infpron, onsetred, dp),
+                                                ('hoeve', 'hoef', pron, infpron, emphasis, dp),
+                                                ('hoeve', 'hoeft', pron, infpron, emphasis, dp+2),
+                                                ('hebbe', 'heb', pron, infpron, emphasis, dp+2),
                                                 ] + \
     ervzvariants + \
     innereplacements + \
@@ -289,7 +297,8 @@ basicexpansionlist: List[BasicExpansion] = \
      ("savonds", ["'s", 'avonds'], pron, infpron, typo, dp + 2),
      ("jamaar", ['ja', 'maar'], pron, infpron, typo, dp + 2),
      ("jahoor", ['ja', 'hoor'], pron, infpron, typo, dp + 2),
-     ("neehoor", ['nee', 'hoor'], pron, infpron, typo, dp + 2)
+     ("neehoor", ['nee', 'hoor'], pron, infpron, typo, dp + 2),
+     ("kanne", ['kan', 'er'], pron, infpron, codared, dp + 2)
      ]
 # + closesyllshortprepexpansions # put off does not lead to improvement
 # + innuclosedsyllshortprepexpansions # put off does not lead to improvement

@@ -23,7 +23,7 @@ from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, known_word,
-                              tswnouns)
+                              tswnouns, wordsunknowntoalpinolexicondict)
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
@@ -971,7 +971,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%) and (@rel="--" or @rel="dp" or @rel="predm" or @rel="nucl")]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
-    if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != []:
+    # if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != []: # OLD
+    if token.word.lower() == 'moe':
         newwords = ['moet']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
@@ -998,6 +999,13 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
+
+    # words unknown to Alpino e.g *gymmen* is replaced by *trainen*
+    if token.word.lower() in wordsunknowntoalpinolexicondict:
+        newwords = [wordsunknowntoalpinolexicondict[token.word.lower()]]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                    name='Word unknown to Alpino', value='Unknown word', cat='lexicon',
+                                    backplacement=bpl_wordlemma)
 
 
     # find document specific replacements
