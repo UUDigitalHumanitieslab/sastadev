@@ -10,6 +10,7 @@ hyphen = '-'
 slash = '/'
 tab = '\t'
 comma = ','
+underscore = '_'
 
 # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
 csvre = "'[^']+'|[^,' ]+"
@@ -463,6 +464,10 @@ def getallrealwords(allresults):
         result[uttid] = Counter(words)
     return result
 
+def remove_underscore(lemma: str) -> str:
+    lemmaparts = lemma.split(underscore)
+    newlemma = ''.join(lemmaparts)
+    return newlemma
 
 if __name__ == '__main__':
     test()

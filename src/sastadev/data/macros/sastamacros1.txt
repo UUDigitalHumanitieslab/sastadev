@@ -40,23 +40,30 @@ PQ_b = """@begin"""
 robusttopicdrop = """(@cat="sv1" and ../node[@lemma="."])"""
 
 Tarsp_hww = """
- (@lemma = "kunnen" or
-  @lemma = "moeten" or
+ (@lemma = "kunnen" or contains(@lemma,"_kunnen") or
+  @lemma = "moeten" or contains(@lemma,"_moeten") or
   @lemma = "hoeven" or
   @lemma = "blijven" or
   @lemma = "willen" or
   @lemma = "zullen" or   
   @lemma = "doen" or
-  @lemma = "gaan" or
+  @lemma = "gaan" or contains(@lemma,"_gaan") or
   (@lemma = "horen" and %horenaux%) or
   @lemma = "komen" or
   @lemma = "laten" or
   @lemma = "liggen" or
   @lemma = "lopen" or
-  @lemma = "mogen" or
+  @lemma = "mogen" or contains(@lemma,"_mogen") or
   @lemma = "staan" or
-  @lemma = "zitten")
+  @lemma = "zitten" or contains(@lemma,"_zitten"))
  """
+
+hebbenwordenzijn = """( 
+     @lemma = "hebben" or contains(@lemma,"_hebben") or
+     @lemma = "worden" or contains(@lemma,"_worden") or
+     @lemma = "zijn"   or contains(@lemma,"_zijn") 
+	 )""""
+ 
  
 Tarsp_vc_sibling = """parent::node[ node[@rel="vc" and node[@rel="hd"]]]"""
 Tarsp_predc_sibling = """parent::node[ node[@rel="predc"]]"""

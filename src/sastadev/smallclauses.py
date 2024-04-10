@@ -352,12 +352,12 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                 inserttokens = [Token('is' if getal(first) != 'mv' else 'zijn', fpos, subpos=5)]
                 resultlist = mktokenlist(tokens, fpos, inserttokens)
                 metadata += mkinsertmeta(inserttokens, resultlist)
-        elif (aanwvnw(first) or knownnoun(first) or istswnoun(first)) and inf(second):
+        elif (aanwvnw(first) or knownnoun(first) or istswnoun(first) or perspro(first)) and inf(second):
             if intransitive(second):
                 firstsubject = True
-            elif transitive(second) and ishuman(first):
+            elif transitive(second) and (ishuman(first) or nomperspro(first)):
                 firstsubject = True
-            elif pseudotr(second) and (ishuman(first) or isanimate(first)):
+            elif pseudotr(second) and (ishuman(first) or isanimate(first) or nomperspro(first)):
                 firstsubject = True
             else:
                 firstsubject = False

@@ -116,15 +116,27 @@ Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
-Tarsp_OndW = """(%declarative% and %Ond% and  
+old_Tarsp_OndW = """(%declarative% and %Ond% and  
                 ((%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) or 
 				 (%Tarsp_W% and not(node[@rel="vc"])) or 
-				 (not(node[%Tarsp_W%]) and node[%Tarsp_onlyWinVC%]) 
+				 (not(%Tarsp_W%) and node[%Tarsp_onlyWinVC%]) 
 				) and 
                  (%realcomplormodnodecount% + %indexnodecount% = 1) and 
                 (@rel!="dp" or (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) )
 				
 				)"""
+
+Tarsp_OndW = """(%declarative% and %Ond% and  
+                ((%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) or 
+				 (%Tarsp_W% and not(node[@rel="vc"])) or 
+				 (not(%Tarsp_W%) and node[%Tarsp_onlyWinVC%]) 
+				) and 
+                 (%realcomplormodnodecount% + %indexnodecount% = 1) and 
+                (@rel!="dp" or (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) )
+				
+				)"""				
+				
+
 
 Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and (%realcomplormodnodecount% + %nonsuindexnodecount% = 0) )"""
 
