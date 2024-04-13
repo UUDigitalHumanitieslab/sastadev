@@ -302,3 +302,16 @@ realwordnode = """ ((@pt="ww" or @pt="n" or @pt="adj" or @pt="bw" or @pt="vz" or
 horenaux = """(@lemma="horen" and 
                @pt="ww" and 
 			   ../node[@rel="ld" or @rel="mod"] and not(../node[@rel="obj1" or @rel="vc"]))"""
+			   
+inv = """( 
+          %declarative% and 
+          ((
+            (
+             (@cat="sv1" and not(parent::node[@cat="whq"])) or
+             (@cat="smain" )
+            ) and 
+            node[@pt="ww" and @rel="hd" and (not(@stype) or @stype!="imparative") ] and node[@rel="su" and number(@end)>../node[@rel="hd"]/@end]
+           ) or 
+           %robustinversion%
+		  )
+		 )"""
