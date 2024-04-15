@@ -969,6 +969,28 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     #                                         name='Disambiguation', value='Avoid unknown reading',
     #                                         cat='Lexicon', backplacement=bpl_wordlemma)
 
+    # final r realized as w weew, ew
+    if not known_word(token.word) and token.word.lower().endswith('w') and known_word(f'{token.word[:-1]}r'):
+        newwords = [f'{token.word[:-1]}r']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='Final r -> w',
+                                        cat='Pronunciation',
+                                        backplacement=bpl_word)
+
+    # wrong past participle emaakt -> gemaakt
+    if not known_word(token.word) and token.word.lower().startswith('e') and known_word(f'g{token.word}'):
+        newwords = [f'g{token.word}']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='Initial g dropped', cat='Pronunciation',
+                                        backplacement=bpl_word)
+
+    # wrong past participle  semaakt -> gemaakt
+    if not known_word(token.word) and token.word.lower().startswith('se') and known_word(f'g{token.word[1:]}'):
+        newwords = [f'g{token.word[1:]}']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='Initial g replaced by s', cat='Pronunciation',
+                                        backplacement=bpl_word)
+
     moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%)]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
     if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != [] and (

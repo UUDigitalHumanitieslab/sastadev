@@ -154,6 +154,10 @@ def inf(node):
     result = getattval(node, 'pt') == 'ww' and getattval(node, 'wvorm') == 'inf'
     return result
 
+def pastpart(node):
+    result = getattval(node, 'pt') == 'ww' and getattval(node, 'wvorm') == 'vd'
+    return result
+
 
 def rpronoun(node):
     result = getattval(node, 'pt') == 'vnw' and \
@@ -253,13 +257,13 @@ def oldmktokenlist(leaves, themap, fpos, inserttokens):
     return resultlist
 
 
-def mkinsertmeta(inserttokens, resultlist):
+def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty):
     insertposs = [token.pos + token.subpos for token in inserttokens]
     insertwordlist = [token.word for token in inserttokens]
     tokenmappinglist = [token.pos if token.subpos == 0 else None for token in resultlist]
     metadata1 = [Meta(insertion, [insertword], annotatedposlist=[insertpos],
                  annotatedwordlist=[], annotationposlist=[insertpos],
-                 annotationwordlist=[insertword], cat=smallclause, source=SASTA, penalty=defaultpenalty,
+                 annotationwordlist=[insertword], cat=smallclause, source=SASTA, penalty=penalty,
                  backplacement=bpl_delete) for insertword, insertpos in zip(insertwordlist, insertposs)]
     meta2 = Meta(insertiontokenmapping, tokenmappinglist, cat=tokenmapping, source=SASTA, penalty=0,
                  backplacement=bpl_none)
@@ -369,6 +373,11 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                 inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
+        elif (aanwvnw(first) or knownnoun(first) or istswnoun(first) or perspro(first)) and pastpart(second):
+            fpos = int(getattval(first, 'begin'))
+            inserttokens = [Token('was' if getal(first) != 'mv' else 'waren', fpos, subpos=5)]
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
+            metadata += mkinsertmeta(inserttokens, resultlist, penalty=.5 * defaultpenalty)
         elif not nominal(first) and not ww(first) and inf(second):
             fpos = -1
             inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]

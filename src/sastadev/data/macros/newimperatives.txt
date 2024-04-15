@@ -116,29 +116,33 @@ Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
-old_Tarsp_OndW = """(%declarative% and %Ond% and  
-                ((%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) or 
-				 (%Tarsp_W% and not(node[@rel="vc"])) or 
-				 (not(%Tarsp_W%) and node[%Tarsp_onlyWinVC%]) 
-				) and 
-                 (%realcomplormodnodecount% + %indexnodecount% = 1) and 
-                (@rel!="dp" or (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) )
-				
-				)"""
+
+
+
+wandonlyw_vc = """(%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) """
+w_novc = """ (%Tarsp_W% and not(node[@rel="vc"])) """
+nowonlyw_vc = """ (not(%Tarsp_W%) and node[%Tarsp_onlyWinVC%]) """
 
 Tarsp_OndW = """(%declarative% and %Ond% and  
-                ((%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) or 
-				 (%Tarsp_W% and not(node[@rel="vc"])) or 
-				 (not(%Tarsp_W%) and node[%Tarsp_onlyWinVC%]) 
+                (%wandonlyw_vc% or 
+				 %w_novc% or 
+				 %nowonlyw_vc% 
 				) and 
-                 (%realcomplormodnodecount% + %indexnodecount% = 1) and 
+                 (%realcomplormodnodecount% + %nonsuindexnodecount% = 1) and 
                 (@rel!="dp" or (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) )
 				
 				)"""				
-				
+			
+subjectboundobject = """(@rel="obj1" and @index = parent::node/parent::node/node[@rel="su"]/@index) """			
+subjectboundobjectcount = """count(node[%subjectboundobject%]) """ 
 
+oldonlyw = """( (%realcomplormodnodecount% + %nonsuindexnodecount% = 0) or %subjectboundobjectcount% = 1)"""
+onlyw = """( (node[@rel="su" and %indexnode%] and %realcomplormodnodecount% = 0) or 
+             (node[%subjectboundobject%] and %realcomplormodnodecount% = 0)      or
+             (%realcomplormodnodecount% = 0 )			 
+           )"""  
 
-Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and (%realcomplormodnodecount% + %nonsuindexnodecount% = 0) )"""
+Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and %onlyw% )"""
 
 
 Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""

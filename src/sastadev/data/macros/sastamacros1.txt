@@ -39,30 +39,69 @@ PQ_b = """@begin"""
 
 robusttopicdrop = """(@cat="sv1" and ../node[@lemma="."])"""
 
-Tarsp_hww = """
+Tarsp_hww = """(
  (@lemma = "kunnen" or contains(@lemma,"_kunnen") or
   @lemma = "moeten" or contains(@lemma,"_moeten") or
-  @lemma = "hoeven" or
-  @lemma = "blijven" or
-  @lemma = "willen" or
-  @lemma = "zullen" or   
-  @lemma = "doen" or
-  @lemma = "gaan" or contains(@lemma,"_gaan") or
-  (@lemma = "horen" and %horenaux%) or
-  @lemma = "komen" or
-  @lemma = "laten" or
-  @lemma = "liggen" or
-  @lemma = "lopen" or
+  @lemma = "hoeven"  or contains(@lemma,"_hoeven") or
+  @lemma = "blijven"  or contains(@lemma,"_blijven") or
+  @lemma = "willen"  or contains(@lemma,"_willen") or
+  @lemma = "zullen"  or contains(@lemma,"_zullen") or   
+  @lemma = "doen"  or contains(@lemma,"_doen") or 
+  @lemma = "gaan"   or contains(@lemma,"_gaan") or
+  @lemma = "horen"   or contains(@lemma,"_horen") or
+  @lemma = "komen"   or contains(@lemma,"_komen") or
+  @lemma = "laten"  or contains(@lemma,"_laten") or
+  @lemma = "liggen"  or contains(@lemma,"_liggen") or
+  @lemma = "lopen" or   contains(@lemma,"_lopen") or
   @lemma = "mogen" or contains(@lemma,"_mogen") or
-  @lemma = "staan" or
-  @lemma = "zitten" or contains(@lemma,"_zitten"))
- """
+  @lemma = "staan" or   contains(@lemma,"_staan") or
+  @lemma = "zitten" or contains(@lemma,"_zitten")) and
+  not(%hwwprtverb%) and
+  not(starts-with(@lemma,"mee")) and
+  not(starts-with(@lemma, "samen")) 
+ 
+ 
+ )"""
 
 hebbenwordenzijn = """( 
      @lemma = "hebben" or contains(@lemma,"_hebben") or
      @lemma = "worden" or contains(@lemma,"_worden") or
      @lemma = "zijn"   or contains(@lemma,"_zijn") 
 	 )""""
+	 
+	 
+hwwprtverb = """
+(
+	@lemma = "aan_doen" or
+	@lemma = "dicht_doen" or
+	@lemma = "mee_doen" or
+	@lemma = "na_doen" or
+	@lemma = "om_doen" or
+	@lemma = "open_doen" or
+	@lemma = "over_doen" or
+	@lemma = "terug_doen" or
+	@lemma = "uit_doen" or
+	@lemma = "voor_doen" or
+	@lemma = "weg_doen" or
+	@lemma = "aan_laten" or
+	@lemma = "binnen_laten" or
+	@lemma = "door_laten" or
+	@lemma = "los_laten" or
+	@lemma = "neer_laten" or
+	@lemma = "op_laten" or
+	@lemma = "uit_laten" or
+	@lemma = "weg_laten" or
+	@lemma = "aan_lopen" or
+	@lemma = "binnen_lopen" or
+	@lemma = "door_lopen" or
+	@lemma = "leeg_lopen" or
+	@lemma = "mee_lopen" or
+	@lemma = "rond_lopen" or
+	@lemma = "vol_lopen" or
+	@lemma = "weg_lopen" or
+	@lemma = "vast_zitten" 
+)
+"""
  
  
 Tarsp_vc_sibling = """parent::node[ node[@rel="vc" and node[@rel="hd"]]]"""
@@ -91,7 +130,8 @@ Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" a
    not(%Tarsp_vc_sibling%)) or
    (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
 
- ))
+ )  and @wvorm="pv"
+ )
 """
 
 
