@@ -14,7 +14,7 @@ from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
 from sastadev.lexicon import de, dets, known_word, getwordinfo, nochildwords
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
-                               bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, insertion)
+                               bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion)
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
@@ -27,7 +27,7 @@ from sastadev.sastatoken import inflate, deflate, tokeninflate, insertinflate
 from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
-                                        getcompoundcount, getnodeyield, getptsubclass,
+                                        getcompoundcount, getneighbourwordnode, getnodeyield, getptsubclass,
                                         getsentid, gettokposlist, getuttid,
                                         getyield, myfind, showflatxml,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
@@ -719,8 +719,9 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         showtree(thetree, text='thetree after treewithtokenpos')
     if debug:
         showtree(fatstree, text='fatstree')
-    for meta in thecorrection[2]:
-        curbackplacement = meta.backplacement
+    nextbackplacement = None
+    for mctr, meta in enumerate(thecorrection[2]):
+        curbackplacement = nextbackplacement if nextbackplacement is not None else meta.backplacement
         if curbackplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(
@@ -789,6 +790,17 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                             settings.LOGGER.error(
                                 'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid, newnode))
                             simpleshow(oldnode, showchildren=False)
+        elif curbackplacement == bpl_word_delprec: # this is rather ad-hoc a more principled way will have to be found
+            nodeend = meta.annotationposlist[-1] + 1
+            nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(
+                nodeend - 1, nodeend)
+            newnode = myfind(thetree, nodexpath)
+            oldnode = myfind(fatstree, nodexpath)
+            newnodeparent = newnode.getparent()
+            newnodeparent.remove(newnode)
+            nextbackplacement = bpl_word
+
+
 
         elif curbackplacement == bpl_none:
             pass
@@ -807,7 +819,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 dezeAVnode = etree.fromstring(dezeAVntemplate.format(
                     begin=nodebegin, end=nodeend, id=nodeid))
                 thetree = transplant_node(oldnode, dezeAVnode, thetree)
-
+        if curbackplacement not in [bpl_word_delprec]:
+            nextbackplacement = None
         # etree.dump(thetree, pretty_print=True)
 
     # now do all the deletions at once, incl adaptation of begins and ends, and new sentence node

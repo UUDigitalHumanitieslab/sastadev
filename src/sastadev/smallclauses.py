@@ -60,6 +60,7 @@ vowels = ['a', 'e', 'i', 'o', 'u']
 
 uniquelynominativeperspros = ['ik', 'jij', 'hij', 'zij', 'wij', 'ikke', "'k", "k", "ie", "we"]
 
+topicdropmeta = Meta('Topic drop', 'Topic drop', cat='Grammar', subcat='Syntax', source='SASTA', penalty=0)
 
 def makegen(lemma):
     if lemma is None or len(lemma) < 2:
@@ -256,6 +257,35 @@ def oldmktokenlist(leaves, themap, fpos, inserttokens):
                  [mktoken(lv, themap) for lv in leaves if bg(lv) > fpos]
     return resultlist
 
+def getaux(node: SynTree) -> str:
+    pt = getattval(node, 'pt')
+    frame =getattval(node, 'frame')
+    if pt == 'adj':
+        result = 'zijn'
+    elif pt == 'ww':
+        if frame.startswith('verb(zijn') or frame.startswith('verb(unacc'):
+            result = 'zijn'
+        elif frame.startswith('verb(hebben'):
+            result = 'hebben'
+        else:
+            result = ''
+    return result
+
+def getauxform(aux: str, node:SynTree) -> str:
+    persoon = getattval(node, 'persoon')
+    getal = getattval(node, 'getal')
+    if getal == 'mv':
+        result = aux
+    else:
+        if persoon.startswith('1'):
+            result = 'heb' if aux == 'hebben' else 'ben'
+        elif persoon.startswith('2'):
+            result = 'hebt' if aux == 'hebben' else 'bent'
+        elif persoon.startswith('3'):
+            result = 'heeft' if aux == 'hebben' else 'is'
+        else:   # should never occur
+            result = 'heeft' if aux == 'hebben' else 'is'
+    return result
 
 def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty):
     insertposs = [token.pos + token.subpos for token in inserttokens]
@@ -270,6 +300,16 @@ def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty):
     metadata = metadata1 + [meta2]
     return metadata
 
+def isfirstsubject(first, second) -> bool:
+    if intransitive(second):
+        firstsubject = True
+    elif transitive(second) and (ishuman(first) or nomperspro(first)):
+        firstsubject = True
+    elif pseudotr(second) and (ishuman(first) or isanimate(first) or nomperspro(first)):
+        firstsubject = True
+    else:
+        firstsubject = False
+    return firstsubject
 
 def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     '''
@@ -357,14 +397,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                 resultlist = mktokenlist(tokens, fpos, inserttokens)
                 metadata += mkinsertmeta(inserttokens, resultlist)
         elif (aanwvnw(first) or knownnoun(first) or istswnoun(first) or perspro(first)) and inf(second):
-            if intransitive(second):
-                firstsubject = True
-            elif transitive(second) and (ishuman(first) or nomperspro(first)):
-                firstsubject = True
-            elif pseudotr(second) and (ishuman(first) or isanimate(first) or nomperspro(first)):
-                firstsubject = True
-            else:
-                firstsubject = False
+            firstsubject = isfirstsubject(first, second)
             if firstsubject:
                 fpos = int(getattval(first, 'begin'))
                 inserttokens = [Token('wil' if getal(first) != 'mv' else 'willen', fpos, subpos=5)]
@@ -373,11 +406,22 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                 inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
-        elif (aanwvnw(first) or knownnoun(first) or istswnoun(first) or perspro(first)) and pastpart(second):
-            fpos = int(getattval(first, 'begin'))
-            inserttokens = [Token('was' if getal(first) != 'mv' else 'waren', fpos, subpos=5)]
-            resultlist = mktokenlist(tokens, fpos, inserttokens)
-            metadata += mkinsertmeta(inserttokens, resultlist, penalty=.5 * defaultpenalty)
+        elif   (aanwvnw(first) or knownnoun(first) or istswnoun(first) or perspro(first)) and pastpart(second):  # ik gedaan
+            firstsubject = isfirstsubject(first, second)
+            if firstsubject: ## otherwise the structure ppart[obj1 hd/ww] is correct to get VCW as tarsp code
+                fpos = int(getattval(first, 'begin'))
+                verbtoinsert = getaux(second)
+                verbform = getauxform(verbtoinsert, first)
+                if verbtoinsert in ['hebben', 'zijn']:
+                    if transitive(second):
+                        inserttokens = [Token('dat', 3), Token(verbform, 5)]
+                        resultlist = mktokenlist(tokens, 0, inserttokens)
+                        metadata += [topicdropmeta]
+                    else:
+                        inserttokens = [Token(verbform, fpos, subpos=5)]
+                        resultlist = mktokenlist(tokens, fpos, inserttokens)
+                    metadata += mkinsertmeta(inserttokens, resultlist, penalty=.5 * defaultpenalty)
+                    # add metadata for topic drop
         elif not nominal(first) and not ww(first) and inf(second):
             fpos = -1
             inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]

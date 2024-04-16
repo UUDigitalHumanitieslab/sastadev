@@ -2249,6 +2249,18 @@ def add_metadata(intree: SynTree, metalist: List[Meta]) -> SynTree:
         metadata.append(meta.toElement())
     return tree
 
+def getneighbourwordnode(node: SynTree, step: int) -> SynTree:
+    syntree = find1(node, './ancestor::node[@cat="top"]')
+    theyield = getnodeyield(syntree)
+    nodeposition = theyield.index(node)
+    neighbournodeposition = nodeposition + step
+    if len(theyield) > neighbournodeposition >= 0:
+        result = theyield[neighbournodeposition]
+    else:
+        result = None
+    return result
+
+
 
 if __name__ == '__main__':
     # test()

@@ -25,7 +25,7 @@ from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, known_word,
                               tswnouns, wordsunknowntoalpinolexicondict)
 from sastadev.macros import expandmacros
-from sastadev.metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
+from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
                                defaultpenalty, filled_pause, fstoken, intj,
                                janeenou, longrep, mkSASTAMeta, repeated,
@@ -874,6 +874,16 @@ def updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newwords: List[s
     return newtokenmds
 
 
+def multi_updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newtokens: List[Token], beginmetadata: List[Meta],
+                      newmetadata: List[Meta]) -> List[TokenMD]:
+    for nwt, nmeta in zip(newtokens, newmetadata):
+        metadata = [nmeta] + beginmetadata
+        newwordtokenmd = TokenMD(nwt, metadata)
+        newtokenmds.append(newwordtokenmd)
+    return newtokenmds
+
+
+
 # def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]: moved to sastatok.py
 
 
@@ -983,6 +993,14 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Initial g dropped', cat='Pronunciation',
                                         backplacement=bpl_word)
+
+    # wrong transcription of 's + e-participle past participle  semaakt -> 's emaakt -> is gemaakt
+    if not known_word(token.word) and token.word.lower().startswith('se') and known_word(f'g{token.word[1:]}'):
+        newwords = [f"is g{token.word[1:]}"]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='Initial g dropped', cat='Pronunciation',
+                                        backplacement=bpl_word_delprec)
+
 
     # wrong past participle  semaakt -> gemaakt
     if not known_word(token.word) and token.word.lower().startswith('se') and known_word(f'g{token.word[1:]}'):

@@ -280,8 +280,8 @@ innuclosedsyllshortprepexpansions = [(w1[:-1] + 'u', w2, c, n, v, p)
 basicexpansionlist: List[BasicExpansion] = \
     [('dis', ['dit', 'is'], pron, infpron, contract, dp),
      ('das', ['dat', 'is'], pron, infpron, contract, dp),
-     ("di's", ['dit' 'is'], pron, infpron, contract, dp),
-     ("da's", ['dat' 'is'], pron, infpron, contract, dp),
+     ("di's", ['dit', 'is'], pron, infpron, contract, dp),
+     ("da's", ['dat', 'is'], pron, infpron, contract, dp),
      ('tis', ['dit', 'is'], pron, infpron, contract, dp),
      ('waas', ['waar', 'is'], pron, infpron, contract, dp),
      ('is-t-ie', ['is', 'ie'], pron, infpron, t_ie, dp),
