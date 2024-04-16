@@ -44,11 +44,11 @@ firstwordcolheaderpattern = r'^\s*word0*1\s*$'
 firstwordcolheaderre = re.compile(firstwordcolheaderpattern)
 
 speakerheaders = ['speaker', 'spreker', 'spk']
-uttidheaders = ['id', 'utt', 'uttid', 'uiting']
+uttidheaders = ['uiting', 'id', 'utt', 'uttid', ]
 levelheaders = ['level']
 stagesheaders = ['fases', 'stages']
-commentsheaders = ['comments', 'commentaar']
-unalignedheaders = ['unaligned', 'hele uiting', 'hele zin']
+commentsheaders = ['opmerkingen', 'comments', 'commentaar']
+unalignedheaders = ['hele uiting', 'unaligned', 'hele zin']
 
 
 def nested_dict(n: int,
@@ -82,6 +82,10 @@ def getlabels(labelstr: str, patterns: Tuple[Pattern, Pattern]) -> List[str]:
             'Cannot interpret %s; found items: %s', labelstr, logstr)
         # exit(-1)
     return results
+
+
+def isuttlevel(level: str) -> bool:
+    return level.lower() in uttidheaders
 
 
 def iswordcolumn(str: str) -> Optional[Match[str]]:
@@ -331,7 +335,7 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
     commentscol = -1
     unalignedcol = -1
 
-    uttlevel = 'utt'
+    # uttlevel = 'utt'
 
     uttcount = 0
 
@@ -366,7 +370,7 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
         #    uttcount += 1
         curuttwlist = []
         for colctr in range(firstwordcol, len(row)):
-            if thelevel == uttlevel:
+            if thelevel.lower() in uttidheaders:
                 rawcurcellval = str(row[colctr])
                 curcellval = getname(rawcurcellval)
                 if curcellval != '':
@@ -383,7 +387,7 @@ def get_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
                 if cleanlabel != '':
                     thedata[(cleanlevel, cleanlabel)].append(
                         (uttid, tokenposition))
-            elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+            elif not isuttlevel(thelevel) and colctr != stagescol and colctr != commentscol:
                 thelabelstr = row[colctr]
                 thelevel = row[levelcol]
                 if colctr == unalignedcol:
