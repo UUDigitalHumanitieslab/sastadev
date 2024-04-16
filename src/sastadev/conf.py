@@ -11,7 +11,7 @@ class SastadevConfig:
                  ALPINO_PORT: int = 7001,
                  LOGGER=logging.getLogger('sastadev'),
                  SD_DIR: str = SD_DIR,
-                 DATAROOT: str = '.',
+                 DATAROOT: str = r'D:\Dropbox\jodijk\Utrecht\Projects\SASTADATA',
                  PARSE_FUNC=alpinoparsing.parse
                  ):
         self.ALPINO_HOST = ALPINO_HOST

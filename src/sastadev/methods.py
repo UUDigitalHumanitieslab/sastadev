@@ -1,17 +1,13 @@
 import os
 from typing import Callable, Dict, List, Optional, Tuple
 
-from sastadev.allresults import (ExactResultsDict, ExactResultsFilter,
-                                 mkresultskey)
+from sastadev.allresults import mkresultskey
 from sastadev.conf import settings
 from sastadev.query import pre_process
-from sastadev.sastatypes import (AltCodeDict, ExactResult, FileName,
-                                 Item_Level2QIdDict, MethodName, QId, Query,
-                                 QueryDict)
-
-lemmaqid = 'A051'
-lexreskey = mkresultskey('A018')
-nreskey = mkresultskey('A021')
+from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
+                                 ExactResultsFilter, FileName,
+                                 Item_Level2QIdDict, MethodName, Pattern, QId,
+                                 Query, QueryDict)
 
 lemmaqid = 'A051'
 lexreskey = mkresultskey('A018')
@@ -28,6 +24,14 @@ stapmethods = [stap]
 validmethods = astamethods + stapmethods + tarspmethods
 
 astalexicalmeasures = [mkresultskey('A018'), mkresultskey('A021')]  # LEX and N
+
+basicpattern: Pattern = '[,;]'
+extendedpattern: Pattern = '[,;/\|]'
+
+methodseparators = {}
+methodseparators[tarsp] = basicpattern
+methodseparators[stap] = extendedpattern
+methodseparators[asta] = extendedpattern
 
 
 class SampleSize:
@@ -69,9 +73,12 @@ class Method:
         self.queries: QueryDict = queries
         self.defaultfilter: ExactResultsFilter = defaultfilter
         self.item2idmap: Item_Level2QIdDict = item2idmap
+        self.simpleitem2idmap = {item: id for (
+            (item, level), id) in item2idmap.items()}
         self.altcodes: AltCodeDict = altcodes
         self.postquerylist: List[QId] = postquerylist
         self.methodfilename: FileName = methodfilename
+        self.separators: Pattern = methodseparators[name]
 
 
 def implies(a: bool, b: bool) -> bool:
@@ -146,13 +153,22 @@ codepath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(codepath, 'data')
 methodspath = os.path.join(datapath, 'methods')
 
-
 supported_methods = {}
 supported_methods[tarsp] = os.path.join(
-    methodspath, 'TARSP Index Current.xlsx')
-supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
+    methodspath, 'TARSP_Index_Current.xlsx')
+supported_methods[asta] = os.path.join(methodspath, 'ASTA_Index_Current.xlsx')
 supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
+
+codepath = os.path.dirname(os.path.abspath(__file__))
+datapath = os.path.join(codepath, 'data')
+methodspath = os.path.join(datapath, 'methods')
+
+# supported_methods = {}
+# supported_methods[tarsp] = os.path.join(
+#     methodspath, 'TARSP_Index_Current.xlsx')
+# supported_methods[asta] = os.path.join(methodspath, 'ASTA_Index_Current.xlsx')
+# supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}
 defaultfilters[asta] = astadefaultfilter

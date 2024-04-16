@@ -1,7 +1,3 @@
-
-
-# import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
-# import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
 import copy
 from typing import List, Optional
 
@@ -11,12 +7,11 @@ from lxml import etree
 # import find1, iswordnode, getattval
 import sastadev.stringfunctions as strf
 import sastadev.treebankfunctions as tbf
-from sastadev.alpinoparsing import parse
-from sastadev.auchannsettings import settings
+from sastadev.auchannsettings import settings as auchannsettings
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings as sdsettings
 from sastadev.lexicon import known_word
-from sastadev.metadata import (MetaValue, bpl_node, bpl_word, fromElement,
+from sastadev.metadata import (MetaValue, bpl_replacement, fromElement,
                                mkSASTAMeta)
 from sastadev.sastatok import gettokensplusxmeta
 # import find1, iswordnode, getattval
@@ -25,21 +20,33 @@ from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.tokenmd import TokenListMD
 
+# import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
+
 defaultsettings = AlignmentSettings()
 
 sentenceinitialconjunctions = {'en', 'maar'}
 # interjections = ['hee', 'hè', 'ja', 'nee', 'kijk']
 # interjections used for sentence initial words that can be absent in te beginning of a correction
-interjections = ['ja', 'nee', 'kijk', 'oh', 'he', 'hoor', 'hè', 'o', 'hee', 'mama', 'okee', 'hé', 'ah', 'oeh', 'au', 'oja', 'joh', 'jee', 'mam', 'bah', 'jawel', 'mamma', 'ho', 'boem', 'ha', 'sorry',
-                 'ooh', 'daag', 'haha', 'nou', 'papa', 'pappa', 'toe', 'maar', 'oei', 'aah', 'hallo', 'dankjewel', 'oeps', 'oo', 'toch', 'wauw', 'goh', 'aha', 'vooruit', 'dan', 'tjonge',
-                 'hèhè', 'jaja', 'hoi', 'waar', 'bb', 'help', 'meneer', 'hi', 'ach', 'ee', 'hup', 'oooh', 'heh', 'm', 'ma', 'sst', 'och', 'tja', 'lieverd', 'hahaha', 'hoera', 'pap',
-                 'echt', 'lalala', 'hopla', 'da', 'pff', 'hai', 'jongens', 'juffrouw', 'jeetje', 'tot', 'ziens', 'hihi', 'jonge', 'ohh', 'poeh', 'oef',
-                 'meisje', 'aaah', 'auw', 'meid', 'niet', 'poe', 'en', 'schat', 'wel', 'ai', 'goed', 'xxxx', 'dat', 'doei', 'tjongejonge', 'ooooh', 'hoewel',
-                 'oke', 'neenee', 'pfff', 'mens', 'ps', 'oow', 'fff', 'juf', 'mevrouw', 'baby', 'dankuwel', 'waw', 'welterusten', 'sehhahahaha', 'hihihi', 'aaaah', 'wee', 'shit',
-                 'pa', 'grr', 'weltrusten', 'pats', 'weh', 'stouterd', 'dag', 'joepie', 'neej', 'hoho', 'rara', 'joehoe', 'schatje', 'hierzo', 'pffff', 'ahh', 'ahah', 'tjee',
-                 'liefje', 'pf', 'ahaha', 'hoppa', 'ahahaha', 'verdorie', 'ssst', 'foei', 'gossie', 'ok', 'joe', 'tsja', 'gatverdamme', 'grrr', 'welnee', 'god', 'tjeetje', 'doeg',
-                 'wah', 'getver', 'ohja', 'hej', 'zak', 'alhoewel', 'neen', 'goedzo', 'ahahah', 'allee', 'jo', 'jongen', 'pardon', 'hihihihi', 'floep', 'lieve', 'gatver', 'kut', 'bro',
-                 'mja', 'tsjonge', 'hohoho', 'klopt', 'man', 'jezus', 'truste', 'ppf', 'goedemorgen', 'domoor', 'aaaaah', 'okeee', 'yes', 'ahahahaha']
+interjections = ['ja', 'nee', 'kijk', 'oh', 'he', 'hoor', 'hè', 'o', 'hee', 'mama', 'okee', 'hé', 'ah', 'oeh', 'au',
+                 'oja', 'joh', 'jee', 'mam', 'bah', 'jawel', 'mamma', 'ho', 'boem', 'ha', 'sorry',
+                 'ooh', 'daag', 'haha', 'nou', 'papa', 'pappa', 'toe', 'maar', 'oei', 'aah', 'hallo', 'dankjewel',
+                 'oeps', 'oo', 'toch', 'wauw', 'goh', 'aha', 'vooruit', 'dan', 'tjonge',
+                 'hèhè', 'jaja', 'hoi', 'waar', 'bb', 'help', 'meneer', 'hi', 'ach', 'ee', 'hup', 'oooh', 'heh', 'm',
+                 'ma', 'sst', 'och', 'tja', 'lieverd', 'hahaha', 'hoera', 'pap',
+                 'echt', 'lalala', 'hopla', 'da', 'pff', 'hai', 'jongens', 'juffrouw', 'jeetje', 'tot', 'ziens', 'hihi',
+                 'jonge', 'ohh', 'poeh', 'oef',
+                 'meisje', 'aaah', 'auw', 'meid', 'niet', 'poe', 'en', 'schat', 'wel', 'ai', 'goed', 'xxxx', 'dat',
+                 'doei', 'tjongejonge', 'ooooh', 'hoewel',
+                 'oke', 'neenee', 'pfff', 'mens', 'ps', 'oow', 'fff', 'juf', 'mevrouw', 'baby', 'dankuwel', 'waw',
+                 'welterusten', 'sehhahahaha', 'hihihi', 'aaaah', 'wee', 'shit',
+                 'pa', 'grr', 'weltrusten', 'pats', 'weh', 'stouterd', 'dag', 'joepie', 'neej', 'hoho', 'rara',
+                 'joehoe', 'schatje', 'hierzo', 'pffff', 'ahh', 'ahah', 'tjee',
+                 'liefje', 'pf', 'ahaha', 'hoppa', 'ahahaha', 'verdorie', 'ssst', 'foei', 'gossie', 'ok', 'joe', 'tsja',
+                 'gatverdamme', 'grrr', 'welnee', 'god', 'tjeetje', 'doeg',
+                 'wah', 'getver', 'ohja', 'hej', 'zak', 'alhoewel', 'neen', 'goedzo', 'ahahah', 'allee', 'jo', 'jongen',
+                 'pardon', 'hihihihi', 'floep', 'lieve', 'gatver', 'kut', 'bro',
+                 'mja', 'tsjonge', 'hohoho', 'klopt', 'man', 'jezus', 'truste', 'ppf', 'goedemorgen', 'domoor',
+                 'aaaaah', 'okeee', 'yes', 'ahahahaha']
 fillers = ['eh', 'ehm', 'ah', 'boe', 'hm', 'hmm',
            'uh', 'uhm', 'ggg', 'mmm', 'ja', 'nee']
 allfillers = fillers + ['&-' + filler for filler in fillers] + \
@@ -47,7 +54,6 @@ allfillers = fillers + ['&-' + filler for filler in fillers] + \
 fragments = ['o.', 't', 's', 'n', 'k', 'a.', 'a', 'i', 's.', 'd', 'n.', 'e.', 'w', 'h', 'b', 'v.', 'p', 'z', 'r',
              'l', 'f', 'm.', 'g.', '@', 'w.', 'y', 'g', 'j', 'j.', 'b.', 'k.', 'v', 'h.', 'z.', 'c.', 'f.', 'i.', 'e'] \
     + defaultsettings.fragments
-
 
 space = ' '
 CHAT_explanation = 'Explanation'
@@ -87,10 +93,10 @@ def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[T
             oldtoken = Token(oldword, oldwordpos)
             if known_word(newword):
                 newtokens = tokenreplace(newtokens, newtoken)
-                bpl = bpl_node if known_word(oldword) else bpl_word
+                # bpl = bpl_node if known_word(oldword) else bpl_word
                 meta = mkSASTAMeta(oldtoken, newtoken, name='ExplanationasReplacement',
                                    value='ExplanationasReplacement',
-                                   cat='Lexical Error', backplacement=bpl)
+                                   cat='Lexical Error', backplacement=bpl_replacement)
                 newmetadata.append(meta)
                 result = TokenListMD(newtokens, newmetadata)
     return result
@@ -107,14 +113,13 @@ def islet(token, tree):
 
 
 def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
-
     # get the multiword explanation and the last tokenposition it occupies
 
     # it is assumed that the chat annotations have not been extracted and no metadata have been produced
     xtokens, xmetalist = gettokensplusxmeta(tree)
 
     result = None
-#    origmetadata = tokensmd.metadata
+    #    origmetadata = tokensmd.metadata
     origmetadata = xmetalist
     explanations = [xm for xm in xmetalist if xm.name == 'Explanation']
     finalmwexplanations = []
@@ -134,7 +139,8 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
             prefixtokens = resttokens[0:2]
             todoxtokens = resttokens[2:]
         elif len(resttokens) >= 1 and \
-                (resttokens[0].word.lower() in allfillers or resttokens[0].word.lower() in sentenceinitialconjunctions) and \
+                (resttokens[0].word.lower() in allfillers or resttokens[
+                    0].word.lower() in sentenceinitialconjunctions) and \
                 len(xm.annotationwordlist) >= 1 and resttokens[0].word.lower() != xm.annotationwordlist[0].lower():
             prefixtokens = resttokens[0:1]
             todoxtokens = resttokens[1:]
@@ -165,7 +171,7 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
         expl = space.join(
             prefixwordlist + finalexpl.annotationwordlist + postexplanationwords)
         # print(settings.replacements)
-        resultalignment = align_words(utt, expl, settings)
+        resultalignment = align_words(utt, expl, auchannsettings)
         result = str(resultalignment)
     else:
         result = None
@@ -175,7 +181,6 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
 
 
 def finalmultiwordexplanation(stree: SynTree) -> Optional[str]:
-
     # get the multiword explanation and the last tokenposition it occupies
 
     explannwrdliststr = tbf.find1(stree, explannwordlistxpath)
@@ -241,7 +246,7 @@ def getalignment(tree: SynTree) -> Optional[str]:
         explanationlist + postexplanationlist) if explanationlist is not None else None
     # print(f'explanationstr={explanationstr}')
     if explanationstr is not None:
-        alignment = align_words(cleanutt, explanationstr, settings)
+        alignment = align_words(cleanutt, explanationstr, auchannsettings)
     else:
         alignment = None
     return alignment
@@ -272,7 +277,7 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         for el in intreemetadataxml:
             newmeta = fromElement(el)
             intreemetadata.append(newmeta)
-#        intreemetadata = [fromElement(el) for el in intreemetadataxml]
+        #        intreemetadata = [fromElement(el) for el in intreemetadataxml]
 
         # adapt the metadata
         newmetadata = []
@@ -292,7 +297,7 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         newmetadata += chatmetadata
         cleanutt = space.join([token.word for token in cleanutttokens])
 
-        newtree = parse(cleanutt)
+        newtree = sdsettings.PARSE_FUNC(cleanutt)
         sentelem = tbf.find1(tree, './/sentence')
         sentid = sentelem.attrib['sentid']
         newsentelem = tbf.find1(newtree, './/sentence')

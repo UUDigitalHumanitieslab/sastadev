@@ -42,7 +42,6 @@ kreskey = mkresultskey(kqid)
 mreskey = mkresultskey(mqid)
 formreskey = mkresultskey(formqid)
 
-
 specialform = 'Special Form'
 errormarking = 'Error Marking'
 
@@ -139,9 +138,9 @@ def wordcountperutt(allresults):
 
 def getignorewordcount(allresults, uttid):
     result = 0
-    if samplesizereskey in allresults.coreresults:
-        if uttid in allresults.coreresults[samplesizereskey]:
-            result = allresults.coreresults[samplesizereskey][uttid]
+    if samplesizeqid in allresults.coreresults:
+        if uttid in allresults.coreresults[samplesizeqid]:
+            result = allresults.coreresults[samplesizeqid][uttid]
     return result
 
 
@@ -172,7 +171,7 @@ def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
     theutt = allresults.allutts[uttid]
     final = diff
     for i, w in enumerate(theutt):
-        if (uttid, i + 1) in allresults.exactresults[samplesizeqid]:
+        if (uttid, i + 1) in allresults.exactresults[samplesizereskey]:
             final += 1
         if i + 1 == final:
             break
@@ -223,15 +222,14 @@ def KMcount(allresults, _):
     Kcount = sumctr(
         allresults.coreresults[kreskey]) if kreskey in allresults.coreresults else 0
     Mcount = sumctr(
-        allresults.coreresults[mreskey]) if mreskey in allresults.coreresults else 0
+        allresults.coreresults[mqid]) if mqid in allresults.coreresults else 0
     result = Kcount + Mcount
     return result
 
 
-def getlemmas(allresults, _):
-    result = getcondlemmas(allresults, _, lambda reskey: reskey in [
-                           nounreskey, lexreskey])
-    return result
+# def getlemmas(allresults, _):
+#    result = getcondlemmas(allresults, _, lambda reskey: reskey in [nounreskey, lexreskey])
+#    return result
 
 
 def getnounlemmas(allresults, _):

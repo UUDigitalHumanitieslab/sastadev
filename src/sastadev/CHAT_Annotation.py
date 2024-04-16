@@ -63,8 +63,9 @@ fullwordpat = fullre(wordpat)
 wordre = re.compile(fullwordpat)
 # interpunction = r'(:?' + r'[!\?\.,;]' + '|' + u'[\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):' + r')'
 interpunction = r'\-\-\-|\-\-|\-|\-' + r'|' + \
-    r'[!\?\.,;]' + '|' + \
-    u'[\u2013\u2014\u2015\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):'
+                r'[!\?\.,;]' + '|' + \
+                u'[\u2013\u2014\u2015\u201C\u201D\u2039\u203A]' + \
+    r'|' + r'(?<=\s):'
 filenamepat = r'[\w\.]+'
 fullfilenamepat = fullre(filenamepat)
 fullfilenamere = re.compile(fullfilenamepat)

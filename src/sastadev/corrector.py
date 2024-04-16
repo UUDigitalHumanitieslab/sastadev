@@ -22,7 +22,7 @@ from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, known_word,
-                              tswnouns)
+                              tswnouns, wordsunknowntoalpinolexicondict)
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
@@ -104,6 +104,8 @@ def replacement(inword: str, outword: str) -> str:
 #: vowel and optionally a consonant.
 gaatiepattern = r'^.*' + anychars(vowels) + opt(anychars(consonants)) + 'tie$'
 gaatiere = re.compile(gaatiepattern)
+gaattiepattern = r'^.*' + anychars(vowels) + 'ttie$'
+gaattiere = re.compile(gaattiepattern)
 neutersgnoun = 'boekje'  # select here an unambiguous neuter noun
 
 
@@ -771,7 +773,7 @@ def getexpansions2(tokenlist: List[Token], intokenposlist: List[int]) -> List[Tu
             results = [combine(headresult, tailresult)
                        for tailresult in tailresults]
             finalresults += [(TokenListMD(result[0].tokens,
-                              result[0].metadata), result[1]) for result in results]
+                                          result[0].metadata), result[1]) for result in results]
     return finalresults
 
 
@@ -966,9 +968,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     #                                         name='Disambiguation', value='Avoid unknown reading',
     #                                         cat='Lexicon', backplacement=bpl_wordlemma)
 
-    moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%) and (@rel="--" or @rel="dp" or @rel="predm" or @rel="nucl")]'
+    moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%)]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
-    if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != []:
+    if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != [] and (
+            tokenctr == 0 or tokens[tokenctr - 1].word.lower() != 'beetje'):
         newwords = ['moet']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
@@ -984,6 +987,25 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
+
+    # beurt -> gebeurt
+    if token.word.lower() == 'beurt':
+        newwords = ['gebeurt']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Wrong pronunciation', value='Unstressed syllable drop', cat='Pronunciation',
+                                        backplacement=bpl_word, penalty=5)
+        newwords = ['deed']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
+                                        backplacement=bpl_word)
+
+    # words unknown to Alpino e.g *gymmen* is replaced by *trainen*
+    if token.word.lower() in wordsunknowntoalpinolexicondict:
+        newwords = [wordsunknowntoalpinolexicondict[token.word.lower()]]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                    name='Word unknown to Alpino', value='Unknown word', cat='lexicon',
+                                    backplacement=bpl_wordlemma)
+
 
     # find document specific replacements
 
@@ -1088,7 +1110,36 @@ def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) ->
     return validnewtokenmds
 
 
+
 def gaatie(word: str) -> List[str]:
+    '''
+    The function *gaatie*
+    * replaces a word of the form *X-ie* by the string f'{X} ie' if X is a verb form
+    * replaces a word of the form *XVttie* by the string f'{X}{V}t ie where V is vowel and XVt is a verb form
+    * replaces  a word that matches with  *gaatiepattern*  (e.g.
+    *gaatie*) by a sequence of two words where the first word equals word[:-2] (
+    *gaat*) and is a known word and the second word equals word[-2:] (*ie*).
+
+    .. autodata:: corrector::gaatiepattern
+    '''
+    results = []
+    # kan-ie, moet-ie, gaat-ie, wil-ie
+    if word.endswith('-ie') and informlexicon(word[:-3]):
+        result = space.join([word[:-3], 'ie'])
+        results.append(result)
+    # moettie, gaattie,
+    if gaattiere.match(word) and informlexicon(word[:-3]):
+        result = space.join([word[:-3], 'ie'])
+        results.append(result)
+    if gaatiere.match(word):
+        # and if it is a verb this is essential because now tie is also split into t ie
+        if informlexicon(word[:-2]):
+            result = space.join([word[:-2], word[-2:]])
+            results.append(result)
+    return results
+
+
+def oldgaatie(word: str) -> List[str]:
     '''
     The function *gaatie* replaces  a word that matches with  *gaatiepattern*  (e.g.
     *gaatie*) by a sequence of two words where the first word equals word[:-2] (

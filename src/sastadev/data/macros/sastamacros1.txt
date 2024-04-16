@@ -48,7 +48,7 @@ Tarsp_hww = """
   @lemma = "zullen" or   
   @lemma = "doen" or
   @lemma = "gaan" or
-  @lemma = "horen" or
+  (@lemma = "horen" and %horenaux%) or
   @lemma = "komen" or
   @lemma = "laten" or
   @lemma = "liggen" or
@@ -64,7 +64,7 @@ Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
 Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
 
-Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
+oldTarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" 
@@ -74,6 +74,19 @@ Tarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pv
 
  )
 """
+
+
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
+ ((
+   %Tarsp_hww% or
+   @lemma = "hebben" 
+   ) and 
+   not(%Tarsp_vc_sibling%)) or
+   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
+
+ ))
+"""
+
 
 vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")
 """
@@ -86,13 +99,6 @@ Tarsp_Kop = """
      (@lemma="zijn" and not(%Tarsp_vc_sibling%) and not(%Tarsp_ld_sibling%) and not(%Tarsp_onlymodR_sibling%))
     )
  )
-"""
-
-robusthwwi = """ (@cat="top" and 
-                  .//node[@pt="ww" and %Tarsp_hww% and @wvorm="pv" and (@rel="--" or @rel="dp")] and
-				  .//node[@pt="ww" and @wvorm="inf" and (@rel="--" or @rel="dp")]
-				  )
-				  
 """
 
 robusthwwvd = """ (@cat="top" and 
@@ -533,3 +539,48 @@ Rpronounx = """(%Rpronoun% or @lemma="daarzo" or @lemma="hierzo") """
 followedbydet = """(@end=ancestor::node[@cat="top"]/descendant::node[%det%]/@begin)"""
 
 det = """(@pt="lid" or @lemma="dit" or @lemma="deze" or @lemma="die" or @lemma="dat" or (@pt="vnw" and @vwtype="bez") ) """
+
+
+vrwondplus = """(%whqsv1% or %basicvrwondplus% or %basicvrwondplusnosubj%)"""
+
+whqsv1 = """(@cat="whq") and node[@cat="sv1" and @rel="body"] and count(node)=1"""
+
+basicvrwondplus = """(
+ @cat="sv1" and @rel="--" and ancestor::node[@cat="top" and node[@lemma="?"]] and
+        node[@rel="hd" and (@lemma="zijn" or @lemma="doen" or @lemma="heten" or @lemma="moeten")] and 
+        node[@rel="su" ] and
+        not(node[@rel="su" and node[@rel="mod"]]) and
+        not(node[(@rel="obj1" or @rel="predc" or @rel="obj2" or 
+                  @rel="vc" or @rel="ld" or @rel="pc" or @rel="se")]) and
+        not(node[@rel="hd" and @lemma="zijn"] and node[@rel="mod" and (@cat="pp" or @cat="cp")]) and
+        not(node[@rel="hd" and @lemma="zijn"] and node[@rel="mod" and %Rpronoun%]) and
+		not(node[@rel="mod" and @lemma="niet"] and
+		not(node[@rel="mod" and @lemma!="dan" and @lemma!="nou" and @lemma!="weer"])
+		)
+)"""
+
+basicvrwondplusnosubj = """
+( 
+ @cat="sv1" and @rel="--" and ancestor::node[@cat="top" and node[@lemma="?"]] and
+        node[@rel="hd" and @pt="ww" and @wvorm="pv" and @stype!="imparative"] and 
+        not(node[@rel="vc"]) and
+        not(node[@cat="np" and node[@rel="mod"]]) and
+        not(node[@cat="np" and node[@rel="det" and 
+              (@lemma = "dit" or @lemma="dat" or @lemma="die" or @lemma="het" or @lemma="de") ]]) and
+		not(node[@cat="conj"]) and
+        not(node[@rel="mod" and @cat="sv1"]) and
+        not(node[@rel="su" ]) and
+		not(node[@rel="mod" and @lemma!="dan" and @lemma!="nou" and @lemma!="weer" and @lemma!="er"]) and
+		(not(node[%intrmodalverb%] and node[@rel="obj1"]))
+		and count(node) <= 3
+)
+"""
+
+intrmodalverb = """( @pt="ww" and 
+                       (@lemma="kunnen" or
+					   @lemma="moeten" or
+					   @lemma="mogen" or
+					   @lemma="gaan" 
+					   )
+
+) """ 

@@ -8,6 +8,7 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
 from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from sastadev.conf import settings
 from sastadev.external_functions import str2functionmap
+from sastadev.imply import removeimplies
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, astamethods, stapmethods, tarspmethods
 from sastadev.mismatches import getmarkposition
@@ -23,6 +24,8 @@ from sastadev.targets import get_mustbedone
 from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxselseuttid,
                                         getyield, showtree)
+
+singlewordWquery = """//node[@pt="ww"]/ancestor::node[@cat="top" and count(.//node[@pt!="let" and @pt!="tsw"]) = 1 ] """
 
 
 @dataclass
@@ -56,6 +59,7 @@ def doauchann(intreebank: SynTree) -> SynTree:
 def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
               annotatedfileresults: Optional[AllResults],
               scp: SastaCoreParameters):
+    invalidqueries = {}
 
     annotationinput = scp.annotationinput
     if annotationinput:
@@ -69,7 +73,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     themethod = scp.themethod
     methodname = themethod.name
     altcodes = themethod.altcodes
-    includeimplies = scp.includeimplies
+    includeimplies = False
     infilename = scp.infilename
     nodeendmap = {}
     targets = scp.targets
@@ -98,6 +102,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
             exit(-1)
         allutts = {}
         uttcount = 0
+        # if includeimplies:   # not needed anymore, now part of the Tarsp Index
+        #    themethod.queries['T120'].query = singlewordWquery
 
         # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
         analysedtrees: List[(UttId, SynTree)] = []
@@ -116,9 +122,9 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
                 analysedtrees.append((uttid, syntree))
 
                 doprequeries(syntree, themethod.queries,
-                             rawexactresults, allmatches)
+                             rawexactresults, allmatches, invalidqueries)
                 docorequeries(syntree, themethod.queries,
-                              rawexactresults, allmatches)
+                              rawexactresults, allmatches, invalidqueries)
 
                 # showtree(syntree)
                 if uttid in nodeendmap:
@@ -141,7 +147,12 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
     # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
 
+    if includeimplies:
+        allmatches, rawexactresults = removeimplies(
+            allmatches, exactresults, themethod)
+
     # adapt the exactresults  positions to the reference
+    exactresults = adaptpositions(rawexactresults, nodeendmap)
 
     coreresults = exact2results(exactresults)
 
@@ -169,8 +180,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
 
 
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
-              criterion: Callable[[Query], bool]):
-    global invalidqueries
+              criterion: Callable[[Query], bool], invalidqueries):
+    # global invalidqueries
     uttid = getuttid(syntree)
     # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(
@@ -220,12 +231,12 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
             #    results[queryid] = Counter(matchingids)
 
 
-def docorequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
-    doqueries(syntree, queries, results, allmatches, is_core)
+def docorequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict, invalidqueries):
+    doqueries(syntree, queries, results, allmatches, is_core, invalidqueries)
 
 
-def doprequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict):
-    doqueries(syntree, queries, results, allmatches, is_pre)
+def doprequeries(syntree: SynTree, queries: QueryDict, results: ExactResultsDict, allmatches: MatchesDict, invalidqueries):
+    doqueries(syntree, queries, results, allmatches, is_pre, invalidqueries)
 
 
 def dopostqueries(allresults: AllResults, postquerylist: List[QId], queries: QueryDict):
@@ -257,7 +268,8 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
         queryfilter = query.filter
         thefilter = method.defaultfilter if queryfilter is None or queryfilter == '' else str2functionmap[
             queryfilter]
-        exactresults[reskey] = [r for r in rawexactresults[reskey] if reskey in rawexactresults and thefilter(query, rawexactresults, r)]
+        exactresults[reskey] = [r for r in rawexactresults[reskey]
+                                if reskey in rawexactresults and thefilter(query, rawexactresults, r)]
     return exactresults
 
 

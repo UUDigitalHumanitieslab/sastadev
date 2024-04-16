@@ -41,7 +41,7 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
         newexactresults: ExactResultsDict = reduceexactresults(allresults.exactresults,
                                                                uttidlist, cutoffpoint, methodname)  # done
         newcoreresults: Dict[QId, ResultsCounter] = exact2results(
-            newexactresults)   # done
+            newexactresults)  # done
         newallutts: UttWordDict = reduceallutts(
             allresults.allutts, uttidlist)  # done
         newallresults = AllResults(allresults.uttcount, newcoreresults, newexactresults, allresults.postresults,
@@ -53,7 +53,7 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
         newexactresults: ExactResultsDict = reduceexactresults(allresults.exactresults,
                                                                uttidlist, cutoffpoint, methodname)  # done
         newcoreresults: Dict[ResultsKey, ResultsCounter] = exact2results(
-            newexactresults)   # done
+            newexactresults)  # done
         # @@ I assume these need no change
         newpostresults: Dict[ResultsKey, Any] = allresults.postresults
         newallmatches: MatchesDict = reducematches(
@@ -79,7 +79,8 @@ def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist:
         newexactresults = []
         for uttid, position in exactresultsdict[reskey]:
             if (uttid in uttidlist and uttid != lastuttid) or \
-               (uttid == lastuttid and cutoffpoint is not None and not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
+                    (uttid == lastuttid and cutoffpoint is not None and
+                     not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
                 newexactresults.append((uttid, position))
         newexactresultsdict[reskey] = newexactresults
     return newexactresultsdict
@@ -100,7 +101,8 @@ def reduceresults(resultsdict: Dict[QId, Counter], samplesizetuple: SampleSizeTu
             newresults = []
             for uttid in resultsdict[reskey]:
                 if (uttid in uttidlist and uttid != lastuttid) or \
-                        (uttid == lastuttid and lastuttqidcondition[methodname](reskey)):  # no condition on the position, we have no info on it
+                        (uttid == lastuttid and lastuttqidcondition[methodname](
+                            reskey)):  # no condition on the position, we have no info on it
                     newresults.append(uttid)
             newresultsdict[reskey] = Counter(newresults)
     return newresultsdict

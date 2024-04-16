@@ -3,11 +3,14 @@ from typing import List, Set
 from sastadev.sastatypes import SynTree
 from sastadev.Sziplus import getnodecount
 from sastadev.treebankfunctions import getattval
+from sastadev.expandquery import expandmacros
 
 noimplemmas = {'hoeven', 'moeten', 'mogen', 'kunnen', 'hebben', 'willen', 'hebben', 'zitten'}
 noimpwords = {'ben', 'bent', 'is', 'zijn'}
 impmodlemmas = {'eens', 'maar'}
 
+
+kijkVUxpath = expandmacros('.//node[%Tarsp_kijkVU%]')
 
 impquery = '''
 .//node[@cat="sv1" and
@@ -140,12 +143,20 @@ def wx(syntree: SynTree) -> List[SynTree]:
     The function *wx* finds nodes for imperative clauses with 1 or 2 nodes.
     it uses the function *impwi* to achieve that.
     '''
-    results = impwi(syntree, {1, 2})
+    kijkvuresults = syntree.xpath(kijkVUxpath)
+    if kijkvuresults == []:
+        results = impwi(syntree, {1, 2})
+    else:
+        results = []
     return results
 
 
 def wxy(syntree):
-    results = impwi(syntree, {3})
+    kijkvuresults = syntree.xpath(kijkVUxpath)
+    if kijkvuresults == []:
+        results = impwi(syntree, {3})
+    else:
+        results = []
     return results
 
 

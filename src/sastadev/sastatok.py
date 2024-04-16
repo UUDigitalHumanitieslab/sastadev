@@ -45,7 +45,6 @@ repetition = scopeorword + r'\s*\[/\]\s*' + word
 retracing = scopeorword + r'\s*\[//\]\s*' + word  # p73
 whitespace = r'\s+'
 
-
 # sastaspecials = [r'\[::', r'\[=', r'\[:', r'\[=\?', r'\[x', r'\<', r'\>', r'\[\?\]', r'\[/\]', r'\[//\]', r'\[///\]', r'\[%', r'\]']
 sastaspecials = list(sastachat.CHAT_patterns)
 sastapatterns = sorted(sastaspecials, key=lambda x: len(
