@@ -87,6 +87,7 @@ UttTokenDict = Dict[UttId, List[Token]]
 UttWordDict = Dict[UttId, List[str]]
 WordInfo = Tuple[Optional[CELEXPosCode], Optional[DeHet],
                  Optional[CELEX_INFL], Optional[Lemma]]
+Pattern = str
 # moved the following to allresuls.py
 # CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 # PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]

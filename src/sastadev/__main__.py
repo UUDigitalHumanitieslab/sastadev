@@ -909,6 +909,7 @@ def main():
         #     options.platinuminfilename = os.path.join(silverpath, corefilename + platinumeditedsuffix + txtext)
         # else:
         #     options.platinuminfilename = inbase + platinumeditedsuffix + txtext
+        silverpath = os.path.join(corepath, silverfolder)
         options.platinuminfilename = os.path.join(
             silverpath, corefilename + silversuffix + xlsxext)
 
