@@ -55,6 +55,6 @@ def xenx(tree: SynTree) -> List[SynTree]:
                     include = include and (childptcat == firstptcat) and childptcat not in clausecats
             #print('include=', include)
         #print('final: include=', include)
-        if include:
+        if include and crdresult is not None:
             results.append(crdresult)
     return results
