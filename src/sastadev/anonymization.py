@@ -7,62 +7,16 @@ See https://github.com/UUDigitalHumanitieslab/sasta/blob/develop/backend/anonymi
 
 import json
 import re
+import os.path
+from sastadev.conf import settings
 
 vertbar = '|'
 
-anonymisationtablejsonstr = """
-[
-    {
-        "category": "place",
-        "codes": ["PLAATS", "PLAATSNAAM", "WOONPLAATS"],
-        "common": ["Utrecht", "Breda", "Leiden", "Maastricht", "Arnhem"]
-    },
-    {
-        "category": "lastname",
-        "codes": ["ACHTERNAAM"],
-        "common": ["Jansen", "Hendriks", "Dekker", "Dijkstra", "Veenstra"]
-    },
-    {
-        "category": "person",
-        "codes": ["NAAM", "BROER", "ZUS", "KIND", "VADER", "MOEDER"],
-        "common": ["Maria", "Jan", "Anna", "Esther", "Pieter", "Sam"]
-    },
-    {
-        "category": "profession",
-        "codes": ["BEROEP"],
-        "common": ["timmerman", "chirurgh", "leraar", "ober", "verslaggever"]
-    },
-    {
-        "category": "country",
-        "codes": ["LAND"],
-        "common": ["Duitsland", "Nederland", "Japan", "Kameroen", "India"]
-    },
-    {
-        "category": "education",
-        "codes": ["STUDIE", "OPLEIDING"],
-        "common": [
-            "bedrijfskunde",
-            "informatica",
-            "filosofie",
-            "rechtsgeleerdheid",
-            "werktuigbouwkunde"
-        ]
-    },
-    {
-        "category": "institution",
-        "codes": ["ZORGINSTELLING", "INSTELLING", "ZIEKENHUIS"],
-        "common": [
-            "Diakonessenhuis",
-            "Rijnstate",
-            "Vogellanden",
-            "HagaZiekenhuis",
-            "Slingeland"
-        ]
-    }
-]
-"""
 
-anonymisationlist = json.loads(anonymisationtablejsonstr)
+anonymisationfile = os.path.join(settings.SD_DIR, 'data', 'anonymization.json')
+
+with open(anonymisationfile) as json_file:
+    anonymisationlist = json.load(json_file)
 
 anonymisationdict = {key: dct["common"]
                      for dct in anonymisationlist for key in dct["codes"]}
