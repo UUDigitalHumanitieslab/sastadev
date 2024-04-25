@@ -1,6 +1,6 @@
 from collections import Counter
 
-from resultsbyutterance import getscoresbyutt
+from sastadev.resultsbyutterance import getscoresbyutt
 
 results = {'T001': Counter(), 'T003': Counter(), 'T004': Counter(), 'T005': Counter(),
            'T006': Counter({'2': 1, '3': 1, '8': 1, '14': 1, '16': 1, '20': 1, '23': 1, '27': 1, '32': 1}),

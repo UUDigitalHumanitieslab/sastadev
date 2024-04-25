@@ -1,5 +1,4 @@
-from iedims import getjeforms
-
+from sastadev.iedims import getjeforms
 
 iewords = ['poppie', 'kassie', 'boekie']
 
