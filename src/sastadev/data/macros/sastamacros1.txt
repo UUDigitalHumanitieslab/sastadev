@@ -245,11 +245,89 @@ v2problem = """//node[@pt="ww" and @wvorm="pv" and
 
 coreavn = """(@pt="vnw"  and @vwtype="aanw" and @lemma!="hier" and @lemma!="daar" and @lemma!="er" and @rel!="det" and (not(@positie) or @positie!="prenom") )"""
 
-AVn = """(%coreavn% or %avnrel%)"""" 
+dittedatte = """(@word = "ditte" or @word="datte") """
+
+AVn = """(%coreavn% or %avnrel% or %dittedatte%)"""" 
 
 corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
-coreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!=niet]/@begin ]]) )"""
+coreB = """( (@pt="bw" or @pt="vz" or @cat="advp" or @cat="pp" or %Rpronoun%) and
+             (@rel="mod" or @rel="predm" or @rel="dp" or @rel="--" or @rel="ld") and
+			 not(%Tarsp_kijkVU%)
+           )"""
+
+oldcoreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!="niet"]/@begin ]]) )"""
+
+coreBX = """(@cat and 
+             count(node[%bxrealnode%]) = 2 and 
+			 node[%corebnode%]  and
+			 count(.//node[%bxrealwordnode%]) = count(%allbxrealwordnodes%)
+			)""" 
+
+corebnode = """(%coreB% and 
+			      not(%Tarsp_kijkVU%) and  
+				  @lemma!="niet" and 
+				  %corebnodesibling% and
+				  @id != %corebnodesibling%/@id
+				 )"""
+
+corebnodesibling = """../node[not(%clausecat%) and 
+				              @lemma!="niet" and 
+						      count(.//node[@lemma="niet"]) = 0 
+							 ]
+"""
+
+bxrealnode = """(%bxrealwordnode% or count(.//node[%bxrealwordnode%]) > 0)"""
+
+allrealwordnodes = """(./ancestor::alpino_ds/descendant::node[%realwordnode%])"""
+
+allbxrealwordnodes = """(./ancestor::alpino_ds/descendant::node[%bxrealwordnode%])"""
+
+bxrealwordnode = """(%realwordnode% and not(%dlinkvg%)) """"
+
+dlinkvg = """(@pt="vg" and (@rel="dlink" or @rel="--"))"""
+
+clausalbx1 = """((@cat="smain" or @cat="sv1" or @cat="inf" or @cat="ppart") and 
+       node[%Tarsp_B% and @lemma!="niet" and @rel!="svp" and not(%Tarsp_kijkVU%)] and 
+       count(node) = 2 and 
+       count(.//node[@word]) = count(%allrealwordnodes%)
+)
+"""
+
+clausalbx2 = """((@cat="smain" or @cat="sv1") and 
+                 node[@rel="hd" and @pt="ww"] and
+                 node[@rel="vc" and
+                      node[@rel="hd" and @pt="ww"] and
+                      node[%Tarsp_B% and @lemma!="niet" and @rel!="svp"] and 
+                      count(node) = 2
+                     ] and
+                 count(node) = 2 and
+                 count(.//node[@word]) = count(%allrealwordnodes%)
+     )
+"""
+
+old_Tarsp_BX = """((@cat="top" and 
+                not(.//node[%pv%]) and 
+				not(.//node[@lemma="niet"]) and not(.//node[@rel="dlink"]) and
+                (
+                   (count(.//node[@cat="du" and count(node[%realnode%])=2  and node[%singlewordbw%] and node[(@pt or %corephrase%) ]])=1 ) or
+	               (node[%bxnp1%]) or
+	               (node[@cat="du" and count(node[%realnode%])=1 and node[%bxnp1%]]) or
+	               (node[%bxnp2%]) or
+	               (node[@cat="du" and count(node[%realnode%])=1 and node[%bxnp2%]])
+                )
+			   ) or %Tarsp_bnonfin% or
+			   %clausalbx1% or
+			   %clausalbx2%
+	  
+)
+"""
+
+Tarsp_BX = """( %coreBX% or
+                %Tarsp_bnonfin% or
+			    %clausalbx1% or
+			    %clausalbx2% 
+              )"""
 
 Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and @rel="vc" and parent::node[@cat="smain" and count(node)=1] and node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and count(node[%realcomplormod%])=1 )"""
 
@@ -631,3 +709,6 @@ intrmodalverb = """( @pt="ww" and
 					   )
 
 ) """ 
+
+
+nodimlemma = """(@lemma="meisje" or @lemma="koek" or @lemma="beet")"""  

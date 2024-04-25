@@ -1,7 +1,9 @@
 from collections import Counter
 from copy import copy
 from lxml import etree
+import os
 from sastadev.conf import settings
+from sastadev.constants import checksuffix
 from sastadev.sastatoken import deflate
 from sastadev.allresults import mkresultskey, ResultsKey, showreskey
 from typing import Tuple
@@ -12,9 +14,10 @@ from sastadev.treebankfunctions import (find1, getattval, getmarkedyield,
 tab = '\t'
 space = ' '
 eps = ''
+slash = '/'
 
-usercommentbegin = 0
-usercommentuntil = 3
+usercommentbegin = 1
+usercommentuntil = 4
 usercommentdefaultvalue = eps
 
 
@@ -136,7 +139,7 @@ def isliteralreskey(reskey: ResultsKey):
     return result
 
 
-def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
+def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile, sample,
                          permsilverdatadict={}, annotationinput=False):
     newrows = []
     for reskey in exactgoldscores:
@@ -165,14 +168,15 @@ def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, all
                                      str(markposition),
                                      uttstr, origutt, inform]
                 print(tab.join(platinumcheckrow2), file=platinumcheckfile)
-                key = (reskey, uttid, position)
+                reskeystr = slash.join(reskey)
+                key = (reskeystr, uttid, position)
                 usercomments = getusercomments(permsilverdatadict, key, report=False)
-                xlplatinumcheckrow2 = usercomments + ['Missed examples'] + platinumcheckrow2
+                xlplatinumcheckrow2 = [sample] + usercomments + ['Missed examples'] + platinumcheckrow2
                 newrows.append(xlplatinumcheckrow2)
     return newrows
 
 
-def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile,
+def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, allutts, platinumcheckfile, sample,
                     permsilverdatadict={}, annotationinput=False):
     reskeystr = showreskey(reskey)
     queryid = reskey[0]
@@ -199,7 +203,7 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
                 print(tab.join(platinumcheckrow1), file=platinumcheckfile)
                 key = (reskey, uttid, position)
                 usercomments = getusercomments(permsilverdatadict, key, report=True)
-                xlplatinumcheckrow1 = usercomments + ['More examples'] + platinumcheckrow1
+                xlplatinumcheckrow1 = [sample] + usercomments + ['More examples'] + platinumcheckrow1
                 newrows.append(xlplatinumcheckrow1)
                 # for (m, syntree) in allmatches[(queryid, uttid)]:
                 #    if getfirstwordposition(m) == position:
@@ -234,7 +238,7 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
         print(tab.join(platinumcheckrow2), file=platinumcheckfile)
         key = (reskey, uttid, position)
         usercomments = getusercomments(permsilverdatadict, key, report=False)
-        xlplatinumcheckrow2 = usercomments + ['Missed examples'] + platinumcheckrow2
+        xlplatinumcheckrow2 = [sample] + usercomments + ['Missed examples'] + platinumcheckrow2
         newrows.append(xlplatinumcheckrow2)
     return newrows
 
@@ -304,23 +308,23 @@ def counter2list(ctr):
     return result
 
 
-def getusercomments(permsilverdict, key: Tuple[ResultsKey, UttId, Position], report=False):
-    reskey, uttid, pos = key
+def getusercomments(permdict, rawkey: Tuple[ResultsKey, UttId, Position], report=False):
+    reskey, uttid, pos = rawkey
+    reskeystr = slash.join(reskey)
+    key = reskeystr, uttid, pos
     olderkey = (reskey[0], uttid, pos)
-    if key in permsilverdict:
-        therow = permsilverdict[key]
+    if key in permdict:
+        therow = permdict[key]
         usercomments = therow[usercommentbegin:usercommentuntil]
         result = usercomments
-    elif olderkey in permsilverdict:
-        therow = permsilverdict[olderkey]
+    elif olderkey in permdict:
+        therow = permdict[olderkey]
         usercomments = therow[usercommentbegin:usercommentuntil]
         result = usercomments
     else:
         count = usercommentuntil - usercommentbegin
         resultlist = [usercommentdefaultvalue for _ in range(count)]
         result = resultlist
-        if report:
-            settings.LOGGER.warning('No silver remark for key: {}'.format(key))
     return result
 
 

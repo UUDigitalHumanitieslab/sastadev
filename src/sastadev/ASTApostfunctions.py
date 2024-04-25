@@ -215,7 +215,8 @@ def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
     theutt = allresults.allutts[uttid]
     final = diff
     for i, w in enumerate(theutt):
-        if (uttid, i + 1) in allresults.exactresults[samplesizereskey]:
+        if samplesizereskey in allresults.exactresults and \
+            (uttid, i + 1) in allresults.exactresults[samplesizereskey]:
             final += 1
         if i + 1 == final:
             break

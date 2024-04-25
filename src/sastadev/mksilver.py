@@ -6,19 +6,22 @@ from sastadev.conf import settings
 from sastadev.counterfunctions import counter2liststr
 from sastadev.xlsx import getxlsxdata, mkworkbook
 
+sampleheaders = ['sample']
+
 permprefix = 'perm_'
 
 permsilvercolcount = 11   # number of columns in the silverperm files
 
-user1col = 0
-user2col = 1
-user3col = 2
-moreorlesscol = 3
-qidcol = 4
-uttidcol = 8
-poscol = 9
+samplecol = 0
+user1col = 1
+user2col = 2
+user3col = 3
+moreorlesscol = 4
+qidcol = 5
+uttidcol = 9
+poscol = 10
 
-uttidscol = 4  # in paltinum-edited tsv files
+uttidscol = 5  # in paltinum-edited tsv files
 
 nots = ['not']
 oks = ['ok', 'oke']
@@ -28,10 +31,6 @@ legalmoreorlesses = ['More examples', 'Missed examples']
 comma = ','
 commaspace = ', '
 
-platinumchecksuffix = '_platinum.check.tsv'
-platinumcheckeditedsuffix = '_platinum.check-edited.tsv'
-platinumsuffix = '.platinum.tsv'
-platinumeditedsuffix = '.platinum-edited.tsv'
 
 
 def write2excel(datadict, header, filename):
@@ -75,10 +74,10 @@ def checkpermformat(header, data, colcount, strict=True):
     return result
 
 
-def updatepermdict(fullname, permdict):
-    silverheader, silverdata = getxlsxdata(fullname)
-    colsok = checkpermformat(silverheader, silverdata, permsilvercolcount, strict=False)
-    silverfulldatadict = silverdata2dict(silverdata)
+def updatepermdict(fullname, permdict, sample=None):
+    header, data = getxlsxdata(fullname)
+    colsok = checkpermformat(header, data, permsilvercolcount, strict=False)
+    silverfulldatadict = silverdata2dict(data, sample=sample)
 
     #Voeg silverfulldatadict toe aan permdict
     for key in silverfulldatadict:
@@ -87,7 +86,7 @@ def updatepermdict(fullname, permdict):
         elif not rowsequal(silverfulldatadict[key], permdict[key]):
             settings.LOGGER.warning('Key: {} Value:\n ({}) \noverwritten by value:\n {};\n File: {}'.format(key, permdict[key], silverfulldatadict[key], fullname))
 
-    return permdict, silverheader
+    return permdict, header
 
 
 def rowsequal(row1, row2, casesensitive=False):
@@ -160,25 +159,26 @@ def myisnan(inval):
     return result
 
 
-def silverdata2dict(silverdata):
+def silverdata2dict(silverdata, sample=None):
     #make a dictionary out of data: a list of rows
     #silverdict = dict()
     silverfulldatadict = dict()
     if silverdata is not None:
-        maxrow = len(silverdata)
-        for rowctr in range(maxrow):
-            therow = silverdata[rowctr]
-            user1 = therow[user1col]
-            user2 = therow[user2col]
-            user3 = therow[user3col]
-            qid = therow[qidcol]
-            uttid = str(therow[uttidcol])
-            pos = therow[poscol]
-            thekey = (qid, uttid, pos)
-            # only add it when any of user1, user2, user3 has a nonempty value
-            if not (nono(user1) and nono(user2) and nono(user3)):
-                #silverdict[thekey] = (user1, user2, user3)
-                silverfulldatadict[thekey] = silverdata[rowctr]
+        for rowctr, therow in enumerate(silverdata):
+            if len(therow) >= poscol:
+                thesample = therow[samplecol].lower()
+                user1 = therow[user1col]
+                user2 = therow[user2col]
+                user3 = therow[user3col]
+                qid = therow[qidcol]
+                uttid = str(therow[uttidcol])
+                pos = therow[poscol]
+                thekey = (qid, uttid, pos)
+                # only add it when any of user1, user2, user3 has a nonempty value
+                if not (nono(user1) and nono(user2) and nono(user3)):
+                    #silverdict[thekey] = (user1, user2, user3)
+                    if sample is None or thesample == sample.lower():
+                        silverfulldatadict[thekey] = silverdata[rowctr]
     return silverfulldatadict  # , silverdict
 
 

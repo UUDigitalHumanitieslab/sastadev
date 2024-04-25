@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import copy
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from lxml import etree
@@ -21,7 +22,7 @@ from sastadev.sasta_explanation import finalexplanation_adapttreebank
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets
 from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
-                                        getxmetatreepositions, getxselseuttid,
+                                        getxmetatreepositions, find1, getxsid, getxselseuttid,
                                         getyield, showtree)
 
 from sastadev.imply import removeimplies
@@ -56,7 +57,6 @@ def doauchann(intreebank: SynTree) -> SynTree:
     # @@ to be implemented @@
 
     return outtreebank
-
 
 
 def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
@@ -95,9 +95,6 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         postresults = annotatedfileresults.postresults
         allmatches = annotatedfileresults.allmatches
         infilename = annotatedfileresults.filename
-        treebank = None
-        errordict = {}
-        allorandalts = {}
     else:
         if origtreebank.tag != 'treebank':
             settings.LOGGER.error("Input treebank file does not contain a treebank element")
@@ -110,17 +107,13 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
         analysedtrees: List[(UttId, SynTree)] = []
         for syntree in correctedtreebank:
-            temputtid = getuttid(syntree)
             uttcount += 1
 
-            # if temputtid == '118':
-            #     showtree(syntree, 'tree 118')
-            # settings.LOGGER.error('uttcount={}'.format(uttcount))
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
                 # uttid = getuttid(syntree)
                 # analysedtrees consists of (uttid, syntree) pairs in order
-                uttid = getxselseuttid(syntree)
+                uttid = getxsid(syntree)
                 analysedtrees.append((uttid, syntree))
 
                 doprequeries(syntree, themethod.queries, rawexactresults, allmatches, invalidqueries)
@@ -138,7 +131,11 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
         # rawexactresults = getexactresults(allmatches)
         rawexactresults2 = passfilter(rawexactresults, themethod)
-        exactresults = adaptpositions(rawexactresults2, nodeendmap)
+        # if not annotationinput:
+        #    exactresults = adaptpositions(rawexactresults2, nodeendmap)
+        # else:
+        #    exactresults = rawexactresults2
+        exactresults = rawexactresults2
 
         # pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
         # @@to be implemented @@ of misschien in de loop hierboven al?
@@ -148,9 +145,14 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
 
     if includeimplies:
         allmatches, rawexactresults = removeimplies(allmatches, exactresults, themethod)
+    else:
+        rawexactresults = exactresults
 
     # adapt the exactresults  positions to the reference
-    exactresults = adaptpositions(rawexactresults, nodeendmap)
+    if annotationinput:
+        exactresults = rawexactresults
+    else:
+        exactresults = adaptpositions(rawexactresults, nodeendmap)
 
     coreresults = exact2results(exactresults)
 
@@ -178,7 +180,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
               criterion: Callable[[Query], bool], invalidqueries):
     # global invalidqueries
-    uttid = getuttid(syntree)
+    uttid = getxsid(syntree)
     # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)

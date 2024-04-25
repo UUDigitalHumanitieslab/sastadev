@@ -182,7 +182,7 @@ Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or @
 Tarsp_finvc = """(@rel="vc" and (@cat="cp" or @cat="whsub"))"""
 Tarsp_vcvnw = """(@rel="vc" and @pt="vnw")"""
 
-Tarsp_WOndX = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% <= 2)
+Tarsp_WOndX = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% <= 2 and not(%vrwondplus%))
 """
 
 Tarsp_WOnd4 = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% = 3)
@@ -300,7 +300,9 @@ Tarsp_vcw = """
 )
 """
 
-realwordnode = """ ((@pt="ww" or @pt="n" or @pt="adj" or @pt="bw" or @pt="vz" or @pt="vg") and not(%Tarsp_kijkVU%))
+singlecharnoun = """(@pt="n" and string-length(@word) = 1)""" 
+
+realwordnode = """ (@pt!="let" and @pt!="tsw" and not(%Tarsp_kijkVU%) and not(%singlecharnoun%))
 """
 
 horenaux = """(@lemma="horen" and 

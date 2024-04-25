@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 reportwidth = 0
 
@@ -49,3 +50,14 @@ def getbasename(fullname):
     path, filename = os.path.split(fullname)
     base, ext = os.path.splitext(filename)
     return base
+
+def savecopy(infullname, prevsuffix='_previous', prevprefix='', outpath=None):
+    thepath, infilename = os.path.split(infullname)
+    base, ext = os.path.splitext(infilename)
+    previousinfilename = prevprefix + base + prevsuffix + ext
+    if outpath is None:
+        outpath = thepath
+    previousinfullname = os.path.join(outpath, previousinfilename)
+    shutil.copyfile(infullname, previousinfullname)
+
+

@@ -162,6 +162,6 @@ def getxlsxdata(fullname, headerrow=0, sheetname=None):
 
 
 def write2excel(datadict, header, filename):
-    data = [list(key) + datadict[key] for key in datadict]
-    workbook = mkworkbook(filename, [header], data)
+    data = [datadict[key] for key in datadict]
+    workbook = mkworkbook(filename, header, data)
     workbook.close()

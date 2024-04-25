@@ -311,6 +311,13 @@ def isfirstsubject(first, second) -> bool:
         firstsubject = False
     return firstsubject
 
+def iscoord(node: SynTree) -> bool:
+    pt = getattval(node, 'pt')
+    vgtype = getattval(node, 'vgtype')
+    result = pt == 'vg' and vgtype == 'neven'
+    return result
+
+
 def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     '''
 
@@ -346,6 +353,8 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     resultlist = []
     leaves = getnodeyield(tree)
     reducedleaves = [leave for leave in leaves if realword(leave)]
+    if reducedleaves != [] and iscoord(reducedleaves[0]):
+        reducedleaves = reducedleaves[1:]
     if not (len(reducedleaves) > 1 and len(reducedleaves) <= 3):
         return resultlist
     tokens = tokensmd.tokens

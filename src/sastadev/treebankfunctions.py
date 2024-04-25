@@ -276,7 +276,6 @@ def getnodeendmap(stree: SynTree) -> Dict[PositionStr, Position]:
     result = {getattval(leave, 'end'): i + 1 for i, leave in enumerate(leaves)}
     return result
 
-
 def getxselseuttid(syntree: SynTree) -> UttId:
     result = getmeta(syntree, 'xsid')
     if result is None:

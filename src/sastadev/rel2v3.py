@@ -4,6 +4,7 @@ from typing import Optional
 from sastadev.treebankfunctions import find1, getattval as gav, getnodeyield, immediately_precedes
 from sastadev.sastatypes import SynTree
 from sastadev.conf import settings
+import os
 npwithrelquery = """.//node[@cat="np" and node[@cat="rel" and node[@rel="rhd" and (@lemma="die" or @lemma="dat" )]]] """
 firstwordquerytemplate = """.//node[@pt and @begin={begin}] """
 relpronodequery = """//node[@cat="np"]/node[@cat="rel"]/node[@rel="rhd" and (@lemma="die" or @lemma="dat" )]"""
@@ -57,12 +58,50 @@ def nprel2v3(stree: SynTree) -> Optional[SynTree]:
             npparent.prepend(dunode)
     return newstree
 
+ooknog = """(@lemma="ook" or @lemma="nog")"""
+nognpquery = f""".//node[(@cat="np" or @cat="pp") and node[{ooknog}]] """
+nogquery = f"""./node[{ooknog}]"""
+def nogoutnp(stree: SynTree) -> Optional[SynTree]:
+    """
+    moves adverbs ook and nog out of the np or pp; if under top node it creates a du node
+    :param stree:
+    :return:
+    """
+    newstree = copy.deepcopy(stree)
+    nognps = newstree.xpath(nognpquery)
+    if nognps == []:
+        return None
+    for nognp in nognps:
+        nognodes = nognp.xpath(nogquery)
+        nognpparent = nognp.getparent()
+        nognpparentcat = gav(nognpparent, 'cat')
+        # etree.dump(nognpparent)
+        for nognode in nognodes:
+            nognp.remove(nognode)
+            # etree.dump(nognp)
+            if nognpparentcat == 'top':
+                dunode = etree.Element('node', {'cat': 'du'})
+                nognode.set('rel', 'dp')
+                dunode.append(nognode)
+                nognp.set('rel', 'dp')
+                dunode.append(nognp)
+                nognpparent.append(dunode)
+            else:
+                nognpparent.append(nognode)
+            # etree.dump(nognpparent)
+    return newstree
 
 
 def tryme(fn):
-    pass
+    fulltreebank = etree.parse(fn)
+    treebank = fulltreebank.getroot()
+    for stree in treebank:
+        # newstree = nprel2v3(stree)
+        newstree = nogoutnp(stree)
+        etree.dump(newstree)
 
 
 if __name__ == '__main__':
-    infullname = 'testfile.xml'
+    infilename = 'test_tarsp.xml'
+    infullname = os.path.join(settings.SD_DIR, 'data', 'development', infilename)
     tryme(infullname)

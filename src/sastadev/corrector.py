@@ -68,8 +68,12 @@ disambiguationdict = getdisambiguationdict()
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
 #: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
 #: therefore have to be excluded from determiner replacement.
-wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik']
+wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee']
 
+#: The constant *e2een_excluded_nouns* contains words that lead to incorrect
+#: replacement of e or schwa  and
+#: therefore have to be excluded from determiner replacement.
+e2een_excluded_nouns = ['kijke', 'kijken']
 
 class Ngramcorrection:
     def __init__(self, ngram, fpositions, cpositions, metafunction):
@@ -904,6 +908,16 @@ def findxmetaatt(xmetalist: List[Meta], name: str, cond: MetaCondition = lambda 
 specialdevoicingwords = {'fan'}
 
 
+def isnounsg(token: Token) -> bool:
+    if token is None:
+        return False
+    wordinfos, _ = getdehetwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (_, _, infl, _) = wordinfo
+        if infl in ['e', 'de']:
+            return True
+    return False
+
 def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[TokenMD], beginmetadata: List[Meta]) \
         -> List[TokenMD]:
     '''
@@ -1039,6 +1053,18 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
+
+
+    # e or schwa -> een if followed by a singular noun
+    nexttoken = tokens[tokenctr+1] if tokenctr < len(tokens) - 1 else None
+    if token.word.lower() in ['e', 'ə'] and isnounsg(nexttoken) and token.word.lower() not in e2een_excluded_nouns:
+        newwords = ['een']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Wrong pronunciation', value='Final n drop', cat='Pronunciation',
+                                        subcat='Coda reduction',
+                                        backplacement=bpl_word, penalty=.5*defaultpenalty)
+
+
 
     # words unknown to Alpino e.g *gymmen* is replaced by *trainen*
     if token.word.lower() in wordsunknowntoalpinolexicondict:
@@ -1197,7 +1223,7 @@ def oldgaatie(word: str) -> List[str]:
     return results
 
 
-def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
+def old_getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
     '''
     The function *getwrongdetalternatives* takes as input a TokenListMD *tokensmd*,  the
     original parse of the utterance (*tree*) and the *uttid* of the utterance.
@@ -1248,6 +1274,84 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
                                            backplacement=bpl_node)
                         metadata.append(meta)
                         correctiondone = True
+                    else:
+                        newcurtokenword = token.word
+                newtokens.append(Token(newcurtokenword, token.pos))
+            else:
+                newcurtokenword = token.word
+                newtokens.append(token)
+        else:
+            newtokens.append(token)
+        tokenctr += 1
+    result = TokenListMD(newtokens, metadata)
+    if correctiondone:
+        results = [result]
+    else:
+        results = []
+    return results
+
+
+def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    '''
+    The function *getwrongdetalternatives* takes as input a TokenListMD *tokensmd*,  the
+    original parse of the utterance (*tree*) and the *uttid* of the utterance.
+
+    It inspects each token in the token list of *tokensmd* that should not be skipped
+    and that is a utrum determiner. If the token that immediately follows this
+    determiner is not a token to be ignored we obtain the gender properties of the
+    token's word (there can be multiple if it is ambiguous). If one of the properties
+    is neuter gender and none is uter, then the uter determiner is replaced by its neuter
+    variant as a new alternative.
+
+    The token following must be ignored if it has the property *skip=True* or if it
+    belongs to words that would lead to wrong corrections, as specified in the constant
+    *wrongdet_excluded_words*:
+
+    .. autodata:: corrector::wrongdet_excluded_words
+
+    The properties of the token following are determined by the function
+    *getdehetwordinfo* from the module *alpino*:
+
+    .. autofunction:: alpino::getdehetwordinfo
+    '''
+    correctiondone = False
+    tokens = tokensmd.tokens
+    metadata = tokensmd.metadata
+    ltokens = len(tokens)
+    tokenctr = 0
+    newtokens = []
+    thedets = dets[de] + dets[het]
+    while tokenctr < ltokens:
+        token = tokens[tokenctr]
+        if not token.skip and token.word in thedets and tokenctr < ltokens - 1:
+            nexttoken = tokens[tokenctr + 1]
+            # we want to exclude some words
+            if nexttoken.skip:
+                wordinfos: List[WordInfo] = []
+            elif nexttoken.word in wrongdet_excluded_words:
+                wordinfos = []
+            else:
+                wordinfos, _ = getdehetwordinfo(nexttoken.word)
+            if wordinfos != []:
+                for wordinfo in wordinfos:  # if there are multiple alternatives we overwrite and therefore get the last alternative
+                    (pos, dehet, infl, lemma) = wordinfo
+                    if token.word in dets[de]  and dehet == het and infl in ['e', 'de']:
+                        # newcurtoken = replacement(token, swapdehet(token))
+                        newcurtokenword = swapdehet(token.word)
+                        newcurtoken = Token(newcurtokenword, token.pos)
+                        meta = mkSASTAMeta(token, newcurtoken, name='GrammarError', value='deheterror', cat='Error',
+                                           backplacement=bpl_node)
+                        metadata.append(meta)
+                        correctiondone = True
+                    elif token.word in dets[het]  and dehet == de and infl in ['e']:
+                        # newcurtoken = replacement(token, swapdehet(token))
+                        newcurtokenword = swapdehet(token.word)
+                        newcurtoken = Token(newcurtokenword, token.pos)
+                        meta = mkSASTAMeta(token, newcurtoken, name='GrammarError', value='hetdeerror', cat='Error',
+                                           backplacement=bpl_node)
+                        metadata.append(meta)
+                        correctiondone = True
+
                     else:
                         newcurtokenword = token.word
                 newtokens.append(Token(newcurtokenword, token.pos))
