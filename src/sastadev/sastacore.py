@@ -92,9 +92,6 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         postresults = annotatedfileresults.postresults
         allmatches = annotatedfileresults.allmatches
         infilename = annotatedfileresults.filename
-        treebank = None
-        errordict = {}
-        allorandalts = {}
     else:
         if origtreebank.tag != 'treebank':
             settings.LOGGER.error(
@@ -139,7 +136,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
         # rawexactresults = getexactresults(allmatches)
         rawexactresults2 = passfilter(rawexactresults, themethod)
-        exactresults = adaptpositions(rawexactresults2, nodeendmap)
+        exactresults = rawexactresults2
 
         # pas hier de allutts en de rawexactresults2 aan om expansies te ontdoen, gebseerd op de nodeendmap
         # @@to be implemented @@ of misschien in de loop hierboven al?
@@ -150,9 +147,14 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     if includeimplies:
         allmatches, rawexactresults = removeimplies(
             allmatches, exactresults, themethod)
+    else:
+        rawexactresults = exactresults
 
     # adapt the exactresults  positions to the reference
-    exactresults = adaptpositions(rawexactresults, nodeendmap)
+    if annotationinput:
+        exactresults = rawexactresults
+    else:
+        exactresults = adaptpositions(rawexactresults, nodeendmap)
 
     coreresults = exact2results(exactresults)
 
