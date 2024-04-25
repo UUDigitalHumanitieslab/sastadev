@@ -283,7 +283,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
     commentscol = -1
     unalignedcol = -1
 
-    uttlevel = 'utt'
+    # uttlevel = 'utt'
 
     uttcount = 0
 
@@ -318,7 +318,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
         #    uttcount += 1
         curuttwlist = []
         for colctr in range(firstwordcol, len(row)):
-            if thelevel == uttlevel:
+            if thelevel.lower() in uttidheaders:
                 rawcurcellval = str(row[colctr])
                 curcellval = getname(rawcurcellval)
                 if curcellval != '':
@@ -335,7 +335,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
                 if cleanlabel != '':
                     thedata[(cleanlevel, cleanlabel)].append(
                         (uttid, tokenposition))
-            elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+            elif not isuttlevel(thelevel) and colctr != stagescol and colctr != commentscol:
                 thelabelstr = row[colctr]
                 thelevel = row[levelcol]
                 if colctr == unalignedcol:
