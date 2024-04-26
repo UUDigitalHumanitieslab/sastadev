@@ -8,12 +8,14 @@ for this purpose.
 
 
 '''
-
+import os
 from typing import Any, Dict, List, Optional
 
 from sastadev import celexlexicon, treebankfunctions
+from sastadev.conf import settings
 from sastadev.namepartlexicon import (namepart_isa_namepart,
                                       namepart_isa_namepart_uc)
+from sastadev.readcsv import readcsv
 from sastadev.sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
 
 space = ' '
@@ -28,7 +30,7 @@ chatspecials = ['xxx', 'yyy']
 lexicon = celex
 
 #Alpino often analyses certain words as tsw though they should be analysed as nouns
-tswnouns = ['baby', 'jongen', 'juf', 'jufforouw', 'mam', 'mama', 'mamma', 'meisje', 'mens', 'meneer', 'mevrouw',
+tswnouns = ['baby', 'jongen', 'juf', 'juffrouw', 'mam', 'mama', 'mamma', 'meisje', 'mens', 'meneer', 'mevrouw',
             'pap', 'papa', 'pappa', 'stouterd', 'opa', 'oma']
 
 de = '1'
@@ -37,6 +39,23 @@ het = '2'
 dets = {}
 dets[de] = ['de', 'die', 'deze', 'onze', 'welke', 'iedere', 'elke', 'zulke']
 dets[het] = ['het', 'dat', 'dit', 'ons', 'welk', 'ieder', 'elk', 'zulk']
+
+def initializelexicon(lexiconfilename) -> set:
+    lexicon = set()
+    fptuples = readcsv(lexiconfilename, header=False)
+    for _, fp in fptuples:
+        strippedword = fp[0].strip()
+        lexicon.add(strippedword)
+    return lexicon
+
+def initializelexicondict(lexiconfilename) -> Dict[str,str]:
+    lexicon = {}
+    fptuples = readcsv(lexiconfilename, header=False)
+    for _, fp in fptuples:
+        strippedword = fp[0].strip()
+        strippedreplacement = fp[1].strip()
+        lexicon[strippedword] = strippedreplacement
+    return lexicon
 
 
 def isa_namepart(word: str) -> bool:
@@ -194,3 +213,13 @@ def getinflforms(thesubj: SynTree, thepv: SynTree, inversion: bool) -> List[str]
     else:
         results = []
     return results
+
+nochildwordsfilename = 'nochildwords.txt'
+nochildwordsfolder = 'data/nochildwords'
+nochildwordsfullname = os.path.join(settings.SD_DIR, nochildwordsfolder, nochildwordsfilename)
+nochildwords = initializelexicon(nochildwordsfullname)
+
+lexiconfoldername = 'data/wordsunknowntoalpino'
+wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
+wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
+wordsunknowntoalpinolexicondict = initializelexicondict(wordsunknowntoalpinofullname)

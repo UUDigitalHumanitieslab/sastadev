@@ -9,7 +9,7 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.lexicon import de, dets, known_word
+from sastadev.lexicon import de, dets, known_word, nochildwords
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
                                bpl_none, bpl_replacement, bpl_word,
@@ -60,8 +60,7 @@ altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'di
 errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
                 ['altid', 'altsent', 'score'] + \
-    altpropertiesheader
-
+                altpropertiesheader
 
 smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn')]
 smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
@@ -70,7 +69,8 @@ smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
                  compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, badcatcount,
-                 hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount, dezebwcount):
+                 hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount,
+                 dezebwcount):
         self.stree: SynTree = stree
         self.altid: AltId = altid
         self.altsent: str = altsent
@@ -166,7 +166,7 @@ class OrigandAlts():
         laltsrows = len(altsrows)
         selectedrow = [base, user1, user2, user3] + \
                       ['Selected', self.orig.uttid, '',
-                          self.alts[self.selected].altsent, str(self.selected)]
+                       self.alts[self.selected].altsent, str(self.selected)]
         if laltsrows > 1:
             rows = [origrow] + altsrows + [selectedrow]
         else:
@@ -229,17 +229,23 @@ def adaptpv(node):
 
 def smartreplace(node: SynTree, word: str) -> SynTree:
     '''
-    replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class, otherwise by
+    replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class and
+     if it does not occur in nochildwords;  otherwise by
     a node with *word* and *lemma* attributes replaced by *word*
     :param node:
     :param word:
     :return:
     '''
+
     wordtree = settings.PARSE_FUNC(word)
     newnode = find1(wordtree, './/node[@pt]')
     newnodept = getattval(newnode, 'pt')
     nodept = getattval(node, 'pt')
-    if isvalidword(word) and issamewordclass(node, newnode) and not isrobustnoun(newnode):
+    newnodelemma = getattval(newnode, 'lemma')
+    if isvalidword(word) and \
+            issamewordclass(node, newnode) and \
+            not isrobustnoun(newnode) and \
+            newnodelemma not in nochildwords:
         result = newnode
         result.attrib['begin'] = getattval(node, 'begin')
         result.attrib['end'] = getattval(node, 'end')
@@ -256,8 +262,7 @@ def smartreplace(node: SynTree, word: str) -> SynTree:
     return result
 
 
-def mkmetarecord(meta: MetaElement, origutt: Optional[str], parsed_as: Optional[str]) -> Tuple[
-        Optional[str], List[str]]:
+def mkmetarecord(meta: MetaElement, origutt: Optional[str], parsed_as: Optional[str]) -> Tuple[Optional[str], List[str]]:
     if meta is None:
         return None, []
     key = meta.attrib['name']
@@ -747,7 +752,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 newnodeparent = newnode.getparent()
                 newnodeparent.remove(newnode)
                 newnodeparent.append(substnode)
-                # showtree(thetree, 'thetree after smart replace')
+        # showtree(thetree, 'thetree after smart replace')
 
         elif curbackplacement in [bpl_word, bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
@@ -897,7 +902,7 @@ def updatecleantokmeta(meta: Meta, begins: List[str], cleantokpos: List[int]) ->
             intbegin = int(begin)
             beginindex = cleantokpos.index(intbegin)
             newmeta.annotationwordlist = newmeta.annotationwordlist[:beginindex] \
-                + newmeta.annotationwordlist[beginindex + 1:]
+                                         + newmeta.annotationwordlist[beginindex + 1:]
         newmeta.value = newmeta.annotationwordlist
         return newmeta
     else:
@@ -924,7 +929,8 @@ def getorigutt(stree: SynTree) -> Optional[str]:
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
-    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount, -obj.dhyphencount,
+    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount,
+            -obj.dhyphencount,
             -obj.complsucount, -obj.badcatcount,
             -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
             -obj.subjunctivecount, obj.dimcount,
@@ -999,13 +1005,13 @@ def countambigwords(stree: SynTree) -> int:
 def getunknownwordcount(nt: SynTree) -> int:
     words = [w for w in nt.xpath('.//node[@pt!="tsw"]/@word')]
     unknownwords = [w for w in words if not (
-        isvalidword(w.lower()) or isvalidword(w.title()))]
+            isvalidword(w.lower()) or isvalidword(w.title()))]
     result = len(unknownwords)
     return result
 
 
 def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode) -> Tuple[
-        ParsedCorrection, OrigandAlts]:
+    ParsedCorrection, OrigandAlts]:
     # to be implemented@@
     # it is presupposed that ptmds is not []
 
