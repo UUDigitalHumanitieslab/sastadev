@@ -16,7 +16,8 @@ import re
 from typing import Callable, Dict
 
 from sastadev.allresults import QueryFunction
-from sastadev.asta_queries import asta_bijzin, asta_delpv, asta_lex, asta_noun
+from sastadev.asta_queries import (asta_bijzin, asta_delpv, asta_lemma,
+                                   asta_lex, asta_noun, astalemmafunction)
 from sastadev.astaforms import astaform
 from sastadev.ASTApostfunctions import (KMcount, countwordsandcutoff,
                                         finietheidsindex, getalllemmas,
@@ -26,7 +27,7 @@ from sastadev.ASTApostfunctions import (KMcount, countwordsandcutoff,
 from sastadev.compounds import getcompounds
 from sastadev.dedup import correct, mlux, onvolledig, samplesize
 from sastadev.imperatives import wond4, wond5plus, wondx, wx, wxy, wxyz, wxyz5
-from sastadev.methods import allok
+from sastadev.methods import allok, astalemmafilter
 from sastadev.queryfunctions import VzN, vobij, voslashbij, xneg_neg, xneg_x
 from sastadev.stapforms import makestapform
 from sastadev.STAPpostfunctions import GL5LVU, GLVU, BB_totaal
@@ -73,7 +74,8 @@ thestapfunctions = [BB_totaal, GLVU, GL5LVU, makestapform]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
-                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, neologisme]
+                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, astalemmafilter, asta_lemma,
+                    astalemmafunction]
 
 thefunctions = thetarspfunctions + thestapfunctions + theastafunctions
 

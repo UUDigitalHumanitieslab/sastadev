@@ -1,11 +1,11 @@
 from collections import Counter
 from typing import Any, Dict, List
 
-from sastadev.allresults import AllResults
+from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
+                                 ResultsKey)
 from sastadev.methods import lastuttqidcondition, maxsamplesize
-from sastadev.sastatypes import (AnalysedTrees, ExactResultsDict, FileName,
-                                 Matches, MatchesDict, MethodName, Position,
-                                 QId, ResultsCounter, ResultsDict,
+from sastadev.sastatypes import (AnalysedTrees, FileName, Matches, MethodName,
+                                 Position, QId, ResultsCounter, ResultsDict,
                                  SampleSizeTuple, UttId, UttWordDict)
 from sastadev.treebankfunctions import getnodeyield
 
@@ -16,10 +16,10 @@ def exact2results(exactresults: ExactResultsDict) -> ResultsDict:
     :return: dictionary (key=queryid, value is a Counter uttid: count)
     """
     results: ResultsDict = {}
-    for qid in exactresults:
-        uttidlist = [uttid for (uttid, _) in exactresults[qid]]
+    for reskey in exactresults:
+        uttidlist = [uttid for (uttid, _) in exactresults[reskey]]
         resultvalue = Counter(uttidlist)
-        results[qid] = resultvalue
+        results[reskey] = resultvalue
     return results
 
 
@@ -41,7 +41,7 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
         newexactresults: ExactResultsDict = reduceexactresults(allresults.exactresults,
                                                                uttidlist, cutoffpoint, methodname)  # done
         newcoreresults: Dict[QId, ResultsCounter] = exact2results(
-            newexactresults)   # done
+            newexactresults)  # done
         newallutts: UttWordDict = reduceallutts(
             allresults.allutts, uttidlist)  # done
         newallresults = AllResults(allresults.uttcount, newcoreresults, newexactresults, allresults.postresults,
@@ -52,10 +52,10 @@ def reduceallresults(allresults: AllResults, samplesizetuple: SampleSizeTuple, m
         newuttcount: int = len(uttidlist)  # done
         newexactresults: ExactResultsDict = reduceexactresults(allresults.exactresults,
                                                                uttidlist, cutoffpoint, methodname)  # done
-        newcoreresults: Dict[QId, ResultsCounter] = exact2results(
-            newexactresults)   # done
+        newcoreresults: Dict[ResultsKey, ResultsCounter] = exact2results(
+            newexactresults)  # done
         # @@ I assume these need no change
-        newpostresults: Dict[QId, Any] = allresults.postresults
+        newpostresults: Dict[ResultsKey, Any] = allresults.postresults
         newallmatches: MatchesDict = reducematches(
             allresults.allmatches, uttidlist, cutoffpoint, methodname)  # done
         newfilename: FileName = allresults.filename  # done
@@ -75,14 +75,14 @@ def reduceexactresults(exactresultsdict: Dict[QId, ExactResultsDict], uttidlist:
     newexactresultsdict = {}
     lastuttid = uttidlist[-1]
 
-    for qid in exactresultsdict:
+    for reskey in exactresultsdict:
         newexactresults = []
-        for uttid, position in exactresultsdict[qid]:
+        for uttid, position in exactresultsdict[reskey]:
             if (uttid in uttidlist and uttid != lastuttid) or \
-               (uttid == lastuttid and cutoffpoint is not None
-                    and not (position > cutoffpoint) and lastuttqidcondition[methodname](qid)):
+                    (uttid == lastuttid and cutoffpoint is not None and
+                     not (position > cutoffpoint) and lastuttqidcondition[methodname](reskey)):
                 newexactresults.append((uttid, position))
-        newexactresultsdict[qid] = newexactresults
+        newexactresultsdict[reskey] = newexactresults
     return newexactresultsdict
 
 
@@ -97,13 +97,14 @@ def reduceresults(resultsdict: Dict[QId, Counter], samplesizetuple: SampleSizeTu
     else:
         newresultsdict = {}
         lastuttid = uttidlist[-1]
-        for qid in resultsdict:
+        for reskey in resultsdict:
             newresults = []
-            for uttid in resultsdict[qid]:
+            for uttid in resultsdict[reskey]:
                 if (uttid in uttidlist and uttid != lastuttid) or \
-                        (uttid == lastuttid and lastuttqidcondition[methodname](qid)):  # no condition on the position, we have no info on it
+                        (uttid == lastuttid and lastuttqidcondition[methodname](
+                            reskey)):  # no condition on the position, we have no info on it
                     newresults.append(uttid)
-            newresultsdict[qid] = Counter(newresults)
+            newresultsdict[reskey] = Counter(newresults)
     return newresultsdict
 
 
@@ -111,19 +112,19 @@ def reducematches(matchesdict: MatchesDict, uttidlist: List[UttId], cutoffpoint:
                   methodname: MethodName) -> MatchesDict:
     newmatchesdict = {}
     lastuttid = uttidlist[-1]
-    for qid, uttid in matchesdict:
+    for reskey, uttid in matchesdict:
         if uttid in uttidlist and uttid != lastuttid:
-            newmatchesdict[(qid, uttid)] = matchesdict[(qid, uttid)]
+            newmatchesdict[(reskey, uttid)] = matchesdict[(reskey, uttid)]
         else:
-            if uttid == lastuttid and lastuttqidcondition[methodname](qid):
+            if uttid == lastuttid and lastuttqidcondition[methodname](reskey):
                 newmatches: Matches = []
-                for match in matchesdict[(qid, uttid)]:
+                for match in matchesdict[(reskey, uttid)]:
                     (m, tree) = match
                     treeyield = getnodeyield(tree)
                     lefttreeyield = treeyield[: cutoffpoint]
                     if m in lefttreeyield:
                         newmatches.append((m, tree))
-                newmatchesdict[(qid, uttid)] = newmatches
+                newmatchesdict[(reskey, uttid)] = newmatches
 
     return newmatchesdict
 

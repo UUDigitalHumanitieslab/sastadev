@@ -27,17 +27,17 @@ circumflexvowels = 'âêîôû\u0177'
 
 consonants = 'bcdfghjklmnpqrstvwxz\u00E7'  # \u00E7 is c cedilla
 dutch_base_vowels = barevowels + aiguvowels + \
-    gravevowels + tremavowels + circumflexvowels
+                    gravevowels + tremavowels + circumflexvowels
 vowels = dutch_base_vowels
 dutch_base_diphthongs = ['aa', 'ee', 'ie', 'oo',
                          'uu', 'ij', 'ei', 'au', 'ou', 'ui', 'eu', 'oe']
 dutch_y_diphthongs = ['y' + d for d in dutch_base_vowels] + [d + 'y' for d in
                                                              dutch_base_vowels]  # ryen gaat nog fout ye alleen samen nemen aan begin van woord
 dutch_y_triphthongs = ['y' + d for d in dutch_base_diphthongs] + \
-    [d + 'y' for d in dutch_base_diphthongs]
+                      [d + 'y' for d in dutch_base_diphthongs]
 dutch_trema_diphthongs = ['äa', "ëe", 'ïe', 'öo', 'üu', 'ëi']
 dutch_diphthongs = dutch_base_diphthongs + \
-    dutch_y_diphthongs + dutch_trema_diphthongs
+                   dutch_y_diphthongs + dutch_trema_diphthongs
 dutch_base_triphthongs = ['aai', 'eeu', 'ooi', 'oei']
 dutch_y_tetraphthongs = ['y' + d for d in dutch_base_triphthongs]
 dutch_triphthongs = dutch_base_triphthongs + dutch_y_triphthongs
@@ -102,7 +102,7 @@ syllableheadspat = alt([alt(dutch_tetraphthongs), alt(
 syllableheadsre = re.compile(syllableheadspat)
 
 monosyllabicpat = r'^' + consonants_star + \
-    syllableheadspat + consonants_star + r'$'
+                  syllableheadspat + consonants_star + r'$'
 monosyllabicre = re.compile(monosyllabicpat)
 
 

@@ -16,3 +16,7 @@ module = [
     'openpyxl','xlsx'
     ]
 ignore_missing_imports = true
+
+
+[tool.pyright]
+reportInvalidTypeForm = false

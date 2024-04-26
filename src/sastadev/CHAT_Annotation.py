@@ -1,6 +1,7 @@
 import re
 
 from sastadev import cleanCHILDEStokens
+# import sastadev.cleanCHILDEStokens
 from sastadev.conf import settings
 from sastadev.metadata import Meta, bpl_delete, bpl_replacement
 from sastadev.sastatoken import Token, show
@@ -62,8 +63,9 @@ fullwordpat = fullre(wordpat)
 wordre = re.compile(fullwordpat)
 # interpunction = r'(:?' + r'[!\?\.,;]' + '|' + u'[\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):' + r')'
 interpunction = r'\-\-\-|\-\-|\-|\-' + r'|' + \
-    r'[!\?\.,;]' + '|' + \
-    u'[\u2013\u2014\u2015\u201C\u201D\u2039\u203A]' + r'|' + r'(?<=\s):'
+                r'[!\?\.,;]' + '|' + \
+                u'[\u2013\u2014\u2015\u201C\u201D\u2039\u203A]' + \
+    r'|' + r'(?<=\s):'
 filenamepat = r'[\w\.]+'
 fullfilenamepat = fullre(filenamepat)
 fullfilenamere = re.compile(fullfilenamepat)

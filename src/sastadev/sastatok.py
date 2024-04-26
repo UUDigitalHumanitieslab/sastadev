@@ -1,6 +1,7 @@
 import re
 from typing import List, Tuple
 
+import sastadev
 import sastadev.CHAT_Annotation as sastachat
 import sastadev.cleanCHILDEStokens
 from sastadev.metadata import Meta
@@ -43,7 +44,6 @@ bestguess = r'\[\?\]'
 repetition = scopeorword + r'\s*\[/\]\s*' + word
 retracing = scopeorword + r'\s*\[//\]\s*' + word  # p73
 whitespace = r'\s+'
-
 
 # sastaspecials = [r'\[::', r'\[=', r'\[:', r'\[=\?', r'\[x', r'\<', r'\>', r'\[\?\]', r'\[/\]', r'\[//\]', r'\[///\]', r'\[%', r'\]']
 sastaspecials = list(sastachat.CHAT_patterns)

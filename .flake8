@@ -16,3 +16,4 @@ exclude =
     __pycache__
     env
     .env
+    build/

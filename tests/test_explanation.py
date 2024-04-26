@@ -6,7 +6,14 @@ from sastadev import sasta_explanation
 
 space = ' '
 
-@pytest.mark.skip(reason='test code does not work')
+#@pytest.mark.skip(reason='test code does not work')
+
+space = ' '
+
+#print(dir(sasta_explanation))
+
+
+@pytest.mark.skip(reason="test not working")
 def test():
     # treetotest = 9
     infullname = r"D:\Dropbox\jodijk\Utrecht\Projects\SASTADATA\Auris\outtreebanks\DLD07_corrected.xml"

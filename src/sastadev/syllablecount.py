@@ -21,7 +21,6 @@ ouillre = re.compile(ouillpattern)
 ieuwpattern = r'([EeIi]e)(u)(w)'
 ieuwre = re.compile(ieuwpattern)
 
-
 syllable_exception_dictionary = {
     'cacao': 2, 'cue': 1, 'camargue': 3, 'bye': 1, 'Paraguay': 3}
 syll1vseqs = ['aau', 'ai', 'ay', 'eoi', 'eui', 'ey', 'eau',
@@ -39,7 +38,6 @@ syll2vseqs = ['aaa', 'aaia', 'aaie', 'aaiee', 'aaii', 'aaio', 'aaioe', 'ae', 'ae
               'ye', 'yi', 'yo', 'yoo']
 syll3vseqs = ['aaieo', 'aaieoo', 'aoi', 'eao', 'eeeie',
               'eeeii', 'eoa', 'ioa', 'ioui', 'oeieo', 'oeieoo']
-
 
 voweltierpattern = f'[{vowels}]+'
 voweltierre = re.compile(voweltierpattern)
@@ -115,7 +113,8 @@ def getfirsttremavowelpos(word: str) -> int:
 
 
 def test1():
-    wordlist = ['B-kant', 'ABC-biljet', 'A-B-C-actie', 'cue', 'aan', 'na', 'baan', 'cadeau', 'chaos', 'naäpen', 'be-edigen', 'haaibaai', 'iaen', 'iaën',
+    wordlist = ['B-kant', 'ABC-biljet', 'A-B-C-actie', 'cue', 'aan', 'na', 'baan', 'cadeau', 'chaos', 'naäpen',
+                'be-edigen', 'haaibaai', 'iaen', 'iaën',
                 'eeuw', 'kieuw', ]
     for word in wordlist:
         vt = getvoweltier(word)
@@ -126,7 +125,8 @@ def test1():
 
 
 def test2():
-    reflist = [('B-kant', 2), ('ABC-biljet', 3), ('A-B-C-actie', 5), ('cue', 1), ('aan', 1), ('na', 1), ('baan', 1), ('cadeau', 2), ('chaos', 2), ('naäpen', 3),
+    reflist = [('B-kant', 2), ('ABC-biljet', 3), ('A-B-C-actie', 5), ('cue', 1), ('aan', 1), ('na', 1), ('baan', 1),
+               ('cadeau', 2), ('chaos', 2), ('naäpen', 3),
                ('be-edigen', 4), ('haaibaai', 2), ('iaen',
                                                    2), ('iaën', 3), ('eeuw', 1), ('kieuw', 1),
                ('koeieoog', 3), ('expressfout', 2), ('desavoueer', 4)]

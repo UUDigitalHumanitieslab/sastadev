@@ -1,12 +1,17 @@
 import os
 from typing import Callable, Dict, List, Optional, Tuple
 
+from sastadev.allresults import mkresultskey
 from sastadev.conf import settings
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
-                                 Item_Level2QIdDict, MethodName, QId, Query,
-                                 QueryDict)
+                                 Item_Level2QIdDict, MethodName, Pattern, QId,
+                                 Query, QueryDict)
+
+lemmaqid = 'A051'
+lexreskey = mkresultskey('A018')
+nreskey = mkresultskey('A021')
 
 asta = 'asta'
 stap = 'stap'
@@ -18,7 +23,15 @@ stapmethods = [stap]
 
 validmethods = astamethods + stapmethods + tarspmethods
 
-astalexicalmeasures = ['A018', 'A021']  # LEX and N
+astalexicalmeasures = [mkresultskey('A018'), mkresultskey('A021')]  # LEX and N
+
+basicpattern: Pattern = '[,;]'
+extendedpattern: Pattern = '[,;/\|]'
+
+methodseparators = {}
+methodseparators[tarsp] = basicpattern
+methodseparators[stap] = extendedpattern
+methodseparators[asta] = extendedpattern
 
 
 class SampleSize:
@@ -60,20 +73,38 @@ class Method:
         self.queries: QueryDict = queries
         self.defaultfilter: ExactResultsFilter = defaultfilter
         self.item2idmap: Item_Level2QIdDict = item2idmap
+        self.simpleitem2idmap = {item: id for (
+            (item, level), id) in item2idmap.items()}
         self.altcodes: AltCodeDict = altcodes
         self.postquerylist: List[QId] = postquerylist
         self.methodfilename: FileName = methodfilename
+        self.separators: Pattern = methodseparators[name]
 
 
 def implies(a: bool, b: bool) -> bool:
-    return (not a or b)
+    return (not a) or b
+
+
+def astalemmafilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
+    for (qid, val) in xrs:
+        if qid == lemmaqid:
+            if xr in xrs[(qid, val)]:
+                result1 = xr in xrs[lexreskey] or xr in xrs[nreskey]
+                result = query.process == pre_process or result1
+                return result
+
+    return True
 
 
 # filter specifies what passes the filter
 def astadefaultfilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> bool:
-    return query.process == pre_process or \
-        (implies('A029' in xrs, xr not in xrs['A029'])
-         and implies('A045' in xrs, xr not in xrs['A045']))
+    a029 = mkresultskey('A029')
+    a045 = mkresultskey('A045')
+    result1 = query.process == pre_process
+    result2 = xr not in xrs[a029] if a029 in xrs else True
+    result3 = xr not in xrs[a045] if a045 in xrs else True
+    result = result1 or (result2 and result3)
+    return result
 
 
 def getmethodfromfile(filename: str) -> str:
@@ -118,17 +149,26 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
     return resultmethodname, resultmethodfilename
 
 
-codepath = settings.SD_DIR
+codepath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(codepath, 'data')
 methodspath = os.path.join(datapath, 'methods')
 
-
 supported_methods = {}
 supported_methods[tarsp] = os.path.join(
-    methodspath, 'TARSP Index Current.xlsx')
+    methodspath, 'TARSP_Index_Current.xlsx')
 supported_methods[asta] = os.path.join(methodspath, 'ASTA_Index_Current.xlsx')
 supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
+
+codepath = os.path.dirname(os.path.abspath(__file__))
+datapath = os.path.join(codepath, 'data')
+methodspath = os.path.join(datapath, 'methods')
+
+# supported_methods = {}
+# supported_methods[tarsp] = os.path.join(
+#     methodspath, 'TARSP_Index_Current.xlsx')
+# supported_methods[asta] = os.path.join(methodspath, 'ASTA_Index_Current.xlsx')
+# supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
 defaultfilters: Dict[MethodName, ExactResultsFilter] = {}
 defaultfilters[asta] = astadefaultfilter

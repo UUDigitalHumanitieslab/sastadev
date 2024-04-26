@@ -955,7 +955,7 @@ A029: MLU/X
   * iedere herhaling (**covered**, including many but not all partial repetitions)
   * iedere echolalie (**covered partially**)
   * iedere mislukte poging om te komen tot realisatie van het doelwoord (** covered partially**) 
-    * Ik ging zitten op de kast, nee stoel, nee bank Aantal woorden voor bepalen samplegrootte = 10, MLU=6
+  * Ik ging zitten op de kast, nee stoel, nee bank Aantal woorden voor bepalen samplegrootte = 10, MLU=6
 * Streep /hé/, /goh/, /och/ etc. weg. (**covered**)
 * Uitingen die deels onverstaanbaar zijn worden in hun geheel weggelaten (eventuele lexicale maten zijn dan al wel geteld) (**covered**)
 

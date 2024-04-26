@@ -1,10 +1,11 @@
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from sastadev.conf import settings
 from sastadev.dedup import getposition
 from sastadev.macros import expandmacros
 from sastadev.metadata import (longrep, repeated, repeatedseqtoken, repetition,
                                substringrep)
+from sastadev.normalise_lemma import normaliselemma
 from sastadev.sastatypes import SynTree
 from sastadev.stringfunctions import string2list
 from sastadev.tblex import asta_recognised_lexnode, asta_recognised_nounnode
@@ -25,6 +26,41 @@ expandedastacoredelpvquery = expandmacros(astacoredelpvquery)
 
 dpancestorsquery = 'ancestor::node[@rel="dp"] | self::node[@rel="dp" or @rel="--"]'
 
+lemma_path = './/node[%asta_noun% or %ASTA_LEX%]'
+expandedlemma_path = expandmacros(lemma_path)
+# this covers all repetitions but the short repetitions should not be included
+repetitioncond = f'@subcat="{repetition}"'
+longrepetitioncond = f'@value="{repeated}" or @value="{repeatedseqtoken}" or @value="{longrep}" or @value="{substringrep}"'
+
+
+def astalemmafunction(node: SynTree) -> str:
+    repetitionantecedent = getrepetitionantecedent(node)
+    if repetitionantecedent is not None:
+        result = astalemmafunction(repetitionantecedent)
+    else:
+        rawlemma = getattval(node, 'lemma')
+        rawword = getattval(node, 'word')
+        pt = getattval(node, 'pt')
+        if pt == 'n':
+            result = normaliselemma(rawword, rawlemma)
+        else:
+            resultlist = [c for c in rawlemma if c != '_']
+            result = ''.join(resultlist)
+    return result
+
+
+def getrepetitionantecedent(node: SynTree) -> Optional[SynTree]:
+    topnode = find1(node, 'ancestor::alpino_ds')
+    dupindex = get_dupindex(topnode, longrepetitioncond)
+    nodepos = getattval(node, 'begin')
+    if nodepos in dupindex:
+        antecedentpos = dupindex[nodepos]
+        antecedent = find1(
+            topnode, f'.//node[@word and @begin="{antecedentpos}"]')
+    else:
+        antecedent = None
+    return antecedent
+
 
 def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
     dupindex = {}
@@ -37,7 +73,8 @@ def get_dupindex(stree: SynTree, cond: str) -> Dict[str, str]:
             valueliststr = meta.attrib['annotationposlist']
             valuelist = string2list(valueliststr)
             if len(keylist) != len(valuelist):
-                settings.LOGGER.error('Error in metadata: {} in sentence {}'.format(meta, getyield(stree)))
+                settings.LOGGER.error(
+                    'Error in metadata: {} in sentence {}'.format(meta, getyield(stree)))
             else:
                 for key, val in zip(keylist, valuelist):
                     dupindex[key] = val
@@ -74,10 +111,29 @@ def asta_lex(stree: SynTree) -> List[SynTree]:
     return results
 
 
+def asta_recognised_lexicalnode(node: SynTree) -> bool:
+    result = asta_recognised_nounnode(node) or asta_recognised_lexnode(node)
+    return result
+
+
+def asta_lemma(stree: SynTree) -> List[SynTree]:
+    '''The function *asta_lemma* uses the function *asta_x* with parameters *stree*,
+    *lemma_path* and the function *asta_recognised_lexicalnode*.
+
+
+    .. autofunction:: treebankfunctions::asta_recognised_lexicalnode
+         :noindex:
+
+    '''
+    results = asta_x(stree, expandedlemma_path, asta_recognised_lexicalnode)
+    return results
+
+
 def old_asta_noun(stree: SynTree) -> List[SynTree]:
     theyield = getyield(stree)   # for debugging purposes
     thenodeyield = getnodeyield(stree)
-    cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(repeated, repeatedseqtoken, longrep, substringrep)
+    cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(
+        repeated, repeatedseqtoken, longrep, substringrep)
     dupindex = get_dupindex(stree, cond1)
     cond2 = '@subcat="{}"'.format(repetition)
     allrepdupindex = get_dupindex(stree, cond2)
@@ -88,18 +144,22 @@ def old_asta_noun(stree: SynTree) -> List[SynTree]:
     clean_noun_nodes = noun_nodes
 
     # remove the nodes that should get it from this function
-    clean_noun_nodes = [node for node in clean_noun_nodes if getattval(node, 'begin') not in allrepdupindex]
+    clean_noun_nodes = [node for node in clean_noun_nodes if getattval(
+        node, 'begin') not in allrepdupindex]
 
     # remove words not recognised as nouns; is dit nodig? Ja dit is nodig!!!
-    clean_noun_nodes = [node for node in clean_noun_nodes if asta_recognised_nounnode(node)]
+    clean_noun_nodes = [
+        node for node in clean_noun_nodes if asta_recognised_nounnode(node)]
     # print(showtns(clean_noun_nodes))
 
     additional_nodes = []
     for key in dupindex:
-        keynode = find1(stree, './/node[(@pt or @pos) and @begin="{}"]'.format(key))
+        keynode = find1(
+            stree, './/node[(@pt or @pos) and @begin="{}"]'.format(key))
         if keynode is not None:
             val = dupindex[key]
-            valnode = find1(stree, './/node[(@pt or @pos) and @begin="{}"]'.format(val))
+            valnode = find1(
+                stree, './/node[(@pt or @pos) and @begin="{}"]'.format(val))
             if valnode is not None:
                 if valnode in clean_noun_nodes:
                     additional_nodes.append(keynode)
@@ -120,8 +180,10 @@ def verbleftof(node: SynTree, positions: List[str]) -> bool:
 def asta_delpv(stree: SynTree) -> List[SynTree]:
     coredelpvnodes = stree.xpath(expandedastacoredelpvquery)
     streeleaves = getnodeyield(stree)
-    wwbegins = [getattval(node, 'begin') for node in streeleaves if getattval(node, 'pt') == 'ww']
-    delpvnodes = [node for node in coredelpvnodes if node.xpath(dpancestorsquery) == [] or not (verbleftof(node, wwbegins))]
+    wwbegins = [getattval(node, 'begin')
+                for node in streeleaves if getattval(node, 'pt') == 'ww']
+    delpvnodes = [node for node in coredelpvnodes if node.xpath(
+        dpancestorsquery) == [] or not (verbleftof(node, wwbegins))]
     return delpvnodes
 
 
@@ -130,7 +192,8 @@ def asta_x(stree: SynTree,
            recognized_x_f: Callable[[SynTree], bool]) -> List[SynTree]:
     theyield = getyield(stree)   # for debugging purposes
     thenodeyield = getnodeyield(stree)
-    cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(repeated, repeatedseqtoken, longrep, substringrep)
+    cond1 = '@value="{}" or @value="{}" or @value="{}" or @value="{}"'.format(
+        repeated, repeatedseqtoken, longrep, substringrep)
     dupindex = get_dupindex(stree, cond1)
     cond2 = '@subcat="{}"'.format(repetition)
     allrepdupindex = get_dupindex(stree, cond2)
@@ -141,7 +204,8 @@ def asta_x(stree: SynTree,
     clean_x_nodes = x_nodes
 
     # remove the nodes that should get it from this function
-    clean_x_nodes = [node for node in clean_x_nodes if getattval(node, 'begin') not in allrepdupindex]
+    clean_x_nodes = [node for node in clean_x_nodes if getattval(
+        node, 'begin') not in allrepdupindex]
 
     # remove words not recognised as nouns; is dit nodig? Ja dit is nodig!!!
     clean_x_nodes = [node for node in clean_x_nodes if recognized_x_f(node)]
@@ -149,10 +213,12 @@ def asta_x(stree: SynTree,
 
     additional_nodes = []
     for key in dupindex:
-        keynode = find1(stree, './/node[(@pt or @pos) and @begin="{}"]'.format(key))
+        keynode = find1(
+            stree, './/node[(@pt or @pos) and @begin="{}"]'.format(key))
         if keynode is not None:
             val = dupindex[key]
-            valnode = find1(stree, './/node[(@pt or @pos) and @begin="{}"]'.format(val))
+            valnode = find1(
+                stree, './/node[(@pt or @pos) and @begin="{}"]'.format(val))
             if valnode is not None:
                 if valnode in clean_x_nodes:
                     additional_nodes.append(keynode)
@@ -192,7 +258,8 @@ def find_node(position, nodes):
     elif lresults == 1:
         result = results[0]
     else:
-        settings.LOGGER.warning('Multiple nodes found for position {}: {}, in {}'.format(position, showtns(results), showtns(nodes)))
+        settings.LOGGER.warning('Multiple nodes found for position {}: {}, in {}'.format(
+            position, showtns(results), showtns(nodes)))
         result = results[0]
     return result
 
@@ -218,7 +285,8 @@ def removerepetitions(ptnodes: List[SynTree], stree: SynTree) -> List[SynTree]:
     newptnodes = []
     for ptnode in ptnodes:
         ptnodeend = ptnode.attrib['begin'] if 'begin' in ptnode.attrib else None
-        xmetaxpath = './/xmeta[@subcat="Repetition" and @annotatedposlist="[{}]"]'.format(ptnodeend)
+        xmetaxpath = './/xmeta[@subcat="Repetition" and @annotatedposlist="[{}]"]'.format(
+            ptnodeend)
         repmetas = stree.xpath(xmetaxpath)
         if repmetas == []:
             newptnodes.append(ptnode)
@@ -260,20 +328,23 @@ def asta_bijzin(stree: SynTree) -> List[SynTree]:
     clausenodes = stree.xpath(astabijzinquery)
     ptnodes = [n for n in clausenodes if 'pt' in n.attrib]
     okptnodes = removerepetitions(ptnodes, stree)
-    trueclausenodes = [n for n in clausenodes if getattval(n, 'cat') in clausecats]
+    trueclausenodes = [
+        n for n in clausenodes if getattval(n, 'cat') in clausecats]
     # alternative 1
     # sortedclausenodes = sorted(trueclausenodes, key=lambda x: (int(getattval(x,'begin')), -int(getattval(x, 'end'))))
     # result = sortedclausenodes[1:] + okptnodes
 
     # alternative2 -follows the conventions for ASTA
-    sortedclausenodes = sorted(trueclausenodes, key=lambda x: (int(getattval(x, 'begin')), int(getattval(x, 'end'))))
+    sortedclausenodes = sorted(trueclausenodes, key=lambda x: (
+        int(getattval(x, 'begin')), int(getattval(x, 'end'))))
     if len(sortedclausenodes) > 1:
         cn0 = sortedclausenodes[0]
         cn1 = sortedclausenodes[1]
         if getattval(cn1, 'begin') == getattval(cn0, 'begin'):
             cn0end = getattval(cn0, 'end')
             newbegin = cn0end
-            newokptnodexpath = '//node[@pt and @begin="{newbegin}"]'.format(newbegin=newbegin)
+            newokptnodexpath = '//node[@pt and @begin="{newbegin}"]'.format(
+                newbegin=newbegin)
             newokptnode = find1(cn1, newokptnodexpath)
             result = sortedclausenodes[2:] + okptnodes
             if newokptnode is not None:

@@ -2,9 +2,9 @@ from collections import Counter
 from copy import deepcopy
 from typing import Dict, List, Optional, Tuple
 
-from sastadev.allresults import AllResults
+from sastadev.allresults import AllResults, ResultsKey, mkresultskey
 from sastadev.lexicon import getwordinfo, getwordposinfo
-from sastadev.sastatypes import Position, QId, SynTree, UttId
+from sastadev.sastatypes import Position, SynTree, UttId
 from sastadev.stringfunctions import getallrealwords, realwordstring
 from sastadev.treebankfunctions import getattval, getnodeyield
 
@@ -25,7 +25,22 @@ kqid = 'A013'
 mqid = 'A020'
 tijdfoutpvqid = 'A041'
 nounlemmaqid = 'A046'
+formqid = 'A047'
 verblemmaqid = 'A049'
+
+nounreskey = mkresultskey(nounqid)
+lexreskey = mkresultskey(lexqid)
+
+samplesizereskey = mkresultskey(samplesizeqid)
+mluxreskey = mkresultskey(mluxqid)
+
+pvreskey = mkresultskey(pvqid)
+delpvreskey = mkresultskey(delpvqid)
+subpvreskey = mkresultskey(subpvqid)
+tijdfoutpvreskey = mkresultskey(tijdfoutpvqid)
+kreskey = mkresultskey(kqid)
+mreskey = mkresultskey(mqid)
+formreskey = mkresultskey(formqid)
 
 specialform = 'Special Form'
 errormarking = 'Error Marking'
@@ -108,9 +123,9 @@ def wordcountperutt(allresults):
     wordcounts = {uttid: sum(ctr.values()) for uttid, ctr in lemmas.items()}
     ignorewordcounts = deepcopy(
         allresults.coreresults[
-            samplesizeqid]) if samplesizeqid in allresults.coreresults else Counter()  # samplesize
+            samplesizereskey]) if samplesizereskey in allresults.coreresults else Counter()  # samplesize
     ignorewordcounts += allresults.coreresults[
-        mluxqid] if mluxqid in allresults.coreresults else Counter()  # mlux
+        mluxreskey] if mluxreskey in allresults.coreresults else Counter()  # mlux
     # ignorewordcounts += allresults.coreresults['A050'] if 'A050' in allresults.coreresults else Counter() # echolalie covered by mlux
     result = {}
     for uttid in wordcounts:
@@ -156,7 +171,7 @@ def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
     theutt = allresults.allutts[uttid]
     final = diff
     for i, w in enumerate(theutt):
-        if (uttid, i + 1) in allresults.exactresults[samplesizeqid]:
+        if (uttid, i + 1) in allresults.exactresults[samplesizereskey]:
             final += 1
         if i + 1 == final:
             break
@@ -165,13 +180,13 @@ def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
 
 def finietheidsindex(allresults, _):
     allpvs = allresults.coreresults[
-        pvqid] if pvqid in allresults.coreresults else Counter()
+        pvreskey] if pvreskey in allresults.coreresults else Counter()
     subpvs = allresults.coreresults[
-        subpvqid] if subpvqid in allresults.coreresults else Counter()
+        subpvreskey] if subpvreskey in allresults.coreresults else Counter()
     delpvs = allresults.coreresults[
-        delpvqid] if delpvqid in allresults.coreresults else Counter()
+        delpvreskey] if delpvreskey in allresults.coreresults else Counter()
     tijdfoutpvs = allresults.coreresults[
-        tijdfoutpvqid] if tijdfoutpvqid in allresults.coreresults else Counter()
+        tijdfoutpvreskey] if tijdfoutpvreskey in allresults.coreresults else Counter()
     foutepvs = subpvs + delpvs + tijdfoutpvs
     allpvcount = sumctr(allpvs)
     foutepvcount = sumctr(foutepvs)
@@ -186,9 +201,9 @@ def finietheidsindex(allresults, _):
 def countwordsandcutoff(allresults, _):
     # @@to be adapted
     result = (None, 0)
-    if 'A047' in allresults.postresults:
+    if formreskey in allresults.postresults:
         paddedlist = []
-        for key, val in allresults.postresults['A047'].items():
+        for key, val in allresults.postresults[formreskey].items():
             paddedkey = key.rjust(lpad, zero)
             paddedlist.append((paddedkey, val))
         sortedlist = sorted(paddedlist)
@@ -205,29 +220,16 @@ def countwordsandcutoff(allresults, _):
 
 def KMcount(allresults, _):
     Kcount = sumctr(
-        allresults.coreresults[kqid]) if kqid in allresults.coreresults else 0
+        allresults.coreresults[kreskey]) if kreskey in allresults.coreresults else 0
     Mcount = sumctr(
         allresults.coreresults[mqid]) if mqid in allresults.coreresults else 0
     result = Kcount + Mcount
     return result
 
 
-def old_old_getlemmas(allresults, _):
-    allmatches = allresults.allmatches
-    allresults.postresults['A046'] = Counter()
-    for el in allmatches:
-        (qid, uttid) = el
-        if qid in ['A021', 'A018']:
-            for amatch in allmatches[el]:
-                # theword = normalizedword(amatch[0])
-                theword = getattval(amatch[0], 'lemma')
-                allresults.postresults['A046'].update([(theword, uttid)])
-    return allresults
-
-
-def getlemmas(allresults, _):
-    result = getcondlemmas(allresults, _, lambda qid: qid in [nounqid, lexqid])
-    return result
+# def getlemmas(allresults, _):
+#    result = getcondlemmas(allresults, _, lambda reskey: reskey in [nounreskey, lexreskey])
+#    return result
 
 
 def getnounlemmas(allresults, _):
@@ -239,7 +241,7 @@ def getnounlemmas(allresults, _):
     .. autofunction:: ASTApostfunctions::getposlemmas
 
     '''
-    result = getposlemmas(allresults, nounqid)
+    result = getposlemmas(allresults, nounreskey)
     return result
 
 
@@ -251,7 +253,7 @@ def getlexlemmas(allresults, _):
 
     .. autofunction:: ASTApostfunctions::getposlemmas
     '''
-    result = getposlemmas(allresults, lexqid)
+    result = getposlemmas(allresults, lexreskey)
     return result
 
 
@@ -276,61 +278,6 @@ def getalllemmas(allresults):
     return result
 
 
-def old_getlemmas(allresults, _):
-    allmatches = allresults.allmatches
-    result = Counter()
-    for el in allmatches:
-        (qid, uttid) = el
-        if qid in ['A021', 'A018']:
-            for amatch in allmatches[el]:
-                # theword = normalizedword(amatch[0])
-                theword = getattval(amatch[0], 'lemma')
-                result.update([(theword, uttid)])
-    return result
-
-
-def oldgetcondlemmas(allresults, _, cond):
-    allmatches = allresults.allmatches
-    result = Counter()
-    for el in allmatches:
-        (qid, uttid) = el
-        if cond(qid):
-            for amatch in allmatches[el]:
-                # theword = normalizedword(amatch[0])
-                theword = getattval(amatch[0], 'lemma')
-                result.update([(theword, uttid)])
-    return result
-
-
-# not used anymore, contains an error
-def getcondlemmas(allresults, _, cond):
-    result = Counter()
-    if allresults.annotationinput:
-        for qid in allresults.exactresults:
-            if cond(qid):
-                for (uttid, position) in allresults.exactresults[qid]:
-                    word = allresults.allutts[uttid][position - 1]
-                    if qid == 'A021':
-                        pos = 'n'
-                    elif qid == 'A018':
-                        pos = 'ww'
-                    else:
-                        pos = None
-                    lemma = bgetlemma(word, pos)
-                    result.update([(lemma, qid, uttid)])
-
-    else:
-        allmatches = allresults.allmatches
-        for el in allmatches:
-            (qid, uttid) = el
-            if cond(qid):
-                for amatch in allmatches[el]:
-                    # theword = normalizedword(amatch[0])
-                    theword = getattval(amatch[0], 'lemma')
-                    result.update([(theword, uttid)])
-    return result
-
-
 def getposfromqid(qid):
     if qid == 'A021':
         pos = 'n'
@@ -341,26 +288,27 @@ def getposfromqid(qid):
     return pos
 
 
-def getposlemmas(allresults: AllResults, posqid: QId) -> List[Tuple[str, UttId]]:
+def getposlemmas(allresults: AllResults, posreskey: ResultsKey) -> List[Tuple[str, UttId]]:
     '''
     The function *getposlemmas* obtains the lemmas from *allresults* that have been
-    found by a query with identifier *posqid*.
+    found by a query with identifier *posreskey*.
 
     The lemma is obtained from the parse tree if there is one, otherwise (in case the
     input was an annotation form) from the lexicon (CELEX).
     '''
     result = Counter()
     if allresults.annotationinput:
-        for (uttid, position) in allresults.exactresults[posqid]:
+        for (uttid, position) in allresults.exactresults[posreskey]:
             word = allresults.allutts[uttid][position - 1]
+            posqid = posreskey[0]
             pos = getposfromqid(posqid)
             lemma = bgetlemma(word, pos)
             result.update([(lemma, uttid)])
     else:
         allmatches = allresults.allmatches
         for el in allmatches:
-            (qid, uttid) = el
-            if qid == posqid:
+            (reskey, uttid) = el
+            if reskey == posreskey:
                 for amatch in allmatches[el]:
                     # theword = normalizedword(amatch[0])
                     theword = getattval(amatch[0], 'lemma')
