@@ -168,6 +168,7 @@ from sastadev.methods import (Method, astamethods, stapmethods,
 from sastadev.permcomments import getallcomments, pcheaders
 from sastadev.query import (Query, is_preorcore,
                             post_process, query_exists, query_inform)
+from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
 from sastadev.sastacore import doauchann, dopostqueries, getreskey, isxpathquery, SastaCoreParameters, sastacore
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
@@ -1166,7 +1167,7 @@ def main():
     # platinumoutfilename = base + platinumsuffix + txtext
     # platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
     # platinumcheckfilename = base + checksuffix + txtext
-    platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
+    # platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
 
     # bronze reduction
     exactgoldscores = reduceexactgoldscores(exactgoldscores, samplesizetuple, options.methodname)  # ongoing
@@ -1197,6 +1198,7 @@ def main():
     countcomparisonfilename = os.path.join(
         resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
+
     # print the invalid queries
     for q in invalidqueries:
         settings.LOGGER.error("{}: {}: <{}>".format(
@@ -1223,6 +1225,8 @@ def main():
     reskeyindex = defaultdict(list)
     for reskey in results:
         reskeyindex[reskey[0]].append(reskey)
+
+    analysedtreesdict = {uttid: stree for uttid, stree in allresults.analysedtrees}
 
     for queryid in themethod.queries:
         qcount += 1
@@ -1253,31 +1257,8 @@ def main():
             # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
             if exact:
                 newrows = exactmismatches(reskey, themethod.queries, exactresults, exactsilverscores, allmatches,
-                                          allutts,
-                                          platinumcheckfile,  sample, permdict, annotationinput)
+                                          allutts, analysedtreesdict, sample, permdict, annotationinput)
                 allrows += newrows
-            else:
-                if theresultsminusgold != {}:
-                    print('More examples', file=platinumcheckfile)
-                for uttid in theresultsminusgold:
-                    if (reskey, uttid) in allmatches:
-                        for (m, syntree) in allmatches[(reskey, uttid)]:
-                            markedutt = getmarkedutt(m, syntree)
-                            platinumcheckrow1 = [reskey, themethod.queries[queryid].cat,
-                                                 themethod.queries[queryid].subcat,
-                                                 themethod.queries[queryid].item, uttid, markedutt]
-                            print(tab.join(platinumcheckrow1), file=platinumcheckfile)
-
-                if goldminustheresults != {}:
-                    print('Missed examples', file=platinumcheckfile)
-                for uttid in goldminustheresults:
-                    if uttid in allutts:
-                        uttstr = space.join(allutts[uttid])
-                    else:
-                        settings.LOGGER.warning('uttid {} not in allutts'.format(uttid))
-                    platinumcheckrow2 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
-                                         themethod.queries[queryid].item, uttid, uttstr]
-                    print(tab.join(platinumcheckrow2), file=platinumcheckfile)
 
     # platinumcheckfullname = platinumcheckfile.name
     # (base, ext) = os.path.splitext(platinumcheckfilename)
@@ -1285,11 +1266,13 @@ def main():
 
     # add missed literal hits
     literalmissedrows = literalmissedmatches(themethod.queries, exactresults, exactgoldscores, allmatches, allutts,
-                                             platinumcheckfile, sample, permdict, annotationinput)
+                                             analysedtreesdict, sample, permdict, annotationinput)
     allrows += literalmissedrows
 
     wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
     wb.close()
+
+    writecsv(allrows, platinumcheckfilename, header=pcheaders[0])
 
     # compute the gold postresults
     goldpostresults: Dict[UttId, int] = {}
@@ -1452,7 +1435,6 @@ def main():
     outfile.close()
     outworkbook.close()
     # platinumoutfile.close()
-    platinumcheckfile.close()
 
     resultscounts = scores2counts(results)
 

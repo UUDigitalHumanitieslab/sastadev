@@ -1,15 +1,59 @@
+from math import isnan
 import os
+from collections import Counter
 from sastadev.conf import settings
 from sastadev.constants import (checksuffix, errorsummaryfolder, errorsummarysuffix, intreebanksfolder,
                                 silverpermfolder as permfolder, resultsfolder)
-from sastadev.mksilver import updatepermdict
-from sastadev.xlsx import write2excel
+from sastadev.counterfunctions import counter2liststr
+from sastadev.xlsx import  getxlsxdata, mkworkbook
 from sastadev.filefunctions import savecopy
 
+qid = 'qid'
+uttid = 'uttid'
+pos = 'pos'
+
 pcheaders = [
-    ['Sample', 'User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt',
-     'origutt',
-     'inform']]
+    ['Sample', 'User1', 'User2', 'User3', 'MoreorLess', qid,  'inform', 'cat', 'subcat', 'item', uttid, pos, 'utt',
+     'origutt', 'parsed_as']]
+
+sampleheaders = ['sample']
+
+permprefix = 'perm_'
+
+permsilvercolcount = 8   # number of columns in the silverperm files
+checkfilecolcount = 15
+
+samplecol = 0
+user1col = 1
+user2col = 2
+user3col = 3
+moreorlesscol = 4
+qidcol = 5
+uttidcol = 10
+poscol = 11
+
+permsamplecol = 0
+permuser1col = 1
+permuser2col = 2
+permuser3col = 3
+permqidcol = 4
+permuttidcol = 5
+permposcol = 6
+permmoreorlesscol = 7
+
+
+
+
+uttidscol = 5  # in paltinum-edited tsv files
+
+nots = ['not']
+oks = ['ok', 'oke']
+undecideds = ['?', 'ok/not', 'not/ok']
+allowedoknots = oks + nots + undecideds
+legalmoreorlesses = ['More examples', 'Missed examples']
+comma = ','
+commaspace = ', '
+
 
 
 def getallcomments(dataset, sample):
@@ -24,7 +68,7 @@ def getallcomments(dataset, sample):
     if not os.path.exists(permpath):
         os.makedirs(permpath)
     permfullname = os.path.join(permpath, permfilename)
-    permdatadict, perm_header = updatepermdict(permfullname, permdatadict)
+    permdatadict, perm_header = updatepermdict(permfullname, permdatadict, permfile=True)
 
     # read the check file, add to permdatadict
     checkfilename = f'{sample}{checksuffix}.xlsx'
@@ -48,7 +92,139 @@ def getallcomments(dataset, sample):
     if os.path.exists(permfullname):
         savecopy(permfullname, prevsuffix='', prevprefix='previous_')
     # write the permdatadict to perfullname
-    write2excel(permdatadict, pcheaders, permfullname)
+    writeperm2excel(permdatadict, perm_header, permfullname)
 
     return permdatadict
+
+def updatepermdict(fullname, permdict, sample=None, permfile=False):
+    header, data = getxlsxdata(fullname)
+    colcount = permsilvercolcount if permfile else checkfilecolcount
+    colsok = checkpermformat(header, data, colcount, strict=False)
+    silverfulldatadict = silverdata2dict(data, sample=sample, permfile=permfile)
+
+    #Voeg silverfulldatadict toe aan permdict
+    for key in silverfulldatadict:
+        if key not in permdict:
+            permdict[key] = silverfulldatadict[key]
+        elif not rowsequal(silverfulldatadict[key], permdict[key]):
+            settings.LOGGER.warning('Key: {} Value:\n ({}) \noverwritten by value:\n {};\n File: {}'.format(key, permdict[key], silverfulldatadict[key], fullname))
+
+    return permdict, header
+
+def rowsequal(row1, row2, casesensitive=False):
+    if len(row1) != len(row2):
+        return False
+    pairs = zip(row1, row2)
+    for el1, el2 in pairs:
+        if isinstance(el1, str) and isinstance(el2, str):
+            if el1.lower() != el2.lower():
+                return False
+        elif el1 != el2:
+            return False
+    return True
+
+
+
+def writeperm2excel(datadict, header, filename):
+    data = [[key[0]] + datadict[key] + list(key[1:]) for key in datadict]
+    workbook = mkworkbook(filename, [header], data)
+    workbook.close()
+
+
+def getheader(data):
+    if data is None:
+        result = []
+    else:
+        result = data.head()
+    return result
+
+def checkpermformat(header, data, colcount, strict=True):
+    result = True
+    lheader = len(header)
+    if (lheader == 0 or header == ['']) and data == []:
+        return True
+    result = lheader == colcount
+    if result:
+        rowctr = 0
+        for row in data:
+            rowctr += 1
+            lrow = len(row)
+            result = lrow == colcount
+            if not result:
+                settings.LOGGER.error('Wrong # columns ({} instead of {}), row {}'.format(lrow, colcount, rowctr))
+                if strict:
+                    exit(-1)
+                else:
+                    return False
+    else:
+        settings.LOGGER.error('Wrong # columns ({} instead of {}) in the header'.format(lheader, colcount,))
+        if strict:
+            exit(-1)
+        else:
+            return False
+    return result
+
+def silverdata2dict(silverdata, sample=None, permfile=False):
+    #make a dictionary out of data: a list of rows
+    #silverdict = dict()
+    silverfulldatadict = dict()
+    if silverdata is not None:
+        for rowctr, therow in enumerate(silverdata):
+            if permfile:
+                if len(therow) >= permposcol:
+                    thesample = therow[permsamplecol].lower()
+                    user1 = therow[permuser1col]
+                    user2 = therow[permuser2col]
+                    user3 = therow[permuser3col]
+                    qid = therow[permqidcol]
+                    uttid = str(therow[permuttidcol])
+                    pos = therow[permposcol]
+                    moreorless = therow[permmoreorlesscol]
+                    thekey = (thesample, qid, uttid, pos, moreorless)
+            else:
+                if len(therow) >= poscol:
+                    thesample = therow[samplecol].lower()
+                    user1 = therow[user1col]
+                    user2 = therow[user2col]
+                    user3 = therow[user3col]
+                    qid = therow[qidcol]
+                    uttid = str(therow[uttidcol])
+                    pos = therow[poscol]
+                    moreorless = therow[moreorlesscol]
+                    thekey = (thesample, qid, uttid, pos, moreorless)
+                    # only add it when any of user1, user2, user3 has a nonempty value
+            if not (nono(user1) and nono(user2) and nono(user3)):
+                #silverdict[thekey] = (user1, user2, user3)
+                if sample is None or thesample == sample.lower():
+                    silverfulldatadict[thekey] = [user1, user2, user3]
+    return silverfulldatadict  # , silverdict
+
+
+def nono(inval):
+    result = (inval is None) or (inval == 0) or (inval == []) or (inval == '')
+    return result
+
+
+def myisnan(inval):
+    try:
+        result = isnan(inval)
+    except Exception:
+        result = False
+    return result
+
+def clean(inval):
+    #if type(inval) != str:
+    #    print('nonstring value: {}'.format(inval))
+    instr = str(inval)
+    result = instr.strip()
+    result = result.lower()
+    return result
+
+
+def listminus(list1, list2):
+    clist1 = Counter(list1)
+    clist2 = Counter(list2)
+    cresult = clist1 - clist2
+    result = counter2liststr(cresult)
+    return result
 
