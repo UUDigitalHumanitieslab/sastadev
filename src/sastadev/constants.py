@@ -3,6 +3,12 @@ Module to specify constant values that are used in the application
 '''
 
 # default locations of the data to train and test sastadev
+actualanalysisfolder = 'actual'
+currentanalysisfolder = 'current'
+corrfolder = 'corr'
+nocorrfolder = 'nocorr'
+previousanalysisfolder = 'previous'
+analysesfolder = 'analyses'
 bronzefolder = 'bronze'
 confidencefolder = 'confidence'
 formsfolder = 'forms'
