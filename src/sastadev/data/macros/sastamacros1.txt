@@ -109,20 +109,16 @@ Tarsp_predc_sibling = """parent::node[ node[@rel="predc"]]"""
 Tarsp_obj1_sibling = """parent::node[ node[@rel="obj1"]]"""
 Tarsp_ld_sibling = """parent::node[ node[@rel="ld"]]"""
 Tarsp_onlymodR_sibling = """(parent::node[node[@rel="mod" and %Rpronoun%] and not(node[@rel="predc"])])"""
+Tarsp_onlylocmod_sibling = """(parent::node[node[@rel="mod" and %locnode%] and not(node[@rel="predc"])])"""
+locnode = """(%locword% or %locphrase%)"""
 
-oldTarsp_HwwZ = """(@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
- ((
-   %Tarsp_hww% or
-   @lemma = "hebben" 
-   ) and 
-   not(%Tarsp_vc_sibling%)) or
-   (@lemma="zijn" and not(%Tarsp_vc_sibling%) and %Tarsp_ld_sibling% )
-
- )
-"""
+locword = """(starts-with(@frame,"loc_adverb") or starts-with(@frame,"er_adverb") or %Rpronoun% ) """
+locphrase = """(%locpp% or %locadvp%)""" 
+locpp = """(@cat="pp")"""
+locadvp = """(@cat="advp" and node[@rel="hd" and %locword%])"""
 
 
-Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
+old_Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and @pvagr!="mv" and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" 
@@ -134,11 +130,41 @@ Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" a
  )
 """
 
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
+ ((
+   %Tarsp_hww% or
+   @lemma = "hebben" or
+   @lemma = "zijn"
+   ) and 
+   not(%Tarsp_vc_sibling%)) 
+
+ )  and @wvorm="pv" and
+    not(%Tarsp_Kop%)
+ )
+"""
+
+MvTT = """(@pt="ww" and @pvagr="mv" and @pvtijd="tgw" and ../node[@rel="su"])"""
+
 
 vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")
 """
 
 Tarsp_Kop = """
+ (   @pt="ww" and @wvorm="pv" and @pvtijd="tgw" and @rel="hd" and not(%Tarsp_hww%) and
+
+    ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or
+
+     (@lemma="zijn" and not(%Tarsp_vc_sibling%)  and (%Tarsp_ld_sibling% or %Tarsp_onlylocmod_sibling% or parent::node[%vrwondplus%] or %pc_sibling% )) or
+	 (contains(@lemma, "_zijn") and %svp_sibling%)
+    )
+ )
+"""
+
+pc_sibling = """../node[@rel="pc"]"""
+svp_sibling = """../node[@rel="svp"] """
+
+
+old_Tarsp_Kop = """
  (   @pt="ww" and @rel="hd" and not(%Tarsp_hww%) and
 
     ((%Tarsp_predc_sibling% and not(%Tarsp_obj1_sibling%)) or

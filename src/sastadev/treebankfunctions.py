@@ -1787,7 +1787,8 @@ def getxmetatreepositions(tree: SynTree, xmetaname: str, poslistname: str = 'ann
 
 
 # topendxpath = './/node[@cat="top"]/@end'
-wordnodemodel = './/node[(@pt or (not(@pt) and not(@cat) and @index)) and @begin="{}"]'
+wordnodemodel = './/node[(@word or (not(@word) and not(@cat) and @index)) and @begin="{}"]'
+purewordnodemodel = './/node[@word and @begin="{}"]'
 
 
 def gettokposlist(tree: SynTree) -> List[PositionStr]:
@@ -1811,12 +1812,15 @@ def gettreepos(origpos: PositionStr, reverseindex: List[PositionStr]) -> Positio
     return result
 
 
-def deletewordnode(tree: SynTree, begin: Position) -> Optional[SynTree]:
+def deletewordnode(tree: SynTree, begin: Position, wordsonly=False) -> Optional[SynTree]:
     newtree = deepcopy(tree)
     if newtree is None:
         return newtree
     else:
-        wordnodexpath = wordnodemodel.format(str(begin))
+        if wordsonly:
+            wordnodexpath = purewordnodemodel.format(str(begin))
+        else:
+            wordnodexpath = wordnodemodel.format(str(begin))
         thenode = find1(newtree, wordnodexpath)
         if thenode is not None:
             thenode.getparent().remove(thenode)
@@ -1899,26 +1903,28 @@ def childless(node: SynTree):
     return result
 
 
-def deletewordnodes(tree: SynTree, begins: List[Position]) -> SynTree:
+def deletewordnodes(tree: SynTree, begins: List[Position], wordsonly=False) -> SynTree:
     newtree = deepcopy(tree)
-    newtree = deletewordnodes2(newtree, begins)
+    newtree = deletewordnodes2(newtree, begins, wordsonly=wordsonly)
     newtree = adaptsentence(newtree)
     return newtree
 
 
-def deletewordnodes2(tree: SynTree, begins: List[Position]) -> Optional[SynTree]:
+def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False) -> Optional[SynTree]:
     if tree is None:
         return tree
     for child in tree:
         if child.tag == 'node':
-            newchild = deletewordnodes2(child, begins)
+            newchild = deletewordnodes2(child, begins, wordsonly=wordsonly)
         else:
             newchild = child
     for child in tree:
         if child.tag == 'node':
             childbegin = getattval(child, 'begin')
             childbeginint = int(childbegin)
-            if childbeginint in begins and childless(child):
+            childisaword = 'word' in child.attrib
+            childmustgo = childisaword if wordsonly else True
+            if childbeginint in begins and childless(child) and childmustgo:
                 tree.remove(child)
             # if its children have been deleted earlier
             elif 'cat' in child.attrib and childless(child):
@@ -2071,11 +2077,11 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     intbegins = [int(getattval(n, 'begin')) for n in thetreeleaves]
     tokenlistbegins = [t.pos + t.subpos for t in tokenlist]
     if len(intbegins) != len(tokenlistbegins):
-        settings.LOGGER.error('token mismatch')
-        settings.LOGGER.error('tree yield={}'.format(getyield(thetree)))
-        settings.LOGGER.error('tokenlist={}'.format(tokenlist))
-        settings.LOGGER.error('intbegins={}'.format(intbegins))
-        settings.LOGGER.error('tokenlistbegins ={}'.format(tokenlistbegins))
+        settings.LOGGER.error('treewithtokenpos: token mismatch')
+        settings.LOGGER.error('treewithtokenpos: tree yield={}'.format(getyield(thetree)))
+        settings.LOGGER.error('treewithtokenpos: tokenlist={}'.format(tokenlist))
+        settings.LOGGER.error('treewithtokenpos: intbegins={}'.format(intbegins))
+        settings.LOGGER.error('treewithtokenpos: tokenlistbegins ={}'.format(tokenlistbegins))
     pospairs = zip(intbegins, tokenlistbegins)
     thetreetokenposdict = {treepos + 1: tokenpos + 1 for treepos, tokenpos in pospairs}
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)

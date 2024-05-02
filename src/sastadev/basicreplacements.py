@@ -142,6 +142,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('tee', 'twee', pron, pronerr, onsetred, dp),
                                                 ('nie', 'niet', pron, infpron, codared, dp),
                                                 ('s', 'is', orth, spellerr, apomiss, dp),
+                                                ("'s", 'is', pron, infpron, redpron, dp),
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('it', 'dit', pron, pronerr, onsetred, dp),
                                                 ('da', 'dat', pron, infpron, codared, dp),

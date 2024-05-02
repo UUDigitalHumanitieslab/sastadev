@@ -164,7 +164,7 @@ def literalmissedmatches(queries, exactresults, exactgoldscores, allmatches, all
                                      uttstr, origutt, parsedas]
                 reskeystr = slash.join(reskey)
                 moreorless = less
-                key = (sample, reskeystr, uttid, position, moreorless)
+                key = (sample.lower(), reskeystr, uttid, position, moreorless)
                 usercomments = getusercomments(permsilverdatadict, key, report=False)
                 xlplatinumcheckrow2 = [sample] + usercomments + [moreorless] + platinumcheckrow2
                 newrows.append(xlplatinumcheckrow2)
@@ -197,7 +197,8 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
                 platinumcheckrow1 = [reskeystr, inform, queries[queryid].cat, queries[queryid].subcat, queryitem,
                                      str(uttid), str(markposition), uttstr, origutt, parsedas]
                 moreorless = more
-                key = (sample, reskey, uttid, position, moreorless)
+                key = (sample.lower(), reskey, uttid, position, moreorless)
+                # breakpoint()
                 usercomments = getusercomments(permsilverdatadict, key, report=True)
                 xlplatinumcheckrow1 = [sample] + usercomments + [moreorless] + platinumcheckrow1
                 newrows.append(xlplatinumcheckrow1)
@@ -222,12 +223,14 @@ def exactmismatches(reskey, queries, exactresults, exactgoldscores, allmatches, 
             markposition = 0
             tree = allmatches[(reskey, uttid)][0][1] if (queryid, uttid) in allmatches else None
             origutt = find1(tree, './/meta[@name="origutt"]/@value') if tree is not None else '**'
+            parsedas = find1(tree, './/xmeta[@name="parsed_as"]/@value') if tree is not None else '**'
+            parsedas = uttstr if parsedas is None else parsedas
         moreorless = less
         platinumcheckrow2 = [reskeystr, inform, queries[queryid].cat, queries[queryid].subcat, queries[queryid].item,
                              str(uttid),
                              str(markposition),
                              uttstr, origutt, parsedas]
-        key = (sample, reskey, uttid, position, moreorless)
+        key = (sample.lower(), reskey, uttid, position, moreorless)
         usercomments = getusercomments(permsilverdatadict, key, report=False)
         xlplatinumcheckrow2 = [sample] + usercomments + [moreorless] + platinumcheckrow2
         newrows.append(xlplatinumcheckrow2)

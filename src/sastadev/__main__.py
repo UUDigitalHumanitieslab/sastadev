@@ -926,7 +926,7 @@ def main():
 
     # Configure logging
     handler = logging.FileHandler(options.logfilename, 'w', encoding='utf8')
-    logformat = '%(levelname)s:%(message)s'
+    logformat = '%(filename)s:%(funcName)s:%(levelname)s:%(message)s'
     formatter = logging.Formatter(logformat)
     handler.setFormatter(formatter)
     root_logger = settings.LOGGER
@@ -1110,6 +1110,7 @@ def main():
                 "Input treebank file does not contain a treebank element")
             exit(-1)
 
+    # breakpoint()
     permdict = getallcomments(dataset, sample)
 
     scp = SastaCoreParameters(annotationinput, options.corr, themethod,
@@ -1256,9 +1257,11 @@ def main():
 
             # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
             if exact:
+                # breakpoint()
                 newrows = exactmismatches(reskey, themethod.queries, exactresults, exactsilverscores, allmatches,
                                           allutts, analysedtreesdict, sample, permdict, annotationinput)
                 allrows += newrows
+                # breakpoint()
 
     # platinumcheckfullname = platinumcheckfile.name
     # (base, ext) = os.path.splitext(platinumcheckfilename)
@@ -1269,6 +1272,7 @@ def main():
                                              analysedtreesdict, sample, permdict, annotationinput)
     allrows += literalmissedrows
 
+    # breakpoint()
     wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
     wb.close()
 

@@ -832,7 +832,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         showtree(thetree, text='thetree before deletion:')
 
     nodes2deleteintbegins = [int(b) for b in nodes2deletebegins]
-    thetree = deletewordnodes(thetree, nodes2deleteintbegins)
+    thetree = deletewordnodes(thetree, nodes2deleteintbegins, wordsonly=True)
 
     if debug:
         showtree(thetree, text='thetree after deletion:')

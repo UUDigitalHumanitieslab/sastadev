@@ -57,7 +57,7 @@ commaspace = ', '
 
 
 def getallcomments(dataset, sample):
-    datasetpath = os.path.join(settings.SD_DIR, settings.DATAROOT, dataset)
+    datasetpath = os.path.join(settings.DATAROOT, dataset)
     intreebankspath = os.path.join(datasetpath, intreebanksfolder)
     filename = os.path.join(intreebankspath, f'{sample}.xml')
     permdatadict = dict()
@@ -96,8 +96,27 @@ def getallcomments(dataset, sample):
 
     return permdatadict
 
+def mergerows(row1, row2):
+    newrow = []
+    overwritten = []
+    for i, eltuple in enumerate(zip(row1, row2)):
+        el1, el2 = eltuple
+        if el1.lower() == el2.lower():
+            newel = el2
+        elif el2 == '':
+            newel = el1
+        elif el1 == '':
+            newel = el2
+        else:
+            newel = el2
+            overwritten.append(i)
+        newrow.append(newel)
+    return newrow, overwritten
+
 def updatepermdict(fullname, permdict, sample=None, permfile=False):
     header, data = getxlsxdata(fullname)
+     # if data == []:
+     #    settings.LOGGER.warning(f'No data found in {fullname}')
     colcount = permsilvercolcount if permfile else checkfilecolcount
     colsok = checkpermformat(header, data, colcount, strict=False)
     silverfulldatadict = silverdata2dict(data, sample=sample, permfile=permfile)
@@ -106,9 +125,11 @@ def updatepermdict(fullname, permdict, sample=None, permfile=False):
     for key in silverfulldatadict:
         if key not in permdict:
             permdict[key] = silverfulldatadict[key]
-        elif not rowsequal(silverfulldatadict[key], permdict[key]):
-            settings.LOGGER.warning('Key: {} Value:\n ({}) \noverwritten by value:\n {};\n File: {}'.format(key, permdict[key], silverfulldatadict[key], fullname))
-
+        elif key in permdict:
+            newval, overwritten = mergerows(permdict[key], silverfulldatadict[key])
+            for i in overwritten:
+                settings.LOGGER.warning(f'Key: {key}; usercol{i+1} value:\n ({silverfulldatadict[key][i]}) \noverwritten by value:\n {permdict[key][i]};\n File: {fullname}' )
+            permdict[key] = newval
     return permdict, header
 
 def rowsequal(row1, row2, casesensitive=False):

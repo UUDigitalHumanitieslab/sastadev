@@ -946,11 +946,21 @@ def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[T
     return newtokenmds
 
 
+def pfauxinnodes(tokennodes: List[SynTree]) -> bool:
+    for tokennode in tokennodes:
+        tokennodelemma = getattval(tokennode, 'lemma')
+        if tokennodelemma in ['hebben', 'zijn']:
+            return True
+    return False
+
+
+
 def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int,
                            tree: SynTree, uttid: UttId) -> List[TokenMD]:
     token = tokenmd.token
     beginmetadata = tokenmd.metadata
     newtokenmds: List[TokenMD] = []
+    tokennodes = getnodeyield(tree)
 
     if token.skip:
         return newtokenmds
@@ -1023,6 +1033,18 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         name='Informal pronunciation', value='Initial g replaced by s', cat='Pronunciation',
                                         backplacement=bpl_word)
 
+    # wrong past participle  maakt -> gemaakt
+    thetokennode = tokennodes[tokenctr]
+    thetokennodept = getattval(thetokennode, 'pt')
+    thetokennodewvorm = getattval(thetokennode, 'wvorm')
+    if thetokennodept == 'ww' and thetokennodewvorm != 'vd' and \
+            known_word(f'ge{token.word}') and pfauxinnodes(tokennodes):
+        newwords = [f'ge{token.word}']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Morphological Error', value='Missing ge prefix', cat='Morphology',
+                                        backplacement=bpl_word)
+
+
     moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%)]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
     if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != [] and (
@@ -1049,10 +1071,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Wrong pronunciation', value='Unstressed syllable drop', cat='Pronunciation',
                                         backplacement=bpl_word, penalty=5)
-        newwords = ['deed']
-        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-                                        name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
-                                        backplacement=bpl_word)
+
+
 
 
     # e or schwa -> een if followed by a singular noun
