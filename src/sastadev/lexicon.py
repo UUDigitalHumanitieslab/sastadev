@@ -114,6 +114,13 @@ def pvinfl2dcoi(word: str, infl: CELEX_INFL, lemma: Lemma) -> Optional[DCOITuple
     return result
 
 
+def isa_vd(word) -> bool:
+    return celexlexicon.isa_vd(word)
+
+def isa_inf(word) -> bool:
+    return celexlexicon.isa_inf(word)
+
+
 def getwordposinfo(word: str, pos: str) -> List[WordInfo]:
     '''
     yields the list of WordInfo for word str with part of speech code pos by looking it up in the lexicon in use

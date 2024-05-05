@@ -220,7 +220,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
     innereplacements + \
     innureplacements
 
-
+basicreplacementpairs = {(tpl[0], tpl[1]) for tpl in basicreplacementlist }
 
 
 #: The dictionary *basicreplacements* maps a word with deviant orthography to a list of

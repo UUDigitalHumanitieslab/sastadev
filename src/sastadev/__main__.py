@@ -140,6 +140,7 @@ import os
 import re
 import sys
 import copy
+import time
 
 from collections import Counter, defaultdict
 from optparse import OptionParser
@@ -189,10 +190,14 @@ from sastadev.treebankfunctions import (find1, getattval, getnodeendmap, getutti
                                         getyield, showtree)
 from sastadev.xlsx import mkworkbook
 
+
+start_time = time.time()
+
 listDir = False
 if listDir:
     print(dir())
     exit(0)
+
 
 tarsp = 'tarsp'
 stap = 'stap'
@@ -1273,7 +1278,9 @@ def main():
     allrows += literalmissedrows
 
     # breakpoint()
-    wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9))
+    platinumcheck_column_widths = {'F:F': 9, 'G:G': 8.11, 'K:K': 6.44, 'L:L': 5.44, 'M:M': 26, 'N:N': 26, 'O:O': 26 }
+    wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9),
+                    column_widths=platinumcheck_column_widths)
     wb.close()
 
     writecsv(allrows, platinumcheckfilename, header=pcheaders[0])
@@ -1484,6 +1491,11 @@ def main():
         definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
     print('Undefined queries:', undefinedqueries)
     settings.LOGGER.info("Done!")
+    end_time = time.time()
+    duration = end_time - start_time
+    timing_message = f'Duration: {duration:.2f} seconds'
+    print(timing_message)
+    settings.LOGGER.info(timing_message)
 
 
 if __name__ == '__main__':

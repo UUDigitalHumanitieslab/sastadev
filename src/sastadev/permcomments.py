@@ -8,6 +8,8 @@ from sastadev.counterfunctions import counter2liststr
 from sastadev.xlsx import  getxlsxdata, mkworkbook
 from sastadev.filefunctions import savecopy
 
+commentdelsym = '!'
+
 qid = 'qid'
 uttid = 'uttid'
 pos = 'pos'
@@ -98,20 +100,18 @@ def getallcomments(dataset, sample):
 
 def mergerows(row1, row2):
     newrow = []
-    overwritten = []
     for i, eltuple in enumerate(zip(row1, row2)):
         el1, el2 = eltuple
         if el1.lower() == el2.lower():
             newel = el2
-        elif el2 == '':
+        elif el2 == '' or el2.startswith(commentdelsym):
             newel = el1
-        elif el1 == '':
+        elif el1 == '' or el1.startswith(commentdelsym):
             newel = el2
         else:
-            newel = el2
-            overwritten.append(i)
+            newel = f'{el1}; {el2}'
         newrow.append(newel)
-    return newrow, overwritten
+    return newrow
 
 def updatepermdict(fullname, permdict, sample=None, permfile=False):
     header, data = getxlsxdata(fullname)
@@ -126,9 +126,9 @@ def updatepermdict(fullname, permdict, sample=None, permfile=False):
         if key not in permdict:
             permdict[key] = silverfulldatadict[key]
         elif key in permdict:
-            newval, overwritten = mergerows(permdict[key], silverfulldatadict[key])
-            for i in overwritten:
-                settings.LOGGER.warning(f'Key: {key}; usercol{i+1} value:\n ({silverfulldatadict[key][i]}) \noverwritten by value:\n {permdict[key][i]};\n File: {fullname}' )
+            newval = mergerows(permdict[key], silverfulldatadict[key])
+            # for i in overwritten:
+            #     settings.LOGGER.warning(f'Key: {key}; usercol{i+1} value:\n ({silverfulldatadict[key][i]}) \noverwritten by value:\n {permdict[key][i]};\n File: {fullname}' )
             permdict[key] = newval
     return permdict, header
 

@@ -8,7 +8,7 @@ import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sastadev.alpino import getdehetwordinfo
-from sastadev.basicreplacements import (basicexpansions, basicreplacements,
+from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements,
                                         getdisambiguationdict)
 from sastadev.cleanCHILDEStokens import cleantokens, cleantext
 from sastadev.conf import settings
@@ -20,9 +20,10 @@ from sastadev.dedup import (cleanwordofnort, find_duplicates2,
 from sastadev.deregularise import correctinflection
 from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
                                  ngram10, ngram11, ngram16, ngram17)
+from sastadev.history import childescorrections, childescorrectionsexceptions
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
-                              informlexicon, isa_namepart, known_word,
+                              informlexicon, isa_namepart, isa_inf, isa_vd, known_word,
                               tswnouns, wordsunknowntoalpinolexicondict)
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl_none, bpl_word,
@@ -49,6 +50,10 @@ MetaCondition = Callable[[Meta], bool]
 
 SASTA = 'SASTA'
 
+tarsp = 'tarsp'
+stap = 'stap'
+asta = 'asta'
+
 hyphen = '-'
 repetition = 'Repetition'
 
@@ -68,7 +73,7 @@ disambiguationdict = getdisambiguationdict()
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
 #: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
 #: therefore have to be excluded from determiner replacement.
-wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee']
+wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee', 'wat', 'alles', 'niet']
 
 #: The constant *e2een_excluded_nouns* contains words that lead to incorrect
 #: replacement of e or schwa  and
@@ -112,6 +117,14 @@ gaatiere = re.compile(gaatiepattern)
 gaattiepattern = r'^.*' + anychars(vowels) + 'ttie$'
 gaattiere = re.compile(gaattiepattern)
 neutersgnoun = 'boekje'  # select here an unambiguous neuter noun
+
+
+
+def isaninftoken(token: Optional[Token]) -> bool:
+    if token is None:
+        return False
+    result = isa_inf(token.word)
+    return result
 
 
 def skiptokens(tokenlist: List[Token], skiptokenlist: List[Token]) -> List[Token]:
@@ -656,9 +669,9 @@ def OLDgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     tokenposlist = []
     newmd = uttmd.metadata
     for tokenctr, token in enumerate(uttmd.tokens):
-        if token.word.lower() in basicexpansions:
+        if token.word in basicexpansions:
             expansionfound = True
-            for (rlist, c, n, v) in basicexpansions[token.word.lower()]:
+            for (rlist, c, n, v) in basicexpansions[token.word]:
                 rlisttokenctr = 0
                 for rlisttokenctr, rw in enumerate(rlist):
                     if rlisttokenctr == 0:
@@ -692,7 +705,7 @@ def OLDgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
 
 
 def getsingleitemexpansions(token: Token, intokenposlist) -> List[Tuple[TokenListMD, List[int]]]:
-    lcword = token.word.lower()
+    lcword = token.word
     outtokenposlist = copy.copy(intokenposlist)
     if lcword in basicexpansions:
         results = []
@@ -933,7 +946,7 @@ def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[T
 
     '''
     # initial s -> z, f -> v
-    if not known_word(token.word.lower()) or token.word.lower() in specialdevoicingwords:
+    if not known_word(token.word) or token.word in specialdevoicingwords:
         if token.word[0] == voiceless:
             newword = voiced + token.word[1:]
             if known_word(newword):
@@ -953,6 +966,15 @@ def pfauxinnodes(tokennodes: List[SynTree]) -> bool:
             return True
     return False
 
+def adaptpenalty(wrong: str, correct: str, p: Penalty) -> Penalty:
+    cc = childescorrections[wrong]
+    for hc in cc:
+        if hc.correction == correct:
+            sumfrq = sum([hc.frequency for hc in cc])
+            relfrq = hc.frequency / sumfrq
+            penalty = max(1, int(defaultpenalty * (1 - relfrq)))
+            return penalty
+    return p
 
 
 def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int,
@@ -988,23 +1010,15 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # basic replacements replace as by als, isse by is
     # here come the replacements
-    if token.word.lower() in basicreplacements:
-        for (r, c, n, v, p) in basicreplacements[token.word.lower()]:
+    if token.word in basicreplacements:
+        for (r, c, n, v, p) in basicreplacements[token.word]:
+            newpenalty = adaptpenalty(token.word, r, p)
             newwords = [r]
             newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-                                            name=n, value=v, cat=c, backplacement=bpl_word, penalty=p)
-    # next replaced by conditions in basicreplacements.py
-    # if token.word.lower() in {'wel', 'niet'}:
-    #     beginval = str(token.pos)
-    #     wordnode = find1(tree, f'.//node[@pt="ww" and @begin="{beginval}"]')
-    #     if wordnode is not None:
-    #         newwords = ['ietsjes']
-    #         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-    #                                         name='Disambiguation', value='Avoid unknown reading',
-    #                                         cat='Lexicon', backplacement=bpl_wordlemma)
+                                            name=n, value=v, cat=c, backplacement=bpl_word, penalty=newpenalty)
 
     # final r realized as w weew, ew
-    if not known_word(token.word) and token.word.lower().endswith('w') and known_word(f'{token.word[:-1]}r'):
+    if not known_word(token.word) and token.word.endswith('w') and known_word(f'{token.word[:-1]}r'):
         newwords = [f'{token.word[:-1]}r']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final r -> w',
@@ -1012,14 +1026,14 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         backplacement=bpl_word)
 
     # wrong past participle emaakt -> gemaakt
-    if not known_word(token.word) and token.word.lower().startswith('e') and known_word(f'g{token.word}'):
+    if not known_word(token.word) and token.word.startswith('e') and known_word(f'g{token.word}'):
         newwords = [f'g{token.word}']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Initial g dropped', cat='Pronunciation',
                                         backplacement=bpl_word)
 
     # wrong transcription of 's + e-participle past participle  semaakt -> 's emaakt -> is gemaakt
-    if not known_word(token.word) and token.word.lower().startswith('se') and known_word(f'g{token.word[1:]}'):
+    if not known_word(token.word) and token.word.startswith('se') and known_word(f'g{token.word[1:]}'):
         newwords = [f"is g{token.word[1:]}"]
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Initial g dropped', cat='Pronunciation',
@@ -1027,35 +1041,46 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
 
     # wrong past participle  semaakt -> gemaakt
-    if not known_word(token.word) and token.word.lower().startswith('se') and known_word(f'g{token.word[1:]}'):
+    if not known_word(token.word) and token.word.startswith('se') and known_word(f'g{token.word[1:]}'):
         newwords = [f'g{token.word[1:]}']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Initial g replaced by s', cat='Pronunciation',
                                         backplacement=bpl_word)
 
     # wrong past participle  maakt -> gemaakt
-    thetokennode = tokennodes[tokenctr]
-    thetokennodept = getattval(thetokennode, 'pt')
-    thetokennodewvorm = getattval(thetokennode, 'wvorm')
-    if thetokennodept == 'ww' and thetokennodewvorm != 'vd' and \
-            known_word(f'ge{token.word}') and pfauxinnodes(tokennodes):
-        newwords = [f'ge{token.word}']
-        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-                                        name='Morphological Error', value='Missing ge prefix', cat='Morphology',
-                                        backplacement=bpl_word)
+    if 0 <= tokenctr < len(tokennodes):
+        prevtoken = tokens[tokenctr - 1] if tokenctr > 0 else None
+        nexttoken = tokens[tokenctr + 1] if tokenctr < len(tokens) - 1 else None
+        thetokennode = tokennodes[tokenctr]
+        thetokennodept = getattval(thetokennode, 'pt')
+        thetokennodewvorm = getattval(thetokennode, 'wvorm')
+        if thetokennodept == 'ww' and thetokennodewvorm != 'vd' and \
+                isa_vd(f'ge{token.word}') and \
+                pfauxinnodes(tokennodes[:tokenctr]) and \
+                not isaninftoken(prevtoken) and \
+                not isaninftoken(nexttoken):
+            newwords = [f'ge{token.word}']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name='Morphological Error', value='Missing ge prefix', cat='Morphology',
+                                            backplacement=bpl_word)
+    else:
+        tokennodestr = space.join([getattval(n, 'word') for n in tokennodes])
+        tokenstr = space.join([token.word for token in tokens])
+        settings.LOGGER.error(f'tokenctr has value ({tokenctr}) out of range 0..{len(tokennodes)}\ntokennodes: {tokennodestr}\n tokens:    {tokenstr}')
+
 
 
     moemoetxpath = './/node[@lemma="moe" and @pt!="n" and not(%onlywordinutt%)]'
     expanded_moemoetxpath = expandmacros(moemoetxpath)
-    if token.word.lower() == 'moe' and tree.xpath(expanded_moemoetxpath) != [] and (
-            tokenctr == 0 or tokens[tokenctr - 1].word.lower() != 'beetje'):
+    if token.word == 'moe' and tree.xpath(expanded_moemoetxpath) != [] and (
+            tokenctr == 0 or tokens[tokenctr - 1].word != 'beetje'):
         newwords = ['moet']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
 
     # dee -> deze of deed
-    if token.word.lower() == 'dee':
+    if token.word == 'dee':
         newwords = ['deze']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Wrong pronunciation', value='Coda reduction', cat='Pronunciation',
@@ -1066,7 +1091,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         backplacement=bpl_word)
 
     # beurt -> gebeurt
-    if token.word.lower() == 'beurt':
+    if token.word == 'beurt':
         newwords = ['gebeurt']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Wrong pronunciation', value='Unstressed syllable drop', cat='Pronunciation',
@@ -1077,7 +1102,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # e or schwa -> een if followed by a singular noun
     nexttoken = tokens[tokenctr+1] if tokenctr < len(tokens) - 1 else None
-    if token.word.lower() in ['e', 'ə'] and isnounsg(nexttoken) and token.word.lower() not in e2een_excluded_nouns:
+    if token.word in ['e', 'ə'] and isnounsg(nexttoken) and token.word not in e2een_excluded_nouns:
         newwords = ['een']
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Wrong pronunciation', value='Final n drop', cat='Pronunciation',
@@ -1087,8 +1112,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
 
     # words unknown to Alpino e.g *gymmen* is replaced by *trainen*
-    if token.word.lower() in wordsunknowntoalpinolexicondict:
-        newwords = [wordsunknowntoalpinolexicondict[token.word.lower()]]
+    if token.word in wordsunknowntoalpinolexicondict:
+        newwords = [wordsunknowntoalpinolexicondict[token.word]]
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                     name='Word unknown to Alpino', value='Unknown word', cat='lexicon',
                                     backplacement=bpl_wordlemma)
@@ -1100,14 +1125,36 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # find childes replacements, preferably with vocabulary from the same age
 
-    # gaatie
+    if method in [tarsp, stap] and not known_word(token.word) and token.word in childescorrections and \
+            token.word not in childescorrectionsexceptions:
+        cc = childescorrections[token.word]
+        sumfrq = sum([hc.frequency for hc in  cc])
+        for hc in cc:
+            relfrq = hc.frequency / sumfrq
+            penalty = max(1, int(defaultpenalty * (1 - relfrq)))
+            newwords = [hc.correction]
+            if (token.word, hc.correction) not in basicreplacementpairs:
+                if hc.correctiontype == 'noncompletion':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Noncompletion', value='', cat='Pronunciation',
+                                                    backplacement=bpl_word, penalty=penalty)
+                elif hc.correctiontype == 'replacement':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Replacement', value='', cat='TBD',
+                                                    backplacement=bpl_word, penalty=penalty)
+                elif hc.correctiontype == 'explanation':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Replacement', value='', cat='TBD',
+                                                    backplacement=bpl_word, penalty=penalty)
+
+                # gaatie
     if not known_word(token.word):
         newwords = gaatie(token.word)
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Word combination', value='Cliticisation', cat='Pronunciation',
                                         backplacement=bpl_none)
 
-    # extend to gaat-ie
+    # extend to gaat-ie -- done
 
     # dediacritisize
 
@@ -1130,7 +1177,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     # me ze (grote/oudere/ kleine) moeder /vader/zusje/ broer -> mijn me s done by Alpino, here we do ze
     # next xpath does not work because it must be preceded by a . !!
     # zexpathmodel = """//node[@word="ze" and @begin={begin} and (@rel="--"  or (@rel="obj1" and parent::node[@cat="pp"])) and @end = ancestor::node[@cat="top"]/descendant::node[@pt="n"]/@begin]"""
-    if token.word.lower() == 'ze' or token.word.lower() == 'su':
+    if token.word == 'ze' or token.word == 'su':
         # find the node that corresponds to this token in the tree
         # zexpath = zexpathmodel.format(begin=str(tokenctr))
         # zenode = find1(tree, zexpath)
@@ -1142,7 +1189,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         zeparent = zenode.getparent()
         zeparentcat = getattval(zeparent, 'cat')
         # nextpt = getattval(nextnode, 'pt')
-        nexttokeninfo = getwordinfo(nexttoken.word.lower())
+        nexttokeninfo = getwordinfo(nexttoken.word)
         nexttokenpts = {pt for (pt, _, _, _) in nexttokeninfo}
         if (zerel == '--' or zerel == 'mwp' or (zerel == 'obj1' and zeparentcat == 'pp')) and 'n' in nexttokenpts:
             newword = "z'n"
@@ -1153,7 +1200,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     # e-> e(n)
     enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
     if not known_word(
-            token.word) and token.word.lower() not in basicreplacements and token.word.lower() not in enexceptions:
+            token.word) and token.word not in basicreplacements and token.word not in enexceptions:
         if endsinschwa(token.word) and not monosyllabic(token.word):
             newword = token.word + 'n'
             if known_word(newword):
@@ -1168,8 +1215,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # replaceambiguous words with one reading not known by the child by a nonambiguous word with the same properties
     if method in {'tarsp', 'stap'}:
-        if token.word.lower() in disambiguationdict:
-            cond, newword = disambiguationdict[token.word.lower()]
+        if token.word in disambiguationdict:
+            cond, newword = disambiguationdict[token.word]
             if cond(token, tree):
                 newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
                                                 name='Disambiguation', value='Avoid unknown reading',

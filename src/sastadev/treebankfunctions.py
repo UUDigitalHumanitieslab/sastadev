@@ -125,6 +125,8 @@ countcompoundxpath = 'count(.//node[contains(@lemma, "_")])'
 monthnames = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus',
               'september', 'oktober', 'november', 'december']
 
+origuttxpath = './/meta[@name="origutt"]/@value'
+
 
 def adjacent(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     """
@@ -1961,6 +1963,15 @@ def olddeletewordnodes2(tree: SynTree, begins: List[Position]):
                         theparent.attrib['begin'] = minbegin
                         theparent.attrib['end'] = maxend
         return tree
+
+
+def getorigutt(stree: SynTree) -> Optional[str]:
+    origuttlist = stree.xpath(origuttxpath)
+    if origuttlist == []:
+        origutt = None
+    else:
+        origutt = origuttlist[0]
+    return origutt
 
 
 def treeinflate(stree: SynTree, start: int = 10, inc: int = 10) -> None:

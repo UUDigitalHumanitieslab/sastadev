@@ -40,7 +40,7 @@ def writetable(tabel, ws, startrow=0, startcol=0, rhformat=None, chformat=None, 
         curcol = startcol
 
 
-def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=None, formats=[]):
+def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=None, formats=[], column_widths={}):
     workbook = xlsxwriter.Workbook(outfullname, {"strings_to_numbers": True})
     bold = workbook.add_format({'bold': True})
 
@@ -69,6 +69,10 @@ def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=N
             colwidth = len(cval) if len(cval) > defaultcolwidth else defaultcolwidth
             worksheet1.set_column(colctr, colctr, colwidth)
             colctr += 1
+
+    #column widths if specified
+    for colrange, width in column_widths.items():
+        worksheet1.set_column(colrange, width)
 
     rowctr = 0
     for header in headers:

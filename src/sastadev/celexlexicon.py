@@ -183,6 +183,25 @@ def celexpv2dcoi(word: str, infl: str, lemma: str) -> Dict[str, str]:
     return results
 
 
+def isa_vd(word: str) -> bool:
+    if word in dmwdict:
+        wordkeys = dmwdict[word]
+        for wordkey in wordkeys:
+            props = dmwkeydict[wordkey]
+            if props[4] == 'pv':
+                return True
+    return False
+
+def isa_inf(word: str) -> bool:
+    if word in dmwdict:
+        wordkeys = dmwdict[word]
+        for wordkey in wordkeys:
+            props = dmwkeydict[wordkey]
+            if props[4] == 'i':
+                return True
+    return False
+
+
 def incelexdmw(str: str) -> bool:
     result = str in dmwdict
     return result

@@ -27,7 +27,8 @@ from sastadev.sastatoken import inflate, deflate, tokeninflate, insertinflate
 from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
-                                        getcompoundcount, getneighbourwordnode, getnodeyield, getptsubclass,
+                                        getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
+                                        getptsubclass,
                                         getsentid, getsentence, gettokposlist, getxsid,
                                         getyield, myfind, showflatxml,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
@@ -40,10 +41,10 @@ corr0, corr1, corrn = '0', '1', 'n'
 validcorroptions = [corr0, corr1, corrn]
 
 space = ' '
-origuttxpath = './/meta[@name="origutt"]/@value'
 uttidxpath = './/meta[@name="uttid"]/@value'
 dezebwxpath = './/node[@pt="bw" and @lemma="deze"]'
-noun1cxpath = './/node[@pt="n" and string-length(@word)=1]'
+# noun1cxpath = './/node[@pt="n" and string-length(@word)=1]'
+noun1cxpath = './/node[string-length(@word)=1]'
 metadataxpath = './/metadata'
 dezeAVntemplate = '<node begin="{begin}" buiging="met-e" end="{end}" frame="determiner(de,nwh,nmod,pro,nparg)" ' \
                   'id="{id}" infl="de" lcat="np" lemma="deze" naamval="stan" npagr="rest" pdtype="det" pos="det" ' \
@@ -938,13 +939,6 @@ def oldgetuttid(stree: SynTree) -> UttId:
     return uttid
 
 
-def getorigutt(stree: SynTree) -> Optional[str]:
-    origuttlist = stree.xpath(origuttxpath)
-    if origuttlist == []:
-        origutt = None
-    else:
-        origutt = origuttlist[0]
-    return origutt
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
@@ -1053,7 +1047,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
         badcatcount = len(
-            [node for node in nt.xpath('.//node[@cat and (@cat="du")]')])
+            [node for node in nt.xpath('.//node[@cat and (@cat="du") and node[@rel="dp"]]')])
         hyphencount = len(
             [node for node in nt.xpath('.//node[contains(@word, "-")]')])
         basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
