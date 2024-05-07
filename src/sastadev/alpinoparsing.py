@@ -11,7 +11,7 @@ The *alpinoparsing* module provides functions for:
 
 '''
 
-import logging
+import sastadev.conf
 import re
 import urllib.parse
 import urllib.request
@@ -74,10 +74,10 @@ def parse(origsent: str, escape: bool = True):
     try:
         r1 = urllib.request.urlopen(fullurl)
     except urllib.request.HTTPError as e:
-        logging.error('{}: parsing <{}> failed'.format(e, sent))
+        sastadev.conf.settings.LOGGER.error('{}: parsing <{}> failed'.format(e, sent))
         return None
     except urllib.error.URLError as e:
-        logging.error('{}: parsing <{}> failed'.format(e, sent))
+        sastadev.conf.settings.LOGGER.error('{}: parsing <{}> failed'.format(e, sent))
         return None
     else:
         if 300 > r1.status >= 200:
@@ -86,7 +86,7 @@ def parse(origsent: str, escape: bool = True):
             stree = etree.fromstring(streebytes)
             return stree
         else:
-            logging.error('parsing failed:', r1.status, r1.reason, sent)
+            sastadev.conf.settings.LOGGER.error('parsing failed:', r1.status, r1.reason, sent)
             return None
 
 #def previewurl(stree: SynTree) -> URL:

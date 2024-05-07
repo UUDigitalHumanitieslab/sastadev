@@ -85,7 +85,7 @@ def gettokensplusxmeta(tree: SynTree) -> Tuple[List[Token], List[Meta]]:
     if origutt is None:
         origutt = getsentence(tree)
         settings.LOGGER.error(f'No origutt for {getyieldstr(tree)}')
-        etree.dump(tree)
+        # etree.dump(tree)
     if origutt is None:
         origutt = getyieldstr(tree)
     if origutt is None:

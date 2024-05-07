@@ -1,16 +1,18 @@
 from collections import defaultdict, Counter
+import copy
 from dataclasses import dataclass
 from sastadev.basicreplacements import innereplacements, innureplacements
 from sastadev.CHAT_Annotation import CHAT_explanation, CHAT_replacement, CHAT_wordnoncompletion
 from sastadev.cleanCHILDEStokens import cleantext
-from sastadev.readcsv import readcsv
+from sastadev.readcsv import readcsv, writecsv
 from sastadev.conf import settings
 from sastadev.sastatypes import TreeBank
 from sastadev.treebankfunctions import getorigutt, getyield, getxselseuttid
+from typing import Dict, List, Tuple
 import os
 
 childescorrectionsfullname = os.path.join(settings.SD_DIR, 'data', 'childescorrections', 'childescorrections.txt')
-
+samplecorrectionsfullname = os.path.join(settings.SD_DIR, 'data', 'childescorrections', 'samplecorrections.txt')
 @dataclass
 class HistoryCorrection:
     wrong: str
@@ -18,7 +20,7 @@ class HistoryCorrection:
     correctiontype: str
     frequency: int
 
-
+HistoryCorrectionDict = Dict[str, List[HistoryCorrection]]
 space = ' '
 eps = ''
 
@@ -64,7 +66,7 @@ def gathercorrections(treebank: TreeBank) -> defaultdict:
     return resultdict
 
 
-def getchildescorrections(filename) -> defaultdict:
+def getcorrections(filename) -> defaultdict:
     resultdict = defaultdict(list)
     idata = readcsv(filename, header=False)
     for i, row in idata:
@@ -74,7 +76,55 @@ def getchildescorrections(filename) -> defaultdict:
 
     return resultdict
 
-childescorrections = getchildescorrections(childescorrectionsfullname)
-childescorrectionsexceptions = ['nie', 'moe', 'dee', 'ie', 'su', 'an', 'tan'] + \
+
+def putcorrections(corrections, filename):
+    data = []
+    for wrong in corrections:
+        hcs = corrections[wrong]
+        for hc in hcs:
+            row = [wrong, hc.correction, hc.correctiontype, hc.frequency]
+            data.append(row)
+    writecsv(data, filename)
+
+def remove(lst, togo) -> list:
+    newlst = []
+    for el in lst:
+        if el != togo:
+            newlst.append(el)
+    return newlst
+
+def mergecorrections(corrections1: HistoryCorrectionDict, corrections2: HistoryCorrectionDict) \
+        -> HistoryCorrectionDict:
+    largest = corrections1 if len(corrections1) >= len(corrections2) else corrections2
+    smallest = corrections1 if len(corrections1) < len(corrections2) else corrections2
+    resultdict = copy.deepcopy(largest)
+    for wrd in smallest:
+        if wrd not in resultdict:
+            resultdict[wrd] = smallest[wrd]
+        else:
+            hcs1 = smallest[wrd]
+            hcs2 = resultdict[wrd]
+            newhcs = []
+            hc1stodo = [hc for hc in hcs1]
+            hc2stodo = [hc for hc in hcs2]
+            for hc1 in hcs1:
+                for hc2 in hcs2:
+                    if hc1 in hc1stodo and hc2 in hc2stodo and \
+                            hc1.correction == hc2.correction and hc1.correctiontype == hc2.correctiontype:
+                        newhc = HistoryCorrection(hc1.wrong, hc1.correction, hc1.correctiontype,
+                                                  hc1.frequency + hc2.frequency)
+                        newhcs.append(newhc)
+                        hc1stodo = remove(hc1stodo, hc1)
+                        hc2stodo = remove(hc2stodo, hc2)
+            newhcs = newhcs + hc1stodo + hc2stodo
+            resultdict[wrd] = newhcs
+    return resultdict
+
+childescorrections = getcorrections(childescorrectionsfullname)
+childescorrectionsexceptions = ['nie', 'moe', 'dee', 'ie', 'su', 'an', 'tan', 'dees', 'tu'] + \
                                [tpl[0] for tpl in innereplacements] + \
                                [tpl[0] for tpl in innureplacements]
+
+samplecorrections = getcorrections(samplecorrectionsfullname)
+
+junk = 0

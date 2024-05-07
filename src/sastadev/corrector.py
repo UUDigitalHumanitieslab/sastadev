@@ -20,7 +20,8 @@ from sastadev.dedup import (cleanwordofnort, find_duplicates2,
 from sastadev.deregularise import correctinflection
 from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
                                  ngram10, ngram11, ngram16, ngram17)
-from sastadev.history import childescorrections, childescorrectionsexceptions
+from sastadev.history import (childescorrections, childescorrectionsexceptions, mergecorrections, putcorrections,
+                              samplecorrections,  samplecorrectionsfullname)
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, isa_inf, isa_vd, known_word,
@@ -469,7 +470,7 @@ def combinesorted(toklist1: List[Token], toklist2: List[Token]) -> List[Token]:
 
 
 def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[SynTree] = None,
-                   interactive: bool = False) -> List[Correction]:
+                   interactive: bool = False, thissamplecorrections={}) -> List[Correction]:
     allmetadata = []
     # rawtokens = sasta_tokenize(utt)
     wordlist = tokenlist2stringlist(rawtokens)
@@ -499,7 +500,7 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
     allmetadata += metadata
 
     # alternativemds = getalternatives(reducedtokensmd, tree, 0)
-    alternativemds = getalternatives(reducedtokensmd, method, tree, '0')
+    alternativemds = getalternatives(reducedtokensmd, method, tree, '0', thissamplecorrections=thissamplecorrections)
     # unreducedalternativesmd = [TokenListMD(combinesorted(alternativemd.tokens, allremovedtokens), alternativemd.metadata) for alternativemd in alternativemds]
 
     intermediateresults = alternativemds if alternativemds != [] else [tokensmd]
@@ -510,11 +511,13 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
         correction = ctmd.tokens
         themetadata = allmetadata + ctmd.metadata
         results.append((correction, themetadata))
+
+
     return results
 
 
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
-def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId):
+def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId, thissamplecorrections={}):
     newtokensmd = explanationasreplacement(origtokensmd, tree)
     if newtokensmd is not None:
         tokensmd = newtokensmd
@@ -531,7 +534,7 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
     for token in tokens:
         tokenmd = TokenMD(token, allmetadata)
         alternativetokenmds[tokenctr] = getalternativetokenmds(
-            tokenmd, method, tokens, tokenctr, tree, uttid)
+            tokenmd, method, tokens, tokenctr, tree, uttid, thissamplecorrections=thissamplecorrections)
         validalternativetokenmds[tokenctr] = getvalidalternativetokenmds(
             tokenmd, alternativetokenmds[tokenctr])
         tokenctr += 1
@@ -978,7 +981,7 @@ def adaptpenalty(wrong: str, correct: str, p: Penalty) -> Penalty:
 
 
 def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int,
-                           tree: SynTree, uttid: UttId) -> List[TokenMD]:
+                           tree: SynTree, uttid: UttId, thissamplecorrections={}) -> List[TokenMD]:
     token = tokenmd.token
     beginmetadata = tokenmd.metadata
     newtokenmds: List[TokenMD] = []
@@ -988,11 +991,12 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         return newtokenmds
 
     # decapitalize initial token  except when it is a known name
-    if tokenctr == 0 and token.word.istitle() and not isa_namepart(token.word):
-        newword = token.word.lower()
-
-        newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
-                                        name='Character Case', value='Lower case', cat='Orthography')
+    # No do not do this
+    # if tokenctr == 0 and token.word.istitle() and not isa_namepart(token.word):
+    #    newword = token.word.lower()
+    #
+    #    newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+    #                                    name='Character Case', value='Lower case', cat='Orthography')
 
     # dehyphenate
     if not known_word(token.word) and hyphen in token.word:
@@ -1120,14 +1124,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
 
     # find document specific replacements
-
-    # find organisation specific replacements
-
-    # find childes replacements, preferably with vocabulary from the same age
-
-    if method in [tarsp, stap] and not known_word(token.word) and token.word in childescorrections and \
+    if not known_word(token.word) and \
+            token.word in thissamplecorrections and \
             token.word not in childescorrectionsexceptions:
-        cc = childescorrections[token.word]
+        cc = thissamplecorrections[token.word]
         sumfrq = sum([hc.frequency for hc in  cc])
         for hc in cc:
             relfrq = hc.frequency / sumfrq
@@ -1144,7 +1144,62 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                                     backplacement=bpl_word, penalty=penalty)
                 elif hc.correctiontype == 'explanation':
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Explanation', value='', cat='TBD',
+                                                    backplacement=bpl_word, penalty=penalty)
+
+    # find correction from all samples processed so far
+    if method in [tarsp, stap] and \
+        not known_word(token.word) and \
+        token.word in samplecorrections and \
+            token.word not in childescorrectionsexceptions:
+        cc = samplecorrections[token.word]
+        sumfrq = sum([hc.frequency for hc in cc])
+        for hc in cc:
+            relfrq = hc.frequency / sumfrq
+            penalty = max(1, int(defaultpenalty * (1 - relfrq)))
+            newwords = [hc.correction]
+            if (token.word, hc.correction) not in basicreplacementpairs:
+                if hc.correctiontype == 'noncompletion':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Noncompletion', value='', cat='Pronunciation',
+                                                    backplacement=bpl_word, penalty=penalty)
+                elif hc.correctiontype == 'replacement':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name='Replacement', value='', cat='TBD',
+                                                    backplacement=bpl_word, penalty=penalty)
+                elif hc.correctiontype == 'explanation':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Explanation', value='', cat='TBD',
+                                                    backplacement=bpl_word, penalty=penalty)
+
+
+    # merge the corrections from this sampe with the samplecorrections and update the file NOT HERE. moved
+    # mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections )
+    # putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
+    # find organisation specific replacements
+
+    # find childes replacements, preferably with vocabulary from the same age
+
+    if method in [tarsp, stap] and not known_word(token.word) and token.word in childescorrections and \
+            token.word not in childescorrectionsexceptions:
+        cc = childescorrections[token.word]
+        sumfrq = sum([hc.frequency for hc in cc])
+        for hc in cc:
+            relfrq = hc.frequency / sumfrq
+            penalty = max(1, int(defaultpenalty * (1 - relfrq)))
+            newwords = [hc.correction]
+            if (token.word, hc.correction) not in basicreplacementpairs:
+                if hc.correctiontype == 'noncompletion':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Noncompletion', value='', cat='Pronunciation',
+                                                    backplacement=bpl_word, penalty=penalty)
+                elif hc.correctiontype == 'replacement':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Replacement', value='', cat='TBD',
+                                                    backplacement=bpl_word, penalty=penalty)
+                elif hc.correctiontype == 'explanation':
+                    newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                                    name='Explanation', value='', cat='TBD',
                                                     backplacement=bpl_word, penalty=penalty)
 
                 # gaatie

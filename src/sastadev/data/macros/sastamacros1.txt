@@ -130,7 +130,9 @@ old_Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="p
  )
 """
 
-Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
+ahi_sibling = """../node[@rel="vc" and @cat="ahi"]"""
+
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and not(%ahi_sibling%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" or

@@ -11,6 +11,8 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
+from sastadev.history import (gathercorrections, mergecorrections, putcorrections,
+                              samplecorrections, samplecorrectionsfullname)
 from sastadev.lexicon import de, dets, known_word, getwordinfo, nochildwords
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
@@ -314,6 +316,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
     * a list of all original utterances and all alternatives that have been considered
 
     '''
+    thissamplecorrections = gathercorrections(treebank)
     allorandalts: List[Optional[OrigandAlts]] = []
     errordict: ErrorDict = defaultdict(list)
     if corr == corr0:
@@ -328,7 +331,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
             if mustbedone:
                 # to implement
                 sentence = getsentence(stree)
-                newstree, orandalts = correct_stree(stree, method, corr)
+                newstree, orandalts = correct_stree(stree, method, corr, thissamplecorrections)
                 if newstree is not None:
                     errordict = updateerrordict(
                         errordict, uttid, stree, newstree)
@@ -338,6 +341,10 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
                     newtreebank.append(stree)
             else:
                 newtreebank.append(stree)
+
+        # merge the corrections from this sample with the samplecorrections and update the file
+        mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
+        putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
 
         return newtreebank, errordict, allorandalts
 
@@ -497,7 +504,7 @@ def cleantextdone(metadataelement):
     return False
 
 
-def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> Tuple[SynTree, Optional[OrigandAlts]]:
+def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, thissamplecorrections) -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
 
      The function *correct_stree* takes as input:
@@ -505,6 +512,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     * stree: input syntactic structure
     * method:  MethodName (tarsp, asta, stap)
     * corr: CorrectionMode (corr0, corr1, corrn)
+    * thissamplecorrections: Dict[str, HistoryCorrection] with the corrections occurring in this sample
+    (correction= CHAT replacement, single word explanation, or incomplete word)
 
     and returns a tuple consisting of:
 
@@ -623,7 +632,9 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     debug = False
     # (fatstree, text='fattened tree:')
 
-    ctmds: List[Correction] = getcorrections(cleanutttokens, method, fatstree)
+    ctmds: List[Correction] = getcorrections(cleanutttokens, method, fatstree, thissamplecorrections=thissamplecorrections)
+
+
 
     debug = False
     if debug:
