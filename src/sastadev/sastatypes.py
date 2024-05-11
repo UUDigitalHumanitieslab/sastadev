@@ -92,6 +92,7 @@ UttTokenDict: TypeAlias = Dict[UttId, List[Token]]
 UttWordDict: TypeAlias = Dict[UttId, List[str]]
 WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode],
                             Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
+XpathExpression = str
 # moved the following to allresuls.py
 # CoreQueryFunction: TypeAlias = Callable[[SynTree], List[SynTree]]
 # PostQueryFunction: TypeAlias = Callable[[SynTree, allresults.AllResults], List[SynTree]]

@@ -279,31 +279,60 @@ AVn = """(%coreavn% or %avnrel% or %dittedatte%)""""
 
 corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 
-coreB = """( (@pt="bw" or @pt="vz" or @cat="advp" or @cat="pp" or %Rpronoun%) and
-             (@rel="mod" or @rel="predm" or @rel="dp" or @rel="--" or @rel="ld") and
-			 not(%Tarsp_kijkVU%)
+coreB = """( ((@pt="bw" or @pt="vz" or @cat="advp" or @cat="pp" or %Rpronoun%) and
+              (@rel="mod" or @rel="predm" or @rel="dp" or @rel="--" or @rel="ld" or 
+			   @rel="tag" or @rel="nucl" or @rel="predc"  or 
+			   (@pt!="vz" and @rel="svp")
+			  ) or
+			  (@pt="adj" and @buiging="met-s")
+			 )
+			  and
+			 not(%Tarsp_kijkVU%) and 
+			 not((@lemma="nou" or @lemma="zo") and (@rel="tag" or @rel="--") and count(allbxrealwordnodes) > 1) and
+			 not(%ahiaspp%) and
+			 not(@frame="adv_tag")
            )"""
+
+ahiaspp = """(@cat="pp" and node[@rel="hd" and @lemma="aan"] and node[@cat="np" and node[@lemma="het" and @pt="lid"] and node[@rel="hd" and @pt="ww" and @wvorm="inf"]]) """
 
 oldcoreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!="niet"]/@begin ]]) )"""
 
-coreBX = """(@cat and 
+coreBX1 = """(@cat and 
              count(node[%bxrealnode%]) = 2 and 
 			 node[%corebnode%]  and
-			 count(.//node[%bxrealwordnode%]) = count(%allbxrealwordnodes%)
+			 not(node[@naamval="nomin" or @rel="su"]) and
+			 %onlythesearerealwords% and		
+             count(.//node[%corebnode%]) = 1				
+ 
 			)""" 
+
+coreBX2 = """(@cat and 
+             count(node[%bxrealnode%]) = 2 and 
+			 count(node[%corebnode%]) =2  and
+			 not(node[@naamval="nomin" or @rel="su"]) and
+			 %onlythesearerealwords% and		
+             count(.//node[%corebnode%]) = 2				
+			)""" 
+
+coreBX = """(%coreBX1% or %coreBX2%)"""
+
 
 corebnode = """(%coreB% and 
 			      not(%Tarsp_kijkVU%) and  
-				  @lemma!="niet" and 
+				  (not(@lemma) or @lemma!="niet") and 
 				  %corebnodesibling% and
 				  @id != %corebnodesibling%/@id
 				 )"""
 
 corebnodesibling = """../node[not(%clausecat%) and 
-				              @lemma!="niet" and 
+				              (not(@lemma) or @lemma!="niet") and 
 						      count(.//node[@lemma="niet"]) = 0 
 							 ]
 """
+
+ooknogmod = """(@rel="mod" and (@lemma="ook" or @lemma="nog"))"""
+ookXP = """((@cat="np" or @cat="pp") and node[%ooknogmod%] and  count(node) = 2 and not(node[@naamval="nomin"])and %onlythesearerealwords% and count(.//node[%corebnode%]) = 1)"""
+
 
 bxrealnode = """(%bxrealwordnode% or count(.//node[%bxrealwordnode%]) > 0)"""
 
@@ -318,7 +347,9 @@ dlinkvg = """(@pt="vg" and (@rel="dlink" or @rel="--"))"""
 clausalbx1 = """((@cat="smain" or @cat="sv1" or @cat="inf" or @cat="ppart") and 
        node[%Tarsp_B% and @lemma!="niet" and @rel!="svp" and not(%Tarsp_kijkVU%)] and 
        count(node) = 2 and 
-       count(.//node[@word]) = count(%allrealwordnodes%)
+       %onlythesearerealwords% and		
+       count(.//node[%corebnode%]) = 1				
+ 
 )
 """
 
@@ -327,10 +358,12 @@ clausalbx2 = """((@cat="smain" or @cat="sv1") and
                  node[@rel="vc" and
                       node[@rel="hd" and @pt="ww"] and
                       node[%Tarsp_B% and @lemma!="niet" and @rel!="svp"] and 
-                      count(node) = 2
+                      count(node[@word or @cat]) = 2
                      ] and
                  count(node) = 2 and
-                 count(.//node[@word]) = count(%allrealwordnodes%)
+                 %onlythesearerealwords% and		
+                count(.//node[%corebnode%]) = 1				
+ 
      )
 """
 
@@ -351,11 +384,13 @@ old_Tarsp_BX = """((@cat="top" and
 )
 """
 
-Tarsp_BX = """( %coreBX% or
-                %Tarsp_bnonfin% or
+Tarsp_BX = """( (%coreBX% or
+                 %Tarsp_bnonfin% or
 			    %clausalbx1% or
-			    %clausalbx2% 
-              )"""
+			    %clausalbx2% or
+				%ookXP%) and
+                not(%Xneg%) 
+			)"""
 
 Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and @rel="vc" and parent::node[@cat="smain" and count(node)=1] and node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and count(node[%realcomplormod%])=1 )"""
 

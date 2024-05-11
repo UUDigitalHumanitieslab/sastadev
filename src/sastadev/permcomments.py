@@ -7,8 +7,10 @@ from sastadev.constants import (checksuffix, errorsummaryfolder, errorsummarysuf
 from sastadev.counterfunctions import counter2liststr
 from sastadev.xlsx import  getxlsxdata, mkworkbook
 from sastadev.filefunctions import savecopy
+from typing import List
 
 commentdelsym = '!'
+commentsep = ';'
 
 qid = 'qid'
 uttid = 'uttid'
@@ -98,18 +100,56 @@ def getallcomments(dataset, sample):
 
     return permdatadict
 
+def removeduplicates(rawel: str) -> str:
+    rawels = rawel.split(commentsep)
+    els = [rawel.strip() for rawel in rawels]
+    newels = []
+    for el in els:
+        if el not in newels:
+            newels.append(el)
+    result = commentsep.join(newels)
+    return result
+
+
+def removedelsym(coms: List[str]) -> List[str]:
+    newcoms = []
+    for com in coms:
+        if com.startswith(commentdelsym):
+            newcoms.append(com[1:])
+        else:
+            newcoms.append(com)
+    return newcoms
+def smartmerge(com1:str, com2:str) -> str:
+    rawcom1s = com1.split(commentsep)
+    com1s = [rawcom1.strip() for rawcom1 in rawcom1s]
+    rawcom2s = com2.split(commentsep)
+    com2s = [rawcom2.strip() for rawcom2 in rawcom2s]
+    toremove = [com1[1:] for com1 in com1s if com1.startswith(commentdelsym)] + \
+               [com2[1:] for com2 in com2s if com2.startswith(commentdelsym)]
+    com1s = removedelsym(com1s)
+    com2s = removedelsym(com2s)
+    newcoms = [com1 for com1 in com1s if com1 not in toremove]
+    for com in com2s:
+        if com not in newcoms and com not in toremove:
+            newcoms.append(com)
+    result = commentsep.join(newcoms)
+    return result
+
+
+
 def mergerows(row1, row2):
     newrow = []
     for i, eltuple in enumerate(zip(row1, row2)):
-        el1, el2 = eltuple
+        rawel1, rawel2 = eltuple
+        el1, el2 = removeduplicates(rawel1), removeduplicates(rawel2)
         if el1.lower() == el2.lower():
             newel = el2
-        elif el2 == '' or el2.startswith(commentdelsym):
+        elif el2 == '':
             newel = el1
-        elif el1 == '' or el1.startswith(commentdelsym):
+        elif el1 == '':
             newel = el2
         else:
-            newel = f'{el1}; {el2}'
+            newel = smartmerge(el1, el2)
         newrow.append(newel)
     return newrow
 

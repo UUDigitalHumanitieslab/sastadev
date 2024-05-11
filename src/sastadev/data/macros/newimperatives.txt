@@ -107,16 +107,30 @@ wond4 = """(%ynquery% and %realcomplormodnodecount% = 3)"""
 
 wond5plus = """(%ynquery% and %realcomplormodnodecount% >= 4)"""
 
+onlythesearerealwords = """(count(.//node[%bxrealwordnode%]) = count(%allbxrealwordnodes%))"""
+
+
 partofwhquestion = """((@cat="sv1" or @cat="ssub") and @rel="body" and parent::node[@cat="whq" or @cat="whsub" ]) """
 declarative = """(@cat="smain" or (@cat="ssub" and not(%partofwhquestion%)) or (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
 
-Tarsp_OndB = """(%Ond% and  node[%Tarsp_Basic_B%]  and count(node) = 2)"""	
-
+Tarsp_OndB = """(%Ond% and  node[%Tarsp_Basic_B%]  and count(node) = 2 and %onlythesearerealwords% and not(%Tarsp_BX%) and not(%Xneg%)) """
 Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
+coreXneg = """( count(node) = 2 and node[ @lemma!="niet"] and 
+                (node[@lemma="niet" ] or 
+	             node[@cat="advp" and node[@lemma="niet"] ]
+	            )
+			  ) """
 
+nonfinxneg = """(node[@rel="hd" and @pt="ww"] and node[@rel="vc" and %coreXneg%] )"""
+
+Xneg = """(%coreXneg% or
+           %nonfinxneg%
+		  ) and 
+		  %onlythesearerealwords%
+	  """
 
 
 wandonlyw_vc = """(%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) """
@@ -301,8 +315,9 @@ Tarsp_vcw = """
 """
 
 singlecharnoun = """(@pt="n" and string-length(@word) = 1)""" 
+chatcode = """(@word="xxx" or @word="xx" or @word="yyy" or @word="yy") """
 
-realwordnode = """ (@pt!="let" and @pt!="tsw" and not(%Tarsp_kijkVU%) and not(%singlecharnoun%))
+realwordnode = """ (@word and @pt!="let" and (@pt!="tsw" or %tswnoun%) and not(%Tarsp_kijkVU%) and not(%singlecharnoun%) and not(%chatcode%))
 """
 
 horenaux = """(@lemma="horen" and 

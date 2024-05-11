@@ -141,6 +141,7 @@ import re
 import sys
 import copy
 import time
+import json
 
 from collections import Counter, defaultdict
 from optparse import OptionParser
@@ -1136,6 +1137,12 @@ def main():
     allresults, samplesizetuple = sastacore(origtreebank, treebank, annotatedfileresults, scp)
 
     exactresults = allresults.exactresults
+    exactresultsoutput = False
+    if exactresultsoutput:
+        jsonexactresults = {'/'.join(key): value for key, value in exactresults.items()}
+        exactresultsfullname = os.path.join(settings.DATAROOT, dataset, 'exactresults', f'{sample}_exactresults.json')
+        with open(exactresultsfullname, 'w', encoding='utf8') as exactresultsfile:
+            json.dump(jsonexactresults, exactresultsfile)
     allutts = allresults.allutts
     uttcount = allresults.uttcount
     allmatches = allresults.allmatches
