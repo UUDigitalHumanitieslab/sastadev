@@ -162,104 +162,6 @@ def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, allval
     return results
 
 
-def oldget_annotations(infilename: FileName, patterns: Tuple[Pattern, Pattern]) \
-        -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
-    '''
-    Reads the file with name filename in SASTA Annotation Format
-    :param infilename:
-    :param patterns
-    :return: a dictionary  with as  key a tuple (level, item) and as value a list of (uttid, tokenposition) pairs
-    '''
-
-    thedata = defaultdict(list)
-
-    allutts = {}
-
-    # To open Workbook
-    header, data = xlsx.getxlsxdata(infilename)
-
-    levelcol = 1
-    uttidcol = 0
-    stagescol = -1
-    commentscol = -1
-    unalignedcol = -1
-
-    # uttlevel = 'utt'
-
-    uttcount = 0
-
-    for col, val in enumerate(header):
-        if iswordcolumn(val):
-            lastwordcol = col
-            if isfirstwordcolumn(val):
-                firstwordcol = col
-        elif clean(val) in speakerheaders:
-            spkcol = col
-        elif clean(val) in uttidheaders:
-            uttidcol = col
-        elif clean(val) in levelheaders:
-            levelcol = col
-        elif clean(val) in stagesheaders:
-            stagescol = col
-        elif clean(val) in commentsheaders:
-            commentscol = col
-        elif clean(val) in unalignedheaders:
-            unalignedcol = col
-        else:
-            pass  # maybe warn here that an unknow column header has been encountered?
-
-    for row in data:
-        if row[uttidcol] != "":
-            # this might go wrong if there is no integer there @@make it robust
-            uttid = str(int(row[uttidcol]))
-        thelevel = row[levelcol]
-        thelevel = clean(thelevel)
-        all_levels.add(thelevel)
-        # if thelevel == uttlevel:
-        #    uttcount += 1
-        curuttwlist = []
-        for colctr in range(firstwordcol, len(row)):
-            if thelevel.lower() in uttidheaders:
-                rawcurcellval = str(row[colctr])
-                curcellval = getname(rawcurcellval)
-                if curcellval != '':
-                    curuttwlist.append(curcellval)
-            elif thelevel in literallevels and colctr != stagescol and colctr != commentscol:
-                rawthelabel = str(row[colctr])
-                thelabel = getname(rawthelabel)
-                if colctr > lastwordcol:
-                    tokenposition = 0
-                else:
-                    tokenposition = colctr - firstwordcol + 1
-                cleanlevel = thelevel
-                cleanlabel = thelabel
-                if cleanlabel != '':
-                    thedata[(cleanlevel, cleanlabel)].append(
-                        (uttid, tokenposition))
-            elif not isuttlevel(thelevel) and colctr != stagescol and colctr != commentscol:
-                thelabelstr = row[colctr]
-                thelevel = row[levelcol]
-                if colctr == unalignedcol:
-                    prefix = ''
-                if lastwordcol + 1 <= colctr < len(row):
-                    # prefix = headers[colctr] aangepast om het simpeler te houden
-                    prefix = ""
-                else:
-                    prefix = ""
-                cleanlevelsandlabels = getcleanlevelsandlabels(
-                    thelabelstr, thelevel, prefix, patterns)
-                if colctr > lastwordcol or colctr == unalignedcol:
-                    tokenposition = 0
-                else:
-                    tokenposition = colctr - firstwordcol + 1
-                for (cleanlevel, cleanlabel) in cleanlevelsandlabels:
-                    thedata[(cleanlevel, cleanlabel)].append(
-                        (uttid, tokenposition))
-        if curuttwlist != []:
-            allutts[uttid] = curuttwlist
-    return allutts, thedata
-
-
 def get_annotations(infilename: FileName, allitems: List[str], themethod: Method) \
         -> Tuple[UttWordDict, Dict[Tuple[Level, Item], List[Tuple[UttId, Position]]]]:
     '''
@@ -307,6 +209,8 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
         else:
             pass  # maybe warn here that an unknow column header has been encountered?
 
+    startcol = min(
+        [col for col in [firstwordcol, unalignedcol, commentscol, stagescol]])
     for row in data:
         if row[uttidcol] != "":
             # this might go wrong if there is no integer there @@make it robust
@@ -317,7 +221,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
         # if thelevel == uttlevel:
         #    uttcount += 1
         curuttwlist = []
-        for colctr in range(firstwordcol, len(row)):
+        for colctr in range(startcol, len(row)):
             if thelevel.lower() in uttidheaders:
                 rawcurcellval = str(row[colctr])
                 curcellval = getname(rawcurcellval)
