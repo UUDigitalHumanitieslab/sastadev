@@ -33,6 +33,8 @@ normalimp = """(@cat="sv1" and
 )
 """
 
+vzdisguisedasadj = """(@pt="adj" and (@lemma="in" or @lemma="af" or @lemma="aan"))"""
+
 wwimpok = """( %wwimpfeatok% and
          not(%modalframe%) and
 		 %zijnimpok%       and
@@ -113,8 +115,15 @@ onlythesearerealwords = """(count(.//node[%bxrealwordnode%]) = count(%allbxrealw
 partofwhquestion = """((@cat="sv1" or @cat="ssub") and @rel="body" and parent::node[@cat="whq" or @cat="whsub" ]) """
 declarative = """(@cat="smain" or (@cat="ssub" and not(%partofwhquestion%)) or (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
 
-Tarsp_OndB = """(%Ond% and  node[%Tarsp_Basic_B%]  and count(node) = 2 and %onlythesearerealwords% and not(%Tarsp_BX%) and not(%Xneg%)) """
-Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
+Tarsp_OndB = """((%Ond% or node[@naamval="nomin"]) and  node[%Tarsp_Basic_B%]  and count(node) = 2 and %onlythesearerealwords% and not(%Tarsp_BX%) and not(%Xneg%)) """
+Tarsp_OndVC = """((%coreondvc% or %dpdpondvc%)  and count(node) = 2 and %onlythesearerealwords%) """
+
+beetje = """(@word="beetje")"""
+
+coreondvc = """(((node[%subject% and not(%beetje%) and not(node[%ooknogmod%])]) or node[@naamval="nomin" and not(node[%ooknogmod%])]) and  node[%Tarsp_Basic_VC% and not(node[%ooknogmod%])]) """
+dpdpondvc = """(node[@rel="dp" and %nominal% and not(node[%ooknogmod%]) and not(%beetje%) and @end<../node/@end] and node[@rel="dp" and (@cat="ap" or @pt="adj")and not(node[%ooknogmod%])])"""
+
+nominal = """(@pt="n" or @pt="vnw" or (@cat="np" ))"""
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
@@ -221,13 +230,31 @@ Tarsp_Vr5plus = """(%Tarsp_whq% and
         node[%Tarsp_whqhead%] and
         node[%whqbody%  and %realcomplormodnodecount% > 2])"""
 		
-Tarsp_BBX = """((@cat="top" and
+old_Tarsp_BBX = """((@cat="top" and
    count(.//node[@pt!='let' and @pt!='vg'])=3 and 
    count(.//node[@special="er_loc" or @pt="bw" or @pt="vz" or (@pt="adj" and @rel="dp" ) ])=2 and 
    .//node[@pt="n" or (@pt="vnw" and not(@special="er_loc")) ]) or
    ((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and count(.//node[%Tarsp_B%]) = 2 and %realcomplormodnodecount% = 2)
    
    )"""
+   
+Tarsp_BBX = """(%coreBBX% or %clausalBBX% or %wvcBBX% or %abcBBX% or %vabcBBX% or %nadvpbbBBX% or %bplusxpbBBX%)"""
+
+old_corebb = """ ((@special="er_loc" or @pt="bw" or @pt="vz" or (@pt="adj" and @rel="dp" )) and @rel!="hd" and @rel!="hdf")""" 
+   
+coreBBX = """((@cat!="smain" and @cat!="sv1") and count(node[%coreB%])=2 and count(node) = 3 and %onlythesearerealwords% )"""
+clausalBBX = """((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and count(node[%Tarsp_B%]) = 2 and  count(node) = 3 and %onlythesearerealwords%)"""
+wvcBBX = """((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W%  and node[@rel="vc" and count(node[%Tarsp_B%]) = 2 and  count(node) = 3 ] and %onlythesearerealwords%) """ 
+abcBBX = """((@cat!="smain" and @cat!="sv1") and node[%Tarsp_B% and @rel!="tag"] and node[node[%Tarsp_B%] and count(node) =2 ] and count(node[%realnode%]) = 2 and %onlythesearerealwords%)"""		
+vabcBBX = """((@cat!="smain" and @cat!="sv1") and 
+               count(node[%realnode%]) = 2 and 
+               node[node[%Tarsp_B%] and node[@pt="vg"]] and 
+               node[node[%Tarsp_B%] and count(node)=2] and
+               %onlythesearerealwords%
+              ) """
+
+nadvpbbBBX = """(node[not(%Tarsp_B%) and (not(@pt) or (@pt!="ww" and @pt!="let")) and @cat!="advp"] and node[@cat="advp" and node[@rel="mod" ] and node[@rel="hd" ]] and count(node) = 2 and %onlythesearerealwords%) """
+bplusxpbBBX = """(node[%Tarsp_B% and @rel!="tag"] and not(node[@pt="ww"]) and node[not(%Tarsp_B%) and count(.//node[%Tarsp_B%]) = 1]and %onlythesearerealwords%)"""
 		
 Tarsp_Ov3 = """(%declarative% and 
                 not(%Tarsp_OndWVC%) and 

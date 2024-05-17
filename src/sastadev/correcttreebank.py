@@ -46,7 +46,7 @@ space = ' '
 uttidxpath = './/meta[@name="uttid"]/@value'
 dezebwxpath = './/node[@pt="bw" and @lemma="deze"]'
 # noun1cxpath = './/node[@pt="n" and string-length(@word)=1]'
-noun1cxpath = './/node[string-length(@word)=1]'
+noun1cxpath = './/node[@pt!="let" and string-length(@word)=1]'
 metadataxpath = './/metadata'
 dezeAVntemplate = '<node begin="{begin}" buiging="met-e" end="{end}" frame="determiner(de,nwh,nmod,pro,nparg)" ' \
                   'id="{id}" infl="de" lcat="np" lemma="deze" naamval="stan" npagr="rest" pdtype="det" pos="det" ' \

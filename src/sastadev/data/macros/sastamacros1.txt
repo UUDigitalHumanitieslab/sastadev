@@ -203,6 +203,11 @@ adjadv = """
 """
 
 
+bbvb = """((node[@rel="mod" and %adjoradv%] and
+       node[@rel="hd"  and %adjoradv%])     
+   )"""
+
+
 realnode = """((not(@pt) or (@pt!="let" and @pt!="tsw")) and (not(@postag) or @postag!="NA()"))"""
 notonlyrealnode = """(parent::node[count(node[%realnode%])>1])"""
 
@@ -237,10 +242,33 @@ Tarsp_B = """(
         (@rel="cnj" and parent::node[@rel="mod" or @rel="ld" or @rel="predm"]) or
         (@rel="mod" and @pt="bw" and parent::node[@cat="np"] ) or
 		%Tarsp_nonmodadvcp% or
-		%Tarsp_pc_vc_exception%
+		%Tarsp_pc_vc_exception% or
+        %vzdisguisedasadj% or
+		%svpofhww%
 		)
      
 """
+
+svpofhww = """ (@rel="svp" and ../node[%hwwwithsvp%])"""
+
+hwwwithsvp = """(contains(@lemma,"_kunnen") or
+                 contains(@lemma,"_moeten") or
+                 contains(@lemma,"_hoeven") or
+                 contains(@lemma,"_blijven") or
+                 contains(@lemma,"_willen") or
+                 contains(@lemma,"_zullen") or   
+                 contains(@lemma,"_doen") or 
+                 contains(@lemma,"_gaan") or
+                 contains(@lemma,"_horen") or
+                 contains(@lemma,"_komen") or
+                 contains(@lemma,"_laten") or
+                 contains(@lemma,"_liggen") or
+                 contains(@lemma,"_lopen") or
+                 contains(@lemma,"_mogen") or
+                 contains(@lemma,"_staan") or
+                 contains(@lemma,"_zitten")
+				) """
+
 
 complement = """((@rel="obj1" or @rel="obj2") or 
                  (@rel="predc" and not(%predcB%)) or
@@ -282,7 +310,9 @@ corephrase = """(@cat="np" or @cat="pp" or @cat="advp" or @cat="ap")"""
 coreB = """( ((@pt="bw" or @pt="vz" or @cat="advp" or @cat="pp" or %Rpronoun%) and
               (@rel="mod" or @rel="predm" or @rel="dp" or @rel="--" or @rel="ld" or 
 			   @rel="tag" or @rel="nucl" or @rel="predc"  or 
-			   (@pt!="vz" and @rel="svp")
+			   (@pt!="vz" and @rel="svp") or
+			   %vzdisguisedasadj% or
+			   %svpofhww%
 			  ) or
 			  (@pt="adj" and @buiging="met-s")
 			 )
@@ -321,7 +351,8 @@ corebnode = """(%coreB% and
 			      not(%Tarsp_kijkVU%) and  
 				  (not(@lemma) or @lemma!="niet") and 
 				  %corebnodesibling% and
-				  @id != %corebnodesibling%/@id
+				  @id != %corebnodesibling%/@id and 
+				  not(node[%ooknogmod%])
 				 )"""
 
 corebnodesibling = """../node[not(%clausecat%) and 
@@ -331,7 +362,7 @@ corebnodesibling = """../node[not(%clausecat%) and
 """
 
 ooknogmod = """(@rel="mod" and (@lemma="ook" or @lemma="nog"))"""
-ookXP = """((@cat="np" or @cat="pp") and node[%ooknogmod%] and  count(node) = 2 and not(node[@naamval="nomin"])and %onlythesearerealwords% and count(.//node[%corebnode%]) = 1)"""
+ookXP = """(((@cat="np"  and count(node) = 2) or  @cat="pp") and node[%ooknogmod%]  and not(node[@naamval="nomin"])and %onlythesearerealwords% )"""
 
 
 bxrealnode = """(%bxrealwordnode% or count(.//node[%bxrealwordnode%]) > 0)"""
@@ -389,7 +420,9 @@ Tarsp_BX = """( (%coreBX% or
 			    %clausalbx1% or
 			    %clausalbx2% or
 				%ookXP%) and
-                not(%Xneg%) 
+                not(%Xneg%) and 
+				not(%wx%) and
+				not(%bbvb%)
 			)"""
 
 Tarsp_bnonfin = """((@cat="inf" or @cat="ppart") and @rel="vc" and parent::node[@cat="smain" and count(node)=1] and node[%Tarsp_B%] and node[@pt="ww" and @rel="hd"] and count(node[%realcomplormod%])=1 )"""

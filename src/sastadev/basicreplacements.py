@@ -41,6 +41,7 @@ typorepl = '{wrong} instead of {correct}'
 redpron = 'reduced pronunciation'
 emphasis = 'emphasis'
 prefixdrop = 'prefix drop'
+sylldrop = "Syllable drop"
 voweldup = 'vowel duplication'
 erdrop = 'er drop'
 closedvow = 'closed vowel'
@@ -127,7 +128,7 @@ innureplacements = [(w1[:-1] + 'u', w2, c, n, v, p) for (w1, w2, c, n, v, p) in 
 #:      :no-value:
 #:
 basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared, dp),
-                                                ('isse', 'is', pron, infpron, addschwa, dp),
+                                                ('isse', 'is', pron, infpron, addschwa, 1),
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('t', "'t", orth, spellerr, apomiss, dp),
                                                 ('effjes', 'eventjes', pron, infpron, varpron, dp),
@@ -214,6 +215,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('hoeve', 'hoef', pron, infpron, emphasis, dp),
                                                 ('hoeve', 'hoeft', pron, infpron, emphasis, dp+2),
                                                 ('hebbe', 'heb', pron, infpron, emphasis, dp+2),
+                                                ('pot', 'kapot', pron, infpron, sylldrop, dp),
                                                 ('kane', 'andere', pron, wrongpron, wrongpron, dp)
                                                 ] + \
     ervzvariants + \
@@ -302,6 +304,7 @@ basicexpansionlist: List[BasicExpansion] = \
      ("neehoor", ['nee', 'hoor'], pron, infpron, typo, dp + 2),
      ("kanne", ['kan', 'er'], pron, infpron, codared, dp + 2),
      ("moek", ['moet', "'k"], pron, infpron, contract, dp)
+
      ]
 # + closesyllshortprepexpansions # put off does not lead to improvement
 # + innuclosedsyllshortprepexpansions # put off does not lead to improvement

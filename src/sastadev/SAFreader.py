@@ -51,7 +51,7 @@ stagesheaders = ['fases', 'stages']
 commentsheaders = ['comments', 'commentaar']
 unalignedheaders = ['unaligned', 'hele zin', 'hele uiting']
 
-
+uttlevels = ['utt', 'uiting']
 def nested_dict(n: int,
                 type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
@@ -296,7 +296,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
             unalignedcol = col
         else:
             pass  # maybe warn here that an unknow column header has been encountered?
-
+    startcol = min([col for col in [firstwordcol, unalignedcol, commentscol, stagescol] if col >=0])
     for row in data:
         if row[uttidcol] != "":
             uttid = str(int(row[uttidcol]))  # this might go wrong if there is no integer there @@make it robust
@@ -306,8 +306,8 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
         # if thelevel == uttlevel:
         #    uttcount += 1
         curuttwlist = []
-        for colctr in range(firstwordcol, len(row)):
-            if thelevel == uttlevel:
+        for colctr in range(startcol, len(row)):
+            if thelevel in uttlevels:
                 rawcurcellval = str(row[colctr])
                 curcellval = getname(rawcurcellval)
                 if curcellval != '':
@@ -323,7 +323,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
                 cleanlabel = thelabel
                 if cleanlabel != '':
                     thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
-            elif thelevel != uttlevel and colctr != stagescol and colctr != commentscol:
+            elif thelevel not in uttlevels and colctr != stagescol and colctr != commentscol:
                 thelabelstr = row[colctr]
                 thelevel = row[levelcol]
                 if colctr == unalignedcol:

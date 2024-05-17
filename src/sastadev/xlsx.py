@@ -40,7 +40,7 @@ def writetable(tabel, ws, startrow=0, startcol=0, rhformat=None, chformat=None, 
         curcol = startcol
 
 
-def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=None, formats=[], column_widths={}):
+def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=None, formats=[], column_widths={}, condrowbg_colors=[]):
     workbook = xlsxwriter.Workbook(outfullname, {"strings_to_numbers": True})
     bold = workbook.add_format({'bold': True})
 
@@ -80,11 +80,27 @@ def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=N
         rowctr += 1
 
     for row in allrows:
-        xlsx_writerow(worksheet1, rowctr, row, formats=realformats)
+        rowformat = getrow_bg_colors(workbook, row, condrowbg_colors)
+        xlsx_writerow(worksheet1, rowctr, row, format=rowformat, formats=realformats)
         rowctr += 1
 
     worksheet1.autofilter(0, 0, rowctr, colctr)
     return workbook
+
+
+def getrow_bg_colors(wb, row, condrowbg_colors):
+    for cond, color in condrowbg_colors:
+        if cond(row):
+            return mk_bg_color(wb, color)
+    return None
+
+
+def mk_bg_color(wb, color):
+    result_format = wb.add_format()
+    result_format.set_pattern(1)
+    result_format.set_bg_color(color)
+    return result_format
+
 
 
 def adaptformats(formats, workbook):

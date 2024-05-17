@@ -61,6 +61,7 @@ vowels = ['a', 'e', 'i', 'o', 'u']
 uniquelynominativeperspros = ['ik', 'jij', 'hij', 'zij', 'wij', 'ikke', "'k", "k", "ie", "we"]
 
 topicdropmeta = Meta('Topic drop', 'Topic drop', cat='Grammar', subcat='Syntax', source='SASTA', penalty=0)
+nominalexceptions = {'weg'}   # words that are nouns but also and more plausibly of a different pt, e.g. bw
 
 def makegen(lemma):
     if lemma is None or len(lemma) < 2:
@@ -231,6 +232,11 @@ def nominal(node):
     result = pt(node) == 'n' or aanwvnw(node)
     return result
 
+def issubstadj(node: SynTree) -> bool:
+    pt = getattval(node, 'pt')
+    positie = getattval(node, 'positie')
+    result = pt == 'adj' and positie == 'vrij'
+    return result
 
 def mktoken(node, map):
     nodebegin = bg(node)
@@ -311,12 +317,24 @@ def isfirstsubject(first, second) -> bool:
         firstsubject = False
     return firstsubject
 
+def isditdat(node: SynTree) -> bool:
+    lemma = getattval(node, 'lemma')
+    result = lemma in {'dit', 'dat'}
+    return result
 def iscoord(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
     vgtype = getattval(node, 'vgtype')
     result = pt == 'vg' and vgtype == 'neven'
     return result
 
+def isnominalexception(node: SynTree) -> bool:
+    result = getattval(node, 'lemma') in nominalexceptions
+    return result
+
+def ispropernoun(node: SynTree) -> bool:
+    lemma = getattval(node, 'lemma')
+    result = lemma[0].isupper() if lemma != "" else False
+    return result
 
 def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     '''
@@ -393,7 +411,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
             fpos = int(getattval(first, 'begin'))
             inserttokens = [Token('is' if getal(first) != 'mv' else 'zijn', fpos, subpos=5)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
-        elif knownnoun(first) and knownnoun(second) and not (lemma(first) == lemma(second)):
+        elif knownnoun(first) and knownnoun(second) and not ispropernoun(second) and not (lemma(first) == lemma(second)):
             if hasgenitive(first):
                 genform = makegen(lemma(first))
                 fpos = int(getattval(first, 'begin'))
@@ -436,6 +454,15 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
             inserttokens = [Token('ik', fpos, subpos=5), Token('wil', fpos, subpos=8)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
+        elif (isditdat(first) or nomperspro(first)) and \
+                (nominal(second) or  issubstadj(second)) and \
+                not isnominalexception(second):
+            fpos = int(getattval(first, 'begin'))
+            insertform = 'waren' if getal(first) == 'mv' else 'was'
+            inserttokens = [Token(insertform, fpos, subpos=5)]
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
+            metadata += mkinsertmeta(inserttokens, resultlist)
+
     if resultlist == []:
         result = []
     else:
