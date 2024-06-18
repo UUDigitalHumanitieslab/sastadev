@@ -138,9 +138,9 @@ def wordcountperutt(allresults):
 
 def getignorewordcount(allresults, uttid):
     result = 0
-    if samplesizeqid in allresults.coreresults:
-        if uttid in allresults.coreresults[samplesizeqid]:
-            result = allresults.coreresults[samplesizeqid][uttid]
+    if samplesizereskey in allresults.coreresults:
+        if uttid in allresults.coreresults[samplesizereskey]:
+            result = allresults.coreresults[samplesizereskey][uttid]
     return result
 
 
