@@ -1238,19 +1238,20 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         # zenode = find1(tree, zexpath)
         tokennodes = getnodeyield(tree)
         zenode = tokennodes[tokenctr]
-        nexttoken = tokens[
-            tokenctr + 1]  # do not take it from the tree because it may have been replaced by something else, e.g. avoid: ze dee -> ze deed -/-> z'n deed!
-        zerel = getattval(zenode, 'rel')
-        zeparent = zenode.getparent()
-        zeparentcat = getattval(zeparent, 'cat')
-        # nextpt = getattval(nextnode, 'pt')
-        nexttokeninfo = getwordinfo(nexttoken.word)
-        nexttokenpts = {pt for (pt, _, _, _) in nexttokeninfo}
-        if (zerel == '--' or zerel == 'mwp' or (zerel == 'obj1' and zeparentcat == 'pp')) and 'n' in nexttokenpts:
-            newword = "z'n"
-            newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
-                                            name='Pronunciation Variant', value='N-less informal possessive pronoun',
-                                            cat='Pronunciation', backplacement=bpl_word)
+        if tokenctr < len(tokens) - 1:
+            nexttoken = tokens[
+                tokenctr + 1]  # do not take it from the tree because it may have been replaced by something else, e.g. avoid: ze dee -> ze deed -/-> z'n deed!
+            zerel = getattval(zenode, 'rel')
+            zeparent = zenode.getparent()
+            zeparentcat = getattval(zeparent, 'cat')
+            # nextpt = getattval(nextnode, 'pt')
+            nexttokeninfo = getwordinfo(nexttoken.word)
+            nexttokenpts = {pt for (pt, _, _, _) in nexttokeninfo}
+            if (zerel == '--' or zerel == 'mwp' or (zerel == 'obj1' and zeparentcat == 'pp')) and 'n' in nexttokenpts:
+                newword = "z'n"
+                newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                                name='Pronunciation Variant', value='N-less informal possessive pronoun',
+                                                cat='Pronunciation', backplacement=bpl_word)
 
     # e-> e(n)
     enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}

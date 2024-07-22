@@ -35,6 +35,7 @@ all_levels = set()
 
 # @@next must be made dependent on the method
 literallevels = ['literal', 'lemma']
+commentslevels = ['comments', 'commentaar', 'opmerkingen']
 
 semicolon = ';'
 labelsep = semicolon
@@ -323,6 +324,8 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
                 cleanlabel = thelabel
                 if cleanlabel != '':
                     thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+            elif thelevel in commentslevels:
+                pass
             elif thelevel not in uttlevels and colctr != stagescol and colctr != commentscol:
                 thelabelstr = row[colctr]
                 thelevel = row[levelcol]
