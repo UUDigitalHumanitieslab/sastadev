@@ -9,6 +9,9 @@ from sastadev.sastatoken import Token, show
 CHAT = 'CHAT'
 
 CHAT_explanation = 'Explanation'
+CHAT_wordnoncompletion = 'Noncompletion of a Word'
+CHAT_replacement = 'Replacement'
+
 
 monadic = 1
 dyadic = 2
@@ -221,7 +224,7 @@ class CHAT_NoncompletionRegex(CHAT_Regex):
         self.regex = regex
         self.replacement = replacement
         self.original = original
-        self.compiledre = re.compile(refunction(self.regex))
+        self.compiledre = re.compile(self.regex)
 
     def apply(self, tokens, annotation, repkeep):
         newtokens = []
@@ -267,6 +270,54 @@ class CHAT_NoncompletionRegex(CHAT_Regex):
 
         return (newtokens, metadata)
 
+
+class CHAT_NoncompletionRegex(CHAT_Regex):
+    def __init__(self, regex, replacement, original):
+        self.regex = regex
+        self.replacement = replacement
+        self.original = original
+        self.compiledre = re.compile(self.regex)
+
+    def apply(self, tokens, annotation, repkeep):
+        newtokens = []
+        metadata = []
+        insidebrackets, outsidebrackets = 0, 1
+        state = outsidebrackets
+        for token in tokens:
+            if self.compiledre.search(token.word):
+                if state == outsidebrackets:
+                    if self.replacement == keep:
+                        newtoken = token
+                        newtokens.append(newtoken)
+                    elif callable(self.replacement):
+                        newtokenword = self.replacement(token.word)
+                        newtoken = Token(newtokenword, token.pos)
+                        newtokens.append(newtoken)
+                    elif isinstance(self.replacement, str):
+                        newtokenword = self.compiledre.sub(self.replacement, token.word)
+                        if newtokenword != '':
+                            newtoken = Token(newtokenword, token.pos)
+                            newtokens.append(newtoken)
+                        else:
+                            pass  # token is removed
+                    else:
+                        pass  # token is removed
+                    if isinstance(self.original, str):
+                        originalword = self.compiledre.sub(self.original, token.word)
+
+                    metadata.append(annotation.metadatafunction(annotation, newtoken.word, newtoken.pos, originalword))
+                else:
+                    newtokens.append(token)
+            elif isopenbracket(token.word):
+                state = insidebrackets
+                newtokens.append(token)
+            elif isclosebracket(token.word):
+                state = outsidebrackets
+                newtokens.append(token)
+            else:
+                newtokens.append(token)
+
+        return (newtokens, metadata)
 
 class CHAT_SimpleScopedRegex(CHAT_Regex):
     def __init__(self, regex, replacement, scoped, arity):
@@ -646,8 +697,10 @@ annotations = [
                     simplemetafunction(epsf)),
     CHAT_Annotation('Phonological Coding', '6.4:41', '8.4:47', CHAT_SimpleRegex(r'yyy', keep, False),
                     simplemetafunction(epsf)),
-    CHAT_Annotation('Noncompletion of a Word', '6.5:43', '8.5:48',
-                    CHAT_NoncompletionRegex(r'(.*)\((\w*)\)(.*)', r'\1\2\3', r'\1\3'), noncompletionmetafunction),
+    CHAT_Annotation(CHAT_wordnoncompletion, '6.5:43', '8.5:48',
+                    CHAT_NoncompletionRegex(r'\(([\w]+)\)', r'\1', r''), noncompletionmetafunction),
+    # CHAT_Annotation(CHAT_wordnoncompletion, '6.5:43', '8.5:48',
+    #                 CHAT_NoncompletionRegex(r'(.*)\((\w*)\)(.*)', r'\1\2\3', r'\1\3'), noncompletionmetafunction),
     CHAT_Annotation(omittedword, '6.5:43', '8.5:48-49',
                     CHAT_SimpleRegex(r'0[\w:]+', dropzero, False), simple_bpldel_metafunction(dropzero)),
     CHAT_Annotation('Satellite at End', '7.4:58', '9.2:59-60',
@@ -831,6 +884,8 @@ annotations = [
                     CHAT_SimpleRegex(r'&\+' + simplewordpat, eps, False), simplemetafunction(identity)),
     CHAT_Annotation('Filler', 'None', '8.4:48',
                     CHAT_SimpleRegex(r'&\-' + wordpat, eps, False), simplemetafunction(identity)),
+    CHAT_Annotation('Nonword', 'None', '2024:8.5:49',
+                    CHAT_SimpleRegex(r'&~' + wordpat, eps, False), simplemetafunction(identity)),
 
     # ad-hoc extensiosn for Lotti
     CHAT_Annotation('[een]', 'ad-hoc extension', 'ad-hoc extension', CHAT_SimpleRegex(r'\[een\]', eps, False),

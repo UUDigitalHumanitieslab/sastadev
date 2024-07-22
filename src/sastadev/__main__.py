@@ -139,6 +139,9 @@ import logging
 import os
 import re
 import sys
+import copy
+import time
+import json
 from collections import Counter, defaultdict
 from optparse import OptionParser
 from typing import Any, Callable, Dict, List, Pattern, Tuple
@@ -151,21 +154,32 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
                                  ResultsKey, mkresultskey, scores2counts,
                                  showreskey)
 from sastadev.conf import settings
-from sastadev.constants import (bronzefolder, formsfolder, intreebanksfolder,
-                                loggingfolder, outtreebanksfolder,
-                                resultsfolder, silverfolder, silverpermfolder)
-from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader,
-                                      validcorroptions)
+from sastadev.constants import (bronzefolder, bronzesuffix, checksuffix, checkeditedsuffix,
+                                formsfolder, intreebanksfolder,
+                                loggingfolder, outtreebanksfolder, permprefix, platinumsuffix,
+                                platinumeditedsuffix,
+                                resultsfolder, silverfolder, silverpermfolder, silversuffix)
+from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, literalmissedmatches
-from sastadev.query import (Query, is_preorcore, post_process, query_exists,
-                            query_inform)
+from sastadev.methods import (Method, astamethods, stapmethods,
+                              supported_methods, tarspmethods, treatmethod)
+from sastadev.permcomments import getallcomments, pcheaders
+from sastadev.query import (Query, is_preorcore,
+                            post_process, query_exists, query_inform)
+from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.reduceresults import exact2results, reduceexactgoldscores
+from sastadev.sastacore import doauchann, dopostqueries, getreskey, isxpathquery, SastaCoreParameters, sastacore
+from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
+                                 GoldTuple, MatchesDict, MethodName, QId,
+                                 QIdCount, QueryDict, ResultsCounter,
+                                 SynTree, TreeBank, UttId)
+from sastadev.reduceresults import (exact2results, reduceallresults,
+                                    reduceexactgoldscores, reduceresults)
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
@@ -174,16 +188,21 @@ from sastadev.sastacore import (SastaCoreParameters, doauchann, dopostqueries,
 from sastadev.sastatypes import (AltCodeDict, GoldTuple, QId, QIdCount,
                                  QueryDict, ResultsCounter, SynTree, UttId)
 from sastadev.SRFreader import read_referencefile
-from sastadev.targets import get_targets
-from sastadev.treebankfunctions import (getattval, getuttid,
-                                        getxmetatreepositions, getyield,
-                                        showtree)
+from sastadev.stringfunctions import getallrealwords
+from sastadev.targets import get_mustbedone, get_targets, target_all
+from sastadev.treebankfunctions import (find1, getattval, getnodeendmap, getuttid,
+                                        getxmetatreepositions, getxsid,
+                                        getyield, showtree)
 from sastadev.xlsx import mkworkbook
+
+
+start_time = time.time()
 
 listDir = False
 if listDir:
     print(dir())
     exit(0)
+
 
 tarsp = 'tarsp'
 stap = 'stap'
@@ -201,12 +220,6 @@ methodspath = os.path.join(codepath, 'data', 'methods')
 # supported_methods[asta] = os.path.join(methodspath, 'ASTA Index Current.xlsx')
 # supported_methods[stap] = os.path.join(methodspath, 'STAP_Index_Current.xlsx')
 
-platinumchecksuffix = '_platinum.check.tsv'
-platinumcheckeditedsuffix = '_platinum.check-edited.tsv'
-platinumsuffix = '.platinum.tsv'
-platinumeditedsuffix = '.platinum-edited.tsv'
-bronzesuffix = '_bronze'
-silversuffix = '_silver'
 
 path2permfolder = silverpermfolder
 
@@ -424,7 +437,7 @@ def getcompounds(syntree: SynTree) -> List[SynTree]:
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
               criterion: Callable[[Query], bool]):
     global invalidqueries
-    uttid = getuttid(syntree)
+    uttid = getxsid(syntree)
     # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(
         syntree, 'Omitted Word', poslistname='annotatedposlist')
@@ -788,6 +801,36 @@ def passfilter(rawexactresults: ExactResultsDict, method: Method) -> ExactResult
 # defaulttarsp = r"TARSP Index Current.xlsx"
 defaulttarsp = supported_methods[tarsp]
 
+def addxsid(xsid, stree: SynTree) -> SynTree:
+    outstree = copy.deepcopy(stree)
+    xsidmeta = etree.Element('meta', {'name': 'xsid', 'type': 'text', 'value': xsid})
+    metadata = find1(outstree, './/metadata')
+    if metadata is not None:
+        metadata.append(xsidmeta)
+    return outstree
+
+
+def tb_addxsid(treebank: TreeBank, targets) -> TreeBank:
+    newtreebank = etree.Element('treebank')
+    newxsidcounter = 0
+    for syntree in treebank:
+        mustbedone = get_mustbedone(syntree, targets)
+        if mustbedone:
+            uttid = getxsid(syntree)
+            if uttid == '0':
+                newxsidcounter += 1
+                uttid = str(newxsidcounter)
+                # showtree(syntree, '===========before adding xsid')
+                newsyntree = addxsid(uttid, syntree)
+                # showtree(syntree, '===========after adding xsid')
+            else:
+                newsyntree = copy.deepcopy(syntree)
+        else:
+            newsyntree = copy.deepcopy(syntree)
+        newtreebank.append(newsyntree)
+    return newtreebank
+
+
 
 def main():
     parser = OptionParser()
@@ -840,17 +883,20 @@ def main():
     basepath, basefilename = os.path.split(options.infilename)
     corepath, lastfolder = os.path.split(basepath)
     corefilename, inext = os.path.splitext(basefilename)
+    sample = corefilename
+    datasetpath, _ = os.path.split(basepath)
+    path2dataset, dataset = os.path.split(datasetpath)
+    analysespath = os.path.join(corepath, 'analyses')
+    bronzepath = os.path.join(corepath, bronzefolder)
+    silverpath = os.path.join(corepath, silverfolder)
+    resultspath = os.path.join(corepath, resultsfolder)
+    silverpermpath = os.path.join(corepath, silverpermfolder)
+    loggingpath = os.path.join(corepath, loggingfolder)
+    formspath = os.path.join(corepath, formsfolder)
 
     if lastfolder == intreebanksfolder:
         intreebankinput = True
-        analysespath = os.path.join(corepath, 'analyses')
-        bronzepath = os.path.join(corepath, bronzefolder)
-        silverpath = os.path.join(corepath, silverfolder)
         outtreebankspath = os.path.join(corepath, outtreebanksfolder)
-        resultspath = os.path.join(corepath, resultsfolder)
-        silverpermpath = os.path.join(corepath, silverpermfolder)
-        loggingpath = os.path.join(corepath, loggingfolder)
-        formspath = os.path.join(corepath, formsfolder)
 
         outpaths = [analysespath, outtreebankspath, resultspath,
                     silverpermpath, loggingpath, formspath, silverpath]
@@ -882,7 +928,7 @@ def main():
 
     # Configure logging
     handler = logging.FileHandler(options.logfilename, 'w', encoding='utf8')
-    logformat = '%(levelname)s:%(message)s'
+    logformat = '%(filename)s:%(funcName)s:%(levelname)s:%(message)s'
     formatter = logging.Formatter(logformat)
     handler.setFormatter(formatter)
     root_logger = settings.LOGGER
@@ -955,6 +1001,7 @@ def main():
             print(el, goldcounts[el], sep=tab, file=goldcountfile)
         goldcountfile.close()
         reffilename = options.annotationfilename
+        errordict = {}
     elif options.goldfilename != '' and os.path.exists(options.goldfilename):
         goldscores = read_referencefile(options.goldfilename, logfile)
         goldcounts = scores2counts(goldscores)
@@ -1025,13 +1072,11 @@ def main():
     # perm_silverfilename = permprefix + corefilename + '.xlsx'
     # perm_silverfullname = os.path.join(permpath, perm_silverfilename)
     #
-    # platinumcheckeditedfullname = os.path.join(resultspath, corefilename + platinumcheckeditedsuffix + '.xlsx')
+    # platinumcheckeditedfullname = os.path.join(resultspath, corefilename + checkeditedsuffix + '.xlsx')
 
     # platinumoutfilename = os.path.join(resultspath, corefilename + platinumsuffix + txtext)
-    platinumcheckfilename = os.path.join(
-        resultspath, corefilename + platinumchecksuffix + txtext)
-    silvercheckfilename = os.path.join(
-        resultspath, corefilename + platinumchecksuffix + '.xlsx')
+    platinumcheckfilename = os.path.join(resultspath, corefilename + checksuffix + txtext)
+    silvercheckfilename = os.path.join(resultspath, corefilename + checksuffix + '.xlsx')
 
     (platbase, platext) = os.path.splitext(platinumcheckfilename)
     platinumcheckxlfullname = platbase + '.xlsx'
@@ -1042,6 +1087,8 @@ def main():
 
     analysedtrees: List[SynTree] = []
     nodeendmap = {}
+    errordict = {}
+    allorandalts = {}
 
     if annotationinput:
         allutts, richexactscores = get_golddata(
@@ -1058,15 +1105,20 @@ def main():
                                           allutts=allutts,
                                           annotationinput=annotationinput)
         origtreebank = None
+        treebank = None
+        targets = target_all
     else:
         tree = etree.parse(options.infilename)
         origtreebank = tree.getroot()
         annotatedfileresults = None
-        targets = get_targets(origtreebank)
+        targets = get_targets(origtreebank, options.methodname)
         if origtreebank.tag != 'treebank':
             settings.LOGGER.error(
                 "Input treebank file does not contain a treebank element")
             exit(-1)
+
+    # breakpoint()
+    permdict = getallcomments(dataset, sample)
 
     scp = SastaCoreParameters(annotationinput, options.corr, themethod,
                               options.includeimplies, options.infilename, targets)
@@ -1078,13 +1130,21 @@ def main():
         corr = scp.corr
         themethod = scp.themethod
 
-        treebank, errordict, allorandalts = correcttreebank(
-            treebank1, targets, methodname, corr)
+        # add xsid to trees that should have one but do not
+        treebank2 = tb_addxsid(treebank1, targets)
+
+        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, corr)
 
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)
 
     exactresults = allresults.exactresults
+    exactresultsoutput = False
+    if exactresultsoutput:
+        jsonexactresults = {'/'.join(key): value for key, value in exactresults.items()}
+        exactresultsfullname = os.path.join(settings.DATAROOT, dataset, 'exactresults', f'{sample}_exactresults.json')
+        with open(exactresultsfullname, 'w', encoding='utf8') as exactresultsfile:
+            json.dump(jsonexactresults, exactresultsfile)
     allutts = allresults.allutts
     uttcount = allresults.uttcount
     allmatches = allresults.allmatches
@@ -1125,8 +1185,8 @@ def main():
 
     # platinumoutfilename = base + platinumsuffix + txtext
     # platinumoutfile = open(platinumoutfilename, 'w', encoding='utf8')
-    # platinumcheckfilename = base + platinumchecksuffix + txtext
-    platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
+    # platinumcheckfilename = base + checksuffix + txtext
+    # platinumcheckfile = open(platinumcheckfilename, 'w', encoding='utf8')
 
     # bronze reduction
     exactgoldscores = reduceexactgoldscores(
@@ -1159,6 +1219,7 @@ def main():
     countcomparisonfilename = os.path.join(
         resultspath, corefilename + '_countcomparison' + '.tsv' + '.txt')
 
+
     # print the invalid queries
     for q in invalidqueries:
         settings.LOGGER.error("{}: {}: <{}>".format(
@@ -1180,14 +1241,13 @@ def main():
     # exactresults = getexactresults(allmatches)
     exact = True
 
-    pcheaders = [
-        ['User1', 'User2', 'User3', 'MoreorLess', 'qid', 'cat', 'subcat', 'item', 'uttid', 'pos', 'utt', 'origutt',
-         'inform']]
     allrows = []
 
     reskeyindex = defaultdict(list)
     for reskey in results:
         reskeyindex[reskey[0]].append(reskey)
+
+    analysedtreesdict = {uttid: stree for uttid, stree in allresults.analysedtrees}
 
     for queryid in themethod.queries:
         qcount += 1
@@ -1217,34 +1277,11 @@ def main():
 
             # @with an annotationfile allmatches is empty so we need to redefine newrows (exactmismatches) markedutt (getmarkedutt)-done
             if exact:
+                # breakpoint()
                 newrows = exactmismatches(reskey, themethod.queries, exactresults, exactsilverscores, allmatches,
-                                          allutts,
-                                          platinumcheckfile, {}, annotationinput)
+                                          allutts, analysedtreesdict, sample, permdict, annotationinput)
                 allrows += newrows
-            else:
-                if theresultsminusgold != {}:
-                    print('More examples', file=platinumcheckfile)
-                for uttid in theresultsminusgold:
-                    if (reskey, uttid) in allmatches:
-                        for (m, syntree) in allmatches[(reskey, uttid)]:
-                            markedutt = getmarkedutt(m, syntree)
-                            platinumcheckrow1 = [reskey, themethod.queries[queryid].cat,
-                                                 themethod.queries[queryid].subcat,
-                                                 themethod.queries[queryid].item, uttid, markedutt]
-                            print(tab.join(platinumcheckrow1),
-                                  file=platinumcheckfile)
-
-                if goldminustheresults != {}:
-                    print('Missed examples', file=platinumcheckfile)
-                for uttid in goldminustheresults:
-                    if uttid in allutts:
-                        uttstr = space.join(allutts[uttid])
-                    else:
-                        settings.LOGGER.warning(
-                            'uttid {} not in allutts'.format(uttid))
-                    platinumcheckrow2 = [reskey, themethod.queries[queryid].cat, themethod.queries[queryid].subcat,
-                                         themethod.queries[queryid].item, uttid, uttstr]
-                    print(tab.join(platinumcheckrow2), file=platinumcheckfile)
+                # breakpoint()
 
     # platinumcheckfullname = platinumcheckfile.name
     # (base, ext) = os.path.splitext(platinumcheckfilename)
@@ -1252,12 +1289,16 @@ def main():
 
     # add missed literal hits
     literalmissedrows = literalmissedmatches(themethod.queries, exactresults, exactgoldscores, allmatches, allutts,
-                                             platinumcheckfile, {}, annotationinput)
+                                             analysedtreesdict, sample, permdict, annotationinput)
     allrows += literalmissedrows
 
-    wb = mkworkbook(platinumcheckxlfullname, pcheaders,
-                    allrows, freeze_panes=(1, 9))
+    # breakpoint()
+    platinumcheck_column_widths = {'F:F': 9, 'G:G': 8.11, 'K:K': 6.44, 'L:L': 5.44, 'M:M': 26, 'N:N': 26, 'O:O': 26 }
+    wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9),
+                    column_widths=platinumcheck_column_widths)
     wb.close()
+
+    writecsv(allrows, platinumcheckfilename, header=pcheaders[0])
 
     # compute the gold postresults
     goldpostresults: Dict[UttId, int] = {}
@@ -1426,7 +1467,6 @@ def main():
     outfile.close()
     outworkbook.close()
     # platinumoutfile.close()
-    platinumcheckfile.close()
 
     resultscounts = scores2counts(results)
 
@@ -1475,6 +1515,11 @@ def main():
         definedfornonemptygoldcounts, lgoldcounts, percentagecompletion2str))
     print('Undefined queries:', undefinedqueries)
     settings.LOGGER.info("Done!")
+    end_time = time.time()
+    duration = end_time - start_time
+    timing_message = f'Duration: {duration:.2f} seconds'
+    print(timing_message)
+    settings.LOGGER.info(timing_message)
 
 
 if __name__ == '__main__':

@@ -41,6 +41,7 @@ typorepl = '{wrong} instead of {correct}'
 redpron = 'reduced pronunciation'
 emphasis = 'emphasis'
 prefixdrop = 'prefix drop'
+sylldrop = "Syllable drop"
 voweldup = 'vowel duplication'
 erdrop = 'er drop'
 closedvow = 'closed vowel'
@@ -127,7 +128,7 @@ innureplacements = [(w1[:-1] + 'u', w2, c, n, v, p) for (w1, w2, c, n, v, p) in 
 #:      :no-value:
 #:
 basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared, dp),
-                                                ('isse', 'is', pron, infpron, addschwa, dp),
+                                                ('isse', 'is', pron, infpron, addschwa, 1),
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('t', "'t", orth, spellerr, apomiss, dp),
                                                 ('effjes', 'eventjes', pron, infpron, varpron, dp),
@@ -142,6 +143,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('tee', 'twee', pron, pronerr, onsetred, dp),
                                                 ('nie', 'niet', pron, infpron, codared, dp),
                                                 ('s', 'is', orth, spellerr, apomiss, dp),
+                                                ("'s", 'is', pron, infpron, redpron, dp),
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('it', 'dit', pron, pronerr, onsetred, dp),
                                                 ('da', 'dat', pron, infpron, codared, dp),
@@ -213,13 +215,14 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('hoeve', 'hoef', pron, infpron, emphasis, dp),
                                                 ('hoeve', 'hoeft', pron, infpron, emphasis, dp+2),
                                                 ('hebbe', 'heb', pron, infpron, emphasis, dp+2),
+                                                ('pot', 'kapot', pron, infpron, sylldrop, dp),
                                                 ('kane', 'andere', pron, wrongpron, wrongpron, dp)
                                                 ] + \
     ervzvariants + \
     innereplacements + \
     innureplacements
 
-
+basicreplacementpairs = {(tpl[0], tpl[1]) for tpl in basicreplacementlist }
 
 
 #: The dictionary *basicreplacements* maps a word with deviant orthography to a list of
@@ -280,8 +283,8 @@ innuclosedsyllshortprepexpansions = [(w1[:-1] + 'u', w2, c, n, v, p)
 basicexpansionlist: List[BasicExpansion] = \
     [('dis', ['dit', 'is'], pron, infpron, contract, dp),
      ('das', ['dat', 'is'], pron, infpron, contract, dp),
-     ("di's", ['dit' 'is'], pron, infpron, contract, dp),
-     ("da's", ['dat' 'is'], pron, infpron, contract, dp),
+     ("di's", ['dit', 'is'], pron, infpron, contract, dp),
+     ("da's", ['dat', 'is'], pron, infpron, contract, dp),
      ('tis', ['dit', 'is'], pron, infpron, contract, dp),
      ('waas', ['waar', 'is'], pron, infpron, contract, dp),
      ('is-t-ie', ['is', 'ie'], pron, infpron, t_ie, dp),
@@ -301,6 +304,7 @@ basicexpansionlist: List[BasicExpansion] = \
      ("neehoor", ['nee', 'hoor'], pron, infpron, typo, dp + 2),
      ("kanne", ['kan', 'er'], pron, infpron, codared, dp + 2),
      ("moek", ['moet', "'k"], pron, infpron, contract, dp)
+
      ]
 # + closesyllshortprepexpansions # put off does not lead to improvement
 # + innuclosedsyllshortprepexpansions # put off does not lead to improvement

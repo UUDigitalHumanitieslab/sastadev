@@ -21,8 +21,8 @@ from sastadev.sastatypes import (FileName, MethodName, Position, QId,
                                  UttId)
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (getattval, getnodeendmap, getuttid,
-                                        getxmetatreepositions, getxselseuttid,
+from sastadev.treebankfunctions import (getattval, getnodeendmap,
+                                        getxmetatreepositions, getxsid,
                                         getyield, showtree)
 
 singlewordWquery = """//node[@pt="ww"]/ancestor::node[@cat="top" and count(.//node[@pt!="let" and @pt!="tsw"]) = 1 ] """
@@ -105,17 +105,13 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         # analysedtrees consists of (uttid, syntree) pairs in the order in which they come in
         analysedtrees: List[(UttId, SynTree)] = []
         for syntree in correctedtreebank:
-            temputtid = getuttid(syntree)
             uttcount += 1
 
-            # if temputtid == '118':
-            #     showtree(syntree, 'tree 118')
-            # settings.LOGGER.error('uttcount={}'.format(uttcount))
             mustbedone = get_mustbedone(syntree, targets)
             if mustbedone:
                 # uttid = getuttid(syntree)
                 # analysedtrees consists of (uttid, syntree) pairs in order
-                uttid = getxselseuttid(syntree)
+                uttid = getxsid(syntree)
                 analysedtrees.append((uttid, syntree))
 
                 doprequeries(syntree, themethod.queries,
@@ -142,11 +138,11 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
         # @@to be implemented @@ of misschien in de loop hierboven al?
 
     # @ en vanaf hier kan het weer gemeenschappelijk worden; er met dus ook voor de annotatiefile een exactresults opgeleverd worden
-    # @d epostfunctions for lemma's etc moeten mogelijk wel aangepast worden
+    # @d epostfunctions for lemma's etc. moeten mogelijk wel aangepast worden
 
     if includeimplies:
-        allmatches, rawexactresults = removeimplies(
-            allmatches, exactresults, themethod)
+        pass
+        # allmatches, rawexactresults = removeimplies(allmatches, exactresults, themethod)
     else:
         rawexactresults = exactresults
 
@@ -184,7 +180,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
               criterion: Callable[[Query], bool], invalidqueries):
     # global invalidqueries
-    uttid = getuttid(syntree)
+    uttid = getxsid(syntree)
     # uttid = getuttidorno(syntree)
     omittedwordpositions = getxmetatreepositions(
         syntree, 'Omitted Word', poslistname='annotatedposlist')

@@ -9,11 +9,13 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
+from sastadev.history import (gathercorrections, mergecorrections, putcorrections,
+                              samplecorrections, samplecorrectionsfullname)
 from sastadev.lexicon import de, dets, known_word, nochildwords
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
-                               bpl_none, bpl_replacement, bpl_word,
-                               bpl_wordlemma, insertion)
+                               bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion)
+from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
@@ -24,13 +26,13 @@ from sastadev.targets import get_mustbedone
 from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
-                                        getcompoundcount, getnodeyield,
-                                        getptsubclass, getsentid,
-                                        gettokposlist, getuttid, getyield,
-                                        myfind, showflatxml, showtree,
-                                        simpleshow, subclasscompatible,
-                                        transplant_node, treeinflate,
-                                        treewithtokenpos, updatetokenpos)
+                                        getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
+                                        getptsubclass,
+                                        getsentid, getsentence, gettokposlist, getxsid,
+                                        getyield, myfind, showflatxml,
+                                        showtree, simpleshow, subclasscompatible, transplant_node,
+                                        treeinflate, treewithtokenpos,
+                                        updatetokenpos)
 
 ampersand = '&'
 
@@ -38,9 +40,10 @@ corr0, corr1, corrn = '0', '1', 'n'
 validcorroptions = [corr0, corr1, corrn]
 
 space = ' '
-origuttxpath = './/meta[@name="origutt"]/@value'
 uttidxpath = './/meta[@name="uttid"]/@value'
 dezebwxpath = './/node[@pt="bw" and @lemma="deze"]'
+# noun1cxpath = './/node[@pt="n" and string-length(@word)=1]'
+noun1cxpath = './/node[@pt!="let" and string-length(@word)=1]'
 metadataxpath = './/metadata'
 dezeAVntemplate = '<node begin="{begin}" buiging="met-e" end="{end}" frame="determiner(de,nwh,nmod,pro,nparg)" ' \
                   'id="{id}" infl="de" lcat="np" lemma="deze" naamval="stan" npagr="rest" pdtype="det" pos="det" ' \
@@ -55,7 +58,7 @@ TupleNint = Tuple[19 * (int,)]
 altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'dimcount', 'compcount', 'supcount',
                        'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'badcatcount',
                        'hyphencount', 'basicreplaceecount', 'ambigcount', 'subjunctivecount', 'unknownnouncount',
-                       'unknownnamecount', 'dezebwcount']
+                       'unknownnamecount', 'dezebwcount', 'noun1c_count']
 
 errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
                 ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
@@ -70,7 +73,7 @@ class Alternative():
     def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
                  compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, badcatcount,
                  hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount,
-                 dezebwcount):
+                 dezebwcount, noun1c_count):
         self.stree: SynTree = stree
         self.altid: AltId = altid
         self.altsent: str = altsent
@@ -94,6 +97,7 @@ class Alternative():
         self.unknownnouncount = int(unknownnouncount)
         self.unknownnamecount = int(unknownnamecount)
         self.dezebwcount = int(dezebwcount)
+        self.noun1c_count : int = int(noun1c_count)
 
     def alt2row(self, uttid: UttId, base: str, user1: str = '', user2: str = '', user3: str = '',
                 bestaltids: List[AltId] = [],
@@ -112,7 +116,7 @@ class Alternative():
                       self.sucount,
                       self.svaok, self.deplusneutcount, self.badcatcount, self.hyphencount,
                       self.basicreplaceecount, self.ambigcount, self.subjunctivecount, self.unknownnouncount,
-                      self.unknownnamecount, self.dezebwcount]))
+                      self.unknownnamecount, self.dezebwcount, self.noun1c_count]))
         therow: list = [base, user1, user2, user3] + \
                        ['Alternative', uttid] + 2 * [''] + part4
 
@@ -307,6 +311,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
     * a list of all original utterances and all alternatives that have been considered
 
     '''
+    thissamplecorrections = gathercorrections(treebank)
     allorandalts: List[Optional[OrigandAlts]] = []
     errordict: ErrorDict = defaultdict(list)
     if corr == corr0:
@@ -315,12 +320,13 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
         newtreebank: Treebank = etree.Element('treebank')
         # errorlogrows = []
         for stree in treebank:
-            uttid = getuttid(stree)
+            uttid = getxsid(stree)
             # print(uttid)
             mustbedone = get_mustbedone(stree, targets)
             if mustbedone:
                 # to implement
-                newstree, orandalts = correct_stree(stree, method, corr)
+                sentence = getsentence(stree)
+                newstree, orandalts = correct_stree(stree, method, corr, thissamplecorrections)
                 if newstree is not None:
                     errordict = updateerrordict(
                         errordict, uttid, stree, newstree)
@@ -330,6 +336,10 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
                     newtreebank.append(stree)
             else:
                 newtreebank.append(stree)
+
+        # merge the corrections from this sample with the samplecorrections and update the file
+        mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
+        putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
 
         return newtreebank, errordict, allorandalts
 
@@ -489,7 +499,7 @@ def cleantextdone(metadataelement):
     return False
 
 
-def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> Tuple[SynTree, Optional[OrigandAlts]]:
+def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, thissamplecorrections) -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
 
      The function *correct_stree* takes as input:
@@ -497,6 +507,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     * stree: input syntactic structure
     * method:  MethodName (tarsp, asta, stap)
     * corr: CorrectionMode (corr0, corr1, corrn)
+    * thissamplecorrections: Dict[str, HistoryCorrection] with the corrections occurring in this sample
+    (correction= CHAT replacement, single word explanation, or incomplete word)
 
     and returns a tuple consisting of:
 
@@ -565,7 +577,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     # orandalts = []
 
     # uttid:
-    uttid = getuttid(stree)
+    uttid = getxsid(stree)
     sentid = getsentid(stree)
 
     # get the original utterance
@@ -615,7 +627,9 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
     debug = False
     # (fatstree, text='fattened tree:')
 
-    ctmds: List[Correction] = getcorrections(cleanutttokens, method, fatstree)
+    ctmds: List[Correction] = getcorrections(cleanutttokens, method, fatstree, thissamplecorrections=thissamplecorrections)
+
+
 
     debug = False
     if debug:
@@ -715,8 +729,9 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         showtree(thetree, text='thetree after treewithtokenpos')
     if debug:
         showtree(fatstree, text='fatstree')
-    for meta in thecorrection[2]:
-        curbackplacement = meta.backplacement
+    nextbackplacement = None
+    for mctr, meta in enumerate(thecorrection[2]):
+        curbackplacement = nextbackplacement if nextbackplacement is not None else meta.backplacement
         if curbackplacement == bpl_node:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(
@@ -787,6 +802,17 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                             settings.LOGGER.error(
                                 'Unexpected missing "lemma" attribute in utterance {}, node {}'.format(uttid, newnode))
                             simpleshow(oldnode, showchildren=False)
+        elif curbackplacement == bpl_word_delprec: # this is rather ad-hoc a more principled way will have to be found
+            nodeend = meta.annotationposlist[-1] + 1
+            nodexpath = './/node[@pt and @begin="{}" and @end="{}"]'.format(
+                nodeend - 1, nodeend)
+            newnode = myfind(thetree, nodexpath)
+            oldnode = myfind(fatstree, nodexpath)
+            newnodeparent = newnode.getparent()
+            newnodeparent.remove(newnode)
+            nextbackplacement = bpl_word
+
+
 
         elif curbackplacement == bpl_none:
             pass
@@ -804,7 +830,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
                 dezeAVnode = etree.fromstring(dezeAVntemplate.format(
                     begin=nodebegin, end=nodeend, id=nodeid))
                 thetree = transplant_node(oldnode, dezeAVnode, thetree)
-
+        if curbackplacement not in [bpl_word_delprec]:
+            nextbackplacement = None
         # etree.dump(thetree, pretty_print=True)
 
     # now do all the deletions at once, incl adaptation of begins and ends, and new sentence node
@@ -813,7 +840,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         showtree(thetree, text='thetree before deletion:')
 
     nodes2deleteintbegins = [int(b) for b in nodes2deletebegins]
-    thetree = deletewordnodes(thetree, nodes2deleteintbegins)
+    thetree = deletewordnodes(thetree, nodes2deleteintbegins, wordsonly=True)
 
     if debug:
         showtree(thetree, text='thetree after deletion:')
@@ -874,7 +901,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode) -> T
         getattval(n, 'begin')) not in omittedwordbegins]
     oldleaves = [getattval(n, 'word') for n in oldleavenodes]
     newleaves = getyield(fulltree)
-    uttid = getuttid(stree)
+    uttid = getxsid(stree)
     if debug and oldleaves != newleaves:
         settings.LOGGER.error(
             'Yield mismatch:{uttid}\n:OLD={oldleaves}\nNEW={newleaves}'.format(uttid=uttid, oldleaves=oldleaves,
@@ -919,13 +946,6 @@ def oldgetuttid(stree: SynTree) -> UttId:
     return uttid
 
 
-def getorigutt(stree: SynTree) -> Optional[str]:
-    origuttlist = stree.xpath(origuttxpath)
-    if origuttlist == []:
-        origutt = None
-    else:
-        origutt = origuttlist[0]
-    return origutt
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
@@ -936,7 +956,7 @@ def scorefunction(obj: Alternative) -> TupleNint:
             -obj.subjunctivecount, obj.dimcount,
             obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok,
             -obj.deplusneutcount,
-            -obj.dezebwcount, -obj.penalty)
+            -obj.dezebwcount, -obj.noun1c_count, -obj.penalty)
 
 
 def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
@@ -1015,7 +1035,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
     # to be implemented@@
     # it is presupposed that ptmds is not []
 
-    uttid = getuttid(stree)
+    uttid = getxsid(stree)
     orig = Original(uttid, stree)
 
     altid: AltId = 0
@@ -1034,7 +1054,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
         badcatcount = len(
-            [node for node in nt.xpath('.//node[@cat and (@cat="du")]')])
+            [node for node in nt.xpath('.//node[@cat and (@cat="du") and node[@rel="dp"]]')])
         hyphencount = len(
             [node for node in nt.xpath('.//node[contains(@word, "-")]')])
         basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
@@ -1051,6 +1071,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
                                                not(node[%Rpronoun%])]""")
         complsucount = len([node for node in nt.xpath(complsuxpath)])
         dezebwcount = len([node for node in nt.xpath(dezebwxpath)])
+        noun1c_count = len([node for node in nt.xpath(noun1cxpath)])
         # overregcount but these will mostly be unknown words
         # mwunamecount well maybe unknownpropernoun first
 
@@ -1058,7 +1079,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
                           supcount,
                           compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, badcatcount,
                           hyphencount, basicreplaceecount, ambigwordcount, subjunctivecount, unknownnouncount,
-                          unknownnamecount, dezebwcount)
+                          unknownnamecount, dezebwcount, noun1c_count)
         alts[altid] = alt
         altid += 1
     orandalts = OrigandAlts(orig, alts)

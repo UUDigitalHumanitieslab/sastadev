@@ -40,7 +40,7 @@ def writetable(tabel, ws, startrow=0, startcol=0, rhformat=None, chformat=None, 
         curcol = startcol
 
 
-def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=None, formats=[]):
+def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=None, formats=[], column_widths={}, condrowbg_colors=[]):
     workbook = xlsxwriter.Workbook(outfullname, {"strings_to_numbers": True})
     bold = workbook.add_format({'bold': True})
 
@@ -70,17 +70,37 @@ def mkworkbook(outfullname, headers, allrows, sheetname='Sheet1', freeze_panes=N
             worksheet1.set_column(colctr, colctr, colwidth)
             colctr += 1
 
+    #column widths if specified
+    for colrange, width in column_widths.items():
+        worksheet1.set_column(colrange, width)
+
     rowctr = 0
     for header in headers:
         xlsx_writerow(worksheet1, rowctr, header, format=bold)
         rowctr += 1
 
     for row in allrows:
-        xlsx_writerow(worksheet1, rowctr, row, formats=realformats)
+        rowformat = getrow_bg_colors(workbook, row, condrowbg_colors)
+        xlsx_writerow(worksheet1, rowctr, row, format=rowformat, formats=realformats)
         rowctr += 1
 
     worksheet1.autofilter(0, 0, rowctr, colctr)
     return workbook
+
+
+def getrow_bg_colors(wb, row, condrowbg_colors):
+    for cond, color in condrowbg_colors:
+        if cond(row):
+            return mk_bg_color(wb, color)
+    return None
+
+
+def mk_bg_color(wb, color):
+    result_format = wb.add_format()
+    result_format.set_pattern(1)
+    result_format.set_bg_color(color)
+    return result_format
+
 
 
 def adaptformats(formats, workbook):
@@ -162,6 +182,6 @@ def getxlsxdata(fullname, headerrow=0, sheetname=None):
 
 
 def write2excel(datadict, header, filename):
-    data = [list(key) + datadict[key] for key in datadict]
-    workbook = mkworkbook(filename, [header], data)
+    data = [datadict[key] for key in datadict]
+    workbook = mkworkbook(filename, header, data)
     workbook.close()

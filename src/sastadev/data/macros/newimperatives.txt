@@ -33,6 +33,8 @@ normalimp = """(@cat="sv1" and
 )
 """
 
+vzdisguisedasadj = """(@pt="adj" and (@lemma="in" or @lemma="af" or @lemma="aan"))"""
+
 wwimpok = """( %wwimpfeatok% and
          not(%modalframe%) and
 		 %zijnimpok%       and
@@ -107,26 +109,63 @@ wond4 = """(%ynquery% and %realcomplormodnodecount% = 3)"""
 
 wond5plus = """(%ynquery% and %realcomplormodnodecount% >= 4)"""
 
+onlythesearerealwords = """(count(.//node[%bxrealwordnode%]) = count(%allbxrealwordnodes%))"""
+
+
 partofwhquestion = """((@cat="sv1" or @cat="ssub") and @rel="body" and parent::node[@cat="whq" or @cat="whsub" ]) """
 declarative = """(@cat="smain" or (@cat="ssub" and not(%partofwhquestion%)) or (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
 
-Tarsp_OndB = """(%Ond% and  node[%Tarsp_Basic_B%]  and count(node) = 2)"""	
+Tarsp_OndB = """((%Ond% or node[@naamval="nomin"]) and  node[%Tarsp_Basic_B%]  and count(node) = 2 and %onlythesearerealwords% and not(%Tarsp_BX%) and not(%Xneg%)) """
+Tarsp_OndVC = """((%coreondvc% or %dpdpondvc%)  and count(node) = 2 and %onlythesearerealwords%) """
 
-Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
+beetje = """(@word="beetje")"""
+
+coreondvc = """(((node[%subject% and not(%beetje%) and not(node[%ooknogmod%])]) or node[@naamval="nomin" and not(node[%ooknogmod%])]) and  node[%Tarsp_Basic_VC% and not(node[%ooknogmod%])]) """
+dpdpondvc = """(node[@rel="dp" and %nominal% and not(node[%ooknogmod%]) and not(%beetje%) and @end<../node/@end] and node[@rel="dp" and (@cat="ap" or @pt="adj")and not(node[%ooknogmod%])])"""
+
+nominal = """(@pt="n" or @pt="vnw" or (@cat="np" ))"""
 
 Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
 
+coreXneg = """( count(node) = 2 and node[ @lemma!="niet"] and 
+                (node[@lemma="niet" ] or 
+	             node[@cat="advp" and node[@lemma="niet"] ]
+	            )
+			  ) """
+
+nonfinxneg = """(node[@rel="hd" and @pt="ww"] and node[@rel="vc" and %coreXneg%] )"""
+
+Xneg = """(%coreXneg% or
+           %nonfinxneg%
+		  ) and 
+		  %onlythesearerealwords%
+	  """
+
+
+wandonlyw_vc = """(%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) """
+w_novc = """ (%Tarsp_W% and not(node[@rel="vc"])) """
+nowonlyw_vc = """ (not(%Tarsp_W%) and node[%Tarsp_onlyWinVC%]) """
+
 Tarsp_OndW = """(%declarative% and %Ond% and  
-                ((%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) or 
-				 (%Tarsp_W% and not(node[@rel="vc"])) or 
-				 (not(node[%Tarsp_W%]) and node[%Tarsp_onlyWinVC%]) 
+                (%wandonlyw_vc% or 
+				 %w_novc% or 
+				 %nowonlyw_vc% 
 				) and 
-                 (%realcomplormodnodecount% + %indexnodecount% = 1) and 
+                 (%realcomplormodnodecount% + %nonsuindexnodecount% = 1) and 
                 (@rel!="dp" or (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) )
 				
-				)"""
+				)"""				
+			
+subjectboundobject = """(@rel="obj1" and @index = parent::node/parent::node/node[@rel="su"]/@index) """			
+subjectboundobjectcount = """count(node[%subjectboundobject%]) """ 
 
-Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and (%realcomplormodnodecount% + %nonsuindexnodecount% = 0) )"""
+oldonlyw = """( (%realcomplormodnodecount% + %nonsuindexnodecount% = 0) or %subjectboundobjectcount% = 1)"""
+onlyw = """( (node[@rel="su" and %indexnode%] and %realcomplormodnodecount% = 0) or 
+             (node[%subjectboundobject%] and %realcomplormodnodecount% = 0)      or
+             (%realcomplormodnodecount% = 0 )			 
+           )"""  
+
+Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and %onlyw% )"""
 
 
 Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
@@ -166,7 +205,7 @@ Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or @
 Tarsp_finvc = """(@rel="vc" and (@cat="cp" or @cat="whsub"))"""
 Tarsp_vcvnw = """(@rel="vc" and @pt="vnw")"""
 
-Tarsp_WOndX = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% <= 2)
+Tarsp_WOndX = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% <= 2 and not(%vrwondplus%))
 """
 
 Tarsp_WOnd4 = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% = 3)
@@ -191,13 +230,31 @@ Tarsp_Vr5plus = """(%Tarsp_whq% and
         node[%Tarsp_whqhead%] and
         node[%whqbody%  and %realcomplormodnodecount% > 2])"""
 		
-Tarsp_BBX = """((@cat="top" and
+old_Tarsp_BBX = """((@cat="top" and
    count(.//node[@pt!='let' and @pt!='vg'])=3 and 
    count(.//node[@special="er_loc" or @pt="bw" or @pt="vz" or (@pt="adj" and @rel="dp" ) ])=2 and 
    .//node[@pt="n" or (@pt="vnw" and not(@special="er_loc")) ]) or
    ((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and count(.//node[%Tarsp_B%]) = 2 and %realcomplormodnodecount% = 2)
    
    )"""
+   
+Tarsp_BBX = """(%coreBBX% or %clausalBBX% or %wvcBBX% or %abcBBX% or %vabcBBX% or %nadvpbbBBX% or %bplusxpbBBX%)"""
+
+old_corebb = """ ((@special="er_loc" or @pt="bw" or @pt="vz" or (@pt="adj" and @rel="dp" )) and @rel!="hd" and @rel!="hdf")""" 
+   
+coreBBX = """((@cat!="smain" and @cat!="sv1") and count(node[%coreB%])=2 and count(node) = 3 and %onlythesearerealwords% )"""
+clausalBBX = """((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and count(node[%Tarsp_B%]) = 2 and  count(node) = 3 and %onlythesearerealwords%)"""
+wvcBBX = """((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W%  and node[@rel="vc" and count(node[%Tarsp_B%]) = 2 and  count(node) = 3 ] and %onlythesearerealwords%) """ 
+abcBBX = """((@cat!="smain" and @cat!="sv1") and node[%Tarsp_B% and @rel!="tag"] and node[node[%Tarsp_B%] and count(node) =2 ] and count(node[%realnode%]) = 2 and %onlythesearerealwords%)"""		
+vabcBBX = """((@cat!="smain" and @cat!="sv1") and 
+               count(node[%realnode%]) = 2 and 
+               node[node[%Tarsp_B%] and node[@pt="vg"]] and 
+               node[node[%Tarsp_B%] and count(node)=2] and
+               %onlythesearerealwords%
+              ) """
+
+nadvpbbBBX = """(node[not(%Tarsp_B%) and (not(@pt) or (@pt!="ww" and @pt!="let")) and @cat!="advp"] and node[@cat="advp" and node[@rel="mod" ] and node[@rel="hd" ]] and count(node) = 2 and %onlythesearerealwords%) """
+bplusxpbBBX = """(node[%Tarsp_B% and @rel!="tag"] and not(node[@pt="ww"]) and node[not(%Tarsp_B%) and count(.//node[%Tarsp_B%]) = 1]and %onlythesearerealwords%)"""
 		
 Tarsp_Ov3 = """(%declarative% and 
                 not(%Tarsp_OndWVC%) and 
@@ -284,9 +341,25 @@ Tarsp_vcw = """
 )
 """
 
-realwordnode = """ ((@pt="ww" or @pt="n" or @pt="adj" or @pt="bw" or @pt="vz" or @pt="vg") and not(%Tarsp_kijkVU%))
+singlecharnoun = """(@pt="n" and string-length(@word) = 1)""" 
+chatcode = """(@word="xxx" or @word="xx" or @word="yyy" or @word="yy") """
+
+realwordnode = """ (@word and @pt!="let" and (@pt!="tsw" or %tswnoun%) and not(%Tarsp_kijkVU%) and not(%singlecharnoun%) and not(%chatcode%))
 """
 
 horenaux = """(@lemma="horen" and 
                @pt="ww" and 
 			   ../node[@rel="ld" or @rel="mod"] and not(../node[@rel="obj1" or @rel="vc"]))"""
+			   
+inv = """( 
+          %declarative% and 
+          ((
+            (
+             (@cat="sv1" and not(parent::node[@cat="whq"])) or
+             (@cat="smain" )
+            ) and 
+            node[@pt="ww" and @rel="hd" and (not(@stype) or @stype!="imparative") ] and node[@rel="su" and number(@end)>../node[@rel="hd"]/@end]
+           ) or 
+           %robustinversion%
+		  )
+		 )"""
