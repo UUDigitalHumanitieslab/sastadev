@@ -3,7 +3,8 @@ This module contains definitions of types used in multiple modules
 """
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, TypeAlias, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing_extensions import TypeAlias
 
 from lxml import etree
 
