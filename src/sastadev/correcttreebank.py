@@ -1,5 +1,6 @@
 from collections import defaultdict
 from copy import copy, deepcopy
+import os
 from typing import Dict, List, Optional, Set, Tuple
 
 from lxml import etree
@@ -9,8 +10,8 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.history import (gathercorrections, mergecorrections, putcorrections,
-                              samplecorrections, samplecorrectionsfullname)
+from sastadev.history import (donefiles, donefilesfullname, gathercorrections, mergecorrections, putcorrections,
+                              putdonefilenames, samplecorrections, samplecorrectionsfullname)
 from sastadev.lexicon import de, dets, known_word, nochildwords
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
@@ -293,13 +294,14 @@ def updateerrordict(errordict: ErrorDict, uttid: UttId, oldtree: SynTree, newtre
     return errordict
 
 
-def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, corr: CorrectionMode = corrn) \
-        -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
+def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, treebankfullname,
+                    corr: CorrectionMode = corrn )   -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
     '''
     The function *correcttreebank* takes as input:
 
     * treebank: the treebank of the sample, parsed as is.
     * targets: a specification of the utterances that have to be analysed
+    * treebankfullname: name of the file that contains the treebank
     * method: the method to be used. Some corrections are method-specific
     * corr: to indicate how the corrections should be done: no corrections at all, all corrections but the last one (usually the one with most adaptations) is selected; all  corrections but the best one according to the evaluation  criterion is selected.
 
@@ -311,12 +313,19 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
     * a list of all original utterances and all alternatives that have been considered
 
     '''
-    thissamplecorrections = gathercorrections(treebank)
+
+
     allorandalts: List[Optional[OrigandAlts]] = []
     errordict: ErrorDict = defaultdict(list)
     if corr == corr0:
         return treebank, errordict, allorandalts
     else:
+        reducedtreebankfullname = os.path.relpath(treebankfullname, start=settings.DATAROOT)
+        if reducedtreebankfullname not in donefiles:
+            thissamplecorrections = gathercorrections(treebank)
+        else:
+            thissamplecorrections = {}
+
         newtreebank: Treebank = etree.Element('treebank')
         # errorlogrows = []
         for stree in treebank:
@@ -340,6 +349,8 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, co
         # merge the corrections from this sample with the samplecorrections and update the file
         mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
         putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
+        donefiles.add(reducedtreebankfullname)
+        putdonefilenames(donefiles, donefilesfullname)
 
         return newtreebank, errordict, allorandalts
 

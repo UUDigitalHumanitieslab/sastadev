@@ -35,7 +35,7 @@ all_levels = set()
 
 # @@next must be made dependent on the method
 literallevels = ['literal', 'lemma']
-commentslevels = ['comments', 'commentaar', 'opmerkingen']
+commentslevels = ['comments', 'commentaar', 'opmerkingen', 'qa']
 
 semicolon = ';'
 labelsep = semicolon

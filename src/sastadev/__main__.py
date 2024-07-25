@@ -1133,7 +1133,7 @@ def main():
         # add xsid to trees that should have one but do not
         treebank2 = tb_addxsid(treebank1, targets)
 
-        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, corr)
+        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, options.infilename, corr)
 
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)

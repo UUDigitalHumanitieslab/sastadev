@@ -11,8 +11,12 @@ from sastadev.treebankfunctions import getorigutt, getyield, getxselseuttid
 from typing import Dict, List, Tuple
 import os
 
-childescorrectionsfullname = os.path.join(settings.SD_DIR, 'data', 'childescorrections', 'childescorrections.txt')
-samplecorrectionsfullname = os.path.join(settings.SD_DIR, 'data', 'childescorrections', 'samplecorrections.txt')
+childescorrectionspath = os.path.join(settings.SD_DIR, 'data', 'childescorrections')
+
+childescorrectionsfullname = os.path.join(childescorrectionspath, 'childescorrections.txt')
+samplecorrectionsfullname = os.path.join(childescorrectionspath, 'samplecorrections.txt')
+donefilesfullname = os.path.join(childescorrectionspath, 'donefiles.txt')
+
 @dataclass
 class HistoryCorrection:
     wrong: str
@@ -77,6 +81,19 @@ def getcorrections(filename) -> defaultdict:
     return resultdict
 
 
+def getdonefilenames(filename) -> set:
+    result = set()
+    idata = readcsv(filename, header=False)
+    for i, row in idata:
+        result.add(row[0])
+    return result
+
+def putdonefilenames(donefiles: set, filename):
+    data = []
+    for el in donefiles:
+        data.append([el])
+    writecsv(data, filename)
+
 def putcorrections(corrections, filename):
     data = []
     for wrong in corrections:
@@ -126,5 +143,6 @@ childescorrectionsexceptions = ['nie', 'moe', 'dee', 'ie', 'su', 'an', 'tan', 'd
                                [tpl[0] for tpl in innureplacements]
 
 samplecorrections = getcorrections(samplecorrectionsfullname)
+donefiles = getdonefilenames(donefilesfullname)
 
 junk = 0

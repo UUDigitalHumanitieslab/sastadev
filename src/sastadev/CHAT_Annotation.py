@@ -586,43 +586,44 @@ def simplemetafunction(f):
     return lambda ann, pos, w: Meta(ann.name, [f(w)],
                                     annotatedposlist=[pos],
                                     annotatedwordlist=[w],
-                                    source=CHAT)
+                                    source=CHAT,
+                                    penalty= 0)
 
 
 def noncompletionmetafunction(ann, annotationword, annotationpos, annotatedword):
     return Meta(ann.name, annotationwordlist=[annotationword], annotationposlist=[annotationpos],
                 annotatedwordlist=[annotatedword], annotatedposlist=[
                     annotationpos], value=annotationword,
-                source=CHAT, backplacement=bpl_replacement)
+                source=CHAT, backplacement=bpl_replacement, penalty=0)
 
 
 def simple_bpldel_metafunction(f): return lambda ann, pos, w: Meta(ann.name, [f(w)], annotatedposlist=[pos],
                                                                    annotatedwordlist=[
                                                                        w], source=CHAT,
-                                                                   backplacement=bpl_delete)
+                                                                   backplacement=bpl_delete, penalty=0)
 
 
 def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
     return Meta(ann.name, annotationwordlist,
                 annotationposlist=annotationposlist, annotatedposlist=annotatedposlist,
-                annotatedwordlist=annotatedwordlist, source=CHAT)
+                annotatedwordlist=annotatedwordlist, source=CHAT, penalty=0)
 
 
 def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
     return Meta(ann.name, annotationwordlist,
                 annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
-                annotatedposlist=annotatedposlist, source=CHAT)
+                annotatedposlist=annotatedposlist, source=CHAT, penalty=0)
 
 
 def complexmetafunction_replbpl(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
     Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
-         annotatedposlist=annotatedposlist, source=CHAT, backplacement=bpl_replacement)
+         annotatedposlist=annotatedposlist, source=CHAT, backplacement=bpl_replacement, penalty=0)
 
 
 def charmetafunction(ann, annotationcharlist, annotatedcharlist, annotationcharposlist, annotatedcharposlist):
     return Meta(ann.name, annotationcharlist, annotationcharlist=annotationcharlist,
                 annotatedcharlist=annotatedcharlist,
-                annotationcharposlist=annotationcharposlist, annotatedcharposlist=annotatedcharposlist)
+                annotationcharposlist=annotationcharposlist, annotatedcharposlist=annotatedcharposlist, penalty=0)
 
 
 def epsf(w):

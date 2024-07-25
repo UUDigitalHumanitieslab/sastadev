@@ -42,7 +42,7 @@ from sastadev.dedup import filledpauseslexicon
 from sastadev.lexicon import known_word, tswnouns
 from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
                                defaultpenalty, insertion,
-                               insertiontokenmapping, smallclause,
+                               insertiontokenmapping, modifypenalty as mp, smallclause,
                                tokenmapping)
 from sastadev.namepartlexicon import namepart_isa_namepart
 from sastadev.sastatoken import Token
@@ -447,7 +447,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                     else:
                         inserttokens = [Token(verbform, fpos, subpos=5)]
                         resultlist = mktokenlist(tokens, fpos, inserttokens)
-                    metadata += mkinsertmeta(inserttokens, resultlist, penalty=.5 * defaultpenalty)
+                    metadata += mkinsertmeta(inserttokens, resultlist, penalty=mp(50))
                     # add metadata for topic drop
         elif not nominal(first) and not ww(first) and inf(second):
             fpos = -1

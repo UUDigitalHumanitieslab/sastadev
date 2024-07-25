@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Dict, List, Tuple
 
 from sastadev.deregularise import correctinflection
-from sastadev.metadata import bpl_word, defaultpenalty
+from sastadev.metadata import bpl_word, defaultpenalty, modifypenalty as mp
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import ReplacementMode, SynTree, TokenTreePredicate
 from sastadev.treebankfunctions import find1
@@ -12,9 +12,9 @@ BasicReplacement = Tuple[str, str, str, str, str, int]
 KnownReplacement = Tuple[str, str, str, str, str, ReplacementMode]
 
 dp = defaultpenalty
-dp6 = dp + 6
-dp3 = dp + 3
-dp2 = dp + 2
+dp6 = mp(160)  # dp + 6
+dp3 = mp(130)  # dp + 3
+dp2 = mp(120)  # dp + 2
 pron = 'Pronunciation'
 orth = 'Orthography'
 infpron = 'Informal Pronunciation'
@@ -128,7 +128,7 @@ innureplacements = [(w1[:-1] + 'u', w2, c, n, v, p) for (w1, w2, c, n, v, p) in 
 #:      :no-value:
 #:
 basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared, dp),
-                                                ('isse', 'is', pron, infpron, addschwa, 1),
+                                                ('isse', 'is', pron, infpron, addschwa, mp(10)),
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('t', "'t", orth, spellerr, apomiss, dp),
                                                 ('effjes', 'eventjes', pron, infpron, varpron, dp),
@@ -155,13 +155,13 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('wiw', 'wil', pron, wrongpron, phonrepl.format(wrong='w', correct='l'), dp),
                                                 ('annug', 'ander', pron, wrongpron, phonrepl.format(wrong='nug', correct='der'), dp),
                                                 ('nohug', 'nodig', pron, wrongpron, phonrepl.format(wrong='hu', correct='di'), dp),
-                                                ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron), dp-5),
+                                                ('magge', 'mogen', morph, wronginfl, '{} & {}'.format(overgen, infpron), mp(50)),
                                                 ('magge', 'mag', pron, infpron, emphasis, dp),
                                                 ('maggen', 'mogen', morph, wronginfl, overgen, dp),
                                                 ('aleen', 'alleen', orth, typo, typorepl.format(wrong='aleen', correct='alleen'), dp),
                                                 ('heef', 'heeft', pron, infpron, codared, dp),
                                                 ('saan', 'staan', pron, wrongpron, onsetred, dp),
-                                                ('saan', 'gaan', pron, wrongpron, wrongpron, dp + 2),
+                                                ('saan', 'gaan', pron, wrongpron, wrongpron, mp(120)),
                                                 ('jerke', 'werken', pron, wrongpron, wrongpron, dp),
                                                 ('taan', 'staan', pron, wrongpron, onsetred, dp),
                                                 ("a'maal", 'allemaal', pron, infpron, redpron, dp),
@@ -207,14 +207,14 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('naartoe', 'ernaartoe', pron, infpron, erdrop, dp),
                                                 ('goe', 'goed', pron, infpron, codared, dp),
                                                 ('geten', 'gegeten', morph, infpron, prefixdrop, dp),
-                                                ('geten', 'vergeten', morph, infpron, prefixdrop, dp + 2),
+                                                ('geten', 'vergeten', morph, infpron, prefixdrop, mp(120)),
                                                 ('cirtus', 'circus', pron, wrongpron, typorepl.format(wrong='t', correct='c'), dp),
                                                 ('ken', 'kan', pron, infpron, dial, dp),
                                                 ('an', 'aan', pron, infpron, vowellaxing, dp),
                                                 ('an', 'kan', pron, infpron, onsetred, dp),
                                                 ('hoeve', 'hoef', pron, infpron, emphasis, dp),
-                                                ('hoeve', 'hoeft', pron, infpron, emphasis, dp+2),
-                                                ('hebbe', 'heb', pron, infpron, emphasis, dp+2),
+                                                ('hoeve', 'hoeft', pron, infpron, emphasis, mp(120)),
+                                                ('hebbe', 'heb', pron, infpron, emphasis, mp(120)),
                                                 ('pot', 'kapot', pron, infpron, sylldrop, dp),
                                                 ('kane', 'andere', pron, wrongpron, wrongpron, dp)
                                                 ] + \
@@ -293,16 +293,16 @@ basicexpansionlist: List[BasicExpansion] = \
      ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
      ("dit's", ["dit", "is"], pron, infpron, contract, dp),
      ("dat's", ["dat", "is"], pron, infpron, contract, dp),
-     ("datte", ['dat', 'ie'], pron, infpron, contract, dp + 2),
-     ("omdatte", ['omdat', 'ie'], pron, infpron, contract, dp + 2),
+     ("datte", ['dat', 'ie'], pron, infpron, contract, mp(120)),
+     ("omdatte", ['omdat', 'ie'], pron, infpron, contract, mp(120)),
      ("isda", ['is', 'dat'], pron, infpron, contract, dp + 2),
-     ("tisda", ['het',  'is', 'dat'], pron, infpron, contract, dp + 2),
-     ("'savonds", ["'s", 'avonds'], pron, infpron, typo, dp + 2),
-     ("savonds", ["'s", 'avonds'], pron, infpron, typo, dp + 2),
-     ("jamaar", ['ja', 'maar'], pron, infpron, typo, dp + 2),
-     ("jahoor", ['ja', 'hoor'], pron, infpron, typo, dp + 2),
-     ("neehoor", ['nee', 'hoor'], pron, infpron, typo, dp + 2),
-     ("kanne", ['kan', 'er'], pron, infpron, codared, dp + 2),
+     ("tisda", ['het',  'is', 'dat'], pron, infpron, contract, mp(120)),
+     ("'savonds", ["'s", 'avonds'], pron, infpron, typo, mp(120)),
+     ("savonds", ["'s", 'avonds'], pron, infpron, typo, mp(120)),
+     ("jamaar", ['ja', 'maar'], pron, infpron, typo, mp(120)),
+     ("jahoor", ['ja', 'hoor'], pron, infpron, typo, mp(120)),
+     ("neehoor", ['nee', 'hoor'], pron, infpron, typo, mp(120)),
+     ("kanne", ['kan', 'er'], pron, infpron, codared, mp(120)),
      ("moek", ['moet', "'k"], pron, infpron, contract, dp)
 
      ]

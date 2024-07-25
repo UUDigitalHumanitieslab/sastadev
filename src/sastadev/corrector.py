@@ -29,7 +29,7 @@ from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
                                defaultpenalty, filled_pause, fstoken, intj,
-                               janeenou, longrep, mkSASTAMeta, repeated,
+                               janeenou, longrep, mkSASTAMeta, modifypenalty as mp, repeated,
                                repeatedjaneenou, repeatedseqtoken, shortrep,
                                substringrep, unknownsymbol)
 from sastadev.sasta_explanation import explanationasreplacement
@@ -1110,7 +1110,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Wrong pronunciation', value='Final n drop', cat='Pronunciation',
                                         subcat='Coda reduction',
-                                        backplacement=bpl_word, penalty=.5*defaultpenalty)
+                                        backplacement=bpl_word, penalty=mp(50))
 
 
 
