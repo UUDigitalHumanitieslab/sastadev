@@ -378,7 +378,7 @@ hijgen	hijsen	explanation	1
 tuperman	Superman	explanation	1
 kijna	bijna	explanation	1
 klaan	kraan	explanation	1
-voorstee	schoorsteen	explanation	1
+voorstee	schoorsteen	explanation	2
 knorrens	varkens	explanation	1
 kein	klein	explanation	1
 ooid	gegooid	explanation	1

@@ -168,7 +168,14 @@ onlyw = """( (node[@rel="su" and %indexnode%] and %realcomplormodnodecount% = 0)
 Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and %onlyw% )"""
 
 
-Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+Tarsp_OndWB = """(%OndWB_core% or %OndWB_special%)"""
+
+OndWB_core = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+OndWB_special = """(%declarative% and 
+                    node[@rel="hd" and @pt="ww" and @wvorm="pv"] and 
+                    node[@rel="ld" and (@cat="np" or @pt="n")] and 
+					node[@rel="svp"] and %realcomplormodnodecount% = 1)
+ """
 
 Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and node[%Tarsp_Basic_VC%] and count(%fillednode%)=2)"""
 

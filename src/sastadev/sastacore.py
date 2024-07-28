@@ -128,6 +128,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
                 # uttno = getuttno(syntree)
                 # allutts[uttno] = getyield(syntree)
                 allutts[uttid] = getyield(syntree)
+                junk = 0
 
         # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
         # rawexactresults = getexactresults(allmatches)

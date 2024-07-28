@@ -1457,7 +1457,7 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
             if wordinfos != []:
                 for wordinfo in wordinfos:  # if there are multiple alternatives we overwrite and therefore get the last alternative
                     (pos, dehet, infl, lemma) = wordinfo
-                    if token.word in dets[de]  and dehet == het and infl in ['e', 'de']:
+                    if token.word in dets[de]  and ((dehet == het and infl in ['e', 'de']) or 'de' in infl):
                         # newcurtoken = replacement(token, swapdehet(token))
                         newcurtokenword = swapdehet(token.word)
                         newcurtoken = Token(newcurtokenword, token.pos)

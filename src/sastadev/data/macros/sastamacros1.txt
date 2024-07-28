@@ -278,10 +278,19 @@ complement = """((@rel="obj1" or @rel="obj2") or
 				
 verbalcomplement = """(@rel="vc" and (@cat="cp" or @cat="whq" or @cat="whsub"))"""
 		 
-predcB = """(@rel="predc" and 
-           (@pt="adj" or @pt="bw" or @cat="ap" or @cat="advp") and
+predcB1 = """(@rel="predc" and 
+           (@pt="adj" or @cat="ap" ) and
            ../node[@rel="obj1"]
          )"""
+
+predcB2 = """(@rel="predc" and 
+           (@pt="bw"  or @cat="advp" or @cat="pp" or @pt="vz"  or %dimadj%  or 
+		   node[@cat="ap" and node[@rel="hd" and %dimadj%]])  
+         )"""
+		 
+predcB = """(%predcB1% or %predcB2%)"""
+
+dimadj = """(@pt="adj" and @graad="dim")""""
 		 
 pobj1B = """(@rel="pc" and ../node[@rel="hd" and %locverb%])"""
  
