@@ -57,7 +57,7 @@ Tarsp_hww = """(
   @lemma = "staan" or   contains(@lemma,"_staan") or
   @lemma = "zitten" or contains(@lemma,"_zitten")) and
   not(%hwwprtverb%) and
-  not(starts-with(@lemma,"mee")) and
+  not(starts-with(@lemma, "mee")) and
   not(starts-with(@lemma, "samen")) 
  
  
@@ -226,8 +226,8 @@ Tarsp_Basic_B = """(@rel="mod" or @rel="ld" or @rel="predm"  or %Tarsp_B_predc%)
 
 Tarsp_B_predc = """(@rel=predc and (@pt="vz" or @pt="bw" or @cat="pp" or @cat="advp" or %Rpronoun%))"""
 
-Tarsp_B = """(
-       ((((@rel="mod" or @rel="ld" or @rel="predm") and
+Tarsp_B = """( not(%aanloopzo%) and
+       (((((@rel="mod" or @rel="ld" or @rel="predm") and
           (not(@cat) or @cat!="conj") and
 		  (not(@pt) or @pt!="tsw")
          )or 
@@ -236,7 +236,7 @@ Tarsp_B = """(
          ) and 
          (../node[@pt="ww" and @rel="hd"])
         ) or
-        ((@pt="vz" or @pt="bw" or %Rpronoun%) and (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and %notonlyrealnode%) or
+        ((@pt="vz" or @pt="bw" or %Rpronoun%) and (@lemma!="kijk") and (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and %notonlyrealnode%) or
         (@cat="pp" and (@rel="--" or @rel="dp") and %notonlyrealnode%) or
 		(@rel="pc" and ../node[@rel="hd" and %locverb%]) or
         (@rel="cnj" and parent::node[@rel="mod" or @rel="ld" or @rel="predm"]) or
@@ -246,10 +246,11 @@ Tarsp_B = """(
         %vzdisguisedasadj% or
 		%svpofhww%
 		)
+		)
      
 """
 
-svpofhww = """ (@rel="svp" and ../node[%hwwwithsvp%])"""
+svpofhww = """ (@rel="svp" and @lemma!="mee" and ../node[%hwwwithsvp% and not(%hwwwithsvpexception%)])"""
 
 hwwwithsvp = """(contains(@lemma,"_kunnen") or
                  contains(@lemma,"_moeten") or
@@ -266,9 +267,12 @@ hwwwithsvp = """(contains(@lemma,"_kunnen") or
                  contains(@lemma,"_lopen") or
                  contains(@lemma,"_mogen") or
                  contains(@lemma,"_staan") or
-                 contains(@lemma,"_zitten")
+                 contains(@lemma,"_zitten") or
+                 contains(@lemma,"_hebben") or
+                 contains(@lemma,"_zijn") 
 				) """
 
+hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan")""" 
 
 complement = """((@rel="obj1" or @rel="obj2") or 
                  (@rel="predc" and not(%predcB%)) or
@@ -329,7 +333,8 @@ coreB = """( ((@pt="bw" or @pt="vz" or @cat="advp" or @cat="pp" or %Rpronoun%) a
 			 not(%Tarsp_kijkVU%) and 
 			 not((@lemma="nou" or @lemma="zo") and (@rel="tag" or @rel="--") and count(allbxrealwordnodes) > 1) and
 			 not(%ahiaspp%) and
-			 not(@frame="adv_tag")
+			 not(@frame="adv_tag") and 
+			 not(%aanloopzo%)
            )"""
 
 ahiaspp = """(@cat="pp" and node[@rel="hd" and @lemma="aan"] and node[@cat="np" and node[@lemma="het" and @pt="lid"] and node[@rel="hd" and @pt="ww" and @wvorm="inf"]]) """
@@ -817,3 +822,13 @@ intrmodalverb = """( @pt="ww" and
 
 
 nodimlemma = """(@lemma="meisje" or @lemma="koek" or @lemma="beet")"""  
+
+hequery = """((@lemma="hè" or @lemma="he") and @end != 1 and
+       ( (@end = ancestor::node[@cat="top"]/@end) or
+         (@end = ancestor::node[@cat="top"]/@end-1 )
+       )
+      )"""
+	  
+aanloopzo = """(@lemma="zo" and 
+                @begin = ancestor::node[@cat="top"]/@begin and
+                starts-with(ancestor::alpino_ds/descendant::sentence, "zo ,")) """

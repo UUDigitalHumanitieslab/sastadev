@@ -24,7 +24,7 @@ from sastadev.history import (childescorrections, childescorrectionsexceptions, 
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, isa_inf, isa_vd, known_word,
-                              tswnouns, wordsunknowntoalpinolexicondict)
+                              tswnouns, vuwordslexicon, wordsunknowntoalpinolexicondict)
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
@@ -79,6 +79,9 @@ wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee', 'wat', 'alles', 
 #: replacement of e or schwa  and
 #: therefore have to be excluded from determiner replacement.
 e2een_excluded_nouns = ['kijke', 'kijken']
+
+interpunction = '.?!'
+comma = ","
 
 class Ngramcorrection:
     def __init__(self, ngram, fpositions, cpositions, metafunction):
@@ -178,6 +181,39 @@ def ngramreduction(reducedtokens: List[Token], token2nodemap: Dict[Token, SynTre
     return reducedtokens, allremovetokens, allmetadata
 
 
+def inaanloop(tok, tokens) -> bool:
+    if len(tokens) == 0:
+        return False
+    if tokens[0] == tok:
+        if len(tokens) == 1:
+            return True
+        else:
+            return tokens[1].word == comma
+    else:
+        return False
+
+def inuitloop(tok, tokens) -> bool:
+    if len(tokens) < 2:
+        return False
+    elif tokens[-1].word in interpunction:
+        thetoken = tokens[-2]
+        prectoken = tokens[-3] if len(tokens) > 2 else None
+    else:
+        thetoken = tokens[-1]
+        prectoken = tokens[-2]
+    result = tok = thetoken and prectoken is not None and prectoken.word == comma
+    return result
+def mustberemoved(tok, reducedtokens) -> bool:
+    wordprops = vuwordslexicon[tok.word]
+    removeinaanloop = '1' in wordprops and inaanloop(tok, reducedtokens)
+    removefirst = '1' in wordprops and ',' not in wordprops and tok == reducedtokens[0]
+    removeinuitloop = '3' in wordprops and inuitloop(tok, reducedtokens)
+    removelast = '3' in wordprops and ',' not in wordprops and tok == reducedtokens[-1]
+    removeincore = '2' in vuwordslexicon[tok.word] and not inuitloop(tok, reducedtokens) and \
+                   not inaanloop(tok, reducedtokens)
+    result = removeinaanloop or removefirst or removeinuitloop or removelast or removeincore
+    return result
+
 def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], List[Meta]]:
     if tree is None:
         settings.LOGGER.error(
@@ -219,11 +255,25 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
                             filled_pause, 'Syntax') for token in filledpausetokens]
     allmetadata += metadata
 
+    # remove vuwords partially dependent on their position
+    vutokens = [tok for tok in reducedtokens if tok.word in vuwordslexicon and
+                mustberemoved(tok, reducedtokens)
+                ]
+    allremovetokens += vutokens
+    reducedtokens = [n for n in reducedtokens if n not in vutokens]
+    metadata = [mkSASTAMeta(token, token, 'ExtraGrammatical',
+                            intj, 'Syntax') for token in vutokens]
+    allmetadata += metadata
+
+    # we do not use the notanalyzewords.txt hopefully covered by following
+    # we must exclude here the vuwords unless they are in the appropriate position (hoor at the end, but toe only at the beginning
     # remove tsw incl goh och hé oke but not ja, nee, nou
     tswtokens = [n for n in reducedtokens if n.pos in token2nodemap
                  and getattval(token2nodemap[n.pos], 'pt') == 'tsw'
                  and getattval(token2nodemap[n.pos], 'lemma') not in {'ja', 'nee', 'nou'}
-                 and getattval(token2nodemap[n.pos], 'lemma') not in tswnouns]
+                 and getattval(token2nodemap[n.pos], 'lemma') not in tswnouns
+                 and getattval(token2nodemap[n.pos], 'lemma') not in vuwordslexicon
+                 ]
     tswpositions = [n.pos for n in tswtokens]
     allremovetokens += tswtokens
     allremovepositions == tswpositions
@@ -231,6 +281,8 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     metadata = [mkSASTAMeta(token, token, 'ExtraGrammatical',
                             intj, 'Syntax') for token in tswtokens]
     allmetadata += metadata
+
+
 
     # find duplicatenode repetitions of ja, nee, nou
     janeenouduplicatenodes = find_janeenouduplicates(reducedtokens)

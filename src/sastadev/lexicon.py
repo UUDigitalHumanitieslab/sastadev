@@ -230,3 +230,17 @@ lexiconfoldername = 'data/wordsunknowntoalpino'
 wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
 wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
 wordsunknowntoalpinolexicondict = initializelexicondict(wordsunknowntoalpinofullname)
+
+lexiconfoldername = 'data/filledpauseslexicon'
+
+filledpausesfilename = 'filledpauseslexicon.txt'
+filledpausesfullname = os.path.join(settings.SD_DIR, lexiconfoldername, filledpausesfilename)
+filledpauseslexicon = initializelexicon(filledpausesfullname)
+
+nomlulexiconfilename = 'notanalyzewords.txt'
+nomlulexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, nomlulexiconfilename)
+nomlulexicon = initializelexicon(nomlulexiconfullname)
+
+vuwordslexiconfilename = 'vuwordslexicon.txt'
+vuwordslexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, vuwordslexiconfilename)
+vuwordslexicon = initializelexicondict(vuwordslexiconfullname)

@@ -7,7 +7,7 @@ from lxml import etree
 
 from sastadev import compounds
 from sastadev.conf import settings
-from sastadev.lexicon import informlexicon
+from sastadev.lexicon import informlexicon, filledpauseslexicon, nomlulexicon, vuwordslexicon
 from sastadev.metadata import (filled_pause, fstoken, intj, janeenou, longrep,
                                repeated, repeatedjaneenou, repeatedseqtoken,
                                shortrep, substringrep, unknownsymbol,
@@ -989,10 +989,11 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
 
 
 # initialize filledpauseslexicon
-filledpauseslexicon = set()
-filledpausesfilename = os.path.join(settings.SD_DIR, 'data', 'filledpauseslexicon',
-                                    'filledpauseslexicon.txt')
-filledpausesfile = open(filledpausesfilename, 'r', encoding='utf8')
-for word in filledpausesfile:
-    cleanword = word.strip()
-    filledpauseslexicon.add(cleanword)
+# moved to lexicon module
+# filledpauseslexicon = set()
+# filledpausesfilename = os.path.join(settings.SD_DIR, 'data', 'filledpauseslexicon',
+#                                     'filledpauseslexicon.txt')
+# filledpausesfile = open(filledpausesfilename, 'r', encoding='utf8')
+# for word in filledpausesfile:
+#     cleanword = word.strip()
+#     filledpauseslexicon.add(cleanword)
