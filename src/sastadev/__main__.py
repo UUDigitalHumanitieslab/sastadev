@@ -159,10 +159,12 @@ from sastadev.constants import (bronzefolder, bronzesuffix, checksuffix, checked
                                 loggingfolder, outtreebanksfolder, permprefix, platinumsuffix,
                                 platinumeditedsuffix,
                                 resultsfolder, silverfolder, silverpermfolder, silversuffix)
-from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader, validcorroptions)
+from sastadev.correcttreebank import (correcttreebank, corr0, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
+from sastadev.history import (donefiles, donefilesfullname, gathercorrections, mergecorrections, putcorrections,
+                              putdonefilenames, samplecorrections, samplecorrectionsfullname)
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, literalmissedmatches
@@ -1133,7 +1135,23 @@ def main():
         # add xsid to trees that should have one but do not
         treebank2 = tb_addxsid(treebank1, targets)
 
-        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, options.infilename, corr)
+        if corr != corr0:
+            reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
+            if reducedtreebankfullname not in donefiles:
+                thissamplecorrections = gathercorrections(treebank2)
+            else:
+                thissamplecorrections = {}
+            # merge the corrections from this sample with the samplecorrections and update the file
+            mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
+            putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
+            donefiles.add(reducedtreebankfullname)
+            putdonefilenames(donefiles, donefilesfullname)
+        else:
+            mergedsamplecorrections = samplecorrections
+
+
+
+        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, mergedsamplecorrections, corr)
 
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)

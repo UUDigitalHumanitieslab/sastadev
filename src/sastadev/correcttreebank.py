@@ -10,8 +10,6 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
-from sastadev.history import (donefiles, donefilesfullname, gathercorrections, mergecorrections, putcorrections,
-                              putdonefilenames, samplecorrections, samplecorrectionsfullname)
 from sastadev.lexicon import de, dets, known_word, nochildwords
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
@@ -294,8 +292,9 @@ def updateerrordict(errordict: ErrorDict, uttid: UttId, oldtree: SynTree, newtre
     return errordict
 
 
-def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, treebankfullname,
-                    corr: CorrectionMode = corrn )   -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
+def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, allsamplecorrections,
+                    corr: CorrectionMode = corrn) -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
+
     '''
     The function *correcttreebank* takes as input:
 
@@ -320,12 +319,6 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, tr
     if corr == corr0:
         return treebank, errordict, allorandalts
     else:
-        reducedtreebankfullname = os.path.relpath(treebankfullname, start=settings.DATAROOT)
-        if reducedtreebankfullname not in donefiles:
-            thissamplecorrections = gathercorrections(treebank)
-        else:
-            thissamplecorrections = {}
-
         newtreebank: Treebank = etree.Element('treebank')
         # errorlogrows = []
         for stree in treebank:
@@ -335,7 +328,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, tr
             if mustbedone:
                 # to implement
                 sentence = getsentence(stree)
-                newstree, orandalts = correct_stree(stree, method, corr, thissamplecorrections)
+                newstree, orandalts = correct_stree(stree, method, corr, allsamplecorrections)
                 if newstree is not None:
                     errordict = updateerrordict(
                         errordict, uttid, stree, newstree)
@@ -346,11 +339,6 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, tr
             else:
                 newtreebank.append(stree)
 
-        # merge the corrections from this sample with the samplecorrections and update the file
-        mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
-        putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
-        donefiles.add(reducedtreebankfullname)
-        putdonefilenames(donefiles, donefilesfullname)
 
         return newtreebank, errordict, allorandalts
 

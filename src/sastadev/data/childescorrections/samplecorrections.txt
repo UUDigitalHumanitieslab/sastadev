@@ -571,7 +571,7 @@ van	veel	replacement	1
 van	bij	replacement	1
 van	om	replacement	1
 arreen	alleen	replacement	1
-het	hij	replacement	1
+het	hij	replacement	2
 het	er	replacement	1
 jiggen	liggen	replacement	2
 kruisd	gekruisd	replacement	1
@@ -631,8 +631,8 @@ ook	blauwe ramen zitten er ook	explanation	1
 ginnen	gingen	replacement	2
 dat	het	replacement	1
 allegrooste	allegrootste	noncompletion	2
+en	maar	replacement	3
 en	eng	noncompletion	1
-en	maar	replacement	2
 en	want	replacement	2
 ben	wordt	replacement	2
 pupcakes	cupcakes	replacement	1
@@ -682,7 +682,7 @@ ziekje	muziekje	replacement	1
 Bobdebouwerkattet	Bobdebouwerkwartet	replacement	1
 blazen	geblazen	replacement	1
 ik	mij	replacement	1
-wou	wilde	replacement	2
+wou	wilde	replacement	3
 vashouden	vasthouden	noncompletion	2
 tant	want	replacement	2
 aws	alles	replacement	4
