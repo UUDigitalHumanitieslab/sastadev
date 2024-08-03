@@ -323,27 +323,47 @@ Tarsp_hehe = """ (@lemma="hè" and @end = ancestor::node[@cat="top"]/descendant:
 simplevcw = """
 ( node[@rel="hd" and @pt="ww" and not(%Tarsp_kijkVU%)] and
   node[%Tarsp_Basic_VC%] and
-  count(node) = 2
+  count(node) = 2 and
+  %onlythesearerealwords%
 )
 """
 
+infsuvcw = """
+( node[@rel="hd" and @pt="ww" and not(%Tarsp_kijkVU%)] and
+  node[%Tarsp_Basic_VC%] and
+  node[@rel="su" and not(@cat) and not(@word)] and
+  count(node) = 3 and
+  %onlythesearerealwords%
+)
+"""
+
+
+infvcw = """
+( node[@rel="hd" and @pt="ww" and not(%Tarsp_kijkVU%)] and
+  node[%Tarsp_Basic_VC%] and
+  count(node) = 2 and
+  %onlythesearerealwords%
+)
+"""
+
+
 vcvcw = """
-(node[@rel="vc" and @cat="inf" and %simplevcw%] and
- count(node) = 1
+(node[@rel="vc" and @cat="inf" and (%infvcw% or %infsuvcw%) and %onlythesearerealwords%]
 )
 """
 
 suvcw = """
 ( node[@rel="su"] and
-  node[@rel="vc" and @cat="inf" and node[@rel="su"] and node[@rel="hd" and @pt="ww"] and count(node)=2]
-  and count(node) =2
+  node[@rel="vc" and @cat="inf" and node[@rel="su" and not(@cat) and not(@word)] and node[@rel="hd" and @pt="ww"] and count(node)=2]
+  and count(node) = 2
+  and %onlythesearerealwords%
 )
 """
 
 Tarsp_vcw = """
-( (@rel="--" or @rel="nucl")  and (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) and
+( 
  ( %simplevcw% or
-   %vcvcw%    
+   %vcvcw%   
  )
 )
 """
