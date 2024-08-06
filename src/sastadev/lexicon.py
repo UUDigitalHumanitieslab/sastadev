@@ -196,7 +196,7 @@ def known_word(word: str) -> bool:
     :param word:
     :return:
     '''
-    result = informlexicon(word) or isa_namepart(word) or chatspecial(word)
+    result = informlexicon(word) or isa_namepart(word) or chatspecial(word) or word in additionalwordslexicon
     return result
 
 
@@ -244,3 +244,7 @@ nomlulexicon = initializelexicon(nomlulexiconfullname)
 vuwordslexiconfilename = 'vuwordslexicon.txt'
 vuwordslexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, vuwordslexiconfilename)
 vuwordslexicon = initializelexicondict(vuwordslexiconfullname)
+
+additionalwordsfilename = 'additionalwordslexicon.txt'
+additionalwordsfullname = os.path.join(settings.SD_DIR, lexiconfoldername, additionalwordsfilename)
+additionalwordslexicon = initializelexicon(additionalwordsfullname)

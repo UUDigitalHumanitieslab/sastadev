@@ -467,7 +467,7 @@ totedil	krokodil	replacement	1
 he	het	noncompletion	2
 he	heb	noncompletion	1
 he	muts	explanation	1
-ga	gaan	replacement	3
+ga	gaan	replacement	4
 ga	gaat	replacement	1
 ga	gaat	noncompletion	1
 veven	geven	explanation	1
@@ -676,8 +676,8 @@ paatje	paartje	noncompletion	1
 sintetlaaspaatje	sinterklaaspaardje	replacement	1
 Zwatepiet	Zwartepiet	noncompletion	1
 saf	staf	noncompletion	1
-kippes	kippies	replacement	1
-itten	eten	replacement	1
+kippes	kippies	replacement	2
+itten	eten	replacement	2
 ziekje	muziekje	replacement	1
 Bobdebouwerkattet	Bobdebouwerkwartet	replacement	1
 blazen	geblazen	replacement	1

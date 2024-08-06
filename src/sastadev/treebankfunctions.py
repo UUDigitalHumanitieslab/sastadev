@@ -88,7 +88,7 @@ complrels = ['su', 'obj1', 'pobj1', 'obj2',
 mainclausecats = ['smain', 'whq', 'sv1']
 
 ptsubclasspairs = [('n', 'ntype'), ('tw', 'numtype'), ('vnw', 'vwtype'), ('lw', 'lwtype'), ('vz', 'vztype'),
-                   ('vg', 'conjtype'), ('spec', 'spectype')]
+                   ('vg', 'conjtype'), ('spec', 'spectype'), ('ww', 'wvorm')]
 ptsubclassdict = {pt: subclass for (pt, subclass) in ptsubclasspairs}
 
 pluralcrds = [('en',)]
@@ -2116,7 +2116,8 @@ def subclasscompatible(sc1, sc2):
     result = (sc1 == sc2) or \
              (sc1 in ['pr', 'refl'] and sc2 in ['pr', 'refl']) or \
              (sc1 in ['pr', 'pers'] and sc2 in ['pr', 'pers']) or \
-             (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm'])
+             (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm']) or \
+             (sc1 in ['pv', 'inf']) and sc2 in ['pv', 'inf']
     return result
 
 
