@@ -2006,6 +2006,23 @@ def treeinflate(stree: SynTree, start: int = 10, inc: int = 10) -> None:
                 stree.attrib['end'] = str((ie * 10) + 1)
 
 
+def deflate(stree: SynTree) -> SynTree:
+    newstree = deepcopy(stree)
+    deflate2(newstree)
+    return newstree
+
+def deflate2(stree: SynTree):
+    if stree.tag == 'node':
+        ib = int(getattval(stree, 'begin'))
+        ie = int(getattval(stree, 'end'))
+        newib = (ib //10) - 1
+        stree.attrib['begin'] = str(newib)
+        newie = (ie - 1) // 10
+        stree.attrib['end'] = str(newie)
+    for child in stree:
+            deflate2(child)
+
+
 def isidentitymap(dct: Dict[Any, Any]) -> bool:
     result = all([key == value for key, value in dct.items()])
     return result

@@ -22,7 +22,7 @@ from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
+from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav, deflate,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
                                         getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
@@ -32,6 +32,7 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
+from sastadev.treetransform import transformtreeld, transformtreenogeen, transformtreenogde
 
 ampersand = '&'
 
@@ -572,6 +573,12 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
         simpleshow(stree)
         print(showflatxml(stree))
 
+    # tree transformations
+    if method in ['tarsp', ' stap']:
+        stree = transformtreeld(stree)
+        stree = transformtreenogeen(stree)
+        stree = transformtreenogde(stree)
+
     allmetadata = []
     # orandalts = []
 
@@ -908,6 +915,18 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     # return this stree
     # print('dump 2:')
     # etree.dump(fulltree, pretty_print=True)
+
+    # tree transformations
+    if method in ['tarsp', ' stap']:
+        fulltree = transformtreeld(fulltree)
+        fulltree = transformtreenogeen(fulltree)
+        fulltree = transformtreenogde(fulltree)
+
+    # fulltree = deflate(fulltree)  # put off becuase there may be expanded elements
+    debug = False
+    if debug:
+        showtree(fulltree, 'Deflated')
+
     return fulltree, orandalts
 
 

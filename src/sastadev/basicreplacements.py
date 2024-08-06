@@ -219,7 +219,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('pot', 'kapot', pron, infpron, sylldrop, dp),
                                                 ('kane', 'andere', pron, wrongpron, wrongpron, dp),
                                                 ('effje', 'eventjes', pron, infpron, infpron, dp),
-                                                ('effjes', 'eventjes', pron, infpron, infpron, dp)
+                                                ('effjes', 'eventjes', pron, infpron, infpron, dp),
+                                                ('nogge', 'nog', pron, infpron, infpron, dp)
                                                 ] + \
     ervzvariants + \
     innereplacements + \
@@ -391,7 +392,7 @@ disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
             'stok', 'knoop', 'rits', 'knikker', 'put', 'boor', 'plons', 'beurt', 'toeter', 'poot',
             'punt', 'post', 'gom', 'tap', 'kraanwagen', 'drup', 'wieg', 'kriebel', 'pit', 'zaag',
             'slof', 'deuk', 'hark', 'jeuk', 'stift', 'aard', 'hamster', 'kiek', 'haak', 'schroef',
-            'tape', 'vorm', 'klem', 'mot', 'druppel'], 'teil'),
+            'tape', 'vorm', 'klem', 'mot', 'druppel', 'knor'], 'teil'),
      (dtp, ['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',
             'wieken', 'paarden', 'stoelen', 'ramen', 'strepen', 'planten', 'groeten',
             'flessen', 'boeren', 'punten', 'tranen'], 'teilen'),
