@@ -29,6 +29,8 @@ chatspecials = ['xxx', 'yyy']
 
 lexicon = celex
 
+
+
 #Alpino often analyses certain words as tsw though they should be analysed as nouns
 tswnouns = ['baby', 'jongen', 'juf', 'juffrouw', 'mam', 'mama', 'mamma', 'meisje', 'mens', 'meneer', 'mevrouw',
             'pap', 'papa', 'pappa', 'stouterd', 'opa', 'oma']
@@ -192,11 +194,13 @@ def chatspecial(word: str) -> bool:
 def known_word(word: str) -> bool:
     '''
     a word is considered to be a known_word if it occurs in the word form lexicon,
-    if it is a name part, or if it is a chatspecial item
+    if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words
+    but not in the nonwordslexicon
     :param word:
     :return:
     '''
     result = informlexicon(word) or isa_namepart(word) or chatspecial(word) or word in additionalwordslexicon
+    result = result and word not in nonwordslexicon
     return result
 
 
@@ -248,3 +252,11 @@ vuwordslexicon = initializelexicondict(vuwordslexiconfullname)
 additionalwordsfilename = 'additionalwordslexicon.txt'
 additionalwordsfullname = os.path.join(settings.SD_DIR, lexiconfoldername, additionalwordsfilename)
 additionalwordslexicon = initializelexicon(additionalwordsfullname)
+
+nonwordsfilename = 'nonwordslexicon.txt'
+nonwordsfullname = os.path.join(settings.SD_DIR, lexiconfoldername, nonwordsfilename)
+nonwordslexicon = initializelexicon(nonwordsfullname)
+
+spellingadditionsfilename  = 'spellingadditions.txt'
+spellingadditionsfullname = os.path.join(settings.SD_DIR, lexiconfoldername, spellingadditionsfilename)
+spellingadditions = initializelexicon(spellingadditionsfullname)

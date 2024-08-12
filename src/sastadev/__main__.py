@@ -170,7 +170,7 @@ from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, literalmissedmatches
 from sastadev.methods import (Method, astamethods, stapmethods,
                               supported_methods, tarspmethods, treatmethod)
-from sastadev.permcomments import getallcomments, pcheaders
+from sastadev.permcomments import getallcomments, pcheaders, platinumcheck_column_widths
 from sastadev.query import (Query, is_preorcore,
                             post_process, query_exists, query_inform)
 from sastadev.readcsv import writecsv
@@ -812,9 +812,17 @@ def addxsid(xsid, stree: SynTree) -> SynTree:
     return outstree
 
 
+def getmax_xsid(treebank: TreeBank) -> int:
+    xsids = treebank.xpath('.//meta[@name="xsid"]/@value')
+    intxsids = [int(xsid) for xsid in xsids]
+    max_xsid = max(intxsids) if intxsids != [] else 0
+    return max_xsid
+
+
 def tb_addxsid(treebank: TreeBank, targets) -> TreeBank:
     newtreebank = etree.Element('treebank')
-    newxsidcounter = 0
+    max_xsid = getmax_xsid(treebank)
+    newxsidcounter = max_xsid + 1
     for syntree in treebank:
         mustbedone = get_mustbedone(syntree, targets)
         if mustbedone:
@@ -1132,8 +1140,9 @@ def main():
         corr = scp.corr
         themethod = scp.themethod
 
-        # add xsid to trees that should have one but do not
-        treebank2 = tb_addxsid(treebank1, targets)
+        # add xsid to trees that should have one but do not; put off becuase not needed anymore
+        # treebank2 = tb_addxsid(treebank1, targets)
+        treebank2 = treebank1
 
         if corr != corr0:
             reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
@@ -1311,7 +1320,7 @@ def main():
     allrows += literalmissedrows
 
     # breakpoint()
-    platinumcheck_column_widths = {'F:F': 9, 'G:G': 8.11, 'K:K': 6.44, 'L:L': 5.44, 'M:M': 26, 'N:N': 26, 'O:O': 26 }
+
     wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9),
                     column_widths=platinumcheck_column_widths)
     wb.close()

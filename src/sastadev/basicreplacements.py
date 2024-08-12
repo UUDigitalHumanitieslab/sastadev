@@ -56,6 +56,10 @@ reduction = 'Reduction'
 intervocalicd2j = 'Intervocalic d -> j'
 dial = 'Dialectical variation'
 vowellaxing = 'Vowel laxing'
+lexical = 'Lexicom'
+onom = 'onomatopeic word'
+substitution = 'lexical replacement'
+alpino_unknown_word = 'Word unknown to Alpino'
 
 #: The constant *Rvzlist* contains a list of adpositions that can combine with *er* into
 #: a so-called pronominal adverb. Example: *van*, since *er* + * van* = *ervan*.
@@ -220,7 +224,13 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('kane', 'andere', pron, wrongpron, wrongpron, dp),
                                                 ('effje', 'eventjes', pron, infpron, infpron, dp),
                                                 ('effjes', 'eventjes', pron, infpron, infpron, dp),
-                                                ('nogge', 'nog', pron, infpron, infpron, dp)
+                                                ('nogge', 'nog', pron, infpron, infpron, dp),
+                                                ('əs', 'eens', pron, infpron, reduction, dp),
+                                                ('moetə', 'moeten', pron, infpron, infpron, dp),
+                                                ('moetə' , 'moet', pron, infpron, infpron, dp),
+                                                ('pot', 'kapot', pron, infpron, sylldrop, dp),
+                                                ('almaal', 'allemaal', pron, infpron, sylldrop, dp),
+                                                ('knorrens', 'varkens', lexical, substitution, onom,dp)
                                                 ] + \
     ervzvariants + \
     innereplacements + \
@@ -417,3 +427,8 @@ def getdisambiguationdict() -> Dict[str, Tuple[TokenTreePredicate, str]]:
         for w in ws:
             disambiguationdict[w] = cond, repl
     return disambiguationdict
+
+parsereplacementslist =  [('smarties', 'toffees', alpino_unknown_word, -2*dp),
+                          ('Smarties', 'toffees', alpino_unknown_word, -2*dp)]
+
+parsereplacements = {el[0]:el for el in parsereplacementslist}

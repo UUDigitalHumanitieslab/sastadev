@@ -92,9 +92,9 @@ wi	kwil	noncompletion	1
 wi	wil	noncompletion	1
 ees	eerst	replacement	2
 ees	eens	noncompletion	1
-s	is	noncompletion	35
+s	is	noncompletion	37
 boe	boer	noncompletion	2
-t	het	noncompletion	92
+t	het	noncompletion	100
 t	met	noncompletion	1
 taa	daar	replacement	1
 ope	open	noncompletion	1
@@ -144,7 +144,7 @@ z'n	zijn	replacement	4
 n	een	noncompletion	99
 no	nog	noncompletion	2
 draan	deraan	noncompletion	1
-kom	komt	noncompletion	2
+kom	komt	noncompletion	3
 fiet	fietst	noncompletion	1
 chuiven	schuiven	noncompletion	1
 ander	anders	noncompletion	1
@@ -239,8 +239,8 @@ wak	wat	replacement	1
 tuur	stuur	noncompletion	1
 kok	ook	replacement	1
 pobreren	proberen	replacement	1
+ze	zit	explanation	2
 ze	hem	replacement	1
-ze	zit	explanation	1
 ze	zijn	replacement	2
 derin	erin	replacement	1
 aardbeiijs	aardbeienijs	replacement	1
@@ -279,7 +279,7 @@ tu	toch	replacement	1
 tu	dan	replacement	1
 wiw	wil	replacement	1
 naan	banaan	explanation	1
-es	eens	noncompletion	44
+es	eens	noncompletion	47
 m	hem	noncompletion	12
 wilt	wil	replacement	1
 taan	staan	explanation	1
@@ -289,13 +289,13 @@ maken	aan elkaar	explanation	1
 hu	pronoun	explanation	1
 man	de kassier	explanation	1
 leeuw	leeuwe	noncompletion	1
-ditte	dit	replacement	1
-d'aan	eraan	replacement	1
-brbrbrbr	motorgeluiden	explanation	1
-mn	mijn	noncompletion	6
-omt	komt	explanation	2
-an	kan	explanation	1
-kleppie	klepje	replacement	1
+ditte	dit	replacement	2
+d'aan	eraan	replacement	2
+brbrbrbr	motorgeluiden	explanation	2
+mn	mijn	noncompletion	7
+omt	komt	explanation	4
+an	kan	explanation	2
+kleppie	klepje	replacement	2
 pusses	puzzelstukjes	explanation	1
 gane	gaan	replacement	1
 puss	puzzelen	replacement	1
@@ -318,7 +318,7 @@ laapkamer	slaapkamer	noncompletion	1
 saat	gaat	explanation	4
 kool	goal	explanation	1
 kersie	kersje	explanation	1
-anne	andere	explanation	3
+anne	andere	explanation	5
 ee	een	noncompletion	9
 step	schep	replacement	3
 isse	is 'n	explanation	1
@@ -368,12 +368,12 @@ el	gaat wel	explanation	1
 e'af	moet eraf	explanation	1
 chep	schelp	explanation	2
 borsel	borstel	noncompletion	1
-slarties	Smarties	explanation	1
-varkje	varkentje	explanation	1
-wor	word	explanation	1
+slarties	Smarties	explanation	2
+varkje	varkentje	explanation	2
+wor	word	explanation	2
+een	'n	explanation	2
 een	de	replacement	1
-een	'n	explanation	1
-'t	wat	explanation	1
+'t	wat	explanation	2
 hijgen	hijsen	explanation	1
 tuperman	Superman	explanation	1
 kijna	bijna	explanation	1
@@ -405,6 +405,7 @@ maakt	deed	replacement	1
 maakt	gemaakt	noncompletion	3
 tien	Christien	noncompletion	3
 kiepen	omkiepen	noncompletion	1
+speeld	gespeeld	replacement	1
 speeld	gespeeld	noncompletion	1
 tekker	trekker	explanation	2
 nijnties	konijnen	explanation	1
@@ -464,24 +465,24 @@ tappe	stap	replacement	1
 tom	soms	replacement	1
 tom	komt	replacement	1
 totedil	krokodil	replacement	1
+he	muts	explanation	2
 he	het	noncompletion	2
 he	heb	noncompletion	1
-he	muts	explanation	1
+ga	gaat	noncompletion	2
 ga	gaan	replacement	4
 ga	gaat	replacement	1
-ga	gaat	noncompletion	1
-veven	geven	explanation	1
-moven	weg	replacement	2
-choot	schoot	explanation	3
-poppe	muts	replacement	1
-mus	van	replacement	1
-mus	muts	explanation	1
-anner	andere	explanation	1
-ja	op straat	explanation	1
-see	sneeuw	explanation	1
-vallen	gevallen	explanation	1
-tasje	bedje	explanation	1
-begbengen	wegbrengen	explanation	2
+veven	geven	explanation	2
+moven	weg	replacement	4
+choot	schoot	explanation	6
+poppe	muts	replacement	2
+mus	van	replacement	2
+mus	muts	explanation	2
+anner	andere	explanation	2
+ja	op straat	explanation	2
+see	sneeuw	explanation	2
+vallen	gevallen	explanation	2
+tasje	bedje	explanation	2
+begbengen	wegbrengen	explanation	4
 dzo	zo	explanation	1
 bochje	bochtje	explanation	1
 anders	andere	explanation	1
@@ -616,7 +617,7 @@ hoger	ouder	replacement	1
 net	met	replacement	3
 datte	wat	replacement	1
 moet	moeten	replacement	3
-als	of	replacement	1
+als	of	replacement	2
 als	waarmee	replacement	1
 hardte	hardste	noncompletion	1
 want	en	replacement	1
@@ -647,7 +648,7 @@ kinderboererij	kinderboerderij	noncompletion	1
 vin	vind	noncompletion	2
 vin	vindt	noncompletion	2
 kinerboererij	kinderboerderij	noncompletion	1
-woon	gewoon	replacement	1
+woon	gewoon	replacement	7
 blijf	blijft	noncompletion	1
 tof	toch	replacement	2
 blijven	blijft	replacement	1
@@ -816,3 +817,13 @@ alse	als	replacement	1
 rekele	rekenen	replacement	1
 daarzo	daar	replacement	1
 voorbeeld	bijvoorbeeld	replacement	1
+freene	free-runnen	replacement	1
+x	gewoon	replacement	1
+feerunnen	freerunnen	replacement	1
+wees	geweest	replacement	1
+schien	misschien	replacement	2
+woonb	gewoon	replacement	1
+sjale	speciale	replacement	1
+zorgen	verzorgen	replacement	1
+kantie	vakantie	replacement	1
+zomerkantie	vakantie	replacement	1

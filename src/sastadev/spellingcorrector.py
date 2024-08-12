@@ -2,6 +2,7 @@ from spellchecker import SpellChecker
 import os
 from sastadev.history import childescorrections, HistoryCorrection
 from sastadev.lexicon import known_word
+from sastadev.readcsv import readcsv, writecsv
 from sastadev.xlsx import mkworkbook, add_worksheet
 from typing import List
 
@@ -59,5 +60,51 @@ def childestest():
     add_worksheet(wb,[scoreheader], scoredata, freeze_panes=(1,0), sheetname='Score')
     wb.close()
 
+
+def auriscorrections():
+    spell = SpellChecker(language='nl')
+    correctionsdict = {}
+    inputfilename = 'notknownwordsfrq.txt'
+    inputfolder = r'D:\Dropbox\jodijk\myprograms\python\childesfreq\aurisfrqoutput'
+    inputfullname = os.path.join(inputfolder, inputfilename)
+    idata = readcsv(inputfullname)
+    for i, row in idata:
+        word = row[1]
+        if word in correctionsdict:
+            result = correctionsdict[word]
+        else:
+            result = spell.candidates(word)
+            correctionsdict[word] = result
+
+    outdata = []
+    for word, corrections in correctionsdict.items():
+        if corrections is not None:
+            correctionsstr = comma.join(corrections)
+        else:
+            correctionsstr = ''
+        row = [word, correctionsstr]
+        outdata.append(row)
+
+    outheader = ['word', 'corrections']
+    outfilename = 'auriscorrections.txt'
+    outfolder = r'D:\Dropbox\jodijk\myprograms\python\childesfreq\aurisfrqoutput'
+    outfullname = os.path.join(outfolder, outfilename)
+    writecsv(outdata, outfullname, outheader)
+
+
+def simplecheck():
+    spell = SpellChecker(language='nl')
+    words = ['opbijten', 'irving', 'isaacs']
+    for word in words:
+        corrections = spell.candidates(word)
+        if corrections is not None:
+            pairs = [(corr, spell.word_usage_frequency(corr)) for corr in corrections]
+        sortedpairs = sorted(pairs, key=lambda x: x[1], reverse=True)
+        print(word)
+        print(corrections)
+        print(sortedpairs)
+
 if __name__ == '__main__':
-    childestest()
+    # childestest()
+    # auriscorrections()
+    simplecheck()

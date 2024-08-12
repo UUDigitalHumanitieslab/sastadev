@@ -132,7 +132,7 @@ old_Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="p
 
 ahi_sibling = """../node[@rel="vc" and @cat="ahi"]"""
 
-Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and not(%ahi_sibling%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and not(%Tarsp_Hwwvd%) and not(%ahi_sibling%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
  ((
    %Tarsp_hww% or
    @lemma = "hebben" or
@@ -150,6 +150,11 @@ MvTT = """(@pt="ww" and @pvagr="mv" and @pvtijd="tgw" and ../node[@rel="su"])"""
 
 vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")
 """
+
+Tarsp_Hwwvd = """((@pt="ww" and @rel="hd" and 
+           (@lemma="hebben" or @lemma="worden" or @lemma="zijn") and
+       parent::node[node[@rel="vc" and ((@cat="ppart" and node[@rel="hd"]) or (@pt="ww" and @wvorm="vd"))]
+       ]) or %robusthwwvd%)""""
 
 Tarsp_Kop = """
  (   @pt="ww" and @wvorm="pv" and @pvtijd="tgw" and @rel="hd" and not(%Tarsp_hww%) and

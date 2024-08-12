@@ -591,7 +591,9 @@ def number2intstring(numberstr: str) -> str:
 
 def getqueryresult(syntree: SynTree, xpathquery: Optional[str] = None,
                    noxpathquery: Callable[[SynTree], List[str]] = None) -> Optional[str]:
-    # etree.dump(syntree)
+    debug = False
+    if debug:
+        showtree(syntree, 'getqueryresults')
     if syntree is None:
         result = None
     else:

@@ -8,7 +8,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sastadev.alpino import getdehetwordinfo
 from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements,
-                                        getdisambiguationdict)
+                                        getdisambiguationdict, parsereplacements)
+from sastadev.childesspellingcorrector import correctspelling, allfrqdict
 from sastadev.cleanCHILDEStokens import cleantokens
 from sastadev.conf import settings
 from sastadev.dedup import (cleanwordofnort, find_duplicates2,
@@ -16,7 +17,7 @@ from sastadev.dedup import (cleanwordofnort, find_duplicates2,
                             find_substringduplicates2, getfilledpauses,
                             getprefixwords, getrepeatedtokens,
                             getunwantedtokens, nodesfindjaneenou)
-from sastadev.deregularise import correctinflection
+from sastadev.deregularise import correctinflection, separable_prefixes
 from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
                                  ngram10, ngram11, ngram16, ngram17)
 from sastadev.history import (childescorrections, childescorrectionsexceptions, mergecorrections, putcorrections,
@@ -61,6 +62,8 @@ replacepattern = '{} [: {} ]'
 metatemplate = '##META {} {} = {}'
 slash = '/'
 space = ' '
+
+enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
 
 #: The constant *disambiguationdict* contains words that should be replaced by a
 #: different word to avoid unwanted readings of the original word. It is filled by a
@@ -121,6 +124,21 @@ gaattiepattern = r'^.*' + anychars(vowels) + 'ttie$'
 gaattiere = re.compile(gaattiepattern)
 neutersgnoun = 'boekje'  # select here an unambiguous neuter noun
 
+
+def isaverb(wrd:str) -> bool:
+    wordinfos = getwordinfo(wrd)
+    verbwordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[0] == 'ww']
+    result = verbwordinfos != []
+    return result
+
+
+
+
+def startswithsvp(wrd: str) -> Tuple[bool, str]:
+    for svp in separable_prefixes:
+        if wrd.startswith(svp):
+            return True, svp
+    return False, ''
 
 
 def isaninftoken(token: Optional[Token]) -> bool:
@@ -1038,6 +1056,9 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     newtokenmds: List[TokenMD] = []
     tokennodes = getnodeyield(tree)
 
+    schwandropfound = False
+    postviefound = False
+    deduplicated = False
     if token.skip:
         return newtokenmds
 
@@ -1059,6 +1080,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     # deduplicate jaaaaa -> ja; heeeeeel -> heel
     if not known_word(token.word):
         newwords = deduplicate(token.word, known_word, exceptions=chatxxxcodes)
+        deduplicated = newwords != []
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Emphasis', value='Phoneme lengthening', cat='Pronunciation',
                                         backplacement=bpl_word)
@@ -1256,6 +1278,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                 # gaatie
     if not known_word(token.word):
         newwords = gaatie(token.word)
+        if newwords != []:
+            postviefound = True
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Word combination', value='Cliticisation', cat='Pronunciation',
                                         backplacement=bpl_none)
@@ -1265,7 +1289,18 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     # dediacritisize
 
     # iedims
-    if token.word.endswith('ie') or token.word.endswith('ies'):
+    # only -ie form: 'duppie', 'jochie', 'jonkie', 'juffie', 'makkie', 'moppie', 'saffie',
+    # 'sjekkie', 'slapie', 'spekkie', 'ukkie' (?)
+
+    # common in standard written language: 'bakkie', 'duppie', 'fikkie', 'gympie', 'jochie', 'jonkie',
+    # 'juffie', 'koppie', 'moppie', 'punkie', 'saffie', 'sjekkie', 'slapie', 'spekkie', 'stekkie', 'ukkie', 'wijfie'
+
+    knowniedimwords = ['bakkie', 'drukkie', 'duppie', 'fikkie', 'gympie', 'koppie', 'kwassie',
+                       'moppie', 'punkie', 'saffie',   'stekkie', 'wijfie']
+
+
+    if (not known_word(token.word) or token.word in knowniedimwords) and \
+            (token.word.endswith('ie') or token.word.endswith('ies')):
         newwords = getjeforms(token.word)
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='RegionalForm', value='ieDim', cat='Morphology', backplacement=bpl_word)
@@ -1274,9 +1309,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     if not known_word(token.word):
         nwms = correctinflection(token.word)
         for nw, metavalue in nwms:
-            newtokenmds += updatenewtokenmds(newtokenmds, token, [nw], beginmetadata,
-                                             name='InflectionError', value=metavalue, cat='Morphology',
-                                             backplacement=bpl_word)
+            if known_word(nw):
+                newtokenmds += updatenewtokenmds(newtokenmds, token, [nw], beginmetadata,
+                                                 name='InflectionError', value=metavalue, cat='Morphology',
+                                                 backplacement=bpl_word)
 
     # wrong verb forms: gekeekt -> gekeken: done!
 
@@ -1305,12 +1341,12 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                                 cat='Pronunciation', backplacement=bpl_word)
 
     # e-> e(n)
-    enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
     if not known_word(
             token.word) and token.word not in basicreplacements and token.word not in enexceptions:
         if endsinschwa(token.word) and not monosyllabic(token.word):
             newword = token.word + 'n'
             if known_word(newword):
+                schwandropfound = True
                 newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
                                                 name='Pronunciation Variant', value='N-drop after schwa',
                                                 cat='Pronunciation', backplacement=bpl_word)
@@ -1329,11 +1365,60 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                                 name='Disambiguation', value='Avoid unknown reading',
                                                 cat='Lexicon', backplacement=bpl_wordlemma)
 
+    dupvowel = '[aeou]'
+    aasre = rf'{dupvowel}\1s$'
+    vvs = {'aas', 'oos', 'ees', 'uus'}
+    # Lauraas -> Laura's; autoos -> auto's
+    if not known_word(token.word) and token.word[-3:] in vvs and known_word(token.word[:-2]):
+        newword = f"{token.word[:-2]}'s"
+        newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                        name='Spelling Correction', value='Missing Apostrophe',
+                                        cat='Spelling', backplacement=bpl_word)
+
     # ...en -> e: groten  -> grote (if adjective); goten -> grote
 
     # drop e at the end incl duplicated consonants (ooke -> ook; isse -> is ? DOne, basicreplacements
 
-    # losse e -> een / het / de
+    # losse e -> een / het / de / drop
+
+    # replace unknown part1+V verb by the most frequent part2+verb in CHILDES
+    # e.g opbijten -> afbijten
+    if not known_word(token.word):
+        issvp, thesvp = startswithsvp(token.word)
+        part2 = token.word[len(thesvp):]
+        if issvp and isaverb(part2):
+            newcandidates = [(f'{svp}{part2}', allfrqdict[f'{svp}{part2}']) for svp in separable_prefixes if svp != thesvp
+                             and f'{svp}{part2}' in allfrqdict]
+            sortednewcandidates = sorted(newcandidates, key= lambda x: x[1], reverse=True )
+            if sortednewcandidates != []:
+                newword = sortednewcandidates[0][0]
+            else:
+                newword = part2
+
+            newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                            name='Unknown Word Substitution', value=token.word,
+                                            cat='Lexicon', backplacement=bpl_word)
+
+    # replace words that are unknown to Alpino
+    if token.word in parsereplacements:
+        item = parsereplacements[token.word]
+        newword = item[1]
+        descr = item[2]
+        penalty = item[3]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                        name='Parse Substitution', value=descr,
+                                        cat='Parser', backplacement=bpl_wordlemma, penalty=penalty)
+
+
+    if method in {'tarsp', 'stap'} and not known_word(token.word) and applyspellingcorrectionisok(token.word) and \
+            not schwandropfound and not postviefound and not token.word[0].isupper() and not deduplicated and \
+            not(token.word.endswith('ie') or token.word.endswith('ies')) and token.word[-3:] not in vvs:
+        corrtuples = correctspelling(token.word, max=5)
+        for corr, penalty in corrtuples:
+            if corr != token.word and known_word(corr):
+                newtokenmds = updatenewtokenmds(newtokenmds, token, [corr], beginmetadata,
+                                                name='Spelling Correction', value=corr,
+                                                cat='Spelling', backplacement=bpl_word, penalty=penalty)
 
     for newtokenmd in newtokenmds:
         morenewtokenmds = getalternativetokenmds(
@@ -1342,6 +1427,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     return newtokenmds
 
+def applyspellingcorrectionisok(word):
+    result = word not in basicreplacements and word not in basicexpansions and \
+             len(word) > 4 and word not in enexceptions
+    return result
 
 def getvalidalternativetokenmds(tokenmd: TokenMD, newtokenmds: List[TokenMD]) -> List[TokenMD]:
     validnewtokenmds = [

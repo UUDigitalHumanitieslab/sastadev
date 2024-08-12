@@ -324,6 +324,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, al
         # errorlogrows = []
         for stree in treebank:
             uttid = getxsid(stree)
+            uttno = find1(stree, './/metadata/meta[@name="uttno"]/@value')
             # print(uttid)
             mustbedone = get_mustbedone(stree, targets)
             if mustbedone:
