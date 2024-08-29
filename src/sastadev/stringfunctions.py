@@ -172,8 +172,8 @@ def fullworddehyphenate(word: str, inlexicon: Callable[[str], bool]) -> List[str
 
     The functions *dehyphenate* and *delhyphenprefix* are described here:
 
-    * .. autofunction:: stringfunctions::dehyphenate
-    * .. autofunction:: stringfunctions::delhyphenprefix
+    * .. autofunction:: sastadev.stringfunctions::dehyphenate
+    * .. autofunction:: sastadev.tringfunctions::delhyphenprefix
 
 
     '''

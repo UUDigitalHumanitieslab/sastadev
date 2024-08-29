@@ -35,7 +35,7 @@ The language measures with  their properties are internally stored in a QueryDic
 
 A special class *Method* has been defined in the module methods.py. 
 
-.. autoclass:: methods::Method
+.. autoclass:: sastadev.methods::Method
 
 
 
@@ -104,11 +104,11 @@ where the definition only contains pieces of Xpath-code.
 Inside SASTA an Xpath query is first expanded so that all macros have been replaced by pieces of Xpath code. Only then is the query launched. 
 The module that takes care of macros is the module macros.py:
 
-.. automodule:: macros
+.. automodule:: sastadev.macros
 
 The expansion function in this module  is called *expandmacros*. It takes as input a string and outputs a string with the macros expanded:
 
-.. autofunction:: macros::expandmacros
+.. autofunction:: sastadev.macros::expandmacros
 
 Expanding the following Xpath expression::
 
@@ -144,7 +144,7 @@ Generation of macros
 
 Macros make writing queries much simpler and makes it easier to maintain them. But in some cases macros are not enough, e.g. if a macro expansion is very large but built up in a regular way. One such case is dealt with by the module generatemacros.py:
 
-.. automodule:: generatemacros
+.. automodule:: sastadev.generatemacros
 
 Python functions
 ----------------
@@ -154,7 +154,7 @@ In some cases formulating the query in Xpath is too cumbersome (even with macros
 In the definition of the query one includes the name of the Python function, for example (from TARSP): *sziplus6*.
 This function must be defined somewhere, of course. This can be done in any python module.
 
-.. automodule:: external_functions
+.. automodule:: sastadev.external_functions
 
 
 

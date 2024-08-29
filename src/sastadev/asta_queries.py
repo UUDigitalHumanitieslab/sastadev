@@ -89,7 +89,7 @@ def asta_noun(
 
     The *expanded_noun_path* is the expansion of the macro **noun_path**.
 
-    .. autofunction:: treebankfunctions::asta_recognised_nounnode
+    .. autofunction:: sastadev.treebankfunctions::asta_recognised_nounnode
 
     '''
     results = asta_x(stree, expanded_noun_xpath, asta_recognised_nounnode)
@@ -102,7 +102,7 @@ def asta_lex(stree: SynTree) -> List[SynTree]:
 
     The *expanded_lex_path* is the expansion of the macro **lex_path**.
 
-    .. autofunction:: treebankfunctions::asta_recognised_lexnode
+    .. autofunction:: sastadev.treebankfunctions::asta_recognised_lexnode
          :noindex:
 
     '''
@@ -121,7 +121,7 @@ def asta_lemma(stree: SynTree) -> List[SynTree]:
     *lemma_path* and the function *asta_recognised_lexicalnode*.
 
 
-    .. autofunction:: treebankfunctions::asta_recognised_lexicalnode
+    .. autofunction:: sastadev.treebankfunctions::asta_recognised_lexicalnode
          :noindex:
 
     '''
@@ -322,7 +322,7 @@ def asta_bijzin(stree: SynTree) -> List[SynTree]:
     results, so the repetitions are removed from the results by means of the function
     *removerepetitions*:
 
-    .. autofunction:: asta_queries::removerepetitions
+    .. autofunction:: sastadev.asta_queries::removerepetitions
     '''
     theyield = getyield(stree)
     clausenodes = stree.xpath(astabijzinquery)

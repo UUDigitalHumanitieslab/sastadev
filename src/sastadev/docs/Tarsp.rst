@@ -372,7 +372,7 @@ T003: 6+
 
     sziplus6
 
-.. autofunction:: Sziplus::sziplus6
+.. autofunction:: sastadev.Sziplus::sziplus6
 
 * **Schlichting**: "6 Zinsdelen of meer in een zin"
 
@@ -3493,7 +3493,7 @@ T106: Vo/bij
 
     voslashbij
  
-.. autofunction:: queryfunctions::voslashbij
+.. autofunction:: sastadev.queryfunctions::voslashbij
 
 * **Schlichting**: "Voornaamwoordelijk bijwoord, gesplitst. Het gesplitste voornaamwoordelijk bijwoord behoeft niet gescoord te worden bij Vobij, kolom Voornaamwoorden in Fase IV, alleen hier bij de Woordgroepen in Fase V."
 
@@ -3518,7 +3518,7 @@ T107: Vobij
 
     vobij
 	
-.. autofunction:: queryfunctions::vobij
+.. autofunction:: sastadev.queryfunctions::vobij
     
 
 
@@ -3932,7 +3932,7 @@ T121: W(X)
 It has been implemented by means of a Python function **wx**. 
 
 
-.. autofunction:: imperatives::wx
+.. autofunction:: sastadev.imperatives::wx
 
 In a later stage  a query with macros was defined for it, but  the Python function has not been replaced yet.
 
@@ -4374,7 +4374,7 @@ T138: X en X (en X)
 
     xenx
 
-.. autofunction:: xenx::xenx
+.. autofunction:: sastadev.xenx::xenx
 
 
 * **Schlichting**: "Dit zijn twee woorden van dezelfde woordsoort, verbonden door 'en', die samen één Zinsdeel vormen, soms worden drie elementen verbonden. Ook woordgroepen kunnen op een dergelijke wijze verbonden worden. Behalve door 'en' kunnen de woorden of woordgroepen ook verbonden worden door 'of'."
@@ -4669,7 +4669,7 @@ T151: V.U. Totaal
     vutotaal
 
 
-.. autofunction:: TARSPpostfunctions::vutotaal
+.. autofunction:: sastadev.TARSPpostfunctions::vutotaal
 
 * **Schlichting**: "Hier noteren we het totaal aantal Sociale en Stereotype Uitdrukkingen"
 
@@ -4692,7 +4692,7 @@ T152: G Totaal
 
     gtotaal
 
-.. autofunction:: TARSPpostfunctions::gtotaal
+.. autofunction:: sastadev.TARSPpostfunctions::gtotaal
 
 
 
@@ -4721,7 +4721,7 @@ T153: G.O Fase
 
     gofase
     
-.. autofunction:: TARSPpostfunctions::gofase
+.. autofunction:: sastadev.TARSPpostfunctions::gofase
 
 * **Schlichting**: Eerst wordt *G totaal* berekend. Zie hiervoor :ref:`G_Totaal`. "We berekenen hoeveel Zinsconstructies per Fase zijn gescoord. We letten hiervoor uitsluitend op de vakken van de Zinsconstructies: Mededelende zin, Vraag, en Gebiedende wijs. Per Fase noteren we het aantal Zinsconstructies in de eerste kolom bóven de Fase-aanduiding (niet meegeteld worden Intonatie en Koppelwerkwoord in Fase II, en 'hè' en Inversie in Fase III). Bij een bepaald percentage Zinsconstructies kunnen we zeggen dat het kind zich in die Fase aan het ontwikkelen is. De regel is dat 5% van de Analyse-eenheden van het taalsample in een Fase bij de Zinsconstructies gescoord moet zijn om het kind in die Fase te kunnen plaatsen.
 
@@ -4746,7 +4746,7 @@ T154: PFII
     pf2
 
 
-.. autofunction:: TARSPpostfunctions::pf2
+.. autofunction:: sastadev.TARSPpostfunctions::pf2
 
 
 
@@ -4771,7 +4771,7 @@ T155: PFIII
     pf3
 
 
-.. autofunction:: TARSPpostfunctions::pf3
+.. autofunction:: sastadev.TARSPpostfunctions::pf3
 
 
 * **Schlichting**: "Profielscore voor Fase III"
@@ -4840,7 +4840,7 @@ T158: PFIV
     pf4
 
 
-.. autofunction:: TARSPpostfunctions::pf4
+.. autofunction:: sastadev.TARSPpostfunctions::pf4
 
 
 * **Schlichting**: "Profielscore voor Fase IV"
@@ -4864,7 +4864,7 @@ T159: PFV
 
     pf5
     
-.. autofunction:: TARSPpostfunctions::pf5
+.. autofunction:: sastadev.TARSPpostfunctions::pf5
 
 
 
@@ -4890,7 +4890,7 @@ T160: PFVI
     pf6
 
 
-.. autofunction:: TARSPpostfunctions::pf6
+.. autofunction:: sastadev.TARSPpostfunctions::pf6
 
 
 * **Schlichting**: "Profielscore voor Fase VI"
@@ -4914,7 +4914,7 @@ T161: PFVII
 
     pf7
 
-.. autofunction:: TARSPpostfunctions::pf7
+.. autofunction:: sastadev.TARSPpostfunctions::pf7
 
 
 * **Schlichting**: "Profielscore voor Fase VII"
@@ -4939,7 +4939,7 @@ T162: PF
     pf
 
 
-.. autofunction:: TARSPpostfunctions::pf
+.. autofunction:: sastadev.TARSPpostfunctions::pf
 
 
 * **Schlichting**: " Profielscore. Een tweede mogelijkheid om twee samples meer in detail te vergelijken is de Profielscore (PF). De Profielscore is het totaal aantal constructies waarbij een of meermalen gescoord is. Bij het vergelijken van twee taalsamples door middel van de Profielscore moeten de samples eenzelfde aantal Analyse-eenheden bevatten. De Fase I constructies worden voor de Profielscore niet meegeteld". Ook de constructies met twee ** tellen niet mee (Bijzin zonder verbindingswoord en de Vraagwoordconstructie zonder vraagwoord: ((Vr)WOnd+). *OndVC* telt men, indien deze niet in het taalsample voorkomt, wel mee als tenminste bij *OndWVC* of *OndWBVC* gescoord is. *XNeg* mag meegeteld worden indien een langere uiting met 'niet' gescoord is. Hetzelfde principe geldt voor *OndB*, *VCW* en *BX*. De vraagintonatie 'Into' mag meegeteld worden indien ergens anders in de vraagkolom gescoord is. In het meest linkse vak op de profielkaart staat het aantal constructies vermeld dat in een Fase ontwikkeld wordt. Hier kan men het gescoorde aantal constructies per Fase noteren. De Profielscore wordt genoteerd naast de G.O. Fase, bij PF. De maximale Profielscore is 100.

@@ -37,18 +37,18 @@ CELEX
 -----
 The lexicon that we use most is CELEX. There is a module lexicon.py which provides the interface to the lexion actually used:
 
-.. automodule:: lexicon
+.. automodule:: sastadev.lexicon
 
 But in it the actual lexicon used is the CELEX lexicon, taken care of by the celexlexicon module:
 
-.. automodule:: celexlexicon
+.. automodule:: sastadev.celexlexicon
 
 .. _top3000:
 
 Top3000
 -------
 
-.. automodule:: top3000
+.. automodule:: sastadev.top3000
 
 .. _namelexicons:
 
@@ -59,12 +59,12 @@ Names very often consist of multiple words.
 For individual words it is therefore important to check whether they can be a part of a (possibly multiword) name.
 The relevant module is the namepartlexicon module.
 
-.. automodule:: namepartlexicon
+.. automodule:: sastadev.namepartlexicon
 
 The dictionary with nameparts has been derived by the SASTA script getnamepartslexicon:
 
-.. automodule:: getnamepartslexicon
-.. automodule:: namelexicons
+.. automodule:: sastadev.getnamepartslexicon
+.. automodule:: sastadev.namelexicons
 
  
 .. _filledpauseslexicon:
@@ -82,7 +82,7 @@ This file has been created by searching for strings marked with & in the Dutch C
 Compounds
 ---------
 
-.. automodule:: compounds
+.. automodule:: sastadev.compounds
 
 .. _exceptionslists:
 

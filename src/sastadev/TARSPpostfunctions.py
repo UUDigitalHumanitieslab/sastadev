@@ -37,11 +37,11 @@ def getqueriesbystage(queries: QueryDict) -> Dict[Stage, List[QId]]:
     It selects those QIds for which the query's (lower cased) subcategory is contained
     in the constant *tarsp_clausetypes*:
 
-    .. autodata:: TARSPpostfunctions::tarsp_clausetypes
+    .. autodata:: sastadev.TARSPpostfunctions::tarsp_clausetypes
 
     and which is not included in the list of *excludedqids*:
 
-    .. autodata:: TARSPpostfunctions::excludedqids
+    .. autodata:: sastadev.TARSPpostfunctions::excludedqids
 
     if these conditions are met, the QId is appended to the dictionary item with key
     equal to the stage of the query associated with QId.
@@ -110,7 +110,7 @@ def getuttcountsbystage(queriesbystage: Dict[Stage, List[QId]], allresults: AllR
     number of utterances marked in  *allresults.coreresults*. For this it uses the
     function *countutts*:
 
-    .. autofunction:: TARSPpostfunctions::countutts
+    .. autofunction:: sastadev.TARSPpostfunctions::countutts
 
     '''
     uttcounts = {}
@@ -130,7 +130,7 @@ def getstage(uttcounts: Dict[Stage, int], allresults: AllResults) -> Stage:
     The stage is taken into consideration if its number of scores divided by *gtotaal* is
     greater or equal to the value of *gofase_minthreshold*:
 
-    .. autodata:: TARSPpostfunctions::gofase_minthreshold
+    .. autodata:: sastadev.TARSPpostfunctions::gofase_minthreshold
 
     From the remaining candidates the highest stage value is selected.
     '''
@@ -157,17 +157,17 @@ def gofase(allresults: AllResults, thequeries: QueryDict) -> Stage:
     It first obtains *queriesbystage*, a dictionary of Stage, List[QId] items, via the
     function  *getqueriesbystage* applied to *thequeries*:
 
-    .. autofunction:: TARSPpostfunctions::getqueriesbystage
+    .. autofunction:: sastadev.TARSPpostfunctions::getqueriesbystage
 
     Next, it obtains *uttcounts*,  a dictionary of Stage, int items by applying the
     function  *getuttcountsbystage* to *queriesbystage* and *allresults*:
 
-    .. autofunction:: TARSPpostfunctions::getuttcountsbystage
+    .. autofunction:: sastadev.TARSPpostfunctions::getuttcountsbystage
 
     Finally, it obtains the stage by applying the function *getstage* to *uttcounts*
     and *allresults*:
 
-    .. autofunction:: TARSPpostfunctions::getstage
+    .. autofunction:: sastadev.TARSPpostfunctions::getstage
 
     and then it returns the obtained *stage*.
     '''
@@ -256,7 +256,7 @@ def pf(allresults: AllResults, allqueries: QueryDict) -> int:
     The *'Profielscore's* per stage are computed by *pf2* through *pf7*, each of which
     uses the function *genpfi*:
 
-    .. autofunction:: TARSPpostfunctions::genpfi
+    .. autofunction:: sastadev.TARSPpostfunctions::genpfi
 
     '''
     postresults = allresults.postresults

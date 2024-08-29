@@ -26,12 +26,12 @@ def recognised_wordnodepos(node: SynTree, pos: str) -> bool:
 
     * the node is a node for a compound, as determined by the function *iscompound*:
 
-        .. autofunction:: treebankfunctions::iscompound
+        .. autofunction:: sastadev.treebankfunctions::iscompound
            :noindex:
 
     * the node is a node for a diminutive, as determined by the function *isdiminutive*:
 
-        .. autofunction:: treebankfunctions::isdiminutive
+        .. autofunction:: sastadev.treebankfunctions::isdiminutive
            :noindex:
 
     * the node is a node for a name part, as determined by the function *lex.isa_namepart*
@@ -59,11 +59,11 @@ def recognised_wordnode(node: SynTree) -> bool:
 
     * the node is a node for a compound, as determined by the function *iscompound*:
 
-        .. autofunction:: treebankfunctions::iscompound
+        .. autofunction:: sastadev.treebankfunctions::iscompound
 
     * the node is node for a diminutive, as determined by the function *isdiminutive*:
 
-        .. autofunction:: treebankfunctions::isdiminutive
+        .. autofunction:: sastadev.treebankfunctions::isdiminutive
 
     * the node is a node for a name part, as determined by the function *lex.isa_namepart*
 
@@ -110,7 +110,7 @@ def asta_recognised_lexnode(node: SynTree) -> bool:
     This is the case if *pt* equals *ww* and the node is not a substantivised verb as
     determined by the function *issubstantivised_verb*:
 
-    .. autofunction:: treebankfunctions::issubstantivised_verb
+    .. autofunction:: sastadev.treebankfunctions::issubstantivised_verb
 
     '''
     if issubstantivised_verb(node):
@@ -129,37 +129,37 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
 
     * either the node meets the conditions of *sasta_pseudonym*
 
-       .. autofunction:: treebankfunctions::sasta_pseudonym
+       .. autofunction:: sastadev.treebankfunctions::sasta_pseudonym
 
     * or the node meets the conditions of *spec_noun*
 
-       .. autofunction:: treebankfunctions::spec_noun
+       .. autofunction:: sastadev.treebankfunctions::spec_noun
 
     * or the node meets the conditions of *is_duplicate_spec_noun*
 
-       .. autofunction:: treebankfunctions::is_duplicate_spec_noun
+       .. autofunction:: sastadev.treebankfunctions::is_duplicate_spec_noun
 
     * or the node meets the conditions of *sasta_long*
 
-       .. autofunction:: treebankfunctions::sasta_long
+       .. autofunction:: sastadev.treebankfunctions::sasta_long
 
     * or the node meets the conditions of *recognised_wordnodepos*
 
-       .. autofunction:: treebankfunctions::recognised_wordnodepos
+       .. autofunction:: sastadev.treebankfunctions::recognised_wordnodepos
 
     * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
 
-       .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
+       .. autofunction:: sastadev.treebankfunctions::recognised_lemmanodepos(node, pos)
 
     However, the node should:
 
     * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
 
-       .. autofunction:: treebankfunctions::all_lower_consonantsnode
+       .. autofunction:: sastadev.treebankfunctions::all_lower_consonantsnode
 
     * nor satisfy the conditions of *short_nucl_n*:
 
-       .. autofunction:: treebankfunctions::short_nucl_n
+       .. autofunction:: sastadev.treebankfunctions::short_nucl_n
 
     '''
 

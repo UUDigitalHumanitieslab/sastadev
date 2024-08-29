@@ -14,5 +14,5 @@ It takes as input a word document or a CHAT file, or a (corrected) annotation fi
 SASTAdev
 --------
 
-.. automodule:: sastadev
+.. automodule:: sastadev.__main__
 

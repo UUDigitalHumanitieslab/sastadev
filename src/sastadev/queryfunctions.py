@@ -98,7 +98,7 @@ def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) 
     (which should be analysed as TARSP *Vobij*) from those that are not adjacent (which should be analysed as TARSP
     Vo/Bij).
 
-    .. autodata:: queryfunctions::voslashbijxpath
+    .. autodata:: sastadev.queryfunctions::voslashbijxpath
 
     '''
     RPnodes = stree.xpath(voslashbijxpath)
@@ -126,11 +126,11 @@ def vobij(stree: SynTree) -> List[SynTree]:
 
     * The *vobijxpath* expression matches with so-called adverbial pronouns:
 
-      .. autodata:: queryfunctions::vobijxpath
+      .. autodata:: sastadev.queryfunctions::vobijxpath
 
     * The function *auxvobij*  finds adjacent R-pronoun + adposition cases:
 
-      .. autofunction:: queryfunctions::auxvobij
+      .. autofunction:: sastadev.queryfunctions::auxvobij
 
     '''
     results1 = stree.xpath(vobijxpath)
@@ -147,7 +147,7 @@ def voslashbij(stree: SynTree) -> List[SynTree]:
 
     The function *voslashbij* uses the function *auxvobij* to find non-adjacent R-pronoun + adposition cases:
 
-    .. autofunction:: queryfunctions::auxvobij
+    .. autofunction:: sastadev.queryfunctions::auxvobij
           :noindex:
 
 
@@ -197,6 +197,7 @@ vudiversxpath = """
 """
 def vudivers(syntree: SynTree) -> List[SynTree]:
 
+    expandedvudiversxpath = expandmacros(vudiversxpath)
     expandedvudiversxpath = expandmacros(vudiversxpath)
     rawresults = syntree.xpath(expandedvudiversxpath)
     heresults = hequery(syntree)

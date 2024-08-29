@@ -85,6 +85,10 @@ trueclausecats = ['smain', 'cp', 'rel', 'whrel', 'whsub', 'whq', 'sv1', 'svan']
 complrels = ['su', 'obj1', 'pobj1', 'obj2',
              'se', 'pc', 'vc', 'svp', 'predc', 'ld']
 
+headrels = ['hd', 'crd']
+
+extendedheadrels  = ['hdf']
+
 mainclausecats = ['smain', 'whq', 'sv1']
 
 ptsubclasspairs = [('n', 'ntype'), ('tw', 'numtype'), ('vnw', 'vwtype'), ('lw', 'lwtype'), ('vz', 'vztype'),
@@ -787,7 +791,7 @@ def iscompound(node: SynTree) -> bool:
     This is the case if the *lemma* attribute contains the compound separator
     *compoundsep*
 
-    .. autodata:: treebankfunctions::compoundsep
+    .. autodata:: sastadev.treebankfunctions::compoundsep
     """
     lemma = getattval(node, 'lemma')
     result = compoundsep in lemma
@@ -860,7 +864,7 @@ def sasta_long(node: SynTree) -> bool:
     The function sasta_long checks whether the length of the *word* attribute of the
     node is greater or equal to *min_sasta_length*:
 
-    .. autodata:: treebankfunctions::min_sasta_length
+    .. autodata:: sastadev.treebankfunctions::min_sasta_length
 
     """
     word = getattval(node, 'word')
@@ -914,7 +918,7 @@ def onbvnwdet(node: SynTree) -> bool:
 #     This is the case if *pt* equals *ww* and the node is not a substantivised verb as
 #     determined by the function *issubstantivised_verb*:
 #
-#     .. autofunction:: treebankfunctions::issubstantivised_verb
+#     .. autofunction:: sastadev.treebankfunctions::issubstantivised_verb
 #
 #     """
 #     if issubstantivised_verb(node):
@@ -947,45 +951,45 @@ def ismonthname(node: SynTree) -> bool:
 #
 #     * either the node meets the conditions of *sasta_pseudonym*
 #
-#        .. autofunction:: treebankfunctions::sasta_pseudonym
+#        .. autofunction:: sastadev.treebankfunctions::sasta_pseudonym
 #
 #     * or the node is part of name (pt = *spec*, spectype= *deeleigen*)
 #
-#        .. autofunction:: treebankfunctions::isspecdeeleigen
+#        .. autofunction:: sastadev.treebankfunctions::isspecdeeleigen
 #
 #     * or the node is a month name (these are not always nouns in Alpino)
 #
-#        .. autofunction:: treebankfunctions::ismonthname
+#        .. autofunction:: sastadev.treebankfunctions::ismonthname
 #
 #     * or the node meets the conditions of *spec_noun*
 #
-#        .. autofunction:: treebankfunctions::spec_noun
+#        .. autofunction:: sastadev.treebankfunctions::spec_noun
 #
 #     * or the node meets the conditions of *is_duplicate_spec_noun*
 #
-#        .. autofunction:: treebankfunctions::is_duplicate_spec_noun
+#        .. autofunction:: sastadev.treebankfunctions::is_duplicate_spec_noun
 #
 #     * or the node meets the conditions of *sasta_long*
 #
-#        .. autofunction:: treebankfunctions::sasta_long
+#        .. autofunction:: sastadev.treebankfunctions::sasta_long
 #
 #     * or the node meets the conditions of *recognised_wordnodepos*
 #
-#        .. autofunction:: treebankfunctions::recognised_wordnodepos
+#        .. autofunction:: sastadev.treebankfunctions::recognised_wordnodepos
 #
 #     * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
 #
-#        .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
+#        .. autofunction:: sastadev.treebankfunctions::recognised_lemmanodepos(node, pos)
 #
 #     However, the node should:
 #
 #     * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
 #
-#        .. autofunction:: treebankfunctions::all_lower_consonantsnode
+#        .. autofunction:: sastadev.treebankfunctions::all_lower_consonantsnode
 #
 #     * nor satisfy the conditions of *short_nucl_n*:
 #
-#        .. autofunction:: treebankfunctions::short_nucl_n
+#        .. autofunction:: sastadev.treebankfunctions::short_nucl_n
 #
 #     """
 #
@@ -1031,7 +1035,7 @@ def sasta_short(inval: str) -> bool:
     The function *sasta_short* determines whether the string *inval* is short, i.e,
     with a length smaller or equal than *sasta_short_length*:
 
-    .. autodata:: treebankfunctions::sasta_short_length
+    .. autodata:: sastadev.treebankfunctions::sasta_short_length
 
     """
     result = len(inval) <= sasta_short_length
@@ -1044,7 +1048,7 @@ def short_nucl_n(node: SynTree) -> bool:
     *pt* equal to *n*, relation *nucl*, and whose *word* attribute is short (as
     determined by the  function *sasta_short*)
 
-    .. autofunction:: treebankfunctions::sasta_short
+    .. autofunction:: sastadev.treebankfunctions::sasta_short
     """
     pt = getattval(node, 'pt')
     rel = getattval(node, 'rel')
@@ -1062,10 +1066,10 @@ def sasta_pseudonym(node: SynTree) -> bool:
     pseudonym regular
     expressions have been created using the constant sasta_pseudonyms:
 
-    .. autodata:: treebankfunctions::sasta_pseudonyms
+    .. autodata:: sastadev.treebankfunctions::sasta_pseudonyms
        :noindex:
 
-    .. autodata:: treebankfunctions::pseudonym_patternlist
+    .. autodata:: sastadev.treebankfunctions::pseudonym_patternlist
 
     """
     word = getattval(node, 'word')
@@ -1171,7 +1175,7 @@ def getindexednodesmap(basicdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
     The function *getindexednodesmap* creates a new dictionary for each item in *basicdict* in which the bare index nodes have been replaced by
     their antecedents by applying the function *expandtree*:
 
-    .. autofunction:: treebankfunctions::expandtree
+    .. autofunction:: sastadev.treebankfunctions::expandtree
 
     """
     newdict = {}
@@ -1296,17 +1300,17 @@ def indextransform(stree: SynTree) -> SynTree:
     It first gathers the antecedents of bare index nodes in a dictionary (*basicindexednodesmap*) of index-SynTree
     items by means of the function *getbasicindexednodesmap*.
 
-    .. autofunction:: treebankfunctions::getbasicindexednodesmap
+    .. autofunction:: sastadev.treebankfunctions::getbasicindexednodesmap
 
     The antecedents can contain bare index nodes themselves. So, in a second step, each antecedent is expanded
     so that bare index nodes are replaced by their antecedents. This is done by the function *getindexednodesmap*,
     which creates a new dictionary of index-SynTree items called *indexnodesmap*
 
-    .. autofunction:: treebankfunctions::getindexednodesmap
+    .. autofunction:: sastadev.treebankfunctions::getindexednodesmap
 
     Finally, the input tree is transformed by the function *indextransform2*, which uses  *indexnodesmap*:
 
-    .. autofunction:: treebankfunctions::indextransform2
+    .. autofunction:: sastadev.treebankfunctions::indextransform2
 
     """
 

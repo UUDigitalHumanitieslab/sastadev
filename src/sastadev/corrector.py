@@ -69,7 +69,7 @@ enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
 #: different word to avoid unwanted readings of the original word. It is filled by a
 #: call to the function *getdisambiguationdict* from the module *basicreplacements*.
 #:
-#: .. autofunction:: basicreplacements::getdisambiguationdict
+#: .. autofunction:: sastadev.basicreplacements::getdisambiguationdict
 #:
 disambiguationdict = getdisambiguationdict()
 
@@ -729,7 +729,7 @@ def OLDgetexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
     It checks whether a word is a contraction by checking whether it occurs in the
     dictionary *basicexpansions* from the module *basicreplacements*
 
-        .. autodata:: basicreplacements::basicexpansions
+        .. autodata:: sastadev.basicreplacements::basicexpansions
             :no-value:
 
     '''
@@ -841,14 +841,14 @@ def getexpansions2(tokenlist: List[Token], intokenposlist: List[int]) -> List[Tu
     It applies the function *getsingleitemexpansions* to the head (first) element of the *tokenlist* and
     recursively applies itself to the tail of *intokenlist*, after which it combines the results by the *combine* function.
 
-        .. autofunction::  corrector::getsingleitemexpansions
+        .. autofunction::  sastadev.corrector::getsingleitemexpansions
 
-        .. autofunction:: corrector::combine
+        .. autofunction:: sastadev.corrector::combine
 
     It checks whether a word is a contraction by checking whether it occurs in the
     dictionary *basicexpansions* from the module *basicreplacements*
 
-        .. autodata:: basicreplacements::basicexpansions
+        .. autodata:: sastadev.basicreplacements::basicexpansions
             :no-value:
 
     '''
@@ -884,7 +884,7 @@ def getexpansions(uttmd: TokenListMD) -> List[TokenListMD]:
 
     It does so by a call to the function *getexpansions2*, which recursively generates all alternatives with expansions:
 
-    .. autofunction:: corrector::getexpansions2
+    .. autofunction:: sastadev.corrector::getexpansions2
 
     '''
     newtokenmds = []
@@ -1014,7 +1014,7 @@ def initdevoicing(token: Token, voiceless: str, voiced: str, newtokenmds: List[T
 
     A known word is *special* if it is contained in the variable *specialdevoicingwords*.
 
-    .. autodata:: corrector::specialdevoicingwords
+    .. autodata:: sastadev.corrector::specialdevoicingwords
 
     '''
     # initial s -> z, f -> v
@@ -1450,7 +1450,7 @@ def gaatie(word: str) -> List[str]:
     *gaatie*) by a sequence of two words where the first word equals word[:-2] (
     *gaat*) and is a known word and the second word equals word[-2:] (*ie*).
 
-    .. autodata:: corrector::gaatiepattern
+    .. autodata:: sastadev.corrector::gaatiepattern
     '''
     results = []
     # kan-ie, moet-ie, gaat-ie, wil-ie
@@ -1475,7 +1475,7 @@ def oldgaatie(word: str) -> List[str]:
     *gaatie*) by a sequence of two words where the first word equals word[:-2] (
     *gaat*) and is a known word and the second word equals word[-2:] (*ie*).
 
-    .. autodata:: corrector::gaatiepattern
+    .. autodata:: sastadev.corrector::gaatiepattern
     '''
     results = []
     if gaatiere.match(word):
@@ -1502,12 +1502,12 @@ def old_getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: Utt
     belongs to words that would lead to wrong corrections, as specified in the constant
     *wrongdet_excluded_words*:
 
-    .. autodata:: corrector::wrongdet_excluded_words
+    .. autodata:: sastadev.corrector::wrongdet_excluded_words
 
     The properties of the token following are determined by the function
     *getdehetwordinfo* from the module *alpino*:
 
-    .. autofunction:: alpino::getdehetwordinfo
+    .. autofunction:: sastadev.alpino::getdehetwordinfo
     '''
     correctiondone = False
     tokens = tokensmd.tokens
@@ -1570,12 +1570,12 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
     belongs to words that would lead to wrong corrections, as specified in the constant
     *wrongdet_excluded_words*:
 
-    .. autodata:: corrector::wrongdet_excluded_words
+    .. autodata:: sastadev.corrector::wrongdet_excluded_words
 
     The properties of the token following are determined by the function
     *getdehetwordinfo* from the module *alpino*:
 
-    .. autofunction:: alpino::getdehetwordinfo
+    .. autofunction:: sastadev.alpino::getdehetwordinfo
     '''
     correctiondone = False
     tokens = tokensmd.tokens

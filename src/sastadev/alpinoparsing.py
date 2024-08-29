@@ -3,11 +3,11 @@ The *alpinoparsing* module provides functions for:
 
 * parsing:
 
-.. autofunction::  alpinoparsing::parse
+.. autofunction::  sastadev.alpinoparsing::parse
 
 * previewing a parse tree:
 
-.. autofunction:: alpinoparsing::previewurl
+.. autofunction:: sastadev.alpinoparsing::previewurl
 
 '''
 

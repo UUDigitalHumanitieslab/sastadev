@@ -31,7 +31,7 @@ interpunction signs, CHAT codes such as *xxx*, etc.
 
 The different subcases are dealt with by the function *smallclauses*:
 
-.. autofunction:: smallclauses::smallclauses
+.. autofunction:: sastadev.smallclauses::smallclauses
 
 '''
 

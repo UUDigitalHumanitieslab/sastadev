@@ -2,7 +2,7 @@
 The module cleanCHILDEStokens provides the function cleantext to tokenize and clean utterances,
 yielding a cleaned text and associated metadata.
 
-* ..autofunction:: cleantext
+* ..autofunction:: sastadev.cleantext
 
 '''
 import re
