@@ -3,7 +3,7 @@ This module contains definitions of types used in multiple modules
 """
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from typing_extensions import TypeAlias
 
 from lxml import etree
@@ -79,6 +79,8 @@ Span = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict = Dict[Item_Level, QId]
 Nort = Union[SynTree, Token]
 ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
+Table = List[List[Any]]
+Header = List[str]
 Targets = int
 Treebank = etree.Element
 TreePredicate = Callable[[SynTree], bool]

@@ -55,8 +55,8 @@ contextualproperties = ['rel', 'index', 'positie']
 ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
 TupleNint = Tuple[19 * (int,)]
 
-altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'dimcount', 'compcount', 'supcount',
-                       'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'badcatcount',
+altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'mainclausecount', 'complsucount', 'dimcount', 'compcount', 'supcount',
+                       'compoundcount', 'unknownwordcount', 'smainsucount', 'sucount', 'svaokcount', 'deplusneutcount', 'badcatcount',
                        'hyphencount', 'basicreplaceecount', 'ambigcount', 'subjunctivecount', 'unknownnouncount',
                        'unknownnamecount', 'dezebwcount', 'noun1c_count']
 
@@ -70,8 +70,8 @@ smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 
 
 class Alternative():
-    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
-                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, badcatcount,
+    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, mainclausecount, complsucount, dimcount,
+                 compcount, supcount, compoundcount, unknownwordcount, smainsucount, sucount, svaok, deplusneutcount, badcatcount,
                  hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount,
                  dezebwcount, noun1c_count):
         self.stree: SynTree = stree
@@ -80,12 +80,14 @@ class Alternative():
         self.penalty: Penalty = int(penalty)
         self.dpcount: int = int(dpcount)
         self.dhyphencount: int = int(dhyphencount)
+        self.mainclausecount: int = int(mainclausecount)
         self.complsucount: int = int(complsucount)
         self.dimcount: int = int(dimcount)
         self.compcount: int = int(compcount)
         self.supcount: int = int(supcount)
         self.compoundcount: int = int(compoundcount)
         self.unknownwordcount: int = int(unknownwordcount)
+        self.smainsucount: int = int(smainsucount)
         self.sucount: int = int(sucount)
         self.svaok: int = int(svaok)
         self.deplusneutcount: int = int(deplusneutcount)
@@ -111,9 +113,10 @@ class Alternative():
             scores.append('IDENTICAL')
         score = ampersand.join(scores)
         part4 = list(
-            map(str, [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount, self.complsucount,
+            map(str, [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount,
+                      self.mainclausecount, self.complsucount,
                       self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount,
-                      self.sucount,
+                      self.smainsucount, self.sucount,
                       self.svaok, self.deplusneutcount, self.badcatcount, self.hyphencount,
                       self.basicreplaceecount, self.ambigcount, self.subjunctivecount, self.unknownnouncount,
                       self.unknownnamecount, self.dezebwcount, self.noun1c_count]))
@@ -969,10 +972,10 @@ def oldgetuttid(stree: SynTree) -> UttId:
 
 def scorefunction(obj: Alternative) -> TupleNint:
     return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount,
-            -obj.dhyphencount,
+            -obj.dhyphencount, -obj.mainclausecount,
             -obj.complsucount, -obj.badcatcount,
             -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
-            -obj.subjunctivecount, obj.dimcount,
+            -obj.subjunctivecount, obj.smainsucount, obj.dimcount,
             obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok,
             -obj.deplusneutcount,
             -obj.dezebwcount, -obj.noun1c_count, -obj.penalty)
@@ -1070,6 +1073,8 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         compoundcount = getcompoundcount(nt)
         unknownwordcount = getunknownwordcount(nt)
         sucount = countav(nt, 'rel', 'su')
+        mainclausecount = getmainclausecount(nt)
+        smainsucount = countsmainsu(nt)
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
         badcatcount = len(
@@ -1094,9 +1099,9 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         # overregcount but these will mostly be unknown words
         # mwunamecount well maybe unknownpropernoun first
 
-        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount, compcount,
+        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, mainclausecount, complsucount, dimcount, compcount,
                           supcount,
-                          compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, badcatcount,
+                          compoundcount, unknownwordcount,  smainsucount, sucount, svaokcount, deplusneutcount, badcatcount,
                           hyphencount, basicreplaceecount, ambigwordcount, subjunctivecount, unknownnouncount,
                           unknownnamecount, dezebwcount, noun1c_count)
         alts[altid] = alt
@@ -1125,6 +1130,25 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
     result = ptmds[orandalts.selected]
     return result, orandalts
 
+smainsuxpath = './/node[@cat="smain" and node[@rel="su"]]'
+#  //node[@cat="smain"  and @begin = node[@rel="su"]/@begin]
+
+def countsmainsu(nt: SynTree) -> int:
+    matches = nt.xpath(smainsuxpath)
+    result = len(matches)
+    return result
+
+mainclausexpath = './/node[@cat="smain" or @cat="whq" or (@cat="sv1" and @rel!="body" and @rel!="cnj")]'
+def getmainclausecount(nt: SynTree) -> int:
+    """
+    parses with more than 1 main clause node are bad
+    :param nt:
+    :return:
+    """
+    matches = nt.xpath(mainclausexpath)
+    lmatches = len(matches)
+    result = lmatches if lmatches > 1 else 0
+    return result
 
 def compute_penalty(md: List[Meta]) -> Penalty:
     totalpenalty = 0
