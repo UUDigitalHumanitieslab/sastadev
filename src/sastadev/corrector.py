@@ -42,8 +42,9 @@ from sastadev.stringfunctions import (chatxxxcodes, consonants, deduplicate,
                                       endsinschwa, fullworddehyphenate,
                                       monosyllabic, vowels)
 from sastadev.sva import getsvacorrections
+from sastadev.toe import lonelytoe
 from sastadev.tokenmd import TokenListMD, TokenMD, mdlist2listmd
-from sastadev.treebankfunctions import (fatparse, getattval, getnodeyield,
+from sastadev.treebankfunctions import (fatparse, getattval, getnodeyield, keycheck,
                                         showtree)
 
 Correction = Tuple[List[Token], List[Meta]]
@@ -232,13 +233,14 @@ def mustberemoved(tok, reducedtokens) -> bool:
     result = removeinaanloop or removefirst or removeinuitloop or removelast or removeincore
     return result
 
+
 def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], List[Meta]]:
     if tree is None:
         settings.LOGGER.error(
             'No tree for :{}\nNo reduction applied'.format(tokens))
         return ((tokens, []))
 
-    tokennodes = tree.xpath('.//node[@pt or @pos]')
+    tokennodes = tree.xpath('.//node[@pt or @pos or @word]')
     tokennodesdict = {int(getattval(n, 'begin')): n for n in tokennodes}
     token2nodemap = {token.pos: tokennodesdict[token.pos]
                      for token in tokens if keycheck(token.pos, tokennodesdict)}
@@ -488,17 +490,6 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     return (skipmarkedtokens, allmetadata)
 
 
-def keycheck(key: Any, dict: Dict[Any, Any]) -> bool:
-    if key not in dict:
-        settings.LOGGER.error(
-            'key {}  not in dictionary. Contents of dictionary:'.format(key))
-        for akey, val in dict.items():
-            valbgn = getattval(val, 'begin')
-            valpt = getattval(val, 'pt')
-            valword = getattval(val, 'word')
-            valstr = '{}:{}:{}'.format(valbgn, valpt, valword)
-            settings.LOGGER.error('{}={}'.format(akey, valstr))
-    return key in dict
 
 
 def combinesorted(toklist1: List[Token], toklist2: List[Token]) -> List[Token]:
@@ -648,6 +639,14 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
         utterance, _ = mkuttwithskips(uttmd.tokens)
         fatntree = fatparse(utterance, uttmd.tokens)
         newresults += getwrongdetalternatives(uttmd, fatntree, uttid)
+    allalternativemds += newresults
+
+    # lonely toe
+    newresults = []
+    for uttmd in allalternativemds:
+        utterance, _ = mkuttwithskips(uttmd.tokens)
+        fatntree = fatparse(utterance, uttmd.tokens)
+        newresults += lonelytoe(uttmd, fatntree)
     allalternativemds += newresults
 
     newresults = []
@@ -1374,6 +1373,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
                                         name='Spelling Correction', value='Missing Apostrophe',
                                         cat='Spelling', backplacement=bpl_word)
+
+
 
     # ...en -> e: groten  -> grote (if adjective); goten -> grote
 

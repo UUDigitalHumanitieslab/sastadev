@@ -46,8 +46,12 @@ def initializelexicon(lexiconfilename) -> set:
     lexicon = set()
     fptuples = readcsv(lexiconfilename, header=False)
     for _, fp in fptuples:
-        strippedword = fp[0].strip()
-        lexicon.add(strippedword)
+        strippedwords = [el.strip() for el in fp]
+        if len(strippedwords) == 1:
+            lexicon.add(strippedwords[0])
+        else:
+            lexitem = tuple(strippedwords)
+            lexicon.add(lexitem)
     return lexicon
 
 def initializelexicondict(lexiconfilename) -> Dict[str,str]:
@@ -260,3 +264,7 @@ nonwordslexicon = initializelexicon(nonwordsfullname)
 spellingadditionsfilename  = 'spellingadditions.txt'
 spellingadditionsfullname = os.path.join(settings.SD_DIR, lexiconfoldername, spellingadditionsfilename)
 spellingadditions = initializelexicon(spellingadditionsfullname)
+
+wrongposwordslexiconfilename = 'wrongposwordslexicon.txt'
+wrongposwordslexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, wrongposwordslexiconfilename)
+wrongposwordslexicon = initializelexicon(wrongposwordslexiconfullname)

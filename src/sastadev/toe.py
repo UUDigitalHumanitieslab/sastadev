@@ -1,11 +1,16 @@
-from treebankfunctions import getattval, getnodeyield
+from sastadev.treebankfunctions import getattval, getnodeyield, mktoken2nodemap
+from sastadev.conf import settings
+from sastadev.alpino import getdehetwordinfo
 from sastadev.sastatypes import SynTree
+from sastadev.sastatoken import Token
 from typing import List
+from sastadev.smallclauses import bg, mkinsertmeta, realword, word
+from sastadev.tokenmd import TokenListMD
 
 def isdet(node) -> bool:
     nodept = getattval(node, 'pt')
-    nodepdtype = getattval(node, pdtype)
-    result = nodept in ['lw'] or (nodept in  ['vnw'] nodepdtype in ['det']
+    nodepdtype = getattval(node, 'pdtype' )
+    result = nodept in ['lw'] or (nodept in  ['vnw'] and nodepdtype in ['det'])
     return result
 
 
@@ -14,49 +19,81 @@ def contentword(node) -> bool:
     result = nodept in ['n', 'ww', 'adj', 'bw']
     return result
 
-token2nodemap = {}
-tokens = []
-newtokens = []
-naarfound = False
 
-for i, token in enumerate(tokens):
-    naarfound = token.word == 'naar'
-    if not naarfound:
-        if i + 2 < len(tokens) and tokens[i].pos in token2nodemap and \
-                tokens[i+1].pos in token2nodemap and \
-                tokens[i+2].word == 'toe':
-            thisnode = token2nodemap[i]
-            nextnode = token2nodemap[i+1]
-            if isdet(thisnode) and contentword(nextnode):
-                naartoken = mktoken('naar')
-                naarfound = True
-                newtokens.append(naartoken)
-        elif i +1 < len(tokens) and tokens[i].pos in token2nodemap and \
-                tokens[i+1].word == 'toe':
-            thisnode = token2nodemap[i]
-            if contentword(thisnode):
-                naartoken = mktoken('naar')
-                naarfound = True
-                newtokens.append(naartoken)
-    else:
+def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
+
+    insertiondone = False
+    leaves = getnodeyield(tree)
+    reducedleaves = [leave for leave in leaves if realword(leave)]
+    if not len(reducedleaves) > 1:
+        return []
+    tokens = tokensmd.tokens
+    treewords = [word(tokennode) for tokennode in leaves]
+    tokenwords = [token.word for token in tokens if not token.skip]
+    if treewords != tokenwords:
+        settings.LOGGER.error('Token mismatch: {} v. {}'.format(treewords, tokenwords))
+        return []
+    token2nodemap = mktoken2nodemap(tokens, tree)
+    metadata = tokensmd.metadata
+
+    newtokens = []
+    naarfound = False
+
+    for i, token in enumerate(tokens):
+        naarfound = naarfound or token.word == 'naar'
+        if not naarfound:
+            if  i + 2 < len(tokens) and tokens[i].pos in token2nodemap and \
+                    tokens[i+1].pos in token2nodemap and \
+                    tokens[i+2].word == 'toe':
+                thisnode = token2nodemap[token.pos]
+                nextnode = token2nodemap[tokens[i+1].pos]
+                if isdet(thisnode) and getattval(nextnode, 'pt') == 'n':
+                    naartoken = Token('naar', token.pos, subpos=5)
+                    inserttokens = [naartoken]
+                    metadata += mkinsertmeta(inserttokens, newtokens)
+                    naarfound = True
+                    newtokens.append(naartoken)
+                    insertiondone = True
+            elif i +1 < len(tokens) and tokens[i].pos in token2nodemap and \
+                    tokens[i+1].word == 'toe':
+                thisnode = token2nodemap[token.pos]
+                if isnominal(thisnode) :
+                    naartoken = Token('naar', token.pos, subpos=5)
+                    naarfound = True
+                    newtokens.append(naartoken)
+                    inserttokens = [naartoken]
+                    metadata += mkinsertmeta(inserttokens, newtokens)
+                    insertiondone = True
         newtokens.append(token)
-
-def isvariantcompatible(variant: str, variants:str) -> bool:
-    rawvariantlist = variants.split(comma)
-    variantlist = [variant.strip() for variant in rawvariantlist]
-    result = variantlist == [] or variant in variantlist
+    if insertiondone:
+        result = [TokenListMD(newtokens, metadata)]
+    else:
+        result = [tokensmd]
     return result
 
-import copy
-def transformtree(stree:SynTree) -> SynTree:
-    newstree = copy.deepcopy(stree)
-    ldxpath = """.//node[node[@rel="hd" and @pt="ww"] and
-       node[@rel="ld" and (@pt="n" or @cat="np")] and
-       node[@rel="svp"  and @pt="vz"] and
-       not(node[@rel="su"])
-       ]"""
-    ldclauses = stree.xpath(ldxpath)
-    for ldclause in ldclauses:
-        ldnode = ldclause.xpath(' node[@rel="ld" and (@pt="n" or @cat="np")]')
-        ldnode.attrib["rel"] = "su"
-    return newstree
+nominalpts = ['n', 'vnw']
+def isnominal(node: SynTree) -> bool:
+    pt = getattval(node, 'pt' )
+    return pt in nominalpts
+
+
+
+# def isvariantcompatible(variant: str, variants:str) -> bool:
+#     rawvariantlist = variants.split(comma)
+#     variantlist = [variant.strip() for variant in rawvariantlist]
+#     result = variantlist == [] or variant in variantlist
+#     return result
+#
+# import copy
+# def transformtree(stree:SynTree) -> SynTree:
+#     newstree = copy.deepcopy(stree)
+#     ldxpath = """.//node[node[@rel="hd" and @pt="ww"] and
+#        node[@rel="ld" and (@pt="n" or @cat="np")] and
+#        node[@rel="svp"  and @pt="vz"] and
+#        not(node[@rel="su"])
+#        ]"""
+#     ldclauses = stree.xpath(ldxpath)
+#     for ldclause in ldclauses:
+#         ldnode = ldclause.xpath(' node[@rel="ld" and (@pt="n" or @cat="np")]')
+#         ldnode.attrib["rel"] = "su"
+#     return newstree
