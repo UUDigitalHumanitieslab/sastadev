@@ -22,7 +22,7 @@ from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav, deflate,
+from sastadev.treebankfunctions import (adaptsentence, add_metadata, clausecats, countav, deflate,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
                                         getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
@@ -55,7 +55,7 @@ contextualproperties = ['rel', 'index', 'positie']
 ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
 TupleNint = Tuple[19 * (int,)]
 
-altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'mainclausecount', 'complsucount', 'dimcount', 'compcount', 'supcount',
+altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'mainclausecount', 'topclause', 'complsucount', 'dimcount', 'compcount', 'supcount',
                        'compoundcount', 'unknownwordcount', 'wrongposwordcount', 'smainsucount', 'sucount', 'svaokcount', 'deplusneutcount', 'badcatcount',
                        'hyphencount', 'lonelytoecount', 'basicreplaceecount', 'ambigcount', 'subjunctivecount', 'unknownnouncount',
                        'unknownnamecount', 'dezebwcount', 'noun1c_count']
@@ -70,7 +70,7 @@ smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 
 
 class Alternative():
-    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, mainclausecount, complsucount, dimcount,
+    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, mainclausecount, topclause, complsucount, dimcount,
                  compcount, supcount, compoundcount, unknownwordcount, wrongposwordcount, smainsucount, sucount, svaok, deplusneutcount, badcatcount,
                  hyphencount, lonelytoecount,
                  basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount,
@@ -82,6 +82,7 @@ class Alternative():
         self.dpcount: int = int(dpcount)
         self.dhyphencount: int = int(dhyphencount)
         self.mainclausecount: int = int(mainclausecount)
+        self.topclause: int = int(topclause)
         self.complsucount: int = int(complsucount)
         self.dimcount: int = int(dimcount)
         self.compcount: int = int(compcount)
@@ -117,7 +118,7 @@ class Alternative():
         score = ampersand.join(scores)
         part4 = list(
             map(str, [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount,
-                      self.mainclausecount, self.complsucount,
+                      self.mainclausecount, self.topclause, self.complsucount,
                       self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount,
                       self.wrongposwordcount, self.smainsucount, self.sucount,
                       self.svaok, self.deplusneutcount, self.badcatcount, self.hyphencount, self.lonelytoecount,
@@ -975,7 +976,7 @@ def oldgetuttid(stree: SynTree) -> UttId:
 
 def scorefunction(obj: Alternative) -> TupleNint:
     return (-obj.unknownwordcount, -obj.wrongposwordcount,-obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount,
-            -obj.dhyphencount, -obj.mainclausecount,
+            -obj.dhyphencount, -obj.mainclausecount, obj.topclause,
             -obj.complsucount, -obj.badcatcount,
             -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount, -obj.lonelytoecount,
             -obj.subjunctivecount, obj.smainsucount, obj.dimcount,
@@ -1087,6 +1088,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         sucount = countav(nt, 'rel', 'su')
         lonelytoecount = getlonelytoecount(nt)
         mainclausecount = getmainclausecount(nt)
+        topclause = gettopclause(nt)
         smainsucount = countsmainsu(nt)
         svaokcount = getsvaokcount(nt)
         deplusneutcount = getdeplusneutcount(nt)
@@ -1112,7 +1114,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         # overregcount but these will mostly be unknown words
         # mwunamecount well maybe unknownpropernoun first
 
-        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, mainclausecount, complsucount, dimcount, compcount,
+        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, mainclausecount, topclause, complsucount, dimcount, compcount,
                           supcount,
                           compoundcount, unknownwordcount,  wrongposwordcount, smainsucount, sucount, svaokcount, deplusneutcount, badcatcount,
                           hyphencount, lonelytoecount,
@@ -1166,6 +1168,21 @@ def getmainclausecount(nt: SynTree) -> int:
     else:
         result = lmatches
     return result
+
+topxpath = './/node[@cat="top"]'
+def gettopclause(nt: SynTree) -> int:
+    tops = nt.xpath(topxpath)
+    if tops == []:
+        return 0
+    top = tops[0]
+    realchildren = [child for child in top if getattval(child, 'pt') not in ['let', 'tsw']]
+    if len(realchildren) != 1:
+        return 0
+    else:
+       thechild = realchildren[0]
+       thechildcat = getattval(thechild, 'cat')
+       result = 1 if thechildcat in clausecats else 0
+       return result
 
 toexpath = './/node[@lemma="toe" or (@lemma="tot" and @vztype="fin")]'
 naarxpath = './/node[@lemma="naar"]'

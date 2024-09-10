@@ -83,7 +83,11 @@ def parse(origsent: str, escape: bool = True):
         if 300 > r1.status >= 200:
             streebytes = r1.read()
             # print(streebytes.decode('utf8'))
-            stree = etree.fromstring(streebytes)
+            try:
+                stree = etree.fromstring(streebytes)
+            except etree.XMLSyntaxError as e:
+                sastadev.conf.settings.LOGGER.error(f'Error: {e} for {sent}')
+                stree = None
             return stree
         else:
             sastadev.conf.settings.LOGGER.error('parsing failed:', r1.status, r1.reason, sent)

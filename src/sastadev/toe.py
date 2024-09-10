@@ -7,6 +7,8 @@ from typing import List
 from sastadev.smallclauses import bg, mkinsertmeta, realword, word
 from sastadev.tokenmd import TokenListMD
 
+lonelytoe = 'Lonely toe'
+
 def isdet(node) -> bool:
     nodept = getattval(node, 'pt')
     nodepdtype = getattval(node, 'pdtype' )
@@ -50,7 +52,7 @@ def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                 if isdet(thisnode) and getattval(nextnode, 'pt') == 'n':
                     naartoken = Token('naar', token.pos, subpos=5)
                     inserttokens = [naartoken]
-                    metadata += mkinsertmeta(inserttokens, newtokens)
+                    metadata += mkinsertmeta(inserttokens, newtokens, cat=lonelytoe)
                     naarfound = True
                     newtokens.append(naartoken)
                     insertiondone = True
@@ -62,7 +64,7 @@ def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                     naarfound = True
                     newtokens.append(naartoken)
                     inserttokens = [naartoken]
-                    metadata += mkinsertmeta(inserttokens, newtokens)
+                    metadata += mkinsertmeta(inserttokens, newtokens, cat=lonelytoe)
                     insertiondone = True
         newtokens.append(token)
     if insertiondone:

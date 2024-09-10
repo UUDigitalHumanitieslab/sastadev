@@ -293,7 +293,7 @@ def getauxform(aux: str, node:SynTree) -> str:
             result = 'heeft' if aux == 'hebben' else 'is'
     return result
 
-def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty):
+def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty, cat=smallclause):
     insertposs = [token.pos + token.subpos for token in inserttokens]
     insertwordlist = [token.word for token in inserttokens]
     tokenmappinglist = [token.pos if token.subpos == 0 else None for token in resultlist]

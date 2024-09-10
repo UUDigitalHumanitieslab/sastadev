@@ -610,7 +610,7 @@ def mktoken2nodemap(tokens: List[Token], tree: SynTree) -> Dict[int, SynTree]:
     tokennodes = tree.xpath('.//node[@pt or @pos or @word]')
     tokennodesdict = {int(getattval(n, 'begin')): n for n in tokennodes}
     token2nodemap = {token.pos: tokennodesdict[token.pos]
-                     for token in tokens if keycheck(token.pos, tokennodesdict)}
+                     for token in tokens if not token.skip and keycheck(token.pos, tokennodesdict)}
     return token2nodemap
 
 
