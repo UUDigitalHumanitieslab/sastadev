@@ -116,7 +116,7 @@ def correctspelling(word: str, max = None, threshold=okthreshold) -> List[Tuple[
     return result
 
 def tryme():
-    words = ['opbijten', 'oprijten', 'opgereten', 'peelkaal' , ' beete' , 'kamm', 'daaistoel', 'oelen', 'tein']
+    words = ['kantie', 'opbijten', 'oprijten', 'opgereten', 'peelkaal' , ' beete' , 'kamm', 'daaistoel', 'oelen', 'tein']
     for word in words:
         result = correctspelling(word, max=5)
         print(f'{word}: {result}' )

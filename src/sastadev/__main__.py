@@ -143,6 +143,7 @@ import copy
 import time
 import json
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from optparse import OptionParser
 from typing import Any, Callable, Dict, List, Pattern, Tuple
 
@@ -159,6 +160,7 @@ from sastadev.constants import (bronzefolder, bronzesuffix, checksuffix, checked
                                 loggingfolder, outtreebanksfolder, permprefix, platinumsuffix,
                                 platinumeditedsuffix,
                                 resultsfolder, silverfolder, silverpermfolder, silversuffix)
+from sastadev.correctionparameters import CorrectionParameters
 from sastadev.correcttreebank import (correcttreebank, corr0, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
@@ -175,7 +177,6 @@ from sastadev.query import (Query, is_preorcore,
                             post_process, query_exists, query_inform)
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.sastacore import doauchann, dopostqueries, getreskey, isxpathquery, SastaCoreParameters, sastacore
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
                                  GoldTuple, MatchesDict, MethodName, QId,
                                  QIdCount, QueryDict, ResultsCounter,
@@ -274,6 +275,7 @@ altcodes: AltCodeDict = {}
 
 emptycounter: Counter = Counter()
 invalidqueries: Dict[QId, Exception] = {}
+
 
 
 def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[ResultsKey, Counter],
@@ -866,6 +868,16 @@ def main():
                            "n=correction with multiple alternatives (default) ")
     parser.add_option("--mf", "--mfile", dest="methodfilename",
                       help="File containing definition of assessment method (SAM)")
+    parser.add_option("--no_spell",  dest="dospellingcorrection", action="store_false",
+                      help="Do no spelling correction")
+    parser.add_option("--no_auchann", dest="doauchann", action="store_false",
+                      help="Do no Automatic CHAT annotation (AuCHAnn)")
+    parser.add_option("--no_history", dest="dohistory", action="store_false",
+                      help="Do no History Creation")
+    parser.add_option("--no_history_extension", dest="extendhistory", action="store_false",
+                      help="Use History but do not extend it")
+
+
 
     (options, args) = parser.parse_args()
 
@@ -889,6 +901,20 @@ def main():
         settings.LOGGER.error(
             'File {} not found. Aborting'.format(options.infilename))
         exit(1)
+
+    if options.dospellingcorrection is None:
+        options.dospellingcorrection = True
+
+    if options.doauchann is None:
+        options.doauchann = True
+
+    if options.dohistory is None:
+        options.dohistory = True
+
+    if options.extendhistory is None:
+        options.extendhistory = True
+
+
     (inbase, inext) = os.path.splitext(options.infilename)
     basepath, basefilename = os.path.split(options.infilename)
     corepath, lastfolder = os.path.split(basepath)
@@ -1134,7 +1160,10 @@ def main():
                               options.includeimplies, options.infilename, targets)
 
     if not annotationinput:
-        treebank1 = doauchann(origtreebank)
+        if options.doauchann:
+            treebank1 = doauchann(origtreebank)
+        else:
+            treebank1 = origtreebank
 
         methodname = scp.themethod.name
         corr = scp.corr
@@ -1144,23 +1173,31 @@ def main():
         # treebank2 = tb_addxsid(treebank1, targets)
         treebank2 = treebank1
 
-        if corr != corr0:
-            reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
-            if reducedtreebankfullname not in donefiles:
-                thissamplecorrections = gathercorrections(treebank2)
+        thissamplecorrections = {}
+        if options.dohistory:
+            if corr != corr0:
+                reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
+                if reducedtreebankfullname not in donefiles:
+                    thissamplecorrections = gathercorrections(treebank2)
+                else:
+                    thissamplecorrections = {}
+                # merge the corrections from this sample with the samplecorrections and update the file
+                if options.extendhistory:
+                    mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
+                    putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
+                    donefiles.add(reducedtreebankfullname)
+                    putdonefilenames(donefiles, donefilesfullname)
+                else:
+                    mergedsamplecorrections = samplecorrections
             else:
-                thissamplecorrections = {}
-            # merge the corrections from this sample with the samplecorrections and update the file
-            mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
-            putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
-            donefiles.add(reducedtreebankfullname)
-            putdonefilenames(donefiles, donefilesfullname)
+                mergedsamplecorrections = samplecorrections
         else:
-            mergedsamplecorrections = samplecorrections
+            mergedsamplecorrections = {}
 
 
+        correctionparameters = CorrectionParameters(methodname, options, mergedsamplecorrections, thissamplecorrections)
 
-        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, mergedsamplecorrections, corr)
+        treebank, errordict, allorandalts = correcttreebank(treebank2, targets,  correctionparameters, corr=corr)
 
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)

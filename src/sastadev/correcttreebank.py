@@ -9,6 +9,7 @@ from lxml import etree
 from sastadev.basicreplacements import basicreplacements
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
+from sastadev.correctionparameters import CorrectionParameters
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips)
 from sastadev.lexicon import de, dets, known_word, nochildwords, wrongposwordslexicon
@@ -272,7 +273,7 @@ def updateerrordict(errordict: ErrorDict, uttid: UttId, oldtree: SynTree, newtre
     return errordict
 
 
-def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, allsamplecorrections,
+def correcttreebank(treebank: Treebank, targets: Targets, correctionparameters: CorrectionParameters,
                     corr: CorrectionMode = corrn) -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
 
     '''
@@ -283,7 +284,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, al
     * treebankfullname: name of the file that contains the treebank
     * method: the method to be used. Some corrections are method-specific
     * corr: to indicate how the corrections should be done: no corrections at all, all corrections but the last one (usually the one with most adaptations) is selected; all  corrections but the best one according to the evaluation  criterion is selected.
-
+    * options: the input parameters for sastadev
 
     It returns a triple consisting of
 
@@ -309,7 +310,7 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, al
             if mustbedone:
                 # to implement
                 sentence = getsentence(stree)
-                newstree, orandalts = correct_stree(stree, method, corr, allsamplecorrections)
+                newstree, orandalts = correct_stree(stree, corr, correctionparameters)
                 if newstree is not None:
                     errordict = updateerrordict(
                         errordict, uttid, stree, newstree)
@@ -479,16 +480,15 @@ def cleantextdone(metadataelement):
     return False
 
 
-def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, thissamplecorrections) -> Tuple[SynTree, Optional[OrigandAlts]]:
+def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: CorrectionParameters) \
+        -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
 
      The function *correct_stree* takes as input:
 
     * stree: input syntactic structure
-    * method:  MethodName (tarsp, asta, stap)
     * corr: CorrectionMode (corr0, corr1, corrn)
-    * thissamplecorrections: Dict[str, HistoryCorrection] with the corrections occurring in this sample
-    (correction= CHAT replacement, single word explanation, or incomplete word)
+    * correctionparameters: CorrectionParameters
 
     and returns a tuple consisting of:
 
@@ -554,7 +554,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
         print(showflatxml(stree))
 
     # tree transformations
-    if method in ['tarsp', ' stap']:
+    if correctionparameters.method in ['tarsp', ' stap']:
         stree = transformtreeld(stree)
         stree = transformtreenogeen(stree)
         stree = transformtreenogde(stree)
@@ -613,7 +613,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     debug = False
     # (fatstree, text='fattened tree:')
 
-    ctmds: List[Correction] = getcorrections(cleanutttokens, method, fatstree, thissamplecorrections=thissamplecorrections)
+    ctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
 
 
 
@@ -897,7 +897,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     # etree.dump(fulltree, pretty_print=True)
 
     # tree transformations
-    if method in ['tarsp', ' stap']:
+    if correctionparameters.method in ['tarsp', ' stap']:
         fulltree = transformtreeld(fulltree)
         fulltree = transformtreenogeen(fulltree)
         fulltree = transformtreenogde(fulltree)
@@ -1029,13 +1029,18 @@ def getwrongposwordcount(nt: SynTree) -> int:
         result += len(matches)
     return result
 
+sucountxpath = './/node[@rel="su" and not(@pt="ww" and @wvorm="inf") and not(node[@rel="hd" and @pt="ww" and @wvorm="inf"])] '
+def getsucount(nt: SynTree) -> int:
+    matches = nt.xpath(sucountxpath)
+    result = len(matches)
+    return result
 
 getdpcount = lambda nt: countav(nt, 'rel', 'dp')
 getdhyphencount = lambda nt: countav(nt, 'rel', '--')
 getdimcount = lambda nt: countav(nt, 'graad', 'dim')
 getcompcount = lambda nt: countav(nt, 'graad', 'comp')
 getsupcount = lambda nt: countav(nt, 'graad', 'sup')
-getsucount = lambda nt: countav(nt, 'rel', 'su')
+# getsucount = lambda nt: countav(nt, 'rel', 'su')
 getbadcatcount = lambda nt: len(
     [node for node in nt.xpath('.//node[@cat and (@cat="du") and node[@rel="dp"]]')])
 gethyphencount = lambda nt: len(
@@ -1098,8 +1103,8 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
     result = ptmds[orandalts.selected]
     return result, orandalts
 
-smainsuxpath = './/node[@cat="smain" and node[@rel="su"]]'
-#  //node[@cat="smain"  and @begin = node[@rel="su"]/@begin]
+# smainsuxpath = '//node[@cat="smain"  and @begin = node[@rel="su"]/@begin]' # yields unexpected errros (TD12:31; TARSP_08:31)
+smainsuxpath =  './/node[@cat="smain" and node[@rel="su"]]'
 
 def countsmainsu(nt: SynTree) -> int:
     matches = nt.xpath(smainsuxpath)

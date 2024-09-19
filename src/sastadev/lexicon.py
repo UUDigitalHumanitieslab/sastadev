@@ -203,10 +203,16 @@ def known_word(word: str) -> bool:
     :param word:
     :return:
     '''
-    result = informlexicon(word) or isa_namepart(word) or chatspecial(word) or word in additionalwordslexicon
+    result = informlexicon(word) or isa_namepart(word) or \
+             chatspecial(word) or word in additionalwordslexicon or \
+             isallersuperlative(word)
     result = result and word not in nonwordslexicon
     return result
 
+
+def isallersuperlative(wrd:str) -> bool:
+    result = wrd.startswith('aller') and (wrd.endswith('st') or wrd.endswith('ste')) and informlexicon(wrd[5:])
+    return result
 
 def getinflforms(thesubj: SynTree, thepv: SynTree, inversion: bool) -> List[str]:
     '''

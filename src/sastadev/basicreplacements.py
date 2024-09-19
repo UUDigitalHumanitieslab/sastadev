@@ -11,6 +11,8 @@ BasicExpansion = Tuple[str, List[str], str, str, str, int]
 BasicReplacement = Tuple[str, str, str, str, str, int]
 KnownReplacement = Tuple[str, str, str, str, str, ReplacementMode]
 
+ampersand = '&'
+
 dp = defaultpenalty
 dp6 = mp(160)  # dp + 6
 dp3 = mp(130)  # dp + 3
@@ -60,6 +62,10 @@ lexical = 'Lexicom'
 onom = 'onomatopeic word'
 substitution = 'lexical replacement'
 alpino_unknown_word = 'Word unknown to Alpino'
+voweldel = 'vowel deletion'
+
+def combine(strlist: List[str]) -> str:
+    return ampersand.join(strlist)
 
 #: The constant *Rvzlist* contains a list of adpositions that can combine with *er* into
 #: a so-called pronominal adverb. Example: *van*, since *er* + * van* = *ervan*.
@@ -230,7 +236,19 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('moetə' , 'moet', pron, infpron, infpron, dp),
                                                 ('pot', 'kapot', pron, infpron, sylldrop, dp),
                                                 ('almaal', 'allemaal', pron, infpron, sylldrop, dp),
-                                                ('knorrens', 'varkens', lexical, substitution, onom,dp)
+                                                ('knorrens', 'varkens', lexical, substitution, onom,dp),
+                                                ('potte', 'kapot', pron, infpron, combine([sylldrop, emphasis]), dp),
+                                                ('vin', 'vind', pron, infpron, codared, dp),
+                                                ('ha', 'had', pron, infpron, codared, dp),
+                                                ('pee', 'twee', pron, wrongpron, onsetred, dp),
+                                                ('wille', 'wil', pron, wrongpron, emphasis, dp),
+                                                ('blon', 'ballon', pron, infpron, voweldel, dp),
+                                                ('ooien', 'gooien', pron, wrongpron, onsetred, dp),
+                                                ('poppe', 'pop', pron, wrongpron, emphasis, dp),
+                                                # ('leggen', 'liggen', lexical, dial, '', dp), # moved to corrector : only if parse is illformed
+                                                # ('legt', 'ligt', lexical, dial, '', dp),  # moved to corrector : only if parse is illformed
+                                                # ('leg', 'lig', lexical, dial, '', dp) # moved to corrector : only if parse is illformed
+                                                # ('me', "m'n", pron, infpron, codared, dp)  # put off because Alpino deals with it and it introduces errors
                                                 ] + \
     ervzvariants + \
     innereplacements + \

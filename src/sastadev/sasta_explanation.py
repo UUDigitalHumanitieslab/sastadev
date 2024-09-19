@@ -300,14 +300,14 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         newtree = sdsettings.PARSE_FUNC(cleanutt)
         sentelem = tbf.find1(tree, './/sentence')
         sentid = sentelem.attrib['sentid']
-        newsentelem = tbf.find1(newtree, './/sentence')
-        newsentelem.attrib['sentid'] = sentid
         # tbf.showtree(newtree, 'newly parsed tree')
         if newtree is None:
             newtree = tree
             sdsettings.LOGGER.warning(
                 'Parsing for <{cleanutt}> failed. No changes applied')
         else:
+            newsentelem = tbf.find1(newtree, './/sentence')
+            newsentelem.attrib['sentid'] = sentid if newsentelem is not None else '@@'
             newmetaelements = [meta.toElement() for meta in newmetadata]
             newmetadataElement = etree.Element('metadata')
             for newmetaelement in newmetaelements:

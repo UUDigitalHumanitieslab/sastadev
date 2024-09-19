@@ -106,6 +106,51 @@ monosyllabicpat = r'^' + consonants_star + \
                   syllableheadspat + consonants_star + r'$'
 monosyllabicre = re.compile(monosyllabicpat)
 
+wordinitialrepeatedconsonants = fr'^({charrange(consonants)})\1+'
+wordfinalalrepeatedconsonants = fr'({charrange(consonants)})\1+$'
+wordinitialrepeatedconsonantsre = re.compile(wordinitialrepeatedconsonants)
+wordfinalalrepeatedconsonantsre = re.compile(wordfinalalrepeatedconsonants)
+intervowelrepeatedconsonants = fr'({syllableheadspat})({charrange(consonants)})\2+({syllableheadspat})'
+intervowelrepeatedconsonantsre = re.compile(intervowelrepeatedconsonants)
+
+repeatedvowelsinopensyllable = rf'([{vowels}])\1+($|{charrange(consonants)}[{vowels}])'
+repeatedvowelsinopensyllablere = re.compile(repeatedvowelsinopensyllable)
+
+repeatedvowelsinclosedsyllable = rf'([{vowels}])\1+({charrange(consonants)})($|{charrange(consonants)})'
+repeatedvowelsinclosedsyllablere = re.compile(repeatedvowelsinclosedsyllable)
+
+def dutchdeduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str]) -> List[str]:
+    results = []
+    if word in exceptions:
+        return results
+    newword = word
+
+    # repeated consonants at the beginning reduce to a single consonant
+    newword2 = wordinitialrepeatedconsonantsre.sub(r'\1', newword)
+    if newword2 != newword and inlexicon(newword2):
+        results.append(newword2)
+
+    # repeated consonants at the end reduce to a single consonant
+    newword3 = wordfinalalrepeatedconsonantsre.sub(r'\1', newword2)
+    if newword3 != newword2 and inlexicon(newword3):
+        results.append(newword3)
+
+    # repeated consonants between vowels reduce to two consonants
+    newword4 = intervowelrepeatedconsonantsre.sub(r'\1\2\2\3', newword3)
+    if newword4 != newword3 and inlexicon(newword4):
+        results.append(newword4)
+
+    # repeated vowels reduce to one if in an open syllable
+    newword5 = repeatedvowelsinopensyllablere.sub(r'\1\2', newword4)
+    if newword5 != newword4 and inlexicon(newword5):
+        results.append(newword5)
+
+    # repeated vowels reduce to two vowels if in a closed syllable
+    newword6 = repeatedvowelsinclosedsyllablere.sub(r'\1\1\2\3', newword5)
+    if newword6 != newword5 and inlexicon(newword6):
+        results.append(newword6)
+
+    return results
 
 def barededup(word: str) -> str:
     '''
@@ -117,7 +162,7 @@ def barededup(word: str) -> str:
     return result
 
 
-def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str] = set()) -> List[str]:
+def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str] = set(), reduce21: bool=True ) -> List[str]:
     '''
     The function deduplicate takes as input a string word:
 
@@ -143,7 +188,7 @@ def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str
         newword = dupre.sub(r'\1\1', word)
         if inlexicon(newword):
             newwords.append(newword)
-        else:
+        elif reduce21:
             newword = dupre.sub(r'\1', word)
             if inlexicon(newword):
                 newwords.append(newword)

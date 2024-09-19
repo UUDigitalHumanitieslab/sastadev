@@ -109,6 +109,37 @@ def purifytokens(tokens: List[Token]) -> List[Token]:
     return result
 
 
+def removebareangledbrackets(tokens:List[Token]) -> Tuple[List[Token], Metadata]:
+    newtokens = []
+    removetokens = []
+    openbfound = False
+    metadata = []
+    for token  in tokens:
+        if token.word == '<':
+            openbfound = True
+        if openbfound:
+            if token.word == '>':
+                removetokens.append(token)
+                removewords = [token.word for token in removetokens[1:-1]]
+                removepositions = [token.pos for token in removetokens[1:-1]]
+                newmeta = Meta('Bare Angled Brackets',  [], annotatedwordlist = removewords, annotatedposlist= removepositions,
+                               atype='list', cat='Tokenisation', subcat='Robustness',  source='Tokenisation',
+                               backplacement=bpl_none, penalty=0)
+                metadata.append(newmeta)
+                removetokens = []
+                openbfound = False
+
+            else:
+                removetokens.append(token)
+        else:
+            newtokens.append(token)
+    if openbfound:
+        newtokens += removetokens
+
+    return newtokens, metadata
+
+
+
 CleanedText = Union[List[Token], str]
 
 
@@ -126,6 +157,11 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False, verbose=False)
     intokenstrings = [str(token) for token in tokens]
     # print(space.join(intokenstrings))
     (newtokens, metadata) = cleantokens(tokens, repkeep)
+
+ #  remove bare angled brackets
+    (newtokens, babmetadata) = removebareangledbrackets(newtokens)
+    metadata += babmetadata
+
     #remove symbol tokens that should not be there anymore
     newtokens = purifytokens(newtokens)
     resultwordlist = [t.word for t in newtokens]
@@ -206,7 +242,8 @@ robustnessrules: List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...
                                           (re.compile(r'\u2018'), '\u2018', "'", "Left Single Quotation Mark (\u2018. Unicode U+2018) replaced by Apostrophe ' (Unicode U+0027)"),
                                           (re.compile(r'\u2019'), '\u2019', "'", "Right Single Quotation Mark (\u2019, Unicode U+2019) replaced by Apostrophe ' (Unicode U+0027)"),
                                           (re.compile(r'\u201C'), '\u201C', '"', 'Left Double Quotation Mark (\u201C, Unicode U+201C) replaced by Quotation Mark (", Unicode U+0022)'),
-                                          (re.compile(r'\u201D'), '\u201D', '"', 'Right Double Quotation Mark (\u201D, Unicode U+201D) replaced by Quotation Mark (", Unicode U+0022)')
+                                          (re.compile(r'\u201D'), '\u201D', '"', 'Right Double Quotation Mark (\u201D, Unicode U+201D) replaced by Quotation Mark (", Unicode U+0022)'),
+                                          # (re.compile(r'<[^>]+>'), '<...>', '', 'Bare angled brackets with contents deleted ')
                                           ]
 
 

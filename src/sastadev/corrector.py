@@ -10,6 +10,7 @@ from sastadev.alpino import getdehetwordinfo
 from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements,
                                         getdisambiguationdict, parsereplacements)
 from sastadev.childesspellingcorrector import correctspelling, allfrqdict
+from sastadev.correctionparameters import CorrectionParameters
 from sastadev.cleanCHILDEStokens import cleantokens
 from sastadev.conf import settings
 from sastadev.dedup import (cleanwordofnort, find_duplicates2,
@@ -38,7 +39,7 @@ from sastadev.sastatoken import Token, tokenlist2stringlist
 from sastadev.sastatypes import (BackPlacement, MethodName, Nort, Penalty,
                                  Position, SynTree, UttId)
 from sastadev.smallclauses import smallclauses
-from sastadev.stringfunctions import (chatxxxcodes, consonants, deduplicate,
+from sastadev.stringfunctions import (chatxxxcodes, consonants, dutchdeduplicate,
                                       endsinschwa, fullworddehyphenate,
                                       monosyllabic, vowels)
 from sastadev.sva import getsvacorrections
@@ -65,6 +66,7 @@ slash = '/'
 space = ' '
 
 enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
+leggendict = {'leg': 'lig', 'legt': 'ligt', 'leggen': 'liggen'}
 
 #: The constant *disambiguationdict* contains words that should be replaced by a
 #: different word to avoid unwanted readings of the original word. It is filled by a
@@ -529,8 +531,8 @@ def combinesorted(toklist1: List[Token], toklist2: List[Token]) -> List[Token]:
 #     return result
 
 
-def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[SynTree] = None,
-                   interactive: bool = False, thissamplecorrections={}) -> List[Correction]:
+def getcorrections(rawtokens: List[Token], correctionparameters: CorrectionParameters,
+                   tree: Optional[SynTree] = None) -> List[Correction]:
     allmetadata = []
     # rawtokens = sasta_tokenize(utt)
     wordlist = tokenlist2stringlist(rawtokens)
@@ -560,7 +562,7 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
     allmetadata += metadata
 
     # alternativemds = getalternatives(reducedtokensmd, tree, 0)
-    alternativemds = getalternatives(reducedtokensmd, method, tree, '0', thissamplecorrections=thissamplecorrections)
+    alternativemds = getalternatives(reducedtokensmd, tree, '0', correctionparameters)
     # unreducedalternativesmd = [TokenListMD(combinesorted(alternativemd.tokens, allremovedtokens), alternativemd.metadata) for alternativemd in alternativemds]
 
     intermediateresults = alternativemds if alternativemds != [] else [tokensmd]
@@ -577,7 +579,8 @@ def getcorrections(rawtokens: List[Token], method: MethodName, tree: Optional[Sy
 
 
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
-def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree, uttid: UttId, thissamplecorrections={}):
+def getalternatives(origtokensmd: TokenListMD,  tree: SynTree, uttid: UttId,
+                    correctionparameters: CorrectionParameters):
     newtokensmd = explanationasreplacement(origtokensmd, tree)
     if newtokensmd is not None:
         tokensmd = newtokensmd
@@ -594,7 +597,7 @@ def getalternatives(origtokensmd: TokenListMD, method: MethodName, tree: SynTree
     for token in tokens:
         tokenmd = TokenMD(token, allmetadata)
         alternativetokenmds[tokenctr] = getalternativetokenmds(
-            tokenmd, method, tokens, tokenctr, tree, uttid, thissamplecorrections=thissamplecorrections)
+            tokenmd, tokens, tokenctr, tree, uttid, correctionparameters)
         validalternativetokenmds[tokenctr] = getvalidalternativetokenmds(
             tokenmd, alternativetokenmds[tokenctr])
         tokenctr += 1
@@ -1048,8 +1051,17 @@ def adaptpenalty(wrong: str, correct: str, p: Penalty) -> Penalty:
     return p
 
 
-def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[Token], tokenctr: int,
-                           tree: SynTree, uttid: UttId, thissamplecorrections={}) -> List[TokenMD]:
+def nocorrectparse(tree: SynTree) -> bool:
+    tops = tree.xpath('.//node[@cat="top"]')
+    if len(tops) != 1:
+        return False
+    top = tops[0]
+    realtopchildren = [ node for node in top if  getattval(node, 'pt') not in ['let', 'tsw']]
+    result = len(realtopchildren) != 1
+    return result
+
+def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int,
+                           tree: SynTree, uttid: UttId, correctionparameters: CorrectionParameters) -> List[TokenMD]:
     token = tokenmd.token
     beginmetadata = tokenmd.metadata
     newtokenmds: List[TokenMD] = []
@@ -1078,7 +1090,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # deduplicate jaaaaa -> ja; heeeeeel -> heel
     if not known_word(token.word):
-        newwords = deduplicate(token.word, known_word, exceptions=chatxxxcodes)
+        newwords = dutchdeduplicate(token.word, known_word, exceptions=chatxxxcodes)
         deduplicated = newwords != []
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Emphasis', value='Phoneme lengthening', cat='Pronunciation',
@@ -1100,6 +1112,28 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         name='Informal pronunciation', value='Final r -> w',
                                         cat='Pronunciation',
                                         backplacement=bpl_word)
+    # aller- misspelled as alle
+    if (not known_word(token.word) and
+        token.word.startswith('alle') and not token.word.startswith('aller') and
+        (token.word.endswith('st') or token.word.endswith('ste')) and
+        known_word(f'{token.word[4:]}')):
+        newwords = [f'aller{token.word[4:]}']
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value='r-drop',
+                                        cat='Pronunciation',
+                                        backplacement=bpl_word)
+
+
+    # # r realized as l
+    # lpositions =
+    # if not known_word(token.word) and token.word.find('l') != -1 and known_word(f'{token.word[:-1]}r'):
+    #     newwords = [f'{token.word[:-1]}r']
+    #     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+    #                                     name='Informal pronunciation', value='Final r -> w',
+    #                                     cat='Pronunciation',
+    #                                     backplacement=bpl_word)
+
+
 
     # wrong past participle emaakt -> gemaakt
     if not known_word(token.word) and token.word.startswith('e') and known_word(f'g{token.word}'):
@@ -1130,9 +1164,10 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
         thetokennode = tokennodes[tokenctr]
         thetokennodept = getattval(thetokennode, 'pt')
         thetokennodewvorm = getattval(thetokennode, 'wvorm')
+        thetokennoderel = getattval(thetokennode, 'rel')
         if thetokennodept == 'ww' and thetokennodewvorm != 'vd' and \
                 isa_vd(f'ge{token.word}') and \
-                pfauxinnodes(tokennodes[:tokenctr]) and \
+                (pfauxinnodes(tokennodes[:tokenctr]) or thetokennoderel == '--') and \
                 not isaninftoken(prevtoken) and \
                 not isaninftoken(nexttoken):
             newwords = [f'ge{token.word}']
@@ -1173,6 +1208,11 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         name='Wrong pronunciation', value='Unstressed syllable drop', cat='Pronunciation',
                                         backplacement=bpl_word, penalty=5)
 
+    if token.word in leggendict and nocorrectparse(tree):
+        newwords = [leggendict[token.word]]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Regional Variant / Lexical Error', value='leggen instead of liggen', cat='Lexical',
+                                        backplacement=bpl_word, penalty=5)
 
 
 
@@ -1197,9 +1237,9 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # find document specific replacements
     if not known_word(token.word) and \
-            token.word in thissamplecorrections and \
+            token.word in correctionparameters.thissamplecorrections and \
             token.word not in childescorrectionsexceptions:
-        cc = thissamplecorrections[token.word]
+        cc = correctionparameters.thissamplecorrections[token.word]
         sumfrq = sum([hc.frequency for hc in  cc])
         for hc in cc:
             relfrq = hc.frequency / sumfrq
@@ -1220,9 +1260,9 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                                     backplacement=bpl_word, penalty=penalty)
 
     # find correction from all samples processed so far
-    if method in [tarsp, stap] and \
+    if correctionparameters.method in [tarsp, stap] and \
         not known_word(token.word) and \
-        token.word in samplecorrections and \
+        token.word in correctionparameters.allsamplecorrections and \
             token.word not in childescorrectionsexceptions:
         cc = samplecorrections[token.word]
         sumfrq = sum([hc.frequency for hc in cc])
@@ -1252,7 +1292,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # find childes replacements, preferably with vocabulary from the same age
 
-    if method in [tarsp, stap] and not known_word(token.word) and token.word in childescorrections and \
+    if correctionparameters.options.dohistory and \
+            correctionparameters.method in [tarsp, stap] and not known_word(token.word) and token.word in childescorrections and \
             token.word not in childescorrectionsexceptions:
         cc = childescorrections[token.word]
         sumfrq = sum([hc.frequency for hc in cc])
@@ -1289,7 +1330,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     # iedims
     # only -ie form: 'duppie', 'jochie', 'jonkie', 'juffie', 'makkie', 'moppie', 'saffie',
-    # 'sjekkie', 'slapie', 'spekkie', 'ukkie' (?)
+    # 'sjekkie', 'slapie', 'spekkie', 'ukkie' (?) voor/in het echie (*echtje)
 
     # common in standard written language: 'bakkie', 'duppie', 'fikkie', 'gympie', 'jochie', 'jonkie',
     # 'juffie', 'koppie', 'moppie', 'punkie', 'saffie', 'sjekkie', 'slapie', 'spekkie', 'stekkie', 'ukkie', 'wijfie'
@@ -1356,7 +1397,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
     newtokenmds = initdevoicing(token, 'f', 'v', newtokenmds, beginmetadata)
 
     # replaceambiguous words with one reading not known by the child by a nonambiguous word with the same properties
-    if method in {'tarsp', 'stap'}:
+    if correctionparameters.method in {'tarsp', 'stap'}:
         if token.word in disambiguationdict:
             cond, newword = disambiguationdict[token.word]
             if cond(token, tree):
@@ -1411,7 +1452,8 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
                                         cat='Parser', backplacement=bpl_wordlemma, penalty=penalty)
 
 
-    if method in {'tarsp', 'stap'} and not known_word(token.word) and applyspellingcorrectionisok(token.word) and \
+    if correctionparameters.options.dospellingcorrection  and \
+            correctionparameters.method in {'tarsp', 'stap'} and not known_word(token.word) and applyspellingcorrectionisok(token.word) and \
             not schwandropfound and not postviefound and not token.word[0].isupper() and not deduplicated and \
             not(token.word.endswith('ie') or token.word.endswith('ies')) and token.word[-3:] not in vvs:
         corrtuples = correctspelling(token.word, max=5)
@@ -1423,7 +1465,7 @@ def getalternativetokenmds(tokenmd: TokenMD, method: MethodName, tokens: List[To
 
     for newtokenmd in newtokenmds:
         morenewtokenmds = getalternativetokenmds(
-            newtokenmd, method, tokens, tokenctr, tree, uttid)
+            newtokenmd, tokens, tokenctr, tree, uttid, correctionparameters)
         newtokenmds += morenewtokenmds
 
     return newtokenmds
