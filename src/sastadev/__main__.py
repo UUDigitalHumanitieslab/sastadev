@@ -166,7 +166,8 @@ from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.history import (donefiles, donefilesfullname, gathercorrections, mergecorrections, putcorrections,
-                              putdonefilenames, samplecorrections, samplecorrectionsfullname)
+                              putdonefilenames, children_samplecorrections, children_samplecorrectionsfullname,
+                              adult_samplecorrections, adult_samplecorrectionsfullname)
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, literalmissedmatches
@@ -1175,6 +1176,15 @@ def main():
 
         thissamplecorrections = {}
         if options.dohistory:
+            if options.methodname.lower() in {'tarsp', 'stap'}:
+                samplecorrectionsfullname = children_samplecorrectionsfullname
+                samplecorrections = children_samplecorrections
+            elif options.methodname.lower() in {'asta'}:
+                samplecorrectionsfullname = adult_samplecorrectionsfullname
+                samplecorrections = adult_samplecorrections
+            else: # should not occur
+                settings.LOGGER.error(f'Illegal method name used: {options.method}')
+                exit(-1)
             if corr != corr0:
                 reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
                 if reducedtreebankfullname not in donefiles:

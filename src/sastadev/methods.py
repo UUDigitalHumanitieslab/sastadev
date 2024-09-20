@@ -89,7 +89,7 @@ def astalemmafilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> boo
     for (qid, val) in xrs:
         if qid == lemmaqid:
             if xr in xrs[(qid, val)]:
-                result1 = xr in xrs[lexreskey] or xr in xrs[nreskey]
+                result1 = (lexreskey in xrs and xr in xrs[lexreskey]) or (nreskey in xrs and xr in xrs[nreskey])
                 result = query.process == pre_process or result1
                 return result
 

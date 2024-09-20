@@ -81,7 +81,8 @@ def main():
          'sinterklaas_paardje', True),
         ('kippes', 'kippies', 'kip_pies', True),
         ('diehoek', 'driehoek', 'drie_hoek', True),
-        ('jantauto', 'brandweerauto', 'brandweer_auto', True)
+        ('jantauto', 'brandweerauto', 'brandweer_auto', True),
+        ('koekklok', 'koekoeksklok', 'koekoek_klok', True)
 
     ]
     # testlist = [('risstengeltjes', 'rietstengeltjes', 'riet_stengel', True)]

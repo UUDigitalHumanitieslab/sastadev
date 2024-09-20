@@ -14,7 +14,8 @@ import os
 childescorrectionspath = os.path.join(settings.SD_DIR, 'data', 'childescorrections')
 
 childescorrectionsfullname = os.path.join(childescorrectionspath, 'childescorrections.txt')
-samplecorrectionsfullname = os.path.join(childescorrectionspath, 'samplecorrections.txt')
+children_samplecorrectionsfullname = os.path.join(childescorrectionspath, 'children_samplecorrections.txt')
+adult_samplecorrectionsfullname = os.path.join(childescorrectionspath, 'adult_samplecorrections.txt')
 donefilesfullname = os.path.join(childescorrectionspath, 'donefiles.txt')
 
 @dataclass
@@ -142,7 +143,8 @@ childescorrectionsexceptions = ['nie', 'moe', 'dee', 'ie', 'su', 'an', 'tan', 'd
                                [tpl[0] for tpl in innereplacements] + \
                                [tpl[0] for tpl in innureplacements]
 
-samplecorrections = getcorrections(samplecorrectionsfullname)
+children_samplecorrections = getcorrections(children_samplecorrectionsfullname)
+adult_samplecorrections = getcorrections(adult_samplecorrectionsfullname)
 donefiles = getdonefilenames(donefilesfullname)
 
 junk = 0

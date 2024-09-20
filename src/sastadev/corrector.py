@@ -9,7 +9,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from sastadev.alpino import getdehetwordinfo
 from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements,
                                         getdisambiguationdict, parsereplacements)
-from sastadev.childesspellingcorrector import correctspelling, allfrqdict
+from sastadev.childesspellingcorrector import (adult_correctionsdict, adult_correctspelling,
+                                               children_correctionsdict, children_correctspelling,  allfrqdict)
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.cleanCHILDEStokens import cleantokens
 from sastadev.conf import settings
@@ -22,7 +23,8 @@ from sastadev.deregularise import correctinflection, separable_prefixes
 from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
                                  ngram10, ngram11, ngram16, ngram17)
 from sastadev.history import (childescorrections, childescorrectionsexceptions, mergecorrections, putcorrections,
-                              samplecorrections,  samplecorrectionsfullname)
+                              children_samplecorrections,  children_samplecorrectionsfullname,
+                              adult_samplecorrections,  adult_samplecorrectionsfullname)
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, isa_inf, isa_vd, known_word,
@@ -1264,7 +1266,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
         not known_word(token.word) and \
         token.word in correctionparameters.allsamplecorrections and \
             token.word not in childescorrectionsexceptions:
-        cc = samplecorrections[token.word]
+        cc = correctionparameters.allsamplecorrections[token.word]
         sumfrq = sum([hc.frequency for hc in cc])
         for hc in cc:
             relfrq = hc.frequency / sumfrq
@@ -1453,10 +1455,17 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
 
 
     if correctionparameters.options.dospellingcorrection  and \
-            correctionparameters.method in {'tarsp', 'stap'} and not known_word(token.word) and applyspellingcorrectionisok(token.word) and \
+             not known_word(token.word) and applyspellingcorrectionisok(token.word) and \
             not schwandropfound and not postviefound and not token.word[0].isupper() and not deduplicated and \
             not(token.word.endswith('ie') or token.word.endswith('ies')) and token.word[-3:] not in vvs:
-        corrtuples = correctspelling(token.word, max=5)
+        if correctionparameters.method in {'tarsp', 'stap'}:
+            corrtuples = children_correctspelling(token.word, children_correctionsdict, max=5)
+        elif correctionparameters.method in {'asta'}:
+            corrtuples = []
+            # put off because it causes a lot of errors: the X-words should all have been removed
+            # corrtuples = adult_correctspelling(token.word, adult_correctionsdict, max=5)
+        else:
+            corrtuples = []
         for corr, penalty in corrtuples:
             if corr != token.word and known_word(corr):
                 newtokenmds = updatenewtokenmds(newtokenmds, token, [corr], beginmetadata,

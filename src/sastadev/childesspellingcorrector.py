@@ -46,11 +46,8 @@ def getchildesfrq() -> Tuple[FrqDict, FrqDict, FrqDict]:
 
 # function to read the stored corrections into a dictionary
 
-def getstoredcorrections() -> Dict[str, List[Tuple[str, int]]]:
+def getstoredcorrections(correctionsfullname) -> Dict[str, List[Tuple[str, int]]]:
     correctionsdict = {}
-    correctionsfilename = 'storedcorrections.txt'
-    correctionspath = os.path.join(settings.SD_DIR, 'data/storedcorrections')
-    correctionsfullname = os.path.join(correctionspath, correctionsfilename)
 
     idata = readcsv(correctionsfullname)
     for i, row in idata:
@@ -70,7 +67,7 @@ def getpenalty(score, total):
 
 #  a function for spelling correction
 
-def correctspelling(word: str, max = None, threshold=okthreshold) -> List[Tuple[str, int]]:
+def children_correctspelling(word: str, correctionsdict, max = None, threshold=okthreshold) -> List[Tuple[str, int]]:
     if word in correctionsdict:
         return correctionsdict[word]
     else:
@@ -115,12 +112,40 @@ def correctspelling(word: str, max = None, threshold=okthreshold) -> List[Tuple[
 
     return result
 
+
+def adult_correctspelling(word: str, correctionsdict,max = None, threshold=okthreshold) -> List[Tuple[str, int]]:
+    if word in correctionsdict:
+        return correctionsdict[word]
+    else:
+        corrections = spell.candidates(word)
+    if corrections is not None:
+        corrtuples = [(corr, spell.word_usage_frequency(corr)) for corr in corrections]
+    else:
+        corrtuples = []
+
+    sortedcorrtuples = sorted(corrtuples, key=lambda x: x[1], reverse=True)
+    allfrqsum = sum(corrtuple[1]for corrtuple in sortedcorrtuples)
+
+    result = [(corr, getpenalty(score, allfrqsum)) for (corr, score) in sortedcorrtuples]
+
+    if max is not None:
+        result = result[:max]
+
+    # store the result in the dictionary; write dictionary to file
+
+    return result
+
+
 def tryme():
     words = ['kantie', 'opbijten', 'oprijten', 'opgereten', 'peelkaal' , ' beete' , 'kamm', 'daaistoel', 'oelen', 'tein']
     for word in words:
-        result = correctspelling(word, max=5)
+        result = children_correctspelling(word, children_correctionsdict, max=5)
         print(f'{word}: {result}' )
 
+    words = ['motariek', 'silase']
+    for word in words:
+        result = adult_correctspelling(word, adult_correctionsdict, max=5)
+        print(f'{word}: {result}' )
 
 
 
@@ -129,8 +154,19 @@ def tryme():
 # read the childes frequency dict in, for targets and others and combine them also
 trgfrqdict, othfrqdict, allfrqdict = getchildesfrq()
 
-# read the stored corrections into a dictionary
-correctionsdict = getstoredcorrections()
+# read the stored corrections for children into a dictionary
+children_correctionsfilename = 'children_storedcorrections.txt'
+correctionspath = os.path.join(settings.SD_DIR, 'data/storedcorrections')
+children_correctionsfullname = os.path.join(correctionspath, children_correctionsfilename)
+children_correctionsdict = getstoredcorrections(children_correctionsfullname)
+
+# read the stored corrections for adults into a dictionary
+adult_correctionsfilename = 'adult_storedcorrections.txt'
+correctionspath = os.path.join(settings.SD_DIR, 'data/storedcorrections')
+adult_correctionsfullname = os.path.join(correctionspath, adult_correctionsfilename)
+adult_correctionsdict = getstoredcorrections(adult_correctionsfullname)
+
+
 
 if __name__ == '__main__':
     tryme()
