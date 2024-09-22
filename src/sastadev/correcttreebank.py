@@ -17,7 +17,7 @@ from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
                                bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion)
 from sastadev.sastatok import sasta_tokenize
-from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
+from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
@@ -613,9 +613,10 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     debug = False
     # (fatstree, text='fattened tree:')
 
-    ctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
+    rawctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
 
-
+    ctmds = reducecorrections(rawctmds)
+    # ctmds = rawctmds
 
     debug = False
     if debug:
@@ -665,7 +666,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
             # make sure to include the xmeta from CHAT cleaning!! variable allmetadata, or better metadata but perhaps rename to chatmetadata
             fatnewstree = add_metadata(fatstree, chatmetadata)
 
-        ptmds.append((correctionwordlist, fatnewstree, cwmdmetadata))
+        ptmds.append((correctiontokenlist, fatnewstree, cwmdmetadata))
 
     # select the stree for the most promising correction
     debug = False
@@ -675,16 +676,16 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     debug = False
 
     if ptmds == []:
-        thecorrection, orandalts = (cleanutt, fatstree, origmetadata), None
+        thecorrection, orandalts = (cleanutttokens, fatstree, origmetadata), None
     elif corr in [corr1, corrn]:
         thecorrection, orandalts = selectcorrection(fatstree, ptmds, corr)
     else:
         settings.LOGGER.error(
             'Illegal correction value: {}. No corrections applied'.format(corr))
-        thecorrection, orandalts = (cleanutt, fatstree, origmetadata), None
+        thecorrection, orandalts = (cleanutttokens, fatstree, origmetadata), None
 
     thetree = deepcopy(thecorrection[1])
-
+    correctiontokenlist = thecorrection[0]
     debuga = False
     # debuga = False
     if debuga:
@@ -943,7 +944,25 @@ def oldgetuttid(stree: SynTree) -> UttId:
         uttid = uttidlist[0]
     return uttid
 
+def reducecorrections(ctmds: List[Correction]) -> List[Correction]:
+    tempdict = {}
+    for tokenlist, metadata in ctmds:
+        tokenstr = tokenlist2string(tokenlist)
+        newpenalty = compute_penalty(metadata)
+        if tokenstr in tempdict:
+           oldpenalty = tempdict[tokenstr][0]
+           if newpenalty < oldpenalty:
+               tempdict[tokenstr] = (newpenalty, tokenlist, metadata)
+        else:
+            tempdict[tokenstr] = (newpenalty, tokenlist, metadata)
 
+    resultlist = []
+    for tokenstr in tempdict:
+        cand = tempdict[tokenstr]
+        result = (cand[1], cand[2])
+        resultlist.append(result)
+
+    return resultlist
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
@@ -1071,7 +1090,8 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
 
     altid: AltId = 0
     alts: Dict[AltId, Alternative] = {}
-    for cw, nt, md in ptmds:
+    for ct, nt, md in ptmds:
+        cw = tokenlist2stringlist(ct)
         altsent = space.join(cw)
         penalty = compute_penalty(md)
 

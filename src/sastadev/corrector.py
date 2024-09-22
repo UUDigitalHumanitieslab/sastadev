@@ -1098,6 +1098,23 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         name='Emphasis', value='Phoneme lengthening', cat='Pronunciation',
                                         backplacement=bpl_word)
 
+    # aha oho uhu ehe
+    ahapattern = r'([aeouy])h\1'
+    ahare = re.compile(ahapattern)
+    if not known_word(token.word) and ahare.search(token.word):
+        newwords = [ahare.sub(r'\1', token.word)]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Emphasis', value='Phoneme Duplication', cat='Pronunciation',
+                                        backplacement=bpl_word)
+    # iehie ijhij
+    iehiepattern = r'(ie|ij)h\1'
+    iehiere = re.compile(iehiepattern)
+    if not known_word(token.word) and iehiere.search(token.word):
+        newwords = [iehiere.sub(r'\1', token.word)]
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Emphasis', value='Phoneme Duplication', cat='Pronunciation',
+                                        backplacement=bpl_word)
+
     # basic replacements replace as by als, isse by is
     # here come the replacements
     if token.word in basicreplacements:

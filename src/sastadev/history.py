@@ -28,13 +28,16 @@ class HistoryCorrection:
 HistoryCorrectionDict = Dict[str, List[HistoryCorrection]]
 space = ' '
 eps = ''
+nocorrectiontype = 'nocorrectiontype'
 
-correctionset = [CHAT_explanation, CHAT_replacement, CHAT_wordnoncompletion]
+correctionset = [nocorrectiontype, CHAT_explanation, CHAT_replacement, CHAT_wordnoncompletion]
 
 chatshorttypedict = {CHAT_explanation: 'explanation',
                      CHAT_wordnoncompletion: 'noncompletion',
-                     CHAT_replacement: 'replacement'}
+                     CHAT_replacement: 'replacement',
+                     nocorrectiontype: nocorrectiontype}
 
+shortcorrectionset =  [chatshorttypedict[v] for v in correctionset]
 
 def getshortchattype(metaname: str) -> str:
     if metaname in chatshorttypedict:
@@ -73,14 +76,39 @@ def gathercorrections(treebank: TreeBank) -> defaultdict:
 
 def getcorrections(filename) -> defaultdict:
     resultdict = defaultdict(list)
+    tempdict = defaultdict(list)
     idata = readcsv(filename, header=False)
     for i, row in idata:
         wrong = row[0]
-        newhc = HistoryCorrection(wrong=wrong, correction=row[1], correctiontype=row[2], frequency=int(row[3]))
-        resultdict[wrong].append(newhc)
+        correction = row[1]
+        newhc = HistoryCorrection(wrong=wrong, correction=correction, correctiontype=row[2], frequency=int(row[3]))
+        tempdict[(wrong, correction)].append(newhc)
 
+    for (wrong, correction) in tempdict:
+        unifiedcorrection = unifycorrections(tempdict[(wrong, correction)])
+        resultdict[wrong].append(unifiedcorrection)
     return resultdict
 
+
+def unifycorrections(hcs: List[HistoryCorrection]) -> HistoryCorrection:
+    currentcorrectiontype = nocorrectiontype
+    totalfrq = 0
+    for hc in hcs:
+        wrong = hc.wrong
+        correction= hc.correction
+        if isbetter(hc.correctiontype, currentcorrectiontype):
+            currentcorrectiontype = hc.correctiontype
+        totalfrq += hc.frequency
+    result = HistoryCorrection(wrong=wrong, correction=correction,
+                               correctiontype = currentcorrectiontype, frequency=totalfrq)
+    return result
+
+
+def isbetter(corrtype1, corrtype2) -> str:
+    c1score = shortcorrectionset.index(corrtype1)
+    c2score = shortcorrectionset.index(corrtype2)
+    result = c1score > c2score
+    return result
 
 def getdonefilenames(filename) -> set:
     result = set()
