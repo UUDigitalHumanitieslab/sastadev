@@ -98,19 +98,21 @@ class UnKnown:
 @dataclass
 class AnyType:
     name: str = "AnyType"
-@dataclass
-class Alt:
-    options: List[Top]
 
 @dataclass
 class And:
     options: List[Top]
 
+@dataclass
+class Alt:
+    options: List[And]
+
+
 
 SemType = Top
 
 def alt(semtypelist: List[SemType]) -> Alt:
-    return Alt(semtypelist)
+    return Alt([And([semtype]) for semtype in semtypelist])
 
 def sand(semtypelist: List[SemType]) -> And:
     return And(semtypelist)

@@ -1,4 +1,5 @@
-from NLtypes import Activity, alt, sand, Alt, Animate, Event, Human, Location, NonAnimate, NonHuman, Object, Property, Quantity, SemType, State, UnKnown
+from sastadev.NLtypes import Activity, alt, sand, Alt, And, Animate, Event, Human, Location, NonAnimate, NonHuman, Object, Property, Quantity, SemType, State, UnKnown
+from typing import List
 
 su = 'su'
 obj1 = 'obj1'
@@ -10,6 +11,13 @@ predc = 'predc'
 
 def s(x: SemType) -> Alt:
     return alt([x])
+
+def sh(sem: SemType) -> Alt:
+    result = Alt([And([sem])])
+    return result
+def aa(semtypelist: List[SemType]) -> Alt:
+    result = Alt([And(semtypelist)])
+    return result
 
 # $node.pt	$node.pdtype	$node.vwtype	$node.lemma	semtype Count
 vnws_auris_vankampen_schlichtingvankampen =[
@@ -24,12 +32,12 @@ vnws_auris_vankampen_schlichtingvankampen =[
 ('vnw',	'grad',	'onbep',	'allemaal',  alt([Object]),	86),
 ('vnw',	'grad',	'onbep',	'alletwee',  alt([Object]),	11),
 ('vnw',	'grad',	'onbep',	'beiden',  alt([Human]),	1),
-('vnw',	'grad',	'onbep',	'meer', s(sand([Object, Quantity])),	1617),
-('vnw',	'grad',	'onbep',	'meest', s(sand([Object,Quantity])),	2),
-('vnw',	'grad',	'onbep',	'minder', s(sand([Object, Quantity])),	13),
-('vnw',	'grad',	'onbep',	'teveel', s(sand([Object, Quantity])),	23),
-('vnw',	'grad',	'onbep',	'veel', s(sand([Object, Quantity])),	598),
-('vnw',	'grad',	'onbep',	'weinig', s(sand([Object, Quantity])),	29),
+('vnw',	'grad',	'onbep',	'meer', aa([Object, Quantity]),	1617),
+('vnw',	'grad',	'onbep',	'meest', aa([Object,Quantity]),	2),
+('vnw',	'grad',	'onbep',	'minder', aa([Object, Quantity]),	13),
+('vnw',	'grad',	'onbep',	'teveel', aa([Object, Quantity]),	23),
+('vnw',	'grad',	'onbep',	'veel', aa([Object, Quantity]),	598),
+('vnw',	'grad',	'onbep',	'weinig', aa([Object, Quantity]),	29),
 ('vnw',	'pron',	'aanw',	'dat',  alt([NonHuman, Event]),	9964),
 ('vnw',	'pron',	'aanw',	'die',  alt([Object, Event]),	7284),
 ('vnw',	'pron',	'aanw',	'dit',  alt([NonHuman, Event]),	3198),
@@ -93,17 +101,15 @@ vnwsemdict = {(lemma, vnwtype, pdtype): semtype
               for (_, vnwtype, pdtype, lemma, semtype, _) in vnws_auris_vankampen_schlichtingvankampen}
 
 # lemma frame[2] semreq=List[Dict[rel: semtype]] semtype
-verbs = [ ('liggen', 'intransitive', [{su: s(Object)}], State),
-          ('maken', 'pred_np', [{su: s(Animate), obj1: s(Object), predc:Alt([State, Property])}], Activity)
-
-
-
+verbs = [ ('liggen', 'intransitive', [{su: sh(Object)}], sh(State)),
+          ('maken', 'pred_np', [{su: sh(Animate), obj1: sh(Object), predc:Alt([And([State]), And([Property])])}], sh(Activity)),
+          ('kapot_maken', 'part_transitive(kapot)', [{su: sh(Animate), obj1: sh(Object)}], sh(Activity))
 ]
 
 wwsemdict = {(lemma, frame): semtype for (lemma, frame, _, semtype) in verbs }
 wwreqsemdict = {(lemma, frame): reqsemtype for (lemma, frame, reqsemtype, _) in verbs}
 
 
-defaultreqsemdict = {'transitive': [{su: s(Animate), obj1: s(Object)}],
-                     'unacc': [{su: s(Object)}]
+defaultreqsemdict = {'transitive': [{su: sh(Animate), obj1: sh(Object)}],
+                     'unacc': [{su: sh(Object)}]
                     }

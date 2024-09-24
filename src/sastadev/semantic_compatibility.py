@@ -1,21 +1,55 @@
+from lxml import etree
 import re
+from sastadev.conf import settings
 from sastadev.NLtypes import Animate, AnyType, Event, Human, Object, SemType, UnKnown, Alt, And
 from sastadev.sastatypes import List, SynTree
-from sastadev.semtypelexicon import vnwsemdict, wwsemdict, wwreqsemdict, defaultreqsemdict
-from sastadev.treebankfunctions import getattval, getheadof
+from sastadev.semtypelexicon import sh, vnwsemdict, wwsemdict, wwreqsemdict, defaultreqsemdict
+from sastadev.treebankfunctions import getattval, getheadof, getsentence
 
+comma = ','
+
+
+def getsemheads(stree: SynTree) -> SynTree:
+    hds = [child for child in stree if getattval(child, 'rel') in ['hd'] ]  # normal case: hd and nucl
+    if hds == []:
+        hds = [child for child in stree if getattval(child, 'rel') == 'cnj']  # coordinate structures
+    if hds == []:
+        cat = getattval(stree, 'cat')                                          # mwus
+        if cat == 'mwu':
+            mwps = [child for child in stree if getattval(child, 'rel') == 'mwp']
+            sortedmwps = sorted(mwps, key=lambda node: int(getattval(node, 'begin')))
+            hds = [sortedmwps[0]] if sortedmwps != [] else []
+    if hds == []:
+        bodies = [child for child in stree if getattval(child, 'rel') in  {'body', 'nucl'} ]  # body, nucl
+        thebody = bodies[0] if bodies != [] else None
+        if thebody is not None:
+            hds = getsemheads(thebody)
+        else:
+            hds = []
+    return hds
+
+def sem_merge(alt1: Alt, alt2: Alt) -> Alt:
+    result = Alt(alt1.options + alt2.options)
+    return result
 
 def getsemtype(syntree: SynTree) -> SemType:
     if 'cat' in syntree.attrib:
-        hd = getheadof(syntree)                 # do something for coordinations
-        result = getsemtype(hd)
+        result = None
+        hds = getsemheads(syntree)                 # do something for coordinations, for mwus
+        for hd in hds:
+            hdresult = getsemtype(hd)
+            result  = hdresult if result is None else sem_merge(result, hdresult)
     elif 'word' in syntree.attrib:
         result = semlookup(syntree)
     elif 'index' in syntree.attrib:
         antecedent = getantecedentof(syntree)
-        result = getsemtype(antecedent)
+        if antecedent is not None:
+            result = getsemtype(antecedent)
+        else:
+            result = sh(UnKnown)
+            settings.LOGGER.error(f'No antecedent found for:\n{etree.dump(syntree)} ')
     else:
-        result = UnKnown
+        result = sh(UnKnown)
     return result
 
 def semlookup(stree: SynTree) -> List[SemType]:
@@ -24,28 +58,34 @@ def semlookup(stree: SynTree) -> List[SemType]:
     if pt == 'vnw':
         vnwtype = getattval(stree, 'vwtype')
         pdtype = getattval(stree, 'pdtype')
-        if (lemma, vnwtype, pdtype) in vnwsemdict:
-            result = vnwsemdict[ (lemma, vnwtype, pdtype)]
+        if (lemma, pdtype, vnwtype) in vnwsemdict:
+            result = vnwsemdict[ (lemma, pdtype, vnwtype)]
         else:
-            result = [UnKnown]
+            result = sh(UnKnown)
     elif pt == 'ww':
         fullframe = getattval(stree, 'frame')
         realframe = fullframe[2]
         if (lemma, realframe) in wwsemdict:
             result = wwsemdict[(lemma, realframe)]
         else:
-            result = [Event]
+            result = sh(Event)
     else:
-        result = [UnKnown]
+        result = sh(UnKnown)
     return result
 
-
+def getrealframe(fullframe: str) -> str:
+    # form = <pos>\(<part> (, <part>)*\)
+    lbpos = fullframe.find('(')
+    corefullframe = fullframe[lbpos + 1:-1]
+    parts = corefullframe.split(comma)
+    result = parts[-1] if len(parts) > 0 else ''
+    return result
 def semreqlookup(stree: SynTree) -> List[dict]:
     pt = getattval(stree, 'pt')
     lemma = getattval(stree, 'lemma')
     if pt == 'ww':
         fullframe = getattval(stree, 'frame')
-        realframe = fullframe[2]
+        realframe = getrealframe(fullframe)
         if (lemma, realframe) in wwreqsemdict:
             result = wwreqsemdict[(lemma, realframe)]
         elif realframe in defaultreqsemdict:
@@ -129,10 +169,33 @@ def barebarecompatible(sem1: SemType, sem2: SemType) -> bool:
     else:
         return False
 
-def sh(sem: SemType) -> Alt:
-    result = Alt([And([sem])])
-    return result
 
+wordnodexpath = './/node[@word]'
+def semincompatiblecount(stree: SynTree) -> int:
+    sentence = getsentence(stree)        # mainly for debugging ease
+    result = 0
+    # gather the words
+    wordnodes = stree.xpath(wordnodexpath)
+    for wordnode in wordnodes:
+        wordnodecount = 0
+        reqslist = semreqlookup(wordnode)
+        if reqslist != []:
+            reqslistcounts = []
+            for reqs in reqslist:
+                reqscount = 0
+                parent = wordnode.getparent()
+                for sibling in parent:
+                    siblingrel = getattval(sibling, 'rel')
+                    if siblingrel in reqs:
+                        siblingsemtype = getsemtype(sibling)
+                        if not compatible(siblingsemtype, reqs[siblingrel]):
+                            reqscount += 1
+                reqslistcounts.append(reqscount)
+            wordnodecount += min(reqslistcounts)
+        else:
+            pass
+        result += wordnodecount
+    return result
 
 def mytry():
     pairs = [(Alt([And([Human])]), Alt([And([Object])])),

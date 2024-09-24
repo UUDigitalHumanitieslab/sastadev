@@ -21,6 +21,7 @@ from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, toke
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
+from sastadev.semantic_compatibility import semincompatiblecount
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
@@ -1185,9 +1186,10 @@ def compute_penalty(md: List[Meta]) -> Penalty:
 # The constant *criteria* is a list of objects of class *Criterion* that are used, in the order given, to evaluate parses
 criteria = [
     Criterion("unknownwordcount", getunknownwordcount, negative, "Number of unknown words"),
-    Criterion("wrongposwordcount", getwrongposwordcount, negative, "Numbe rof words with the wrong part of speech"),
+    Criterion("wrongposwordcount", getwrongposwordcount, negative, "Number of words with the wrong part of speech"),
     Criterion("unknownnouncount", getunknownnouncount, negative, "Count of unknown nouns according to Alpino"),
     Criterion("unknownnamecount", getunknownnamecount, negative, "Count of unknown names"),
+    Criterion('semincompatibilitycount', semincompatiblecount, negative, "Count of the number of semantic incompatibilities"),
     Criterion("ambigcount", countambigwords, negative, "Number of ambiguous words"),
     Criterion("dpcount", getdpcount, negative, "Number of nodes with relation dp"),
     Criterion("dhyphencount", getdhyphencount, negative, "Number of nodes with relation --"),
