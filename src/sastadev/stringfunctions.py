@@ -11,6 +11,8 @@ tab = '\t'
 comma = ','
 underscore = '_'
 
+punctuationchars = """`!()-{}[]:;"'<>,.?"""  # should actally use unicod categories
+
 # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
 csvre = "'[^']+'|[^,' ]+"
 csvpat = re.compile(csvre)
@@ -75,6 +77,9 @@ def star(str: str) -> str:
     '''
     return '({})*'.format(str)
 
+def ispunctuation(wrd: str) -> bool:
+    result = wrd in punctuationchars
+    return result
 
 def alt(strlist: Sequence[str], grouped: bool = True) -> str:
     '''

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from sastadev.sastatypes import MethodName
+from sastadev.sastatypes import MethodName, TreeBank
 
 @dataclass
 class CorrectionParameters:
@@ -7,3 +7,5 @@ class CorrectionParameters:
     options: dict
     allsamplecorrections : dict
     thissamplecorrections: dict
+    treebank: TreeBank
+    contextdict : dict

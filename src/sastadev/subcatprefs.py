@@ -43,10 +43,11 @@ def getsubcatprefscore(stree: SynTree) -> int:
     verbnodes = stree.xpath('.//node[@pt="ww"]')
     for verbnode in verbnodes:
         sc = getattval(verbnode, 'sc')
+        lemma = getattval(verbnode, 'lemma')
         if (lemma, sc) in oth_subcatlexicon:
             resultscore += oth_subcatlexicon[(lemma, sc)]
         elif (lemma, sc) in trg_subcatlexicon:
-            resultscore += trg_subcatlexicon
+            resultscore += trg_subcatlexicon[(lemma, sc)]
     return resultscore
 
 
@@ -102,3 +103,5 @@ del all_tempsubcatlexicon
 del oth_temp2subcatlexicon
 del trg_temp2subcatlexicon
 del all_temp2subcatlexicon
+
+junk = 0

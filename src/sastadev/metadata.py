@@ -10,6 +10,21 @@ defaultpenalty = 100
 defaultbackplacement = bpl_none
 
 SASTA = 'SASTA'
+ADULTSPELLINGCORRECTION = 'AdultSpellingCorrection'
+ALLSAMPLECORRECTIONS = 'AllSampleCorrections'
+BASICREPLACEMENTS = 'BasicReplacements'
+CHILDRENSPELLINGCORRECTION = 'ChildrenSpellingCorrection'
+CONTEXT = 'Context'
+HISTORY = 'History'
+THISSAMPLECORRECTIONS = 'ThisSampleCorrections'
+
+
+EXTRAGRAMMATICAL = 'ExtraGrammatical'
+
+replacementsubsources = [ ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS,
+                             CHILDRENSPELLINGCORRECTION , CONTEXT, HISTORY, THISSAMPLECORRECTIONS
+                           ]
+
 space = ' '
 metakw = '##META'
 
@@ -125,11 +140,11 @@ def selectmeta(name, metadatalist):
     return None
 
 
-def mkSASTAMeta(token, nwt, name, value, cat, subcat=None, penalty=defaultpenalty, backplacement=defaultbackplacement):
+def mkSASTAMeta(token, nwt, name, value, cat, subcat=None, source=SASTA, penalty=defaultpenalty, backplacement=defaultbackplacement):
     result = Meta(name, value, annotatedposlist=[token.pos],
                   annotatedwordlist=[token.word], annotationposlist=[nwt.pos],
                   annotationwordlist=[
-                      nwt.word], cat=cat, subcat=subcat, source=SASTA, penalty=penalty,
+                      nwt.word], cat=cat, subcat=subcat, source=source, penalty=penalty,
                   backplacement=backplacement)
     return result
 

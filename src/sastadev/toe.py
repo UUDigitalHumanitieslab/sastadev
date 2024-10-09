@@ -1,6 +1,7 @@
 from sastadev.treebankfunctions import getattval, getnodeyield, mktoken2nodemap
 from sastadev.conf import settings
 from sastadev.alpino import getdehetwordinfo
+from sastadev.lexicon import isalpinonouncompound
 from sastadev.sastatypes import SynTree
 from sastadev.sastatoken import Token
 from typing import List
@@ -76,7 +77,13 @@ def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
 nominalpts = ['n', 'vnw']
 def isnominal(node: SynTree) -> bool:
     pt = getattval(node, 'pt' )
-    return pt in nominalpts
+    wrd = getattval(node, 'word')
+    if pt in nominalpts:
+        return True
+    elif isalpinonouncompound(wrd):
+        return True
+    else:
+        return False
 
 
 

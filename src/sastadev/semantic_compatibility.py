@@ -1,6 +1,8 @@
 from lxml import etree
 import re
 from sastadev.conf import settings
+from sastadev.metadata import Meta
+from sastadev.methods import MethodName
 from sastadev.NLtypes import Animate, AnyType, Event, Human, Object, SemType, UnKnown, Alt, And
 from sastadev.sastatypes import List, SynTree
 from sastadev.semtypelexicon import sh, vnwsemdict, wwsemdict, wwreqsemdict, defaultreqsemdict
@@ -171,7 +173,7 @@ def barebarecompatible(sem1: SemType, sem2: SemType) -> bool:
 
 
 wordnodexpath = './/node[@word]'
-def semincompatiblecount(stree: SynTree) -> int:
+def semincompatiblecount(stree: SynTree, md:List[Meta], mn:MethodName) -> int:
     sentence = getsentence(stree)        # mainly for debugging ease
     result = 0
     # gather the words

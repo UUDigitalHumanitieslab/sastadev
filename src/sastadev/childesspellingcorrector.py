@@ -138,6 +138,7 @@ def adult_correctspelling(word: str, correctionsdict,max = None, threshold=okthr
 
 def tryme():
     words = ['kantie', 'opbijten', 'oprijten', 'opgereten', 'peelkaal' , ' beete' , 'kamm', 'daaistoel', 'oelen', 'tein']
+    words = ['poppe']
     for word in words:
         result = children_correctspelling(word, children_correctionsdict, max=5)
         print(f'{word}: {result}' )

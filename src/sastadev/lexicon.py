@@ -8,16 +8,19 @@ for this purpose.
 
 
 '''
+from collections import defaultdict
 import os
 from typing import Any, Dict, List, Optional
 
 from sastadev import celexlexicon, treebankfunctions
 from sastadev.conf import settings
+from sastadev.methods import asta, stap, tarsp, MethodName
 from sastadev.namepartlexicon import (namepart_isa_namepart,
                                       namepart_isa_namepart_uc)
 from sastadev.readcsv import readcsv
 from sastadev.sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
 
+alpinoparse = settings.PARSE_FUNC
 space = ' '
 
 celex = 'celex'
@@ -63,6 +66,14 @@ def initializelexicondict(lexiconfilename) -> Dict[str,str]:
         lexicon[strippedword] = strippedreplacement
     return lexicon
 
+def initializelexicondefdict(lexiconfilename) -> Dict[str,List[str]]:
+    lexicon = defaultdict(list)
+    fptuples = readcsv(lexiconfilename, header=False)
+    for _, fp in fptuples:
+        strippedword = fp[0].strip()
+        strippedreplacement = fp[1].strip()
+        lexicon[strippedword].append(strippedreplacement)
+    return lexicon
 
 def isa_namepart(word: str) -> bool:
     '''
@@ -198,16 +209,58 @@ def chatspecial(word: str) -> bool:
 def known_word(word: str) -> bool:
     '''
     a word is considered to be a known_word if it occurs in the word form lexicon,
-    if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words
+    if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words,
+    or a compound noun recognised as such by Alpino
     but not in the nonwordslexicon
     :param word:
     :return:
     '''
     result = informlexicon(word) or isa_namepart(word) or \
              chatspecial(word) or word in additionalwordslexicon or \
-             isallersuperlative(word)
+             isallersuperlative(word) or isalpinonouncompound(word)
     result = result and word not in nonwordslexicon
     return result
+
+
+comma = ','
+compoundsep = '_'
+
+def validword(wrd: str, methodname: MethodName) -> bool:
+    result = known_word(wrd)
+    if methodname in {tarsp, stap}:
+        result = result and not nochildword(wrd)
+    return result
+
+def nochildword(wrd: str) -> bool:
+    result = wrd in nochildwords
+    return result
+
+def isalpinonouncompound(wrd: str) -> bool:
+    fullstr = f'geen {wrd}'  # geen makes it a noun and can combine with uter and neuter, count and mass, sg and plural
+    tree = alpinoparse(fullstr)
+    # find the noun
+    if tree is None:
+        settings.LOGGER.error(f'Parsing {fullstr} failed')
+        return False
+    nounnode = treebankfunctions.find1(tree, './/node[@pt="n"]')
+    if nounnode is None:
+        settings.LOGGER.error(f'No noun found in {fullstr} parse')
+        return False
+    nounwrd = treebankfunctions.getattval(nounnode, 'word')
+    if nounwrd != wrd:
+        settings.LOGGER.error(f'Wrong noun ({nounwrd}) found in {fullstr} parse')
+        return False
+    nounlemma = treebankfunctions.getattval(nounnode, 'lemma')
+    if compoundsep in nounlemma:
+        parts = nounlemma.split(compoundsep)
+        unknownparts = [part for part in parts if not known_word(part)]
+        result = unknownparts = []
+        if not result:
+            settings.LOGGER.error(f'Unknown words ({comma.join(unknownparts)}) found in {fullstr} parse')
+            return False
+        return True
+    else:
+        return False
 
 
 def isallersuperlative(wrd:str) -> bool:
@@ -243,7 +296,7 @@ nochildwords = initializelexicon(nochildwordsfullname)
 lexiconfoldername = 'data/wordsunknowntoalpino'
 wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
 wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
-wordsunknowntoalpinolexicondict = initializelexicondict(wordsunknowntoalpinofullname)
+wordsunknowntoalpinolexicondict = initializelexicondefdict(wordsunknowntoalpinofullname)
 
 lexiconfoldername = 'data/filledpauseslexicon'
 
@@ -274,3 +327,6 @@ spellingadditions = initializelexicon(spellingadditionsfullname)
 wrongposwordslexiconfilename = 'wrongposwordslexicon.txt'
 wrongposwordslexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, wrongposwordslexiconfilename)
 wrongposwordslexicon = initializelexicon(wrongposwordslexiconfullname)
+
+# validnouns is intended for nous  that Alpino assigns frame (both,both, both) but that are valid Dutch words
+validnouns = {'knijper'}

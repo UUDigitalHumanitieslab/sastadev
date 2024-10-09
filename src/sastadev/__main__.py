@@ -155,11 +155,12 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
                                  ResultsKey, mkresultskey, scores2counts,
                                  showreskey)
 from sastadev.conf import settings
-from sastadev.constants import (bronzefolder, bronzesuffix, checksuffix, checkeditedsuffix,
+from sastadev.constants import (analysissuffix, bronzefolder, bronzesuffix, byuttscoressuffix, checksuffix, checkeditedsuffix,
                                 formsfolder, intreebanksfolder,
                                 loggingfolder, outtreebanksfolder, permprefix, platinumsuffix,
                                 platinumeditedsuffix,
                                 resultsfolder, silverfolder, silverpermfolder, silversuffix)
+from sastadev.context import getcontextdict
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.correcttreebank import (correcttreebank, corr0, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
@@ -178,6 +179,8 @@ from sastadev.query import (Query, is_preorcore,
                             post_process, query_exists, query_inform)
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
+from sastadev.resultsbyutterance import getscoresbyutt, mkscoresbyuttrows, byuttheader
+from sastadev.sas_impact import getcomparisoncounts, mksas_impactrows, sas_impact
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
                                  GoldTuple, MatchesDict, MethodName, QId,
                                  QIdCount, QueryDict, ResultsCounter,
@@ -197,7 +200,7 @@ from sastadev.targets import get_mustbedone, get_targets, target_all
 from sastadev.treebankfunctions import (find1, getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxsid,
                                         getyield, showtree)
-from sastadev.xlsx import mkworkbook
+from sastadev.xlsx import mkworkbook, add_worksheet
 
 
 start_time = time.time()
@@ -1204,8 +1207,10 @@ def main():
         else:
             mergedsamplecorrections = {}
 
+        contextdict = getcontextdict(treebank2, lambda x: True)
 
-        correctionparameters = CorrectionParameters(methodname, options, mergedsamplecorrections, thissamplecorrections)
+        correctionparameters = CorrectionParameters(methodname, options, mergedsamplecorrections,
+                                                    thissamplecorrections, treebank2, contextdict)
 
         treebank, errordict, allorandalts = correcttreebank(treebank2, targets,  correctionparameters, corr=corr)
 
@@ -1274,12 +1279,27 @@ def main():
     silverscores = exact2results(exactsilverscores)  # ongoing
     silvercounts = scores2counts(silverscores)
 
+    # scores by utterance
+    # bronzescoresbyutt = getscoresbyutt(allresults.coreresults, goldscores)
+    # silverscoresbyutt = getscoresbyutt(allresults.coreresults, silverscores)
+
+    byuttrows = mkscoresbyuttrows(allresults, goldscores, silverscores, themethod)
+    not100count = len([row for row in byuttrows if row[9] != 100])
+    scoresbyuttoutfullname = os.path.join(resultspath, corefilename + byuttscoressuffix + '.xlsx')
+    wb = mkworkbook(scoresbyuttoutfullname, [byuttheader], byuttrows, freeze_panes=(1,0) )
+    allbyuttscores = sas_impact(allresults, silverscores, themethod)
+    sasheader, sasimpactrows = mksas_impactrows(allbyuttscores, not100count)
+    add_worksheet(wb,[sasheader], sasimpactrows, sheetname='SAS_impact', freeze_panes=(1,0))
+    wb.close()
+
+
+
     # netx is now obsolete
     # platinumresults: Dict[ResultsKey, Counter] = reduceresults(platinumresults, samplesizetuple, options.methodname)
 
     (base, ext) = os.path.splitext(options.infilename)
     outputfullname = os.path.join(
-        resultspath, corefilename + "_analysis" + tsvext + txtext)
+        resultspath, corefilename + analysissuffix + tsvext + txtext)
     outfile = open(outputfullname, 'w', encoding='utf8')
 
     outxlsx = os.path.join(resultspath, corefilename + "_analysis" + xlsxext)

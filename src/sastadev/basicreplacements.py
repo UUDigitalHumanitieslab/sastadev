@@ -138,7 +138,7 @@ innureplacements = [(w1[:-1] + 'u', w2, c, n, v, p) for (w1, w2, c, n, v, p) in 
 #: .. autodata:: sastadev.basicreplacements::innureplacements
 #:      :no-value:
 #:
-basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared, dp),
+basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, codared, -2 * dp),
                                                 ('isse', 'is', pron, infpron, addschwa, mp(10)),
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('t', "'t", orth, spellerr, apomiss, dp),
@@ -234,7 +234,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('əs', 'eens', pron, infpron, reduction, dp),
                                                 ('moetə', 'moeten', pron, infpron, infpron, dp),
                                                 ('moetə' , 'moet', pron, infpron, infpron, dp),
-                                                ('pot', 'kapot', pron, infpron, sylldrop, dp),
+                                                ('pot', 'kapot', pron, infpron, sylldrop, -2 * dp),
                                                 ('almaal', 'allemaal', pron, infpron, sylldrop, dp),
                                                 ('knorrens', 'varkens', lexical, substitution, onom,dp),
                                                 ('potte', 'kapot', pron, infpron, combine([sylldrop, emphasis]), dp),
@@ -325,8 +325,8 @@ basicexpansionlist: List[BasicExpansion] = \
      ('as-t-ie', ['als', 'ie'], pron, infpron, t_ie, dp),
      ("dit's", ["dit", "is"], pron, infpron, contract, dp),
      ("dat's", ["dat", "is"], pron, infpron, contract, dp),
-     ("datte", ['dat', 'ie'], pron, infpron, contract, mp(120)),
-     ("omdatte", ['omdat', 'ie'], pron, infpron, contract, mp(120)),
+     ("datte", ['dat', 'ie'], pron, infpron, contract, mp(220)),
+     ("omdatte", ['omdat', 'ie'], pron, infpron, contract, mp(220)),
      ("isda", ['is', 'dat'], pron, infpron, contract, dp + 2),
      ("tisda", ['het',  'is', 'dat'], pron, infpron, contract, mp(120)),
      ("'savonds", ["'s", 'avonds'], pron, infpron, typo, mp(120)),
@@ -446,7 +446,8 @@ def getdisambiguationdict() -> Dict[str, Tuple[TokenTreePredicate, str]]:
             disambiguationdict[w] = cond, repl
     return disambiguationdict
 
-parsereplacementslist =  [('smarties', 'toffees', alpino_unknown_word, -2*dp),
-                          ('Smarties', 'toffees', alpino_unknown_word, -2*dp)]
+# next replaced by wordsunknowntoalpino lexicon
+#parsereplacementslist =  [('smarties', 'toffees', alpino_unknown_word, -2*dp),
+#                          ('Smarties', 'toffees', alpino_unknown_word, -2*dp)]
 
-parsereplacements = {el[0]:el for el in parsereplacementslist}
+# parsereplacements = {el[0]:el for el in parsereplacementslist}
