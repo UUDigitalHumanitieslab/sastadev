@@ -1,6 +1,6 @@
 from lxml import etree
 
-from sastadev.Sziplus import empty, notempty, sziplus6
+from sastadev.Sziplus import empty, isrealnode, notempty, sziplus6
 
 testtree1str = '''  <alpino_ds version="1.3" id="Treebank_Schlichting_CHAT-115.xml">
     <node begin="0" cat="top" end="8" id="0" rel="top">
@@ -217,3 +217,12 @@ def test_sziplus():
     assert report(test4, notempty)
     test5 = sziplus6(testtree5)
     assert report(test5, empty)
+
+
+def test_isrealnode():
+    attrib = {'begin': '180', 'cat': 'mwu', 'end': '191', 'id': '31',
+              'mwu_root': 'naar buiten', 'mwu_sense': 'naar buiten', 'rel': 'svp'}
+
+    node = etree.Element('node', attrib=attrib)
+
+    assert isrealnode(node)

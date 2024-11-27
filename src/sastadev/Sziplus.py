@@ -98,11 +98,11 @@ def isrealnode(node: SynTree) -> bool:
     '''
     pt = getattval(node, 'pt')
     rel = getattval(node, 'rel')
-    if pt == 'let':
+    if pt and pt == 'let':
         result = False
     elif isvcinforppart(node):
         result = False
-    elif rel == 'svp' and pt in node.attrib:
+    elif (rel and rel == 'svp') and (pt and pt in node.attrib):
         result = False
     elif isindexnode(node):
         result = False
