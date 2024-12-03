@@ -102,7 +102,7 @@ def isrealnode(node: SynTree) -> bool:
         result = False
     elif isvcinforppart(node):
         result = False
-    elif rel == 'svp' and pt in node.attrib:
+    elif rel == 'svp' and 'pt' in node.attrib:
         result = False
     elif isindexnode(node):
         result = False
