@@ -1,9 +1,9 @@
-'''
+"""
 This module offers the function get_annotations() to obtain a dictionary with the annotations from a file
 for the moment at the utteranceid level, to be extended to the wordposition per uttid level
 
 and the function read_annotations() to obtain a score dictionary with queryid as keys and Counter() as values
-'''
+"""
 
 # todo
 # -additional columns unaligned treatment and generalisation
@@ -35,6 +35,7 @@ all_levels = set()
 
 # @@next must be made dependent on the method
 literallevels = ['literal', 'lemma']
+commentslevels = ['comments', 'commentaar', 'opmerkingen', 'qa']
 
 semicolon = ';'
 labelsep = semicolon
@@ -51,7 +52,7 @@ stagesheaders = ['fases', 'stages']
 commentsheaders = ['opmerkingen', 'comments', 'commentaar']
 unalignedheaders = ['hele uiting', 'unaligned', 'hele zin']
 
-
+uttlevels = ['utt', 'uiting']
 def nested_dict(n: int,
                 type: type):  # I do not know how to characterize the result type Dict n times deep endin gwith values of type type
     if n == 1:
@@ -127,24 +128,6 @@ def enrich(labelstr: str, lcprefix: str) -> str:
     result = labelsep.join(newlabels)
     return result
 
-
-def oldgetcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, patterns: Tuple[Pattern, Pattern]) \
-        -> List[Tuple[str, str]]:
-    results: List[Tuple[str, str]] = []
-    lcthelabelstr = thelabelstr.lower()
-    lcprefix = prefix.lower().strip()
-    lcthelabelstr = enrich(lcthelabelstr, lcprefix)
-    thelabels = getlabels(lcthelabelstr, patterns)
-    for thelabel in thelabels:
-        if thelabel != "":
-            cleanlabel = thelabel
-            cleanlevel = clean(thelevel)
-            result = (cleanlevel, cleanlabel)
-            results.append(result)
-
-    return results
-
-
 def getcleanlevelsandlabels(thelabelstr: str, thelevel: str, prefix: str, allvaliditems: List[str], themethod: Method) \
         -> List[Tuple[str, str]]:
     results: List[Tuple[str, str]] = []
@@ -208,9 +191,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
             unalignedcol = col
         else:
             pass  # maybe warn here that an unknow column header has been encountered?
-
-    startcol = min(
-        [col for col in [firstwordcol, unalignedcol, commentscol, stagescol]])
+    startcol = min([col for col in [firstwordcol, unalignedcol, commentscol, stagescol] if col >=0])
     for row in data:
         if row[uttidcol] != "":
             # this might go wrong if there is no integer there @@make it robust
@@ -222,7 +203,7 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
         #    uttcount += 1
         curuttwlist = []
         for colctr in range(startcol, len(row)):
-            if thelevel.lower() in uttidheaders:
+            if thelevel in uttlevels:
                 rawcurcellval = str(row[colctr])
                 curcellval = getname(rawcurcellval)
                 if curcellval != '':
@@ -237,9 +218,10 @@ def get_annotations(infilename: FileName, allitems: List[str], themethod: Method
                 cleanlevel = thelevel
                 cleanlabel = thelabel
                 if cleanlabel != '':
-                    thedata[(cleanlevel, cleanlabel)].append(
-                        (uttid, tokenposition))
-            elif not isuttlevel(thelevel) and colctr != stagescol and colctr != commentscol:
+                    thedata[(cleanlevel, cleanlabel)].append((uttid, tokenposition))
+            elif thelevel in commentslevels:
+                pass
+            elif thelevel not in uttlevels and colctr != stagescol and colctr != commentscol:
                 thelabelstr = row[colctr]
                 thelevel = row[levelcol]
                 if colctr == unalignedcol:

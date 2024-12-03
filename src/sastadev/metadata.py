@@ -2,10 +2,11 @@ import re
 from typing import List
 
 from lxml import etree
+from sastadev.sastatypes import Penalty
 
-(bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical,
- bpl_wordlemma, bpl_cond, bpl_replacement) = tuple(range(9))
-defaultpenalty = 10
+bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma, \
+bpl_cond, bpl_replacement, bpl_word_delprec = tuple(range(10))
+defaultpenalty = 100
 defaultbackplacement = bpl_none
 
 SASTA = 'SASTA'
@@ -154,3 +155,7 @@ insertion = 'Insertion'
 smallclause = 'Small Clause Treatment'
 tokenmapping = 'Token Mapping'
 insertiontokenmapping = 'Insertion Token Mapping'
+
+def modifypenalty(pct:int) -> Penalty:
+    newpen = int(pct /100 * defaultpenalty)
+    return newpen

@@ -10,7 +10,7 @@ from copy import deepcopy
 from typing import List, Optional, Pattern, TextIO, Tuple, Union
 
 import sastadev
-# from sastadev import CHAT_Annotation, sastatok
+# import sastadev.CHAT_Annotation
 from sastadev.conf import settings
 from sastadev.metadata import Meta, Metadata, bpl_none
 from sastadev.sastatoken import Token, show
@@ -20,6 +20,7 @@ hexformat = '\\u{0:04X}'
 
 
 space = ' '
+plussym = '+'
 
 scope_open = '<'
 scope_close = '>'
@@ -111,7 +112,7 @@ def purifytokens(tokens: List[Token]) -> List[Token]:
 CleanedText = Union[List[Token], str]
 
 
-def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False) -> Tuple[CleanedText, Metadata]:
+def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False, verbose=False) -> Tuple[CleanedText, Metadata]:
     '''
 
     :param utt:
@@ -119,7 +120,7 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False) -> Tuple[Clean
     :param tokenoutput:
     :return:
     '''
-    newutt = robustness(utt)
+    newutt = robustness(utt, verbose=verbose)
     tokens = sastadev.sastatok.sasta_tokenize(newutt)
     inwordlist = [t.word for t in tokens]
     intokenstrings = [str(token) for token in tokens]
@@ -174,6 +175,25 @@ def removesuspects(str: str) -> str:
     return result
 
 
+def removesuspecttokens(tokens: List[Token]) -> List[Token]:
+    tokenstr = space.join([str(token) for token in tokens])
+    newtokens = []
+    for token in tokens:
+        if token.word in checkpatternchars:
+            pass
+            settings.LOGGER.warning(f'Suspect token <{token.word}> removed from {tokenstr}')
+        elif token.word.endswith(plussym):
+            newtokens.append(token.word[:-1])
+            settings.LOGGER.warning(f'{plussym} removed from  <{token.word}> ')
+        elif token.word.startswith(plussym):
+            newtokens.append(token.word[1:])
+            settings.LOGGER.warning(f'{plussym} removed from  <{token.word}> ')
+        else:
+            newtokens.append(token)
+    return newtokens
+
+
+
 RobustnessTuple = Tuple[Pattern, str, str, str]
 
 robustnessrules: List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
@@ -190,18 +210,19 @@ robustnessrules: List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...
                                           ]
 
 
-def robustness(utt: str) -> str:
+def robustness(utt: str, verbose=False) -> str:
     newutt = utt
     for (regex, instr, outstr, msg) in robustnessrules:
         newnewutt = regex.sub(outstr, newutt)
-        if newnewutt != newutt:
+        if verbose and newnewutt != newutt:
             settings.LOGGER.warning('{}. Interpreted <{}> as <{}> in <{}>'.format(msg, instr, outstr, utt))
         newutt = newnewutt
     return newutt
 
-
+checkpatternchars = '][\(\)&%@/=><_^~↓↑↑↓⇗↗→↘⇘∞≈≋≡∙⌈⌉⌊⌋∆∇⁎⁇°◉▁▔☺∬Ϋ·\u22A5\u00B7\u0001\u2260\u21AB\u2039\u203A'
 # checkpattern = re.compile(r'[][\(\)&%@/=><_0^~↓↑↑↓⇗↗→↘⇘∞≈≋≡∙⌈⌉⌊⌋∆∇⁎⁇°◉▁▔☺∬Ϋ123456789·\u22A5\u00B7\u0001\u2260\u21AB]')
 checkpattern = re.compile(r'[][\(\)&%@/=><_^~↓↑↑↓⇗↗→↘⇘∞≈≋≡∙⌈⌉⌊⌋∆∇⁎⁇°◉▁▔☺∬Ϋ·\u22A5\u00B7\u0001\u2260\u21AB\u2039\u203A]')
+checkpattern = re.compile(f'[{checkpatternchars}]')
 # + should not occur except as compound marker black+board
 # next one split up in order to do substitutions
 pluspattern = re.compile(r'(\W)\+|\+(\W)')

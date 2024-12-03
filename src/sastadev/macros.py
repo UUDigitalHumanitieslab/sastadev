@@ -15,6 +15,8 @@ from typing import Dict, List, TextIO
 
 from sastadev.conf import settings
 from sastadev.generatemacros import generatemacros
+from sastadev.lexicon import tswnouns
+from sastadev.sastatypes import XpathExpression
 
 idpat = r'([A-z_][A-z0-9_]*)'
 eqpat = r'='
@@ -75,6 +77,14 @@ def expandmacrosdict(expr: str, macrodict: Dict[str, str]) -> str:
     return newexpr
 
 
+def list2xpath(vlist: List[str], attr: str) -> XpathExpression:
+    alts = [f'@{attr}="{v}"' for v in vlist]
+    expr = ' or '.join(alts)
+    result = f"({expr})"
+    return result
+
+tswnounsexpansion = f'(@pt="tsw" and {list2xpath(tswnouns, "lemma")})'
+
 macrodir = op.join(settings.SD_DIR, 'data', 'macros')
 macrofilenames = [op.join(macrodir, 'sastamacros1.txt'), op.join(macrodir, 'sastamacros2.txt'), op.join(macrodir, 'newimperatives.txt')]
 
@@ -82,3 +92,5 @@ macrodict = generatemacros()
 for macrofilename in macrofilenames:
     macrofile = open(macrofilename, 'r', encoding='utf8')
     macrodict = readmacros(macrofile, macrodict)
+
+macrodict['tswnoun'] = tswnounsexpansion
