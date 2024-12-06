@@ -19,6 +19,7 @@ from sastadev.namepartlexicon import (namepart_isa_namepart,
                                       namepart_isa_namepart_uc)
 from sastadev.readcsv import readcsv
 from sastadev.sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
+from sastadev.stringfunctions import ispunctuation
 
 alpinoparse = settings.PARSE_FUNC
 space = ' '
@@ -236,6 +237,8 @@ def nochildword(wrd: str) -> bool:
     return result
 
 def isalpinonouncompound(wrd: str) -> bool:
+    if ispunctuation(wrd):
+        return False
     fullstr = f'geen {wrd}'  # geen makes it a noun and can combine with uter and neuter, count and mass, sg and plural
     tree = alpinoparse(fullstr)
     # find the noun

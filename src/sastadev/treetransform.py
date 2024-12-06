@@ -1,7 +1,28 @@
 import copy
-from sastadev.treebankfunctions import immediately_precedes, showtree
+from sastadev.conf import settings
+from sastadev.treebankfunctions import find1, getattval, getbeginend, getnodeyield, getyield, \
+    immediately_precedes, iswordnode, showtree
 from sastadev.sastatypes import SynTree
 from lxml import etree
+
+space = ' '
+
+tagcommaclausexpath = """.//node[@cat="smain" and 
+                          node[@pt="n" and @end = ancestor::alpino_ds/descendant::node[@lemma="," ]/@begin and 
+                               @begin = ancestor::node[@cat="top"]/@begin]]"""
+
+sv1xpath = """.//node[@cat="sv1" and parent::node[@cat="top"]]"""
+tagxpath = """.//node[@pt="n" and @end = ancestor::alpino_ds/descendant::node[@lemma="," ]/@begin and 
+                               @begin = ancestor::node[@cat="top"]/@begin]"""
+tagcommaxpath = """.//node[@lemma=","]"""
+notsv1xpath = """.//node[(not(@cat) or @cat!="sv1") and parent::node[@cat="top"]]"""
+
+nognonpxpath = """.//node[@lemma="nog" and parent::node[not(@cat="np")]]"""
+nogxpath = """.//node[@lemma="nog" and parent::node[@cat="np" and not(node[@rel="hd" and @pt="ww"])]]"""
+eenxpath = """.//node[(@lemma="een" or @lemma="één" or @lemma="eentje" or @lemma="meer" or @lemma="minder" or 
+                      @lemma="zo'n" or @pt="tw")   and parent::node[@cat="np"]]"""
+dexpath = """.//node[(@lemma="de" or @lemma="het" or @lemma="deze" or @lemma="die") and parent::node[@cat="np"]]"""
+
 
 def transformtreeld(stree:SynTree) -> SynTree:
     debug = False
@@ -27,9 +48,7 @@ def transformtreenogeen(stree:SynTree) -> SynTree:
     if debug:
         showtree(stree, 'intree')
     newstree = copy.deepcopy(stree)
-    nogxpath = """.//node[@lemma="nog" and parent::node[not(@cat="np")]]"""
-    eenxpath = """.//node[(@lemma="een" or @lemma="één" or @lemma="eentje") and parent::node[@cat="np"]]"""
-    nogs = newstree.xpath(nogxpath)
+    nogs = newstree.xpath(nognonpxpath)
     eens = newstree.xpath(eenxpath)
     for nog in nogs:
         for een in eens:
@@ -45,15 +64,92 @@ def transformtreenogde(stree:SynTree) -> SynTree:
     if debug:
         showtree(stree, 'intree')
     newstree = copy.deepcopy(stree)
-    nogxpath = """.//node[@lemma="nog" and parent::node[@cat="np"]]"""
-    dexpath = """.//node[(@lemma="de" or @lemma="het" or @lemma="deze" or @lemma="die") and parent::node[@cat="np"]]"""
     nogs = newstree.xpath(nogxpath)
     des = newstree.xpath(dexpath)
-    for nog in nogs:
-        for de in des:
-            if immediately_precedes(nog, de, newstree):
+    eens = newstree.xpath(eenxpath)
+    if eens == []:   # otherwise we have transformtreenogeen
+        for nog in nogs:
+            for de in des:
+                if immediately_precedes(nog, de, newstree):
+                    nog.getparent().remove(nog)
+                    de.getparent().getparent().append(nog)
+            if des == [] and eens == []:
+                nog_grandparent = nog.getparent().getparent()
                 nog.getparent().remove(nog)
-                de.getparent().getparent().append(nog)
-    if debug:
-        showtree(newstree, 'outtree')
+                nog_grandparent.append(nog)
+            if debug:
+                showtree(newstree, 'outtree')
     return newstree
+
+def transformtagcomma(stree: SynTree) -> SynTree:
+    debug = False
+    newtree = copy.deepcopy(stree)
+    match = find1(newtree, tagcommaclausexpath)
+
+    if match is not None:
+        topnode = match.getparent()
+        thetag = find1(newtree, tagxpath)
+        thetagcomma = find1(newtree, tagcommaxpath)
+        thenodeyield = getnodeyield(newtree)
+        if isfiniteverbnode(thenodeyield[2]):
+            theyield = getyield(newtree)
+            sv1str = space.join(theyield[2:])
+            sv1parse = settings.PARSE_FUNC(sv1str)
+            if debug:
+                showtree(sv1parse, 'sv1parse')
+            if sv1parse is not None:
+                sv1top = find1(sv1parse, './/node[@cat="top"]')
+                incr = 2 if thenodeyield[0].attrib['begin'] == '0' else 20
+                sv1top = increasebeginends(sv1top, incr)
+                sv1node = find1(sv1top, sv1xpath)
+                otherpuncs = sv1top.xpath(notsv1xpath)
+                topattrib = {'cat': 'top', 'id': getattval(topnode, 'id'), 'begin': getattval(topnode, 'begin'),
+                             'end': getattval(topnode, 'end')}
+                newtop = etree.Element('node', topattrib)
+                duattrib = {'cat': 'du', 'rel': '--', 'id': f'{getattval(topnode, "id")}a',
+                            'begin': getattval(thetag, 'begin'), 'end': f'{getattval(sv1node, "end")}'}
+                thedu = etree.Element('node', duattrib)
+                thetag.attrib['rel'] = 'tag'
+                sv1node.attrib['rel'] = 'nucl'
+                thedu.append(thetag)
+                thedu.append(sv1node)
+                newtop.append(thetagcomma)
+                newtop.append(thedu)
+                newtop.extend(otherpuncs)
+                newtree.remove(topnode)
+                newtreechildren = [child for child in newtree]
+                newtreechildren = [newtop] + newtreechildren
+                newtree.extend(newtreechildren)
+                result = newtree
+            else:
+                result = stree
+        else:
+            result = stree
+    else:
+        result = stree
+
+    if debug:
+        showtree(result, 'result')
+    return result
+
+
+def isfiniteverbnode(node: SynTree) -> bool:
+    pt = getattval(node, 'pt')
+    wvorm = getattval(node, 'wvorm')
+    result = pt == 'ww' and wvorm == 'pv'
+    return result
+
+def increasebeginends(stree: SynTree, incr: int) -> SynTree:
+    newtree = copy.copy(stree)
+    newchildren = [increasebeginends(child, incr) for child in stree]
+    for child in newtree:
+        newtree.remove(child)
+    if iswordnode(newtree):
+        newtree.attrib['begin'] = str(int(newtree.attrib['begin']) + incr)
+        newtree.attrib['end'] = str(int(newtree.attrib['begin']) + 1)
+    else:
+        (b, e) = getbeginend(newchildren)
+        newtree.attrib['begin'] = b
+        newtree.attrib['end'] = e
+    newtree.extend(newchildren)
+    return newtree

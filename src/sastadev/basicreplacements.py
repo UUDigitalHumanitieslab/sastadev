@@ -245,6 +245,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('blon', 'ballon', pron, infpron, voweldel, dp),
                                                 ('ooien', 'gooien', pron, wrongpron, onsetred, dp),
                                                 ('poppe', 'pop', pron, wrongpron, emphasis, dp),
+                                                ('lus', 'lust', pron, infpron, codared, dp),
+                                                ('jou', 'jouw', pron, infpron, codared, -dp) # Td 22, 30 ik wil ook keer naar jou huis find criterion
                                                 # ('leggen', 'liggen', lexical, dial, '', dp), # moved to corrector : only if parse is illformed
                                                 # ('legt', 'ligt', lexical, dial, '', dp),  # moved to corrector : only if parse is illformed
                                                 # ('leg', 'lig', lexical, dial, '', dp) # moved to corrector : only if parse is illformed

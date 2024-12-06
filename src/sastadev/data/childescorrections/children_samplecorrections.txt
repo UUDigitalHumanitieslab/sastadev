@@ -121,6 +121,7 @@ siko	cirkel	replacement	1
 bjokje	blokje	replacement	1
 kikke	kikker	noncompletion	1
 springe	springen	noncompletion	1
+in	met	replacement	1
 in	erin	noncompletion	3
 in	deze	replacement	2
 in	op	replacement	2
@@ -211,7 +212,8 @@ ke	die	replacement	1
 dese	deze	replacement	4
 hijs	hij is	replacement	1
 eigk	eigenlijk	replacement	1
-de	het	replacement	21
+de	het	replacement	23
+de	zitten	replacement	1
 de	der	noncompletion	11
 de	dan	replacement	2
 de	deze	replacement	2
@@ -249,7 +251,7 @@ worst	borst	replacement	1
 ennu	en	replacement	1
 koeie	koeien	noncompletion	1
 o	op	noncompletion	3
-mij	mijn	noncompletion	9
+mij	mijn	noncompletion	10
 bet	bent	noncompletion	1
 bent	ben	replacement	1
 tinnen	tillen	replacement	1
@@ -378,6 +380,8 @@ deze	dit	replacement	4
 deze	waar hoort deze	explanation	1
 evallen	gevallen	noncompletion	1
 nog	ook	explanation	1
+voor	bij	replacement	1
+voor	om	replacement	2
 voor	van	explanation	1
 wat	waar	replacement	2
 wordt	hoort	replacement	2
@@ -443,6 +447,7 @@ pantoet	pannekoeken	replacement	2
 eet	eten	replacement	2
 bejo	hallo	explanation	1
 teje	gaan	replacement	2
+maar	normaal	replacement	1
 maar	en	replacement	7
 maar	want	replacement	1
 maar	ga daar maar	explanation	1
@@ -472,7 +477,7 @@ bochje	bochtje	explanation	1
 anders	andere	explanation	1
 saar	daar	explanation	1
 saal	haal	explanation	1
-saan	gaan	explanation	1
+saan	gaan	replacement	2
 bruiken	gebruiken	explanation	1
 keerd	verkeerd	explanation	1
 vrastauto	vrachtauto	replacement	1
@@ -520,6 +525,7 @@ gun	ging	replacement	2
 gin	ging	noncompletion	4
 som	soms	noncompletion	6
 witte	wit	replacement	2
+dee	deed	noncompletion	1
 dee	was	replacement	2
 dan	toen	replacement	6
 ging	gingen	replacement	2
@@ -549,12 +555,12 @@ lew	wel	replacement	2
 slin	ging	replacement	2
 stond	stonden	replacement	4
 stond	was	replacement	2
+van	bij	replacement	2
 van	om	replacement	2
 van	door	replacement	1
 van	met	replacement	1
 van	uit	replacement	1
 van	veel	replacement	1
-van	bij	replacement	1
 arreen	alleen	replacement	2
 het	er	replacement	2
 het	hij	replacement	2
@@ -614,6 +620,7 @@ zaten	hadden	replacement	1
 zo	zo'n	replacement	1
 ook	blauwe ramen zitten er ook	explanation	1
 ginnen	gingen	replacement	2
+dat	daar	replacement	1
 dat	het	replacement	1
 allegrooste	allegrootste	noncompletion	2
 en	maar	replacement	3
@@ -641,9 +648,11 @@ ta	tat	noncompletion	1
 peltje	pijltje	replacement	1
 pijwtje	pijltje	replacement	1
 sef	zeg	replacement	1
+doe	toen	replacement	1
 doe	ga	replacement	1
 zwaarden	vechten	replacement	1
 lekkes	lekkers	noncompletion	1
+was	ging	replacement	1
 was	waren	replacement	1
 was	wat	replacement	1
 suimpjes	sguimpjes	noncompletion	1
@@ -666,6 +675,8 @@ itten	eten	replacement	2
 ziekje	muziekje	replacement	1
 Bobdebouwerkattet	Bobdebouwerkwartet	replacement	1
 blazen	geblazen	replacement	1
+ik	je	replacement	1
+ik	jij	replacement	1
 ik	mij	replacement	1
 wou	wilde	replacement	3
 vashouden	vasthouden	noncompletion	2
@@ -802,6 +813,9 @@ rekele	rekenen	replacement	1
 daarzo	daar	replacement	1
 voorbeeld	bijvoorbeeld	replacement	1
 freene	free-runnen	replacement	1
+x	racen-x	replacement	1
+x	los ?	replacement	1
+x	gelaten ?	replacement	1
 x	gewoon	replacement	1
 feerunnen	freerunnen	replacement	1
 wees	geweest	replacement	1
@@ -812,3 +826,22 @@ zorgen	verzorgen	replacement	1
 kantie	vakantie	replacement	1
 zomerkantie	vakantie	replacement	1
 boekje	'n boekje voor David	explanation	1
+xxx	?	replacement	1
+koppie	kopbal	replacement	1
+weer	meer	replacement	1
+kubbelbum	bubblegum ?	replacement	1
+probreren	proberen	replacement	2
+doem	doen	replacement	1
+durf	durft	noncompletion	1
+tik	tikkertje	replacement	1
+teek	betekent	replacement	1
+palaplu	paraplu	replacement	1
+valaag	vandaag	replacement	1
+,	dat	replacement	1
+tegen	aan	replacement	1
+zeggen	vragen	replacement	1
+vliegtuig	vliegveld	replacement	1
+anneen	alleen	replacement	1
+na	dan	replacement	1
+noen	doen	replacement	1
+teeëndertig	tweeëndertig	replacement	1

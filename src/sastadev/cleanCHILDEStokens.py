@@ -230,13 +230,15 @@ def removesuspecttokens(tokens: List[Token]) -> List[Token]:
 
 
 
-RobustnessTuple = Tuple[Pattern, str, str, str]
+RobustnessTuple = Tuple[Pattern, str, str, str]  # regex, instring, outstring, message
 
 robustnessrules: List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
                                           (re.compile('#'), '#', '', 'Number Sign (#, Unicode U+0023) removed'),
                                           #(re.compile('#'), '#', '(.)', 'Number Sign (#, Unicode U+0023) replaced by CHAT (short) pause code: (.)'),
-                                          (re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
-                                          (re.compile(r'\[\+trn\]'), '[+trn]', '[+ trn]', 'Missing space'),
+                                          (re.compile(r'\[\+bch\]', re.I), '[+bch]', '[+ bch]', 'Missing space'),
+                                          (re.compile(r'\[\+trn\]', re.I), '[+trn]', '[+ trn]', 'Missing space'),
+                                          (re.compile(r'\[\+ea\]', re.I), '[+ea]', '[+ ea]', 'Missing space'),
+                                          (re.compile(r'\[%(?![\s])'), '[%', '[% ', 'Missing space'),
                                           (re.compile(r'\[:(?![:\s])'), '[:', '[: ', 'Missing space'),
                                           (re.compile(r'(?<=\w)\+\.\.\.'), '+...', ' +...', 'Missing space'),
                                           (re.compile(r'\u2018'), '\u2018', "'", "Left Single Quotation Mark (\u2018. Unicode U+2018) replaced by Apostrophe ' (Unicode U+0027)"),

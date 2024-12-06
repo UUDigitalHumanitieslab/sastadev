@@ -95,14 +95,16 @@ wxyz5 = """(%basicimperative%
 
 
 ynquery = """@cat="sv1" and
-            (@rel="--" or @rel="dp") and
+            (@rel="--" or @rel="dp" or %nofollowinghenucl%) and
             not(%topcontainsperiodmark%) and 
 			not(%topcontainsexclamationmark%) and 
             node[@rel="hd" and @pt="ww" and @pvtijd !="conj" and (@stype="ynquestion" or %topcontainsquestionmark% ) ] and
             (node[@rel="su"] or %topcontainsquestionmark%)    and
             (not(%impmodfound%) or %topcontainsquestionmark% )			 
 		  """	 
-		  
+		 
+nofollowinghenucl = """(@rel="nucl" and not(../node[@rel="tag" and (@lemma="hè" or @lemma="he") and @begin >= ../node[@rel="nucl"]/@end])) """ 
+		 
 wondx = """(%ynquery% and %realcomplormodnodecount% <= 2 )"""
 
 wond4 = """(%ynquery% and %realcomplormodnodecount% = 3)"""
@@ -198,7 +200,7 @@ Tarsp_OndWVC = """
 
 Tarsp_WBVC = """(%declarative%  and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 2 )"""
 
-Tarsp_Ov4 = """(%declarative% and %realcomplormodnodecount% = 3 and not(%Tarsp_OndWBVC%) and not(%Tarsp_OndWBB%) and not(%Tarsp_OndWVCVCX%))"""
+Tarsp_Ov4 = """(%declarative% and %realcomplormodnodecount% = 3 and %Tarsp_W% and not(%Tarsp_OndWBVC%) and not(%Tarsp_OndWBB%) and not(%Tarsp_OndWVCVCX%))"""
 
 Tarsp_Ov5 = """(%declarative% and %realcomplormodnodecount% = 4 and not(%Tarsp_VCWOndBB%) and not(%Tarsp_OndWVCVCX%) and not(%Tarsp_BWOndBB%) )"""
 
@@ -245,7 +247,7 @@ old_Tarsp_BBX = """((@cat="top" and
    
    )"""
    
-Tarsp_BBX = """(%coreBBX% or %clausalBBX% or %wvcBBX% or %abcBBX% or %vabcBBX% or %nadvpbbBBX% or %bplusxpbBBX%)"""
+Tarsp_BBX = """(%coreBBX% or %clausalBBX% or %wvcBBX% or %abcBBX% or %vabcBBX% or %nadvpbbBBX% or %bplusxpbBBX% or %smallclausebbx%)"""
 
 old_corebb = """ ((@special="er_loc" or @pt="bw" or @pt="vz" or (@pt="adj" and @rel="dp" )) and @rel!="hd" and @rel!="hdf")""" 
    
@@ -262,6 +264,8 @@ vabcBBX = """((@cat!="smain" and @cat!="sv1") and
 
 nadvpbbBBX = """(node[not(%Tarsp_B%) and (not(@pt) or (@pt!="ww" and @pt!="let")) and @cat!="advp"] and node[@cat="advp" and node[@rel="mod" ] and node[@rel="hd" ]] and count(node) = 2 and %onlythesearerealwords%) """
 bplusxpbBBX = """(node[%Tarsp_B% and @rel!="tag"] and not(node[@pt="ww"]) and node[not(%Tarsp_B%) and count(.//node[%Tarsp_B%]) = 1]and %onlythesearerealwords%)"""
+
+smallclausebbx = """(@cat="smain" and node[%complement%] and count(node[%coreB%])=2 and count(node)=3 and %onlythesearerealwords% )"""
 		
 Tarsp_Ov3 = """(%declarative% and 
                 not(%Tarsp_OndWVC%) and 
@@ -270,6 +274,7 @@ Tarsp_Ov3 = """(%declarative% and
 				not(%Tarsp_WBVC%) and 
 				not(%Tarsp_OndB%) and
 				not(%Tarsp_OndVC%) and
+				%Tarsp_W% and
 				%realcomplormodnodecount% = 2) """
 
 

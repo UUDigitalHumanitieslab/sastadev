@@ -85,12 +85,12 @@ def isvcinforppart(node: SynTree) -> bool:
 
 def isrealnode(node: SynTree) -> bool:
     '''
-    The function *isrealnode* determines whether a nide is a real node, which it is if:
+    The function *isrealnode* determines whether a node is a real node, which it is if:
 
     * it is not a node for an interpunction sign
     * it is not a nonfinite complement
     * if it is not a separable particle word of a verb
-    * if it is not an index node 9as detemined by the function *isindexnode*)
+    * if it is not an index node (as determined by the function *isindexnode*)
 
     The function *isindexnode* is defined as follows:
 
@@ -102,7 +102,7 @@ def isrealnode(node: SynTree) -> bool:
         result = False
     elif isvcinforppart(node):
         result = False
-    elif rel == 'svp' and pt in node.attrib:
+    elif rel == 'svp' and 'word' in node.attrib:
         result = False
     elif isindexnode(node):
         result = False

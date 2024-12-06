@@ -21,6 +21,7 @@ from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, defaultpe
                                SASTA, ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT,
                                HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
                                )
+from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
@@ -41,7 +42,7 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, clausecats,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
-from sastadev.treetransform import transformtreeld, transformtreenogeen, transformtreenogde
+from sastadev.treetransform import transformtagcomma, transformtreeld, transformtreenogeen, transformtreenogde
 
 ampersand = '&'
 
@@ -564,7 +565,10 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
 
     # tree transformations
     if correctionparameters.method in ['tarsp', ' stap']:
+        stree = transformtagcomma(stree)
         stree = transformtreeld(stree)
+        stree = transformppinnp(stree)
+        stree = transformbwinnp(stree)
         stree = transformtreenogeen(stree)
         stree = transformtreenogde(stree)
 
@@ -908,7 +912,10 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
 
     # tree transformations
     if correctionparameters.method in ['tarsp', ' stap']:
+        fulltree = transformtagcomma(fulltree)
         fulltree = transformtreeld(fulltree)
+        fulltree = transformppinnp(fulltree)
+        fulltree = transformbwinnp(fulltree)
         fulltree = transformtreenogeen(fulltree)
         fulltree = transformtreenogde(fulltree)
 

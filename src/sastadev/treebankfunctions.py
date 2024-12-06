@@ -788,7 +788,8 @@ def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
 
 
 def iswordnode(thenode: SynTree) -> bool:
-    result = 'pt' in thenode.attrib or 'pos' in thenode.attrib
+    # result = 'pt' in thenode.attrib or 'pos' in thenode.attrib
+    result = 'word' in thenode.attrib
     return result
 
 
@@ -1729,6 +1730,17 @@ def findfirstnode(tree: SynTree, condition: Callable[[SynTree], bool]) -> Option
                 return result
     return None
 
+
+def hasnominativehead(node: SynTree) -> bool:
+    hd = find1(node, './node[@rel="hd"]')
+    cnjs = node.xpath('./node[@rel="cnj"]')  # coordinations
+    if cnjs != []:
+        result = any([hasnominativehead(cnj) for cnj in cnjs])
+    elif hd is not None:
+        result = getattval(hd, 'naamval') == 'nomin'
+    else:
+        result = False
+    return result
 
 def nominal(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
