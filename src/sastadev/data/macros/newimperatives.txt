@@ -227,9 +227,17 @@ Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub") or (@cat="whrel" an
 
 Tarsp_whqhead = """(@rel="whd" or @rel="rhd") """
 whqbody = """((@cat="sv1" or @cat="ssub") and @rel="body")"""
-Tarsp_VrXY = """(%Tarsp_whq% and
+Tarsp_coreVrXY = """(%Tarsp_whq% and
         node[%Tarsp_whqhead%] and
-        node[%whqbody%   and %realcomplormodnodecount% <= 1])"""
+        node[%whqbody%   and %realcomplormodnodecount% < 2])"""
+		
+		
+vraagwoord = """((@pt="vnw" and @vwtype="vb") or @lemma="hoe" or @lemma="wanneer" or  starts-with(@lemma, "waar") or @lemma="welk")"""
+
+Vr = """(%vraagwoord% or (@cat=pp and node[@rel="obj1" and %vraagwoord%]) )""" 
+
+
+Tarsp_VrXY = """(%Tarsp_coreVrXY% or (%Vr% and not(../node[%whqbody%]) and count(..//node[%realnode%]) <= 3)) """
 
 Tarsp_Vr4 = """(%Tarsp_whq% and
         node[%Tarsp_whqhead%] and
