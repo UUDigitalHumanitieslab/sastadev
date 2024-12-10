@@ -12,7 +12,7 @@ from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
-                                mkuttwithskips)
+                                mkuttwithskips, initialmaarvgxpath)
 from sastadev.lexicon import de, dets, known_word, nochildword, nochildwords, validnouns, validword, \
     wordsunknowntoalpinolexicondict, wrongposwordslexicon
 from sastadev.macros import expandmacros
@@ -1316,9 +1316,14 @@ def gettotaleditdistance(nt: SynTree, md: List[Meta], mn:MethodName) -> int:
     return totaldistance
 
 ppinnpxpath = """//node[@cat='pp' and node[@rel='hd' and @lemma!='van'] and parent::node[@cat='np']]"""
-def getpostnominalppmodcount(nt: SynTree, md: List[Meta], mn: MethodName):
+def getpostnominalppmodcount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
     ppinnpmods = nt.xpath(ppinnpxpath)
     result = len(ppinnpmods)
+    return result
+
+def getmaaradvcount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    initialmaaradvs = nt.xpath(initialmaarvgxpath)
+    result = len(initialmaaradvs)
     return result
 
 
@@ -1330,6 +1335,7 @@ criteria = [
     Criterion("unknownnouncount", getunknownnouncount, negative, "Count of unknown nouns according to Alpino"),
     Criterion("unknownnamecount", getunknownnamecount, negative, "Count of unknown names"),
     Criterion('semincompatibilitycount', semincompatiblecount, negative, "Count of the number of semantic incompatibilities"),
+    Criterion('maaradvcount', getmaaradvcount, negative, "Count of number of occurrences of clause initial 'maar' as an adverb"),
     Criterion("ambigcount", countambigwords, negative, "Number of ambiguous words"),
     Criterion("dpcount", getdpcount, negative, "Number of nodes with relation dp"),
     Criterion("dhyphencount", getdhyphencount, negative, "Number of nodes with relation --"),

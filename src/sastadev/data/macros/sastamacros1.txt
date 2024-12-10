@@ -742,6 +742,7 @@ Tarsp_nonmodadvcp = """(@cat="cp" and (@rel="dp" or @rel="--") and node[@pt="vg"
 
 directerede_vcbijzin = """( %clausecat% and not(@rel="cnj") and (preceding-sibling::node[%metasmain%] or following-sibling::node[%metasv1%]))"""
 
+maarvg = """(@lemma="maar" and @begin=ancestor::node[%clausecat%]/@begin and not(../node[@rel="nucl"]))""" 
 
 clausecat = """(@cat="smain" or @cat="whq" or %baresv1% )"""
 metaverb = """(@lemma="zeggen" or @lemma="denken" or @lemma="vinden" or @lemma="vragen" or @lemma="schreeuwen" or @lemma="fluisteren" )"""

@@ -332,4 +332,4 @@ wrongposwordslexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, 
 wrongposwordslexicon = initializelexicon(wrongposwordslexiconfullname)
 
 # validnouns is intended for nous  that Alpino assigns frame (both,both, both) but that are valid Dutch words
-validnouns = {'knijper'}
+validnouns = {'knijper', 'roosvicee'}

@@ -99,6 +99,9 @@ e2een_excluded_nouns = ['kijke', 'kijken']
 interpunction = '.?!'
 comma = ","
 
+initialmaarvgxpath = expandmacros(""".//node[%maarvg%]""")
+
+
 class Ngramcorrection:
     def __init__(self, ngram, fpositions, cpositions, metafunction):
         self.ngram: Ngram = ngram
@@ -1237,6 +1240,16 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
+
+    # clause intial maar must be parsed as conjunction not as ana dverb: we replces it by "en" to avoid the ambiguity
+    if token.word == 'maar':
+        initialmaars = tree.xpath(initialmaarvgxpath)
+        for initialmaar in initialmaars:
+            if initialmaar == tokennodes[tokenctr]:
+                newwords = ['en']
+                newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Maar Ambiguity Avoidance', value='en', cat='Ambiguity Avoidance',
+                                        backplacement=bpl_wordlemma, penalty=5)
 
     # dee -> deze of deed
     if token.word == 'dee':

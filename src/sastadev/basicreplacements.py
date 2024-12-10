@@ -63,6 +63,8 @@ onom = 'onomatopeic word'
 substitution = 'lexical replacement'
 alpino_unknown_word = 'Word unknown to Alpino'
 voweldel = 'vowel deletion'
+avoidambiguity = 'Avoiding ambiguity'
+wwnambiguity = 'Verb - Noun ambiguity'
 
 def combine(strlist: List[str]) -> str:
     return ampersand.join(strlist)
@@ -246,6 +248,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('ooien', 'gooien', pron, wrongpron, onsetred, dp),
                                                 ('poppe', 'pop', pron, wrongpron, emphasis, dp),
                                                 ('lus', 'lust', pron, infpron, codared, dp),
+                                                ('mij', 'mijn', pron, infpron, codared, dp),
+                                                ('drinken', 'voedsel',  avoidambiguity, wwnambiguity, wwnambiguity, dp ),
                                                 ('jou', 'jouw', pron, infpron, codared, -dp) # Td 22, 30 ik wil ook keer naar jou huis find criterion
                                                 # ('leggen', 'liggen', lexical, dial, '', dp), # moved to corrector : only if parse is illformed
                                                 # ('legt', 'ligt', lexical, dial, '', dp),  # moved to corrector : only if parse is illformed
