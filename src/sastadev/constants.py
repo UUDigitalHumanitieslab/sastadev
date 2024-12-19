@@ -25,6 +25,7 @@ silverpermfolder = 'silverperm'
 testsetsfolder = 'testsets'
 dataset_treebanksfolder = 'dataset_treebanksfolder'
 errorsummaryfolder = 'errorsummaries'
+lemmafolder = 'lemmas'
 
 analysissuffix = '_analysis'
 analysistsvsuffix = '_analysis.tsv'

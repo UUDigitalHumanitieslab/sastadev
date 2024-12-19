@@ -1,5 +1,6 @@
 import copy
 from sastadev.conf import settings
+from sastadev.lexicon import lemmalexicon
 from sastadev.treebankfunctions import find1, getattval, getbeginend, getnodeyield, getyield, \
     immediately_precedes, iswordnode, showtree
 from sastadev.sastatypes import SynTree
@@ -23,6 +24,8 @@ eenxpath = """.//node[(@lemma="een" or @lemma="één" or @lemma="eentje" or @lem
                       @lemma="zo'n" or @pt="tw")   and parent::node[@cat="np"]]"""
 dexpath = """.//node[(@lemma="de" or @lemma="het" or @lemma="deze" or @lemma="die") and parent::node[@cat="np"]]"""
 
+nognietxpath = """.//node[@cat="advp" and node[@rel="mod" and @lemma="nog"] and node[@rel="hd" and @lemma="niet"] and not(parent::node[@cat="top"])]"""
+zelfinnpmodxpath = """.//node[@rel="mod" and @lemma="zelf" and parent::node[@cat="np"]]"""
 
 def transformtreeld(stree:SynTree) -> SynTree:
     debug = False
@@ -130,6 +133,48 @@ def transformtagcomma(stree: SynTree) -> SynTree:
 
     if debug:
         showtree(result, 'result')
+    return result
+
+
+def nognietsplit(stree: SynTree) -> SynTree:
+    debug = False
+    if debug:
+        showtree(stree, 'nognietsplit: stree')
+    newstree = copy.deepcopy(stree)
+    nognietnodes = newstree.xpath(nognietxpath)
+    if nognietnodes == []:
+        return stree
+    for nognietnode in nognietnodes:
+        nog = find1(nognietnode, """./node[@lemma="nog"]""")
+        niet = find1(nognietnode, """./node[@lemma="niet"]""")
+        nognietnodeparent = nognietnode.getparent()
+        nognietnode.remove(nog)
+        nognietnode.remove(niet)
+        nognietnodeparent.remove(nognietnode)
+        nognietnodeparent.append(nog)
+        niet.attrib['rel'] = 'mod'
+        nognietnodeparent.append(niet)
+    if debug:
+        showtree(newstree, 'nognietsplit: newstree')
+    return newstree
+
+
+def adaptlemmas(stree: SynTree) -> SynTree:
+    newlemmafound = False
+    newstree = copy.deepcopy(stree)
+    for node in newstree.iter():
+        if node.tag == 'node' and iswordnode(node):
+            nodeword = getattval(node, 'word')
+            nodelemma = getattval(node, 'lemma')
+            if nodeword == nodelemma and nodeword in lemmalexicon:
+                # node.attrib['lemma'] = lemmalexicon[nodeword]
+                node.set('lemma', lemmalexicon[nodeword])
+                newlemmafound = True
+
+    if newlemmafound:
+        result = newstree
+    else:
+        result = stree
     return result
 
 

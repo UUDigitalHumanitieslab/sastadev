@@ -13,6 +13,7 @@ KnownReplacement = Tuple[str, str, str, str, str, ReplacementMode]
 
 ampersand = '&'
 
+adjnambiguity = 'Avoiding adj - noun ambiguity'
 dp = defaultpenalty
 dp6 = mp(160)  # dp + 6
 dp3 = mp(130)  # dp + 3
@@ -37,6 +38,7 @@ wrongpron = 'Wrong Prunciation'
 phonrepl = '/{wrong}/ instead of /{correct}/'
 wronginfl = 'Incorrect inflection'
 morph = 'Morphology'
+wrongmorph = 'Wrong Morphology'
 overgen = 'Overgeneralisation'
 typo = 'Typo'
 typorepl = '{wrong} instead of {correct}'
@@ -65,6 +67,7 @@ alpino_unknown_word = 'Word unknown to Alpino'
 voweldel = 'vowel deletion'
 avoidambiguity = 'Avoiding ambiguity'
 wwnambiguity = 'Verb - Noun ambiguity'
+pnnambiguity = 'Person name - combined surname ambiguity'
 
 def combine(strlist: List[str]) -> str:
     return ampersand.join(strlist)
@@ -155,8 +158,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('il', 'wil', pron, pronerr, onsetred, dp),
                                                 ('tee', 'twee', pron, pronerr, onsetred, dp),
                                                 ('nie', 'niet', pron, infpron, codared, dp),
-                                                ('s', 'is', orth, spellerr, apomiss, dp),
-                                                ("'s", 'is', pron, infpron, redpron, dp),
+                                                # ('s', 'is', orth, spellerr, apomiss, dp),  # moved to corrector for context
+                                                # ("'s", 'is', pron, infpron, redpron, dp),  # moved to corrector for context
                                                 ('ooke', 'ook', pron, infpron, addschwa, dp),
                                                 ('it', 'dit', pron, pronerr, onsetred, dp),
                                                 ('da', 'dat', pron, infpron, codared, dp),
@@ -173,6 +176,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('maggen', 'mogen', morph, wronginfl, overgen, dp),
                                                 ('aleen', 'alleen', orth, typo, typorepl.format(wrong='aleen', correct='alleen'), dp),
                                                 ('heef', 'heeft', pron, infpron, codared, dp),
+                                                ('heef', 'heb', morph,  wrongmorph, phonrepl.format(wrong='heef', correct='heb'), dp),
                                                 ('saan', 'staan', pron, wrongpron, onsetred, dp),
                                                 ('saan', 'gaan', pron, wrongpron, wrongpron, mp(120)),
                                                 ('jerke', 'werken', pron, wrongpron, wrongpron, dp),
@@ -250,7 +254,11 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('lus', 'lust', pron, infpron, codared, dp),
                                                 ('mij', 'mijn', pron, infpron, codared, dp),
                                                 ('drinken', 'voedsel',  avoidambiguity, wwnambiguity, wwnambiguity, dp ),
-                                                ('jou', 'jouw', pron, infpron, codared, -dp) # Td 22, 30 ik wil ook keer naar jou huis find criterion
+                                                ('jou', 'jouw', pron, infpron, codared, -dp), # Td 22, 30 ik wil ook keer naar jou huis find criterion
+                                                # ('kijke', 'kijk', pron, infpron, emphasis, dp), # TD05, 32 moved to disambuguationdict
+                                                # ('geel', 'mooi', avoidambiguity, adjnambiguity, dp), #TD05, 24
+                                                # ('Roy', 'Jan', avoidambiguity, pnnambiguity, dp)
+                                                # ('surf', 'turf', avoidambiguity, wwnambiguity, dp), # TD05, 35
                                                 # ('leggen', 'liggen', lexical, dial, '', dp), # moved to corrector : only if parse is illformed
                                                 # ('legt', 'ligt', lexical, dial, '', dp),  # moved to corrector : only if parse is illformed
                                                 # ('leg', 'lig', lexical, dial, '', dp) # moved to corrector : only if parse is illformed
@@ -430,8 +438,11 @@ disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
      (dtp, ['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',
             'wieken', 'paarden', 'stoelen', 'ramen', 'strepen', 'planten', 'groeten',
             'flessen', 'boeren', 'punten', 'tranen'], 'teilen'),
-     (dtp, ['snel', 'wit', 'kort', 'dicht'], 'mooi'),
+     (dtp, ['snel', 'wit', 'kort', 'dicht', 'geel'], 'mooi'),
      (dtp, ['witte'], 'mooie'),
+     (dtp, ['Roy'], 'Jan'),
+     # (dtp, ['kijke'], 'he'),
+     (dtp, ['surf'], 'turf'),
      (welnietttp, ['wel', 'niet'], 'ietsjes')  # find a different adverb that does not get inside constituents (ietsjes?)
      ]
 

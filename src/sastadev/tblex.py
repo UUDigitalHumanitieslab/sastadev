@@ -175,8 +175,20 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
     result = result or recognised_lemmanodepos(node, pos)
     result = result and not (all_lower_consonantsnode(node))
     result = result and not (short_nucl_n(node))
+    result = result and not iscardinal(node)
     return result
 
+
+def iscardinal(node):
+    word = getattval(node, 'word')
+    wordlc = word.lower()
+    if wordlc == '':
+        result = False
+    elif wordlc in lex.cardinallexicon:
+        result = True
+    else:
+        result = False
+    return result
 
 def asta_recognised_wordnode(node: SynTree) -> bool:
     result = sasta_pseudonym(node)

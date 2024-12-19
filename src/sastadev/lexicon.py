@@ -19,7 +19,7 @@ from sastadev.namepartlexicon import (namepart_isa_namepart,
                                       namepart_isa_namepart_uc)
 from sastadev.readcsv import readcsv
 from sastadev.sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
-from sastadev.stringfunctions import ispunctuation
+from sastadev.stringfunctions import ispunctuation, strip_accents
 
 alpinoparse = settings.PARSE_FUNC
 space = ' '
@@ -66,6 +66,17 @@ def initializelexicondict(lexiconfilename) -> Dict[str,str]:
         strippedreplacement = fp[1].strip()
         lexicon[strippedword] = strippedreplacement
     return lexicon
+
+
+def geninitializelexicondict(lexiconfilename, key: int, header=True) -> Dict[str, List[str]]:
+    lexicon = {}
+    fptuples = readcsv(lexiconfilename, header=header)
+    for _, fp in fptuples:
+        strippedkey = fp[key].strip()
+        strippedentry = [el.strip() for el in fp]
+        lexicon[strippedkey] = strippedentry
+    return lexicon
+
 
 def initializelexicondefdict(lexiconfilename) -> Dict[str,List[str]]:
     lexicon = defaultdict(list)
@@ -149,6 +160,9 @@ def getwordposinfo(word: str, pos: str) -> List[WordInfo]:
     results = []
     if lexicon == celex:
         results = celexlexicon.getwordposinfo(word, pos)
+        if results == []:
+            cleanword = strip_accents(word)
+            results = celexlexicon.getwordposinfo(cleanword, pos)
     return results
 
 
@@ -161,6 +175,9 @@ def getwordinfo(word: str) -> List[WordInfo]:
     results = []
     if lexicon == celex:
         results = celexlexicon.getwordinfo(word)
+        if results == []:
+            cleanword = strip_accents(word)
+            results = celexlexicon.getwordinfo(cleanword)
     return results
 
 
@@ -174,7 +191,11 @@ def informlexicon(word: str) -> bool:
     result = True
     for aword in allwords:
         if lexicon == 'celex':
-            result = result and celexlexicon.incelexdmw(aword)
+            wordfound = celexlexicon.incelexdmw(aword)
+            if not wordfound:
+                cleanword = strip_accents(aword)
+                wordfound = celexlexicon.incelexdmw(cleanword)
+            result = result and wordfound
         elif lexicon == 'alpino':
             result = False
         else:
@@ -194,7 +215,11 @@ def informlexiconpos(word: str, pos: str) -> bool:
     result = True
     for aword in allwords:
         if lexicon == 'celex':
-            result = result and celexlexicon.incelexdmwpos(aword, pos)
+            wordfound = celexlexicon.incelexdmwpos(aword, pos)
+            if not wordfound:
+                cleanword = strip_accents(aword)
+                wordfound = celexlexicon.incelexdmwpos(cleanword, pos)
+            result = result and wordfound
         elif lexicon == 'alpino':
             result = False
         else:
@@ -333,3 +358,15 @@ wrongposwordslexicon = initializelexicon(wrongposwordslexiconfullname)
 
 # validnouns is intended for nous  that Alpino assigns frame (both,both, both) but that are valid Dutch words
 validnouns = {'knijper', 'roosvicee'}
+
+lexiconfoldername = 'data/wordsunknowntoalpino'
+lemmalexiconfilename = 'lemmalexicon.txt'
+lemmalexiconfulname = os.path.join(settings.SD_DIR, lexiconfoldername, lemmalexiconfilename)
+lemmalexicon = initializelexicondict(lemmalexiconfulname)
+
+lexiconfoldername = 'data/wordsunknowntoalpino'
+cardinallexiconfilename = 'cardinalnumerals.tsv'
+cardinallexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, cardinallexiconfilename)
+cardinallexicon = geninitializelexicondict(cardinallexiconfullname, 0)
+
+junk = 0  # to have a breapoint after the last lexicon read

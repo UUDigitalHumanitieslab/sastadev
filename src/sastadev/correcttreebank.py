@@ -42,7 +42,8 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, clausecats,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
-from sastadev.treetransform import transformtagcomma, transformtreeld, transformtreenogeen, transformtreenogde
+from sastadev.treetransform import adaptlemmas, transformtagcomma, transformtreeld, transformtreenogeen, \
+    transformtreenogde, nognietsplit
 
 ampersand = '&'
 
@@ -571,6 +572,10 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         stree = transformbwinnp(stree)
         stree = transformtreenogeen(stree)
         stree = transformtreenogde(stree)
+        # stree = nognietsplit(stree)  # put off because it should not be done
+
+    # adapt lemmas for words of which we know Alpino does it wrong
+    stree = adaptlemmas(stree)
 
     allmetadata = []
     # orandalts = []
@@ -593,7 +598,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     lmetadatalist = len(metadatalist)
     if lmetadatalist == 0:
         settings.LOGGER.error('Missing metadata in utterance {}'.format(uttid))
-        origmetadata = []
+        origmetadata = None
     else:
         if lmetadatalist > 1:
             settings.LOGGER.error(
@@ -666,7 +671,8 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
                 # newstree = insertskips(newstree, correctiontokenlist, stree)
                 # simpleshow(stree)
                 mdcopy = deepcopy(origmetadata)
-                fatnewstree.insert(0, mdcopy)
+                if mdcopy is not None:
+                    fatnewstree.insert(0, mdcopy)
                 # copy the sentid attribute
                 sentencenode = getsentencenode(fatnewstree)
                 if sentencenode is not None:
@@ -918,6 +924,11 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         fulltree = transformbwinnp(fulltree)
         fulltree = transformtreenogeen(fulltree)
         fulltree = transformtreenogde(fulltree)
+        # fulltree = nognietsplit(fulltree) # put off because it should not be done
+
+    # adapt lemmas for words of which we know Alpino does it wrong
+    fulltree = adaptlemmas(fulltree)
+
 
     # fulltree = deflate(fulltree)  # put off becuase there may be expanded elements
     debug = False
@@ -1363,7 +1374,7 @@ criteria = [
     Criterion("supcount", getsupcount, positive, "Number of words that are superlatives"),
     Criterion("compoundcount", localgetcompoundcount, positive, "Number of nouns that are compounds"),
     Criterion("sucount", getsucount, positive, "Number of subjects"),
-    Criterion("svaok", getsvaokcount, positive, "Numbe rof time subject verb agreement is OK"),
+    Criterion("svaok", getsvaokcount, positive, "Number of time subject verb agreement is OK"),
     Criterion("deplusneutcount", getdeplusneutcount, negative, "Number of deviant configuratios with de-determeine + neuiter noun"),
     Criterion("dezebwcount", getdezebwcount, negative, "Count of 'deze' as adverb"),
     Criterion("penalty", compute_penalty, negative, "Penalty for the changes made")

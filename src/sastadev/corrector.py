@@ -77,6 +77,9 @@ space = ' '
 
 enexceptions = {'inne', 'mette', 'omme', 'oppe', 'vanne'}
 leggendict = {'leg': 'lig', 'legt': 'ligt', 'leggen': 'liggen'}
+aposfollowers = {'ochtends', 'middags', 'avonds', 'nachts', 'morgens', 'werelds', 'lands', 'anderendaags',
+                 'winters', 'zomers', 'namiddags',
+                 'zondags', 'maandags', 'dinsdags', 'woensdags', 'donderdags', 'vrijdags', 'zaterdags'}
 
 #: The constant *disambiguationdict* contains words that should be replaced by a
 #: different word to avoid unwanted readings of the original word. It is filled by a
@@ -1241,7 +1244,17 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         name='Informal pronunciation', value='Final t-deletion', cat='Pronunciation',
                                         backplacement=bpl_word)
 
-    # clause intial maar must be parsed as conjunction not as ana dverb: we replces it by "en" to avoid the ambiguity
+    # 's and s could be is, but do not try it when followed by ochtends etc
+    if token.word in ["'s", "s"] and nexttoken.word not in aposfollowers:
+        newwords = ['is']
+        valvalue = 'reduced pronunciation'
+        catval = 'Pronunciation'
+        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                        name='Informal pronunciation', value=valvalue, cat=catval,
+                                        backplacement=bpl_word)
+
+
+    # clause intial maar must be parsed as conjunction not as ana dverb: we replace it by "en" to avoid the ambiguity
     if token.word == 'maar':
         initialmaars = tree.xpath(initialmaarvgxpath)
         for initialmaar in initialmaars:

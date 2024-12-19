@@ -507,7 +507,9 @@ def realwordstring(w: str) -> bool:
         result = not unicodedata.category(w).startswith('P')
     return result
 
-
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
 def getallrealwords(allresults):
     result = {}
     for uttid in allresults.allutts:
