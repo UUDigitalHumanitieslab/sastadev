@@ -278,7 +278,7 @@ hwwwithsvp = """(contains(@lemma,"_kunnen") or
                  contains(@lemma,"_zijn") 
 				) """
 
-hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan")""" 
+hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan" or @lemma="aan_hebben")""" 
 
 complement = """((@rel="obj1" or @rel="obj2") or 
                  (@rel="predc" and not(%predcB%)) or
