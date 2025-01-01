@@ -235,17 +235,23 @@ def smartreplace(node: SynTree, word: str, mn: MethodName) -> SynTree:
     newnode = find1(wordtree, './/node[@pt]')
     newnodept = getattval(newnode, 'pt')
     nodept = getattval(node, 'pt')
+    nodelemma = getattval(node, 'lemma')
     newnodelemma = getattval(newnode, 'lemma')
     if isvalidword(word, mn) and \
             issamewordclass(node, newnode) and \
             not isrobustnoun(newnode) and \
             newnodelemma not in nochildwords:
         result = newnode
-        result.attrib['begin'] = getattval(node, 'begin')
-        result.attrib['end'] = getattval(node, 'end')
-        result.attrib['rel'] = getattval(node, 'rel')
+        if nodept == 'ww' and '_' in nodelemma and newnodelemma in nodelemma and '_' not in newnodelemma:
+            # e.g. nodelemma == 'op_hebben', newnodelemma='hebben'
+            cpseppos = nodelemma.find('_')
+            prt = nodelemma[:cpseppos]
+            result.set('lemma', f'{prt}_{newnodelemma}')
+        result.set('begin', getattval(node, 'begin'))
+        result.set('end', getattval(node, 'end'))
+        result.set('rel', getattval(node, 'rel'))
         if 'index' in node.attrib:
-            result.attrib['index'] = getattval(node, 'index')
+            result.set('index', getattval(node, 'index'))
         if infpvpair(newnode, node):
             adaptpv(result)
     else:

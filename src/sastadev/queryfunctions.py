@@ -40,6 +40,12 @@ voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and
 vobijxpath = expandmacros('.//node[%Vobij%]')
 
 
+mvznxpath = """.//node[@pt = "n" and  @getal ="mv"]"""
+mvznsuffixes = ['en', 'e', 's', 'n']
+
+verklxpath = expandmacros(""".//node[@pt="n" and @graad="dim" and not(%nodimlemma%)]""")
+verklsuffixes = ['je', 'jes', 'ie', 'ies', 'ke', 'kes']
+
 def notadjacent(n1, n2, t): return not adjacent(n1, n2, t)
 
 
@@ -203,3 +209,13 @@ def vudivers(syntree: SynTree) -> List[SynTree]:
     heresults = hequery(syntree)
     results = [result for result in rawresults if result not in heresults]
     return results
+
+def tarsp_mvzn(stree: SynTree) -> List[SynTree]:
+     mvzns = stree.xpath(mvznxpath)
+     realmvzns = [mvzn for mvzn in mvzns if any([mvzn.attrib['word'].endswith(suf) for suf in mvznsuffixes])]
+     return realmvzns
+
+def tarsp_verkl(stree: SynTree) -> List[SynTree]:
+    verkls = stree.xpath(verklxpath)
+    realverkls = [verkl for verkl in verkls if any([verkl.attrib['word'].endswith(suf) for suf in verklsuffixes])]
+    return realverkls

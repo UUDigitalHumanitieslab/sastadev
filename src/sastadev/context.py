@@ -4,6 +4,7 @@ from lxml import etree
 import os
 from sastadev.conf import settings
 from sastadev.constants import intreebanksfolder, outtreebanksfolder
+from sastadev.datasets import infiguresdatasets
 from sastadev.filefunctions import getbasename
 from sastadev.lexicon import known_word
 from sastadev.sastatypes import TreeBank, SynTree
@@ -147,14 +148,10 @@ def nottargetchild(stree: SynTree) -> bool:
 
 
 def main():
-    # read auristrain DLD03 in as test treebank
-    # filename = 'DLD03.xml'
-    # filename = 'DLD11.xml'
-    dataset = 'auristrain'
     table = []
-    datasets = ['auristrain', 'vkltarsp', 'vklstap', 'vklasta', 'vklstapfase2', 'vklastafase2', 'auristest']
+    datasets = infiguresdatasets
     for dataset in datasets:
-        fullpath = os.path.join(settings.DATAROOT, dataset, outtreebanksfolder)
+        fullpath = os.path.join(settings.DATAROOT, dataset.name, outtreebanksfolder)
         filenames = os.listdir(fullpath)
         # filenames= ['TD21.xml']
         for filename in filenames:
@@ -183,7 +180,8 @@ def main():
                         # print(f'Preceding context: {comma.join(prevbestwords)}')
                         postbestwords = findbestwords(wrongword, postcontext, lambda x: True)
                         # print(f'Post context: {comma.join(postbestwords)}')
-                        row = [dataset, sample, wrongword, comma.join(prevbestwords), comma.join(postbestwords), origutt]
+                        row = [dataset.name, sample, wrongword, comma.join(prevbestwords),
+                               comma.join(postbestwords), origutt]
                         table.append(row)
 
     header = ['dataset', 'sample', 'wrongword', 'prev', 'post', 'origutt']

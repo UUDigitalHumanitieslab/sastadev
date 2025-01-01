@@ -24,6 +24,8 @@ from sastadev.tokenmd import TokenListMD
 
 defaultsettings = AlignmentSettings()
 
+explanationasreplacementname = 'ExplanationasReplacement'
+
 sentenceinitialconjunctions = {'en', 'maar'}
 # interjections = ['hee', 'hè', 'ja', 'nee', 'kijk']
 # interjections used for sentence initial words that can be absent in te beginning of a correction
@@ -94,8 +96,8 @@ def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[T
             if known_word(newword):
                 newtokens = tokenreplace(newtokens, newtoken)
                 # bpl = bpl_node if known_word(oldword) else bpl_word
-                meta = mkSASTAMeta(oldtoken, newtoken, name='ExplanationasReplacement',
-                                   value='ExplanationasReplacement',
+                meta = mkSASTAMeta(oldtoken, newtoken, name=explanationasreplacementname,
+                                   value=explanationasreplacementname,
                                    cat='Lexical Error', backplacement=bpl_replacement)
                 newmetadata.append(meta)
                 result = TokenListMD(newtokens, newmetadata)

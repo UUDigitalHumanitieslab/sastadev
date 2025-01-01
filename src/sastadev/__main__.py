@@ -179,7 +179,7 @@ from sastadev.query import (Query, is_preorcore,
                             post_process, query_exists, query_inform)
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.resultsbyutterance import getscoresbyutt, mkscoresbyuttrows, byuttheader
+from sastadev.resultsbyutterance import getscoresbyutt, mkscoresbyuttrows, byuttheader, silverf1col
 from sastadev.sas_impact import getcomparisoncounts, mksas_impactrows, sas_impact
 from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
                                  GoldTuple, MatchesDict, MethodName, QId,
@@ -1284,7 +1284,7 @@ def main():
     # silverscoresbyutt = getscoresbyutt(allresults.coreresults, silverscores)
 
     byuttrows = mkscoresbyuttrows(allresults, goldscores, silverscores, themethod)
-    not100count = len([row for row in byuttrows if row[9] != 100])
+    not100count = len([row for row in byuttrows if row[silverf1col] != 100])
     scoresbyuttoutfullname = os.path.join(resultspath, corefilename + byuttscoressuffix + '.xlsx')
     wb = mkworkbook(scoresbyuttoutfullname, [byuttheader], byuttrows, freeze_panes=(1,0) )
     allbyuttscores = sas_impact(allresults, silverscores, themethod)

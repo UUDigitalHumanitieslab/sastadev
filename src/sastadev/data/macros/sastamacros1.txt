@@ -278,7 +278,7 @@ hwwwithsvp = """(contains(@lemma,"_kunnen") or
                  contains(@lemma,"_zijn") 
 				) """
 
-hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan" or @lemma="aan_hebben")""" 
+hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan" or @lemma="aan_hebben" or @lemma="op_hebben")""" 
 
 complement = """((@rel="obj1" or @rel="obj2") or 
                  (@rel="predc" and not(%predcB%)) or
@@ -831,6 +831,9 @@ intrmodalverb = """( @pt="ww" and
 
 
 nodimlemma = """(@lemma="meisje" or @lemma="koek" or @lemma="beet")"""  
+dimword = """(ends-with(@word, "je") or ends-with(@word, "jes") or ends-with(@word, "ie") or ends-with(@word, "ies") or ends-with(@word, "ke") or ends-with(@word, "kes")  ) """
+
+mvword = """(ends-with(@word, "en") or ends-with(@word, "e") or ends-with(@word, "s"))"""
 
 hequery = """((@lemma="hè" or @lemma="he") and @end != 1 and
        ( (@end = ancestor::node[@cat="top"]/@end) or

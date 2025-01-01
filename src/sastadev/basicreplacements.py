@@ -52,6 +52,7 @@ closedvow = 'closed vowel'
 vzdevoicing = 'v/z devoicing'
 missingapostrophe = apomiss
 finalschwadrop = 'Finals schwa dropped'
+schwadrop = 'schwa dropped'
 u4schwa = 'u usewd for the schwa sound'
 inithdrop = 'Initial h drop'
 finaldevoicing = 'Final devoicing'
@@ -254,6 +255,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('lus', 'lust', pron, infpron, codared, dp),
                                                 ('mij', 'mijn', pron, infpron, codared, dp),
                                                 ('drinken', 'voedsel',  avoidambiguity, wwnambiguity, wwnambiguity, dp ),
+                                                ('heelboel', 'heleboel', pron, infpron, schwadrop, dp),
                                                 ('jou', 'jouw', pron, infpron, codared, -dp), # Td 22, 30 ik wil ook keer naar jou huis find criterion
                                                 # ('kijke', 'kijk', pron, infpron, emphasis, dp), # TD05, 32 moved to disambuguationdict
                                                 # ('geel', 'mooi', avoidambiguity, adjnambiguity, dp), #TD05, 24

@@ -223,7 +223,7 @@ def fullworddehyphenate(word: str, inlexicon: Callable[[str], bool]) -> List[str
     The functions *dehyphenate* and *delhyphenprefix* are described here:
 
     * .. autofunction:: sastadev.stringfunctions::dehyphenate
-    * .. autofunction:: sastadev.tringfunctions::delhyphenprefix
+    * .. autofunction:: sastadev.stringfunctions::delhyphenprefix
 
 
     '''
@@ -281,7 +281,7 @@ def delhyphenprefix(word: str, inlexicon: Callable[[str], bool]) -> List[str]:
 
 def allhyphens(word: str) -> Optional[Match]:
     '''
-    The fucntion allhyphens checks whether the strin gword consist completely of hyphens
+    The function allhyphens checks whether the string word consist completely of hyphens
     '''
     result = allhyphensre.match(word)
     return result

@@ -167,9 +167,12 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False, verbose=False)
     resultwordlist = [t.word for t in newtokens]
     resultstring = smartjoin(resultwordlist)
     resultposlist = [t.pos for t in newtokens]
-    newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
-    newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
-    newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
+    newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none,
+                    penalty=0)
+    newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation',
+                    backplacement=bpl_none, penalty=0)
+    newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list',
+                    source='CHAT/Tokenisation', backplacement=bpl_none, penalty=0)
     #newmeta4 = Meta('cleantext',  'done')
     metadata += [newmeta1, newmeta2, newmeta3]
     resultmetadata = metadata

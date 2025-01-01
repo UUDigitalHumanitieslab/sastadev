@@ -16,6 +16,7 @@ from sastadev.context import findbestwords, getcontext
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.cleanCHILDEStokens import cleantokens
 from sastadev.conf import settings
+from sastadev.correctionlabels import contextcorrection, repetition
 from sastadev.dedup import (cleanwordofnort, find_duplicates2,
                             find_janeenouduplicates, find_simpleduplicates,
                             find_substringduplicates2, getfilledpauses,
@@ -30,7 +31,7 @@ from sastadev.history import (childescorrections, childescorrectionsexceptions, 
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (WordInfo, de, dets, getwordinfo, het,
                               informlexicon, isa_namepart, isa_inf, isa_vd, known_word, nochildword,
-                              tswnouns, validword, vuwordslexicon, wordsunknowntoalpinolexicondict)
+                              tswnouns, validnotalpinocompoundword, validword, vuwordslexicon, wordsunknowntoalpinolexicondict)
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl_none, bpl_word,
                                bpl_wordlemma, defaultbackplacement,
@@ -68,7 +69,6 @@ stap = 'stap'
 asta = 'asta'
 
 hyphen = '-'
-repetition = 'Repetition'
 
 replacepattern = '{} [: {} ]'
 metatemplate = '##META {} {} = {}'
@@ -92,7 +92,7 @@ disambiguationdict = getdisambiguationdict()
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
 #: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
 #: therefore have to be excluded from determiner replacement.
-wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee', 'wat', 'alles', 'niet']
+wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee', 'wat', 'alles', 'niet', 'spelen']
 
 #: The constant *e2een_excluded_nouns* contains words that lead to incorrect
 #: replacement of e or schwa  and
@@ -1115,8 +1115,8 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         name='Character Case', value='Lower case', cat='Orthography')
 
     # dehyphenate
-    if not validword(token.word, methodname)  and hyphen in token.word:
-        newwords = fullworddehyphenate(token.word, lambda x: validword(x, methodname))
+    if not validnotalpinocompoundword(token.word, methodname)  and hyphen in token.word:
+        newwords = fullworddehyphenate(token.word, lambda x: validnotalpinocompoundword(x, methodname))
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Dehyphenation', value='Dehyphenation', cat='Pronunciation',
                                         backplacement=bpl_word)
@@ -1132,7 +1132,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
     # aha oho uhu ehe
     ahapattern = r'([aeouy])h\1'
     ahare = re.compile(ahapattern)
-    if not validword(token.word, methodname) and ahare.search(token.word):
+    if not validnotalpinocompoundword(token.word, methodname) and ahare.search(token.word):
         newwords = [ahare.sub(r'\1', token.word)]
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name='Emphasis', value='Phoneme Duplication', cat='Pronunciation',
@@ -1323,7 +1323,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                 penalty = basepenalties[CONTEXT]
                 newwords = [newcandidate]
                 newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-                                                name='Context Correction', value='Unknown word', cat='lexicon',
+                                                name=contextcorrection, value='Unknown word', cat='lexicon',
                                                 source=f'{SASTA}/{CONTEXT}', backplacement=bpl_word, penalty=penalty)
 
     # find document specific replacements
@@ -1440,7 +1440,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                        'moppie', 'punkie', 'saffie',   'stekkie', 'wijfie']
 
 
-    if (not validword(token.word, methodname) or token.word in knowniedimwords) and \
+    if (not validnotalpinocompoundword(token.word, methodname) or token.word in knowniedimwords) and \
             (token.word.endswith('ie') or token.word.endswith('ies')):
         newwords = getjeforms(token.word)
         for newword in newwords:
@@ -1754,7 +1754,7 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
                                            backplacement=bpl_node)
                         metadata.append(meta)
                         correctiondone = True
-                    elif token.word in dets[het]  and dehet == de and infl in ['e']:
+                    elif token.word in dets[het]  and ((dehet == de and infl in ['e']) or infl in ['m', 'dm']):
                         # newcurtoken = replacement(token, swapdehet(token))
                         newcurtokenword = swapdehet(token.word)
                         newcurtoken = Token(newcurtokenword, token.pos)

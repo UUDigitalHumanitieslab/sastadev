@@ -226,24 +226,33 @@ def informlexiconpos(word: str, pos: str) -> bool:
             result = False
     return result
 
+def issuperadjective(wrd: str) -> bool:
+    lcwrd = wrd.lower()
+    stem = lcwrd[5:]
+    result = lcwrd.startswith('super') and informlexiconpos(stem, 'adj')
+    return result
+
+
 
 def chatspecial(word: str) -> bool:
     result = word in chatspecials
     return result
 
 
-def known_word(word: str) -> bool:
+def known_word(word: str, includealpinonouncompound=True) -> bool:
     '''
     a word is considered to be a known_word if it occurs in the word form lexicon,
     if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words,
-    or a compound noun recognised as such by Alpino
+    or  a compound noun recognised as such by Alpino (the latter unless excluded)
     but not in the nonwordslexicon
     :param word:
     :return:
     '''
     result = informlexicon(word) or isa_namepart(word) or \
              chatspecial(word) or word in additionalwordslexicon or \
-             isallersuperlative(word) or isalpinonouncompound(word)
+             isallersuperlative(word) or issuperadjective(word)
+    if includealpinonouncompound:
+        result = result or isalpinonouncompound(word)
     result = result and word not in nonwordslexicon
     return result
 
@@ -251,11 +260,16 @@ def known_word(word: str) -> bool:
 comma = ','
 compoundsep = '_'
 
-def validword(wrd: str, methodname: MethodName) -> bool:
-    result = known_word(wrd)
+def validword(wrd: str, methodname: MethodName, includealpinonouncompound=True) -> bool:
+    result = known_word(wrd, includealpinonouncompound=includealpinonouncompound)
     if methodname in {tarsp, stap}:
         result = result and not nochildword(wrd)
     return result
+
+def validnotalpinocompoundword(wrd: str, methodname: MethodName) -> bool:
+    result = validword(wrd, methodname, includealpinonouncompound=False)
+    return result
+
 
 def nochildword(wrd: str) -> bool:
     result = wrd in nochildwords
@@ -281,8 +295,8 @@ def isalpinonouncompound(wrd: str) -> bool:
     nounlemma = treebankfunctions.getattval(nounnode, 'lemma')
     if compoundsep in nounlemma:
         parts = nounlemma.split(compoundsep)
-        unknownparts = [part for part in parts if not known_word(part)]
-        result = unknownparts = []
+        unknownparts = [part for part in parts if not known_word(part) and part != "DIM"]
+        result = unknownparts == []
         if not result:
             settings.LOGGER.error(f'Unknown words ({comma.join(unknownparts)}) found in {fullstr} parse')
             return False
