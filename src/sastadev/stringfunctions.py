@@ -59,6 +59,13 @@ purechatxxxcodes = {'xxx', 'yyy', 'www'}
 chatxxxcodes = purechatxxxcodes | {'xx'}
 
 
+def str2list(instr: str, sep=comma) -> List[str]:
+    if instr == '':
+        return []
+    rawlist = instr.split(sep)
+    cleanlist = [el.strip() for el in rawlist]
+    return cleanlist
+
 def pad(wrd: str, i: int, c: str = space) -> str:
     '''
     returns a right-justified string lengthened to length i and padded  with c

@@ -248,6 +248,8 @@ def pf7(allresults: AllResults, allqueries: QueryDict) -> int:
     return genpfi(7, allresults, allqueries)
 
 
+
+
 def pf(allresults: AllResults, allqueries: QueryDict) -> int:
     '''
     The function *pf* computes the *'Profielscore'* for the whole sample (*PF*) by
@@ -260,8 +262,9 @@ def pf(allresults: AllResults, allqueries: QueryDict) -> int:
 
     '''
     postresults = allresults.postresults
-    result = sum([postresults['T154'], postresults['T155'], postresults['T158'],
-                  postresults['T159'], postresults['T160'], postresults['T161']])
+    pfkeys = ['T154', 'T155', 'T158', 'T159', 'T160', 'T161']
+    safepostresults = [postresults[key] if key in postresults else 0 for key in pfkeys]
+    result = sum(safepostresults)
     return result
 
 

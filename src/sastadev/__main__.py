@@ -145,7 +145,7 @@ import json
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from optparse import OptionParser
-from typing import Any, Callable, Dict, List, Pattern, Tuple
+from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple
 
 import xlsxwriter
 from lxml import etree
@@ -164,13 +164,13 @@ from sastadev.context import getcontextdict
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.correcttreebank import (correcttreebank, corr0, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
+from sastadev.datasets import dsname2ds
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.history import (donefiles, donefilesfullname, gathercorrections, mergecorrections, putcorrections,
                               putdonefilenames, children_samplecorrections, children_samplecorrectionsfullname,
                               adult_samplecorrections, adult_samplecorrectionsfullname)
 from sastadev.macros import expandmacros
-from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, literalmissedmatches
 from sastadev.methods import (Method, astamethods, stapmethods,
                               supported_methods, tarspmethods, treatmethod)
@@ -181,8 +181,8 @@ from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
 from sastadev.resultsbyutterance import getscoresbyutt, mkscoresbyuttrows, byuttheader, silverf1col
 from sastadev.sas_impact import getcomparisoncounts, mksas_impactrows, sas_impact
-from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
-                                 GoldTuple, MatchesDict, MethodName, QId,
+from sastadev.sastatypes import (AltCodeDict, DataSetName, ExactResultsDict, FileName,
+                                 GoldTuple, MatchesDict, MethodName, MethodVariant, QId,
                                  QIdCount, QueryDict, ResultsCounter,
                                  SynTree, TreeBank, UttId)
 from sastadev.reduceresults import (exact2results, reduceallresults,
@@ -846,6 +846,29 @@ def tb_addxsid(treebank: TreeBank, targets) -> TreeBank:
         newtreebank.append(newsyntree)
     return newtreebank
 
+def getdatasetname(fn: FileName) -> DataSetName:
+    r"""
+    gets the dataset name that the file belongs to
+    :param fn: has the form r"D:\Dropbox\jodijk\Utrecht\Projects\SASTADATA\VKLTarsp\intreebanks\TARSP_08.xml"
+    :return: the name of the folder that is the dataset (VKLTarsp for the input example)
+    """
+
+    head1, tail1 = os.path.split(fn)
+    head2, tail2 = os.path.split(head1)
+    head3, tail3 = os.path.split(head2)
+    return tail3
+
+def getvariant(infilename:FileName, optionsvariant: Optional[str]) -> Optional[MethodVariant]:
+    if optionsvariant is not None:
+        return optionsvariant
+    ds = getdatasetname(infilename)
+    dslc = ds.lower()
+    if dslc in dsname2ds:
+        result = dsname2ds[dslc].variant
+    else:
+        result = None
+    return result
+
 
 
 def main():
@@ -855,6 +878,8 @@ def main():
     parser.add_option("-m", "--method", dest="methodname",
                       help="Name of the method or (for backwards compatibility) "
                            "file containing definition of assessment method (SAM)")
+    parser.add_option("-v", "--variant", dest="variant",
+                      help="Name of the variant of the method ")
     parser.add_option("-a", "--anno", dest="annotationfilename",
                       help="SASTA Annotation Format File containing annotations to derive a  reference")
     parser.add_option("-g", "--gold", dest="goldfilename",
@@ -1016,12 +1041,15 @@ def main():
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
+    # determine the method variant to be used
+    variant = getvariant(options.infilename, options.variant)
+
     # adapted this so that the method is read in directly as a Method object
     # (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodname, options.methodfilename)
     # defaultfilter = defaultfilters[options.methodname]
     # themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
     #                   options.methodfilename, defaultfilter)
-    themethod = read_method(options.methodname, options.methodfilename)
+    themethod = read_method(options.methodname, options.methodfilename, variant=variant)
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
 

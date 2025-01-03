@@ -38,7 +38,7 @@ class DataSet:
 
 def row2dataset(row: List[str]) -> DataSet:
     rawname = row[0]
-    lcname = rawname.strip()
+    lcname = rawname.strip().lower()   # we ignore case in the dataset name (despite Linux)
     rawmethodname = row[1]
     methodname = rawmethodname.strip().lower()
     infigures = "yes" in row[3].lower()
@@ -62,3 +62,4 @@ def getalldatasets():
 alldatasets = getalldatasets()
 infiguresdatasets = [d for d in alldatasets if d.infigures]
 dsname2method = {d.name: d.methodname for d in alldatasets}
+dsname2ds = {d.name: d for d in alldatasets}

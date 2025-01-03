@@ -8,6 +8,7 @@ from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
                                  Item_Level2QIdDict, MethodName, Pattern, QId,
                                  Query, QueryDict)
+from sastadev.stringfunctions import str2list
 
 lemmaqid = 'A051'
 lexreskey = mkresultskey('A018')
