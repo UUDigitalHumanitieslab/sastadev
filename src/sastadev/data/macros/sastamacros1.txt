@@ -130,20 +130,28 @@ old_Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="p
  )
 """
 
+bvbvraagwoord = """((@pt="vnw" and @lemma="waar") or (@pt="bw" and (@lemma="wanneer" or @lemma="hoe" or contains(@frame, "waar_adverb"))))"""
+
 ahi_sibling = """../node[@rel="vc" and @cat="ahi"]"""
 
-Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and not(%Tarsp_Hwwvd%) and not(%ahi_sibling%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
- ((
-   %Tarsp_hww% or
-   @lemma = "hebben" or
-   @lemma = "zijn"
-   ) and 
-   not(%Tarsp_vc_sibling%)) 
+nomvttorverl = """(@wvorm!="pv" or (not(%MvTT%) and @pvtijd!="verl"))"""
 
- )  and @wvorm="pv" and
-    not(%Tarsp_Kop%)
- )
-"""
+basic_hww = """(%Tarsp_hww% or @lemma = "hebben" or @lemma = "zijn")"""
+
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and 
+                 not(%Tarsp_Hwwvd%) and 
+				 not(%ahi_sibling%) and 
+				 @pt="ww" and 
+				 @rel="hd" and 
+				 %nomvttorverl%  and
+                 %basic_hww% and
+                 not(%Tarsp_vc_sibling%) and 
+				 @wvorm="pv" and
+                 not(%Tarsp_Kop%)
+                )
+            """
+
+lonelynonfinww = """(@wvorm!="pv" and not(ancestor::node[@cat="top"]/descendant::node[@pt="ww" and @wvorm="pv"]))"""
 
 MvTT = """(@pt="ww" and @pvagr="mv" and @pvtijd="tgw" and ../node[@rel="su"])"""
 
@@ -831,9 +839,6 @@ intrmodalverb = """( @pt="ww" and
 
 
 nodimlemma = """(@lemma="meisje" or @lemma="koek" or @lemma="beet")"""  
-dimword = """(ends-with(@word, "je") or ends-with(@word, "jes") or ends-with(@word, "ie") or ends-with(@word, "ies") or ends-with(@word, "ke") or ends-with(@word, "kes")  ) """
-
-mvword = """(ends-with(@word, "en") or ends-with(@word, "e") or ends-with(@word, "s"))"""
 
 hequery = """((@lemma="hè" or @lemma="he") and @end != 1 and
        ( (@end = ancestor::node[@cat="top"]/@end) or

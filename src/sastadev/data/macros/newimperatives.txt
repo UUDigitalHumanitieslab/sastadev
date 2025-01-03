@@ -308,8 +308,9 @@ Tarsp_BarenonfinW = """parent::node[@rel="vc" and  parent::node[@cat="smain" and
 
 Tarsp_coreHwwi = """ ( @pt="ww" and @rel="hd" and @wvorm="pv" and
                        %Tarsp_hww% and
-                       ((parent::node[node[@cat="inf"and @rel="vc" and node[@rel="hd" and @pt="ww"]]]) or
-                        (parent::node[node[@pt="ww" and @rel="vc" and @wvorm="inf"]])
+                       ((parent::node[node[@cat="inf" and @rel="vc" and node[@rel="hd" and @pt="ww"]]]) or
+                        (parent::node[node[@pt="ww" and @rel="vc" and @wvorm="inf"]]) or
+						(parent::node[node[@cat="ti" and @rel="vc"]])
                        )
                      )
 """
