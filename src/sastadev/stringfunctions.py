@@ -11,7 +11,7 @@ tab = '\t'
 comma = ','
 underscore = '_'
 
-punctuationchars = """`!()-{}[]:;"'<>,.?"""  # should actally use unicod categories
+punctuationchars = """`!()-{}[]:;"'<>,.“?"""  # should actally use unicod categories
 
 # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
 csvre = "'[^']+'|[^,' ]+"

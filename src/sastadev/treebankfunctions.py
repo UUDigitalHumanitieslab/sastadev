@@ -2249,7 +2249,7 @@ def normalisebeginend2(stree: SynTree, sortedbegins: List[PositionStr]) -> None:
     :param sortedbegins: sorted list of begin values of @pt or @pos nodes
     :return: None
     """
-    children = list(stree)
+    children = list(stree)   # adapt this to seelct only children with tag node (because of the  ud extensions)
     for child in children:
         normalisebeginend2(child, sortedbegins)
     if stree.tag == "node":

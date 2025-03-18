@@ -50,6 +50,7 @@ QId = str  # in the future perhaps NewType('QId', str)
 UttId = str  # in the future perhaps NewType('UttId', str)
 Position = int  # in the future perhaps NewType('Position', int)
 PositionStr = str
+Relation = str
 Stage = int
 SynTree = etree._Element  # type: ignore
 GoldTuple = Tuple[str, str, Counter]

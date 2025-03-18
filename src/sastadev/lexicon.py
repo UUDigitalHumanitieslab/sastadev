@@ -286,7 +286,7 @@ def isalpinonouncompound(wrd: str) -> bool:
         return False
     nounnode = treebankfunctions.find1(tree, './/node[@pt="n"]')
     if nounnode is None:
-        settings.LOGGER.error(f'No noun found in {fullstr} parse')
+        # settings.LOGGER.error(f'No noun found in {fullstr} parse')
         return False
     nounwrd = treebankfunctions.getattval(nounnode, 'word')
     if nounwrd != wrd:
