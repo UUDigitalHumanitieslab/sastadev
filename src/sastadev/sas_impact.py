@@ -13,9 +13,9 @@ n = 15
 f1target = 95
 
 
-def sas_impact(allresults: AllResults, silverrefscores, method: Method):
+def sas_impact(results, silverrefscores, method: Method):
 
-    results = allresults.coreresults
+    # results = allresults.coreresults
     resultsbyutt = getresultsbyutt(results, method)
     silverbyutt = getresultsbyutt(silverrefscores, method)
     silverscoresbyutt = getscoresbyutt2(resultsbyutt, silverbyutt)

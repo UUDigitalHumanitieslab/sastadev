@@ -3,10 +3,26 @@ import os
 from sastadev.conf import settings
 from sastadev.sastatypes import MethodName
 from sastadev.xlsx import getxlsxdata
-from typing import List
+from typing import List, Tuple
 
+comma = ','
 space = ' '
 MethodVariant = str
+training = 'training'
+testing = 'testing'
+
+
+namecol = 0
+methodcol = 1
+usecol = 2
+infigurescol = 3
+variantcol = 4
+samplecountcol = 5
+bronzecountcol = 6
+source_orgcol = 7
+source_personscol = 8
+descriptioncol = 9
+
 
 
 datasetfilename = 'DatasetOverview.xlsx'
@@ -25,30 +41,33 @@ def robustint(x) -> int:
 @dataclass
 class DataSet:
     name: str
-    methodname: MethodName
+    method: MethodName
     use: str
     infigures: bool
     variant:  MethodVariant
-    samples: int
+    samplecount: int
     bronzecount: int
     source_org: str
-    sourcepersons: str
+    source_persons: Tuple[str]
     description: str
 
 
 def row2dataset(row: List[str]) -> DataSet:
-    rawname = row[0]
-    lcname = rawname.strip().lower()   # we ignore case in the dataset name (despite Linux)
-    rawmethodname = row[1]
-    methodname = rawmethodname.strip().lower()
-    infigures = "yes" in row[3].lower()
-    rawvariant = row[4]
-    variant = rawvariant.strip().lower()
-
-    result = DataSet(name=lcname, methodname=methodname, use=row[2], infigures=infigures, variant=variant,
-                     samples=robustint(row[5]), bronzecount=robustint(row[6]), source_org=row[7], sourcepersons=row[8],
-                     description=row[9])
+    name = row[namecol].lower().strip()
+    method = row[methodcol].lower().strip()
+    use = row[usecol].lower().strip()
+    infigures = True if row[infigurescol].lower() == 'yes' else False
+    variant = row[variantcol].lower().strip()
+    samplecount = robustint(row[samplecountcol])
+    bronzecount = robustint(row[bronzecountcol])
+    source_org = row[source_orgcol].strip()
+    source_persons = tuple(row[source_personscol].split(comma))
+    description = row[descriptioncol]
+    result = DataSet(name=name, method=method, use=use, infigures=infigures, variant=variant, samplecount=samplecount,
+                     bronzecount=bronzecount, source_org=source_org, source_persons=source_persons,
+                     description=description)
     return result
+
 
 
 def getalldatasets():
@@ -61,5 +80,10 @@ def getalldatasets():
 
 alldatasets = getalldatasets()
 infiguresdatasets = [d for d in alldatasets if d.infigures]
-dsname2method = {d.name: d.methodname for d in alldatasets}
+dsname2method = {d.name: d.method for d in alldatasets}
 dsname2ds = {d.name: d for d in alldatasets}
+
+
+
+trainingdatasets = [ds for ds in alldatasets if ds.use == training]
+testdatasets = [ds for ds in alldatasets if ds.use == testing]

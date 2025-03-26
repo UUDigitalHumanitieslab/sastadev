@@ -6,7 +6,7 @@ from sastadev.conf import settings
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
-                                 Item_Level2QIdDict, MethodName, Pattern, QId,
+                                 Item_Level2QIdDict, Level, MethodName, Pattern, QId,
                                  Query, QueryDict)
 from sastadev.stringfunctions import str2list
 
@@ -150,6 +150,7 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
     return resultmethodname, resultmethodfilename
 
 
+
 codepath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(codepath, 'data')
 methodspath = os.path.join(datapath, 'methods')
@@ -187,3 +188,4 @@ lastuttqidcondition: Dict[MethodName, Callable] = {}
 lastuttqidcondition[asta] = lambda q: q in astalexicalmeasures
 lastuttqidcondition[tarsp] = lambda q: True
 lastuttqidcondition[stap] = lambda q: True
+

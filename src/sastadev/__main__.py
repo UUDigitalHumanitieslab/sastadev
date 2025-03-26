@@ -1315,7 +1315,7 @@ def main():
     not100count = len([row for row in byuttrows if row[silverf1col] != 100])
     scoresbyuttoutfullname = os.path.join(resultspath, corefilename + byuttscoressuffix + '.xlsx')
     wb = mkworkbook(scoresbyuttoutfullname, [byuttheader], byuttrows, freeze_panes=(1,0) )
-    allbyuttscores = sas_impact(allresults, silverscores, themethod)
+    allbyuttscores = sas_impact(allresults.coreresults, silverscores, themethod)
     sasheader, sasimpactrows = mksas_impactrows(allbyuttscores, not100count)
     add_worksheet(wb,[sasheader], sasimpactrows, sheetname='SAS_impact', freeze_panes=(1,0))
     wb.close()

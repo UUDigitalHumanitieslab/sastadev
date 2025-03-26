@@ -19,12 +19,12 @@ from sastadev.sastatok import gettokensplusxmeta
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.tokenmd import TokenListMD
+from sastadev import correctionlabels
 
 # import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
 
 defaultsettings = AlignmentSettings()
 
-explanationasreplacementname = 'ExplanationasReplacement'
 
 sentenceinitialconjunctions = {'en', 'maar'}
 # interjections = ['hee', 'hè', 'ja', 'nee', 'kijk']
@@ -96,9 +96,9 @@ def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[T
             if known_word(newword):
                 newtokens = tokenreplace(newtokens, newtoken)
                 # bpl = bpl_node if known_word(oldword) else bpl_word
-                meta = mkSASTAMeta(oldtoken, newtoken, name=explanationasreplacementname,
-                                   value=explanationasreplacementname,
-                                   cat='Lexical Error', backplacement=bpl_replacement)
+                meta = mkSASTAMeta(oldtoken, newtoken, name=correctionlabels.explanationasreplacement,
+                                   value=correctionlabels.explanationasreplacement,
+                                   cat=correctionlabels.lexicalerror, backplacement=bpl_replacement)
                 newmetadata.append(meta)
                 result = TokenListMD(newtokens, newmetadata)
     return result
@@ -123,7 +123,7 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
     result = None
     #    origmetadata = tokensmd.metadata
     origmetadata = xmetalist
-    explanations = [xm for xm in xmetalist if xm.name == 'Explanation']
+    explanations = [xm for xm in xmetalist if xm.name == correctionlabels.explanation]
     finalmwexplanations = []
     for xm in explanations:
         lxm = len(xm.annotationwordlist)

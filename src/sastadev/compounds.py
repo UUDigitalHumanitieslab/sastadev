@@ -33,8 +33,7 @@ from typing import Dict, List
 
 from sastadev.CHAT_Annotation import CHAT_wordnoncompletion, CHAT_replacement
 from sastadev.conf import settings
-from sastadev.correctionlabels import contextcorrection
-from sastadev.sasta_explanation import explanationasreplacementname
+from sastadev.correctionlabels import contextcorrection, explanationasreplacement
 from sastadev.sastatypes import SynTree
 from sastadev.smartcompoundcomparison import issmartcompound
 from sastadev.stringfunctions import string2list
@@ -56,7 +55,7 @@ dictfilename = os.path.join(settings.SD_DIR, 'data', 'compoundfiles', 'Ncompound
 dictfile = open(dictfilename, 'r', encoding='utf8')
 
 getwordsxpath = ".//node[@pt]"
-correctionsmetaxpath = f""".//xmeta[@name = "{explanationasreplacementname}" or 
+correctionsmetaxpath = f""".//xmeta[@name = "{explanationasreplacement}" or 
                                     @name = "{CHAT_replacement}" or 
                                     @name = "{CHAT_wordnoncompletion}" or
                                     @name = "{contextcorrection}"
