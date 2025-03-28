@@ -40,6 +40,7 @@ def robustint(x) -> int:
 
 @dataclass
 class DataSet:
+    rawname: str
     name: str
     method: MethodName
     use: str
@@ -53,6 +54,7 @@ class DataSet:
 
 
 def row2dataset(row: List[str]) -> DataSet:
+    rawname = row[namecol].strip()
     name = row[namecol].lower().strip()
     method = row[methodcol].lower().strip()
     use = row[usecol].lower().strip()
@@ -63,7 +65,7 @@ def row2dataset(row: List[str]) -> DataSet:
     source_org = row[source_orgcol].strip()
     source_persons = tuple(row[source_personscol].split(comma))
     description = row[descriptioncol]
-    result = DataSet(name=name, method=method, use=use, infigures=infigures, variant=variant, samplecount=samplecount,
+    result = DataSet(rawname= rawname, name=name, method=method, use=use, infigures=infigures, variant=variant, samplecount=samplecount,
                      bronzecount=bronzecount, source_org=source_org, source_persons=source_persons,
                      description=description)
     return result

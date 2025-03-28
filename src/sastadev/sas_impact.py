@@ -5,7 +5,7 @@ from sastadev.conf import settings
 from sastadev.methods import Method
 from sastadev.rpf1 import getscores, getevalscores, sumfreq
 from sastadev.resultsbyutterance import getresultsbyutt, getscoresbyutt2
-from sastadev.sastatypes import UttId
+from sastadev.sastatypes import ResultsDict, UttId
 from typing import Dict, List, Tuple
 
 # maximum nuber of utterances to be reviewed
@@ -13,7 +13,7 @@ n = 15
 f1target = 95
 
 
-def sas_impact(results, silverrefscores, method: Method):
+def sas_impact(results: ResultsDict, silverrefscores: ResultsDict, method: Method):
 
     # results = allresults.coreresults
     resultsbyutt = getresultsbyutt(results, method)
