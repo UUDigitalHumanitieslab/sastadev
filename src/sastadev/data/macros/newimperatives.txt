@@ -211,7 +211,7 @@ Tarsp_VC_X_count = """count(node[%Tarsp_VC%] | node[%nonfinvc%]/node[%Tarsp_VC%]
 Tarsp_VC_X = """(node[%Tarsp_VC%] or node[%nonfinvc%]/node[%Tarsp_VC%])"""
 Tarsp_W = """node[@rel="hd" and @pt="ww"]"""
 Tarsp_VCr1 = """node[%Tarsp_VC%] """
-Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz")) and not(%Tarsp_B%) )"""
+Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz" and @pt!="bw")) and not(%Tarsp_B%) )"""
 Tarsp_finvc = """(@rel="vc" and (@cat="cp" or @cat="whsub"))"""
 Tarsp_vcvnw = """(@rel="vc" and @pt="vnw")"""
 
