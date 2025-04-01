@@ -7,11 +7,15 @@ from typing import List, Tuple
 
 postnominalmodifier = "Postnominal Modifier Adaptation"
 
-ppinnpxpath = """.//node[@cat="pp" and node[@rel="hd" and @lemma!="van" and @lemma!="met" and @lemma!="mee"] and 
-                         parent::node[@cat="np" and node[@rel="hd" and @pt!="ww"]]]"""
+nonvheadedparentnp = """parent::node[@cat="np" and node[@rel="hd" and @pt!="ww"]]"""
 
-modbwinnpxpath = """.//node[(@lemma="ook" or @lemma="alleen" or @lemma="eerst") and 
-                         parent::node[@cat="np" and node[@rel="hd" and @pt!="ww"]]]"""
+ppinnpxpath = f""".//node[@cat="pp" and node[@rel="hd" and @lemma!="van" and @lemma!="met" and @lemma!="mee"] and 
+                         {nonvheadedparentnp}]"""
+
+modbwinnpxpath = f""".//node[(@lemma="ook" or @lemma="alleen" or @lemma="eerst") and 
+                         {nonvheadedparentnp}]"""
+
+modRinnpxpath = f""".//node[@pt="vnw" and @special="er_loc" and {nonvheadedparentnp}]"""
 
 def transformppinnp(instree: SynTree) -> SynTree:
     result = transformmodinnp(instree, ppinnpxpath)
@@ -21,6 +25,9 @@ def transformbwinnp(instree: SynTree) -> SynTree:
     result = transformmodinnp(instree, modbwinnpxpath)
     return result
 
+def transformmodRinnp(instree: SynTree) -> SynTree:
+    result = transformmodinnp(instree, modRinnpxpath)
+    return result
 
 
 def transformmodinnp(instree: SynTree, modxpath: XpathExpression) -> SynTree:

@@ -99,7 +99,8 @@ hwwprtverb = """
 	@lemma = "rond_lopen" or
 	@lemma = "vol_lopen" or
 	@lemma = "weg_lopen" or
-	@lemma = "vast_zitten" 
+	@lemma = "vast_zitten" or
+	@lemma = "terug_komen"
 )
 """
  
@@ -248,7 +249,7 @@ Tarsp_B = """( not(%adjacentnogeen%) and
          (%predcB%
          )
          ) and 
-         (../node[@pt="ww" and @rel="hd"])
+         ((../node[@pt="ww" and @rel="hd"]) or parent::node[@cat="smain"])
         ) or
         ((@pt="vz" or @pt="bw" or %Rpronoun%) and (@lemma!="kijk") and (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and %notonlyrealnode%) or
         (@cat="pp" and (@rel="--" or @rel="dp") and %notonlyrealnode%) or
@@ -355,10 +356,13 @@ ahiaspp = """(@cat="pp" and node[@rel="hd" and @lemma="aan"] and node[@cat="np" 
 
 oldcoreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!="niet"]/@begin ]]) )"""
 
+nonominorsubj = """(not(node[@naamval="nomin"]) and not(node[@cat and node[@rel="hd" and @naamval="nomin"]]) and not(node[@rel="su"]))"""
+
+
 coreBX1 = """(@cat and 
              count(node[%bxrealnode%]) = 2 and 
 			 node[%corebnode%]  and
-			 not(node[@naamval="nomin" or @rel="su"]) and
+			 %nonominorsubj% and
 			 %onlythesearerealwords% and		
              count(.//node[%corebnode%]) = 1				
  
@@ -367,7 +371,7 @@ coreBX1 = """(@cat and
 coreBX2 = """(@cat and 
              count(node[%bxrealnode%]) = 2 and 
 			 count(node[%corebnode%]) =2  and
-			 not(node[@naamval="nomin" or @rel="su"]) and
+			 %nonominorsubj% and
 			 %onlythesearerealwords% and		
              count(.//node[%corebnode%]) = 2				
 			)""" 
@@ -390,7 +394,7 @@ corebnodesibling = """../node[not(%clausecat%) and
 """
 
 ooknogmod = """(@rel="mod" and (@lemma="ook" or @lemma="nog"))"""
-ookXP = """(((@cat="np"  and count(node) = 2) or  @cat="pp") and node[%ooknogmod%]  and not(node[@naamval="nomin"])and %onlythesearerealwords% )"""
+ookXP = """(((@cat="np"  and count(node) = 2) or  @cat="pp") and node[%ooknogmod%]  and %nonominorsubj% and %onlythesearerealwords% )"""
 
 
 bxrealnode = """(%bxrealwordnode% or count(.//node[%bxrealwordnode%]) > 0)"""
@@ -406,6 +410,7 @@ dlinkvg = """(@pt="vg" and (@rel="dlink" or @rel="--"))"""
 clausalbx1 = """((@cat="smain" or @cat="sv1" or @cat="inf" or @cat="ppart") and 
        node[%Tarsp_B% and @lemma!="niet" and @rel!="svp" and not(%Tarsp_kijkVU%)] and 
        count(node) = 2 and 
+	   %nonominorsubj% and
        %onlythesearerealwords% and		
        count(.//node[%corebnode%]) = 1				
  

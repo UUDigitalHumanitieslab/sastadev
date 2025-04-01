@@ -9,7 +9,8 @@ from sastadev.sastatypes import ResultsDict, UttId
 from typing import Dict, List, Tuple
 
 # maximum nuber of utterances to be reviewed
-n = 15
+maxutt = 15
+n = maxutt
 f1target = 95
 
 

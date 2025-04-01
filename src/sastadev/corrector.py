@@ -48,6 +48,7 @@ from sastadev.sastatoken import Token, tokenlist2stringlist
 from sastadev.sastatypes import (BackPlacement, MethodName, Nort, Penalty,
                                  Position, SynTree, UttId)
 from sastadev.smallclauses import smallclauses
+from sastadev.spellingerrors import getbabylemma, isbabyword, correctbaby
 from sastadev.stringfunctions import (chatxxxcodes, consonants, dutchdeduplicate,
                                       endsinschwa, fullworddehyphenate, ispunctuation,
                                       monosyllabic, vowels)
@@ -69,6 +70,7 @@ stap = 'stap'
 asta = 'asta'
 
 hyphen = '-'
+errormsgsep = '&'
 
 replacepattern = '{} [: {} ]'
 metatemplate = '##META {} {} = {}'
@@ -1524,6 +1526,15 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         cat=correctionlabels.orthography, backplacement=bpl_word)
 
 
+    # babies -> baby's, babietje(s) -> baby'tje(s)
+    if not validword(token.word, methodname) and isbabyword(token.word) and \
+            validword(getbabylemma(token.word), methodname):
+        newword = correctbaby(token.word)
+        newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                        name=correctionlabels.spellingcorrection,
+                                        value=errormsgsep.join(['Missing Apostrophe',"Incorrect y-ie alternation" ]),
+                                        cat=correctionlabels.orthography, backplacement=bpl_word,
+                                        penalty=-defaultpenalty)   # we reward this change rather than penalizing it
 
     # ...en -> e: groten  -> grote (if adjective); goten -> grote
 

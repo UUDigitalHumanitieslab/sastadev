@@ -5,6 +5,7 @@ from sastadev.treebankfunctions import find1, getattval, getbeginend, getnodeyie
     immediately_precedes, iswordnode, showtree
 from sastadev.sastatypes import SynTree
 from lxml import etree
+from typing import List
 
 space = ' '
 
@@ -26,6 +27,8 @@ dexpath = """.//node[(@lemma="de" or @lemma="het" or @lemma="deze" or @lemma="di
 
 nognietxpath = """.//node[@cat="advp" and node[@rel="mod" and @lemma="nog"] and node[@rel="hd" and @lemma="niet"] and not(parent::node[@cat="top"])]"""
 zelfinnpmodxpath = """.//node[@rel="mod" and @lemma="zelf" and parent::node[@cat="np"]]"""
+
+smainwithverbxpath = """.//node[@cat="smain" and node[@rel="hd" and @pt="ww" and @wvorm="pv"]]"""
 
 def transformtreeld(stree:SynTree) -> SynTree:
     debug = False
@@ -198,3 +201,13 @@ def increasebeginends(stree: SynTree, incr: int) -> SynTree:
         newtree.attrib['end'] = e
     newtree.extend(newchildren)
     return newtree
+
+def getV2violations(stree: SynTree) -> List[SynTree]:
+    results = []
+    smains = stree.xpath(smainwithverbxpath)
+    for smain in smains:
+        childs = [child for child in smain]
+        sortedchilds = sorted(childs, key= lambda ch: int(getattval(ch, 'begin')))
+        if len(sortedchilds) > 1 and getattval(sortedchilds[1], 'pt') != "ww":
+            results.append(sortedchilds[1])
+    return results

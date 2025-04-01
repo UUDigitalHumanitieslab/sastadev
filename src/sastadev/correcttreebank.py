@@ -16,12 +16,12 @@ from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
 from sastadev.lexicon import de, dets, known_word, nochildword, nochildwords, validnouns, validword, \
     wordsunknowntoalpinolexicondict, wrongposwordslexicon
 from sastadev.macros import expandmacros
-from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, defaultpenalty,
+from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_nolemma, defaultpenalty,
                                bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion,
                                SASTA, ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT,
                                HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
                                )
-from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp
+from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
@@ -577,6 +577,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         stree = transformtreeld(stree)
         stree = transformppinnp(stree)
         stree = transformbwinnp(stree)
+        stree = transformmodRinnp(stree)
         stree = transformtreenogeen(stree)
         stree = transformtreenogde(stree)
         # stree = nognietsplit(stree)  # put off because it should not be done
@@ -745,7 +746,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     nextbackplacement = None
     for mctr, meta in enumerate(thecorrection[2]):
         curbackplacement = nextbackplacement if nextbackplacement is not None else meta.backplacement
-        if curbackplacement == bpl_node:
+        if curbackplacement in [bpl_node, bpl_node_nolemma]:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(
                 thetree, './/node[@pt and @end="{}"]'.format(nodeend))
@@ -754,6 +755,9 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
             if newnode is not None and oldnode is not None:
                 # adapt oldnode1 for contextual features
                 contextoldnode = contextualise(oldnode, newnode)
+                if curbackplacement == bpl_node_nolemma:
+                    newnodelemma = getattval(newnode, 'lemma')
+                    contextoldnode.set('lemma', newnodelemma)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
         elif curbackplacement == bpl_replacement:
             # showtree(fatstree, 'fatstree')
@@ -932,6 +936,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         fulltree = transformtreeld(fulltree)
         fulltree = transformppinnp(fulltree)
         fulltree = transformbwinnp(fulltree)
+        fulltree = transformmodRinnp(fulltree)
         fulltree = transformtreenogeen(fulltree)
         fulltree = transformtreenogde(fulltree)
         # fulltree = nognietsplit(fulltree) # put off because it should not be done
@@ -1163,9 +1168,14 @@ def getsucount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
     result = len(matches)
     return result
 
+def getdhyphencount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    matches = nt.xpath('.//node[@rel="--" and @pt and @pt!="let"]')
+    result = len(matches)
+    return result
+
 localgetcompoundcount = lambda nt, md, mn: getcompoundcount(nt)
 getdpcount = lambda nt, md, mn: countav(nt, 'rel', 'dp')
-getdhyphencount = lambda nt, md, mn: countav(nt, 'rel', '--')
+# getdhyphencount = lambda nt, md, mn: countav(nt, 'rel', '--')
 getdimcount = lambda nt, md, mn: countav(nt, 'graad', 'dim')
 getcompcount = lambda nt, md, mn: countav(nt, 'graad', 'comp')
 getsupcount = lambda nt, md, mn: countav(nt, 'graad', 'sup')

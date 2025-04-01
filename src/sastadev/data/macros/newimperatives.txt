@@ -74,7 +74,7 @@ nonsuindexnodecount = """(count(node[%nonsuindexnode%]))"""
 
 fillednode = """node[not(%indexnode%)]"""
 
-particlesvp = """(@rel="svp" and @pt="vz" and not(%svpofhww%))"""
+particlesvp = """(@rel="svp" and (@pt="vz" or @pt="bw") and not(%svpofhww%))"""
 
 realcomplormodnodecount = """count(%realcomplormodnode% | node[%nonfinvc%]/%realcomplormodnode%)"""
 
@@ -117,7 +117,7 @@ onlythesearerealwords = """(count(.//node[%bxrealwordnode%]) = count(%allbxrealw
 partofwhquestion = """((@cat="sv1" or @cat="ssub") and @rel="body" and parent::node[@cat="whq" or @cat="whsub" ]) """
 declarative = """(@cat="smain" or (@cat="ssub" and not(%partofwhquestion%)) or (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
 
-Tarsp_OndB = """((%Ond% or node[@naamval="nomin"]) and  node[%Tarsp_Basic_B%]  and count(node) = 2 and %onlythesearerealwords% and not(%Tarsp_BX%) and not(%Xneg%)) """
+Tarsp_OndB = """((%Ond% or node[@naamval="nomin"] or node[@cat and node[@rel="hd" and @naamval="nomin"]]) and  node[%Tarsp_Basic_B%]  and count(node) = 2 and %onlythesearerealwords% and not(%Tarsp_BX%) and not(%Xneg%)) """
 Tarsp_OndVC = """((%coreondvc% or %dpdpondvc%)  and count(node) = 2 and %onlythesearerealwords%) """
 
 beetje = """(@word="beetje")"""
@@ -172,7 +172,7 @@ Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and %onlyw% )""
 
 Tarsp_OndWB = """(%OndWB_core% or %OndWB_special%)"""
 
-OndWB_core = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+OndWB_core = """(%declarative% and %Ond% and  %Tarsp_W_X% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
 OndWB_special = """(%declarative% and 
                     node[@rel="hd" and @pt="ww" and @wvorm="pv"] and 
                     node[@rel="ld" and (@cat="np" or @pt="n")] and 
@@ -184,26 +184,27 @@ Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and node[%Tarsp_Basic_VC%] and
 Tarsp_VCW_X = """(%Tarsp_BasicVCW% or (node[%nonfinvc% and %Tarsp_BasicVCW%] and count(node)=1) )""" 
 
 
-Tarsp_OndWBVC = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 3 )"""
+Tarsp_OndWBVC = """(%declarative% and %Ond% and  %Tarsp_W_X% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 3 )"""
 
-Tarsp_OndWBB = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 2 and %realcomplormodnodecount% = 3)"""
+Tarsp_OndWBB = """(%declarative% and %Ond% and %Tarsp_W_X% and %Tarsp_B_X_count% = 2 and %realcomplormodnodecount% = 3)"""
 
-Tarsp_VCWOndBB = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 2 and %Tarsp_VC_X% and %realcomplormodnodecount% = 4)"""
+Tarsp_VCWOndBB = """(%declarative% and %Ond% and %Tarsp_W_X% and %Tarsp_B_X_count% = 2 and %Tarsp_VC_X% and %realcomplormodnodecount% = 4)"""
 
-Tarsp_OndWVCVCX = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_VC_X_count% = 2  and %realcomplormodnodecount% <= 4 )"""
+Tarsp_OndWVCVCX = """(%declarative% and %Ond% and %Tarsp_W_X% and %Tarsp_VC_X_count% = 2  and %realcomplormodnodecount% <= 4 )"""
 
-Tarsp_BWOndBB = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 3 and %realcomplormodnodecount% = 4)"""
+Tarsp_BWOndBB = """(%declarative% and %Ond% and %Tarsp_W_X% and %Tarsp_B_X_count% = 3 and %realcomplormodnodecount% = 4)"""
 
 Tarsp_OndWVC = """
 (%declarative% and %Ond% and  %Tarsp_W%  and %Tarsp_VC_X% and %realcomplormodnodecount% = 2 )
 """
 
-Tarsp_WBVC = """(%declarative%  and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 2 )"""
+Tarsp_WBVC = """(%declarative%  and  %Tarsp_W_X% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 2 )"""
 
-Tarsp_Ov4 = """(%declarative% and %realcomplormodnodecount% = 3 and %Tarsp_W% and not(%Tarsp_OndWBVC%) and not(%Tarsp_OndWBB%) and not(%Tarsp_OndWVCVCX%))"""
+Tarsp_Ov4 = """(%declarative% and %realcomplormodnodecount% = 3 and %Tarsp_W_X% and not(%Tarsp_OndWBVC%) and not(%Tarsp_OndWBB%) and not(%Tarsp_OndWVCVCX%))"""
 
 Tarsp_Ov5 = """(%declarative% and %realcomplormodnodecount% = 4 and not(%Tarsp_VCWOndBB%) and not(%Tarsp_OndWVCVCX%) and not(%Tarsp_BWOndBB%) )"""
 
+Tarsp_W_X = """(%Tarsp_W% or node[%nonfinvc%]/%Tarsp_W%) """
 Tarsp_B_X = """(node[%Tarsp_B%] or node[%nonfinvc%]/node[%Tarsp_B%])"""
 Tarsp_B_X_count = """count(node[%Tarsp_B%] | node[%nonfinvc%]/node[%Tarsp_B%]) """
 Tarsp_VC_X_count = """count(node[%Tarsp_VC%] | node[%nonfinvc%]/node[%Tarsp_VC%]) """
