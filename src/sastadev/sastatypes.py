@@ -122,6 +122,7 @@ XpathExpression = str
 
 MethodVariant = str
 DataSetName = str
+HeadedTable = Tuple[Header, Table]
 # moved the following to allresults.py
 # CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 # PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]

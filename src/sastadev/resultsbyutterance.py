@@ -39,7 +39,8 @@ def getresultsbyutt(results: ResultsDict, method: Method) -> ResultsByUttDict:
             thequery = method.queries[qid]
             if query_inform(thequery):
                 for uttid in results[reskey]:
-                    resultsbyuttdict[uttid].update([reskey])
+                    newcounter = Counter({reskey: results[reskey][uttid]})
+                    resultsbyuttdict[uttid] += newcounter
     return resultsbyuttdict
 
 
