@@ -1,3 +1,6 @@
+""""
+The module sas_impact ..(to be completed)
+"""
 from collections import Counter
 import copy
 from sastadev.allresults import AllResults
@@ -119,6 +122,9 @@ def getscoresallutts(results: CodesByUtt, reference: CodesByUtt) -> Tuple[float,
             intersection = results[uttid] & reference[uttid]
             toomuch = results[uttid] - intersection
             toofew = reference[uttid] - intersection
+            debug = False
+            if debug:
+                print(uttid, sumfreq(intersection), sumfreq(toomuch), sumfreq(toofew) )
             totalok += sumfreq(intersection)
             totaltoomuch += sumfreq(toomuch)
             totaltoofew += sumfreq(toofew)

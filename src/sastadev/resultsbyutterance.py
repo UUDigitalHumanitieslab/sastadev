@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple
 from sastadev.allresults import AllResults
 from sastadev.conf import settings
 from sastadev.methods import Method
-from sastadev.query import query_inform
+from sastadev.query import Query, query_inform, query_exists
 from sastadev.rpf1 import getscores
 from sastadev.sastatypes import GoldResults, QId, ResultsDict, Table, UttId
 
@@ -31,13 +31,14 @@ ResultsByUttDict = Dict[UttId, List[QId]]
 ScoresByUttDict = Dict[UttId, List[Tuple[float, float, float]]]
 
 
+
 def getresultsbyutt(results: ResultsDict, method: Method) -> ResultsByUttDict:
     resultsbyuttdict: ResultsByUttDict = defaultdict(Counter)
     for reskey in results:
         qid = reskey[0]
         if qid in method.queries:
             thequery = method.queries[qid]
-            if query_inform(thequery):
+            if query_inform(thequery) and query_exists(thequery):
                 for uttid in results[reskey]:
                     newcounter = Counter({reskey: results[reskey][uttid]})
                     resultsbyuttdict[uttid] += newcounter
