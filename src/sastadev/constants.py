@@ -3,11 +3,13 @@ Module to specify constant values that are used in the application
 '''
 
 # default locations of the data to train and test sastadev
-actualanalysisfolder = 'actual'
-actual_sasfolder = 'actual'
+actualfolder = 'actual'
+actualanalysisfolder = actualfolder
+actual_sasfolder = actualfolder
 analysiscomparisonfolder = 'analysiscomparison'
-currentanalysisfolder = 'current'
-current_sasfolder = 'current'
+currentfolder = 'current'
+currentanalysisfolder = currentfolder
+current_sasfolder = currentfolder
 corrfolder = 'corr'
 nocorrfolder = 'nocorr'
 overallsasfolder = '_SAS_overall'
