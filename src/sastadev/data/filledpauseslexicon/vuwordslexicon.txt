@@ -1,14 +1,14 @@
-goed
-he
-hè
-hoor
-kijk
-mama
-niet
-nou
-papa
-stap
-toe
-wel
-wip
-zo
+goed	100,
+he	120
+hè	120
+hoor	003
+kijk	103,
+mama	103,
+niet	100,
+nou	100,
+papa	103,
+stap	100,
+toe	100
+wel	100,
+wip	100,
+zo	100,

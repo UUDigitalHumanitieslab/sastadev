@@ -134,14 +134,14 @@ Sastadev logs its actions through:
 # to do
 # -Excel output, cleanup output code
 
+import copy
 import datetime
+import json
 import logging
 import os
 import re
 import sys
-import copy
 import time
-import json
 from collections import Counter, defaultdict
 from optparse import OptionParser
 from typing import Any, Callable, Dict, List, Pattern, Tuple
@@ -154,47 +154,48 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
                                  ResultsKey, mkresultskey, scores2counts,
                                  showreskey)
 from sastadev.conf import settings
-from sastadev.constants import (bronzefolder, bronzesuffix, checksuffix, checkeditedsuffix,
-                                formsfolder, intreebanksfolder,
-                                loggingfolder, outtreebanksfolder, permprefix, platinumsuffix,
-                                platinumeditedsuffix,
-                                resultsfolder, silverfolder, silverpermfolder, silversuffix)
-from sastadev.correcttreebank import (correcttreebank, corrn, errorwbheader, validcorroptions)
+from sastadev.constants import (bronzefolder, bronzesuffix, checkeditedsuffix,
+                                checksuffix, formsfolder, intreebanksfolder,
+                                loggingfolder, outtreebanksfolder, permprefix,
+                                platinumeditedsuffix, platinumsuffix,
+                                resultsfolder, silverfolder, silverpermfolder,
+                                silversuffix)
+from sastadev.correcttreebank import (corr0, correcttreebank, corrn,
+                                      errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
+from sastadev.history import (donefiles, donefilesfullname, gathercorrections,
+                              mergecorrections, putcorrections,
+                              putdonefilenames, samplecorrections,
+                              samplecorrectionsfullname)
 from sastadev.macros import expandmacros
-from sastadev.methods import Method, supported_methods, treatmethod
-from sastadev.mismatches import exactmismatches, literalmissedmatches
 from sastadev.methods import (Method, astamethods, stapmethods,
                               supported_methods, tarspmethods, treatmethod)
+from sastadev.mismatches import exactmismatches, literalmissedmatches
 from sastadev.permcomments import getallcomments, pcheaders
-from sastadev.query import (Query, is_preorcore,
-                            post_process, query_exists, query_inform)
+from sastadev.query import (Query, is_preorcore, post_process, query_exists,
+                            query_inform)
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.sastacore import doauchann, dopostqueries, getreskey, isxpathquery, SastaCoreParameters, sastacore
-from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
-                                 GoldTuple, MatchesDict, MethodName, QId,
-                                 QIdCount, QueryDict, ResultsCounter,
-                                 SynTree, TreeBank, UttId)
 from sastadev.reduceresults import (exact2results, reduceallresults,
                                     reduceexactgoldscores, reduceresults)
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
 from sastadev.sastacore import (SastaCoreParameters, doauchann, dopostqueries,
-                                isxpathquery, sastacore)
-from sastadev.sastatypes import (AltCodeDict, GoldTuple, QId, QIdCount,
-                                 QueryDict, ResultsCounter, SynTree, UttId)
+                                getreskey, isxpathquery, sastacore)
+from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
+                                 GoldTuple, MatchesDict, MethodName, QId,
+                                 QIdCount, QueryDict, ResultsCounter, SynTree,
+                                 TreeBank, UttId)
 from sastadev.SRFreader import read_referencefile
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets, target_all
-from sastadev.treebankfunctions import (find1, getattval, getnodeendmap, getuttid,
-                                        getxmetatreepositions, getxsid,
-                                        getyield, showtree)
+from sastadev.treebankfunctions import (find1, getattval, getnodeendmap,
+                                        getuttid, getxmetatreepositions,
+                                        getxsid, getyield, showtree)
 from sastadev.xlsx import mkworkbook
-
 
 start_time = time.time()
 
@@ -443,7 +444,6 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
         syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)
     # core queries
-    junk = 0
     for queryid in queries:
         if queryid not in exactresults:
             exactresults[queryid] = []
@@ -1133,7 +1133,23 @@ def main():
         # add xsid to trees that should have one but do not
         treebank2 = tb_addxsid(treebank1, targets)
 
-        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, options.infilename, corr)
+        if corr != corr0:
+            reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
+            if reducedtreebankfullname not in donefiles:
+                thissamplecorrections = gathercorrections(treebank2)
+            else:
+                thissamplecorrections = {}
+            # merge the corrections from this sample with the samplecorrections and update the file
+            mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
+            putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
+            donefiles.add(reducedtreebankfullname)
+            putdonefilenames(donefiles, donefilesfullname)
+        else:
+            mergedsamplecorrections = samplecorrections
+
+
+
+        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, mergedsamplecorrections, corr)
 
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)

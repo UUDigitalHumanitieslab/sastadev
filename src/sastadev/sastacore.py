@@ -129,6 +129,7 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
                 # allutts[uttno] = getyield(syntree)
                 allutts[uttid] = getyield(syntree)
 
+
         # determine exactresults and apply the filter to catch interdependencies between prequeries and corequeries
         # rawexactresults = getexactresults(allmatches)
         rawexactresults2 = passfilter(rawexactresults, themethod)
@@ -186,7 +187,6 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
         syntree, 'Omitted Word', poslistname='annotatedposlist')
     # print(uttid)
     # core queries
-    junk = 0
     for queryid in queries:  # @@ dit aanpassen voor literals en voor Resultskey; check read_referencefile
         # if queryid not in exactresults: # not needed becaysetaken care of below
         #     exactresults[queryid] = []

@@ -76,7 +76,8 @@ Rvzlist = ['aan', 'achter', 'achteraan', 'achterin', 'achterop', 'af', 'beneden'
 #:
 ervzvariants: List[BasicReplacement] = \
     [('der' + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
-    [("d'r" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist]
+    [("d'r" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
+    [("e'" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist]
 
 #: The constant *innereplacements* contains replacements for short closed syllable prepositions followed by *e*
 #: (and with final consonant doubling), e.g. *inne* for the preposition *in*. They can be replaced by *in* or by *erin*.
@@ -216,7 +217,9 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('hoeve', 'hoeft', pron, infpron, emphasis, mp(120)),
                                                 ('hebbe', 'heb', pron, infpron, emphasis, mp(120)),
                                                 ('pot', 'kapot', pron, infpron, sylldrop, dp),
-                                                ('kane', 'andere', pron, wrongpron, wrongpron, dp)
+                                                ('kane', 'andere', pron, wrongpron, wrongpron, dp),
+                                                ('effje', 'eventjes', pron, infpron, infpron, dp),
+                                                ('effjes', 'eventjes', pron, infpron, infpron, dp)
                                                 ] + \
     ervzvariants + \
     innereplacements + \

@@ -1,6 +1,6 @@
 
 
-subject = """(@rel="su" and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
+subject = """(@rel="su" and not(%kijknoun%) and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
 questionmark = """(@pt="let" and @word="?")"""
 exclamationmark = """(@pt="let" and @word="!")"""
 periodmark = """(@pt="let" and @word=".")"""
@@ -11,7 +11,7 @@ topcontainsperiodmark = """ (ancestor::node[@cat="top" and node[%periodmark%]])"
 Ond = """node[%subject%]"""
 FullOnd = """(%subject% or %erx%)"""
 
-
+kijknoun = """((@pt="n" and @lemma="kijk") or node[@rel="hd" and @pt="n" and @lemma="kijk"] )"""
 
 erx = """((@rel="mod" and @lemma="er" and ../node[@rel="su" and @begin>=../node[@rel="mod" and @lemma="er"]/@end]) or
           (@rel="mod" and @lemma="er" and ../node[@rel="su" and not(@pt) and not(@cat)])
@@ -74,7 +74,7 @@ nonsuindexnodecount = """(count(node[%nonsuindexnode%]))"""
 
 fillednode = """node[not(%indexnode%)]"""
 
-particlesvp = """(@rel="svp" and @pt="vz")"""
+particlesvp = """(@rel="svp" and @pt="vz" and not(%svpofhww%))"""
 
 realcomplormodnodecount = """count(%realcomplormodnode% | node[%nonfinvc%]/%realcomplormodnode%)"""
 
@@ -168,7 +168,14 @@ onlyw = """( (node[@rel="su" and %indexnode%] and %realcomplormodnodecount% = 0)
 Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and %onlyw% )"""
 
 
-Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+Tarsp_OndWB = """(%OndWB_core% or %OndWB_special%)"""
+
+OndWB_core = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+OndWB_special = """(%declarative% and 
+                    node[@rel="hd" and @pt="ww" and @wvorm="pv"] and 
+                    node[@rel="ld" and (@cat="np" or @pt="n")] and 
+					node[@rel="svp"] and %realcomplormodnodecount% = 1)
+ """
 
 Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and node[%Tarsp_Basic_VC%] and count(%fillednode%)=2)"""
 
