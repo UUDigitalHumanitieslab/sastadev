@@ -34,7 +34,7 @@ contract = 'Contraction'
 t_ie = 't-Insertion with ie'
 fndrop = 'Final n drop'
 zdev = 'Devoicing of /z/'
-wrongpron = 'Wrong Prunciation'
+wrongpron = 'Wrong Pronunciation'
 phonrepl = '/{wrong}/ instead of /{correct}/'
 wronginfl = 'Incorrect inflection'
 morph = 'Morphology'
@@ -69,6 +69,7 @@ voweldel = 'vowel deletion'
 avoidambiguity = 'Avoiding ambiguity'
 wwnambiguity = 'Verb - Noun ambiguity'
 pnnambiguity = 'Person name - combined surname ambiguity'
+
 
 def combine(strlist: List[str]) -> str:
     return ampersand.join(strlist)
