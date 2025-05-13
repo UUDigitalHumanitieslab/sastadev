@@ -1,15 +1,17 @@
-from collections import defaultdict, Counter
 import copy
-from dataclasses import dataclass
-from sastadev.basicreplacements import innereplacements, innureplacements
-from sastadev.CHAT_Annotation import CHAT_explanation, CHAT_replacement, CHAT_wordnoncompletion
-from sastadev.cleanCHILDEStokens import cleantext
-from sastadev.readcsv import readcsv, writecsv
-from sastadev.conf import settings
-from sastadev.sastatypes import TreeBank
-from sastadev.treebankfunctions import getorigutt, getyield, getxselseuttid
-from typing import Dict, List, Tuple
 import os
+from collections import Counter, defaultdict
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
+from sastadev.basicreplacements import innereplacements, innureplacements
+from sastadev.CHAT_Annotation import (CHAT_explanation, CHAT_replacement,
+                                      CHAT_wordnoncompletion)
+from sastadev.cleanCHILDEStokens import cleantext
+from sastadev.conf import settings
+from sastadev.readcsv import readcsv, writecsv
+from sastadev.sastatypes import TreeBank
+from sastadev.treebankfunctions import getorigutt, getxselseuttid, getyield
 
 childescorrectionspath = os.path.join(settings.SD_DIR, 'data', 'childescorrections')
 
@@ -174,5 +176,3 @@ childescorrectionsexceptions = ['nie', 'moe', 'dee', 'ie', 'su', 'an', 'tan', 'd
 children_samplecorrections = getcorrections(children_samplecorrectionsfullname)
 adult_samplecorrections = getcorrections(adult_samplecorrectionsfullname)
 donefiles = getdonefilenames(donefilesfullname)
-
-junk = 0
