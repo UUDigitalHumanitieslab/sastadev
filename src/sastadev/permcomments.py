@@ -18,14 +18,15 @@ pos = 'pos'
 
 pcheaders = [
     ['Sample', 'User1', 'User2', 'User3', 'MoreorLess', qid,  'inform', 'cat', 'subcat', 'item', uttid, pos, 'utt',
-     'origutt', 'parsed_as']]
+     'origutt', 'parsed_as', 'marking']]
 
+platinumcheck_column_widths = {'F:F': 9, 'G:G': 8.11, 'K:K': 6.44, 'L:L': 5.44, 'M:M': 26, 'N:N': 26, 'O:O': 26 }
 sampleheaders = ['sample']
 
 permprefix = 'perm_'
 
 permsilvercolcount = 8   # number of columns in the silverperm files
-checkfilecolcount = 15
+checkfilecolcount = 16
 
 samplecol = 0
 user1col = 1

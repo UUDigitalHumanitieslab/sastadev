@@ -20,7 +20,7 @@ several alternative ways of writing these forms, e.g.
 The module has been tested against a gold reference of all words ending in ie(s) from OpenSonaR.
 The module to use for a renewed test is tests.iedims_test.py, the file is tests.iediminutives.iedimsgold2.csv
 
-.. autofunction:: iedims::getjeforms
+.. autofunction:: sastadev.iedims::getjeforms
 '''
 
 
@@ -365,8 +365,8 @@ def getjeforms(ieform: str) -> List[str]:
 
     It crucially makes use of the functions *getjeformsnolex* and *getbase*
 
-    .. autofunction:: iedims::getjeformsnolex
-    .. autofunction:: iedims::getbase
+    .. autofunction:: sastadev.iedims::getjeformsnolex
+    .. autofunction:: sastadev.iedims::getbase
 
     '''
     results1 = getjeformsnolex(ieform)

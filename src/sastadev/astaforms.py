@@ -438,6 +438,6 @@ def getlemmafreqs(allresults, lexicalreskey) -> Dict[str, int]:
         if qid == lemmaqid:
             lemma = reskey[1]
             for position in allresults.exactresults[reskey]:
-                if position in allresults.exactresults[lexicalreskey]:
+                if lexicalreskey in allresults.exactresults and position in allresults.exactresults[lexicalreskey]:
                     dict[lemma] += 1
     return dict

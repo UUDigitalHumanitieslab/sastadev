@@ -30,6 +30,7 @@ setup(
         'lxml',
         'openpyxl',
         'XlsxWriter',
-        'typing-extensions'
+        'typing-extensions',
+        'pyspellchecker'
     ],
 )

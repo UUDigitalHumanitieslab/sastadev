@@ -6,8 +6,9 @@ from sastadev.conf import settings
 from sastadev.query import pre_process
 from sastadev.sastatypes import (AltCodeDict, ExactResult, ExactResultsDict,
                                  ExactResultsFilter, FileName,
-                                 Item_Level2QIdDict, MethodName, Pattern, QId,
+                                 Item_Level2QIdDict, Level, MethodName, Pattern, QId,
                                  Query, QueryDict)
+from sastadev.stringfunctions import str2list
 
 lemmaqid = 'A051'
 lexreskey = mkresultskey('A018')
@@ -89,7 +90,7 @@ def astalemmafilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> boo
     for (qid, val) in xrs:
         if qid == lemmaqid:
             if xr in xrs[(qid, val)]:
-                result1 = xr in xrs[lexreskey] or xr in xrs[nreskey]
+                result1 = (lexreskey in xrs and xr in xrs[lexreskey]) or (nreskey in xrs and xr in xrs[nreskey])
                 result = query.process == pre_process or result1
                 return result
 
@@ -149,6 +150,7 @@ def treatmethod(methodname: MethodName, methodfilename: FileName) -> Tuple[Metho
     return resultmethodname, resultmethodfilename
 
 
+
 codepath = os.path.dirname(os.path.abspath(__file__))
 datapath = os.path.join(codepath, 'data')
 methodspath = os.path.join(datapath, 'methods')
@@ -186,3 +188,4 @@ lastuttqidcondition: Dict[MethodName, Callable] = {}
 lastuttqidcondition[asta] = lambda q: q in astalexicalmeasures
 lastuttqidcondition[tarsp] = lambda q: True
 lastuttqidcondition[stap] = lambda q: True
+

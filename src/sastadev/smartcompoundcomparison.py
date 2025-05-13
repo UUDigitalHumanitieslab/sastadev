@@ -16,7 +16,7 @@ def reldistance(word, corr):
     return result
 
 
-def iscompound(word, corr, rawcorrlemma):
+def issmartcompound(word, corr, rawcorrlemma):
     debug = False
     corrlemma = normaliselemma(corr, rawcorrlemma, keeplastsep=True)
     corrlemmaparts = corrlemma.split('_')
@@ -55,9 +55,10 @@ def main():
         ('chocomelluk', 'chocolademelk', 'chocolade_melk', True),
         ('zepezop', 'zeepsop', 'zeep_sop', True),
         ('verffinger', 'vingerverf', 'vinger_verf', True),
-        ('welə', 'welles', 'wel_les', True),
+        ('welə', 'welles', 'wel_les', False),
         ('staap', 'stapelbed', 'stapel_bed', False),
         ('stape', 'stapelbed', 'stapel_bed', False),
+        ('stapel', 'stapelbed', 'stapel_bed', False),
         ('aardbeiijs', 'aardbeienijs', 'aardbei_ijs', True),
         ('slijbaan', 'glijbaan', 'glij_baan', True),
         ('zwatte+piet', 'Zwarte_Piet', 'Zwarte_Piet', True),
@@ -81,7 +82,11 @@ def main():
          'sinterklaas_paardje', True),
         ('kippes', 'kippies', 'kip_pies', True),
         ('diehoek', 'driehoek', 'drie_hoek', True),
-        ('jantauto', 'brandweerauto', 'brandweer_auto', True)
+        ('jantauto', 'brandweerauto', 'brandweer_auto', True),
+        ('koekklok', 'koekoeksklok', 'koekoek_klok', True),
+        ('pusses', 'puzzelstukjes', 'puzzel_stuk', False),
+        ('pantoet', 'pannekoeken', 'pan_koek', False),
+        ('puzzelstukjes', 'puzzelstukjes', 'puzzel_stuk', True)
 
     ]
     # testlist = [('risstengeltjes', 'rietstengeltjes', 'riet_stengel', True)]
@@ -89,7 +94,7 @@ def main():
     max = len(testlist)
     # max = 1
     for word, corr, corrlemma, ref in testlist[:max]:
-        result = iscompound(word, corr, corrlemma)
+        result = issmartcompound(word, corr, corrlemma)
         if result != ref:
             print(f'{word}, {corr}, {corrlemma}: {result}/={ref}')
 
