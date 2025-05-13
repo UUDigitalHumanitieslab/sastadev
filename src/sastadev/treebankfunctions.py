@@ -998,7 +998,7 @@ def ismonthname(node: SynTree) -> bool:
 #
 #     * or the node meets the conditions of *recognised_wordnodepos*
 #
-#        .. autofunction:: sastadev.treebankfunctions::recognised_wordnodepos
+#        .. autofunction:: sastadev.tblex::recognised_wordnodepos
 #
 #     * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
 #
@@ -1089,10 +1089,10 @@ def sasta_pseudonym(node: SynTree) -> bool:
     pseudonym regular
     expressions have been created using the constant sasta_pseudonyms:
 
-    .. autodata:: sastadev.treebankfunctions::sasta_pseudonyms
+    .. autodata:: sastadev.anonymization::sasta_pseudonyms
        :noindex:
 
-    .. autodata:: sastadev.treebankfunctions::pseudonym_patternlist
+    .. autodata:: sastadev.anonymization::pseudonym_patternlist
 
     """
     word = getattval(node, 'word')
