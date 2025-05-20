@@ -111,18 +111,18 @@ def mismatches(reskey, queries, theresultsminusgold, goldminustheresults, allmat
 
 def getmarkposition(position, nodeendmap, uttid):
     if position == 0:
-        result = 1
+        result = 0
     elif uttid in nodeendmap:
         if str(position) in nodeendmap[uttid]:
             result = nodeendmap[uttid][str(position)]
         else:
             settings.LOGGER.error(
                 'getmarkposition: No mapping found for position {} in utterance {}'.format(position, uttid))
-            result = 1
+            result = 0
     else:
         settings.LOGGER.error(
             'getmarkposition: No mappings found for uttid {}'.format(uttid))
-        result = 1
+        result = 0
     return result
 
 

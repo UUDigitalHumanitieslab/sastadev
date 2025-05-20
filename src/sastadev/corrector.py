@@ -1854,7 +1854,7 @@ def correctPdit(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[Toke
                         indezemwp:
                     newtoken = Token('hem', token.pos, subpos=token.subpos)
                     bpl = bpl_indeze if indezemwp else bpl_node
-                    meta = mkSASTAMeta(token, newtoken, name=correctionlabels.parsedas, value='hem',
+                    meta = mkSASTAMeta(token, newtoken, name=correctionlabels.alpinoimprovement, value='hem',
                                        cat=correctionlabels.alpinoimprovement,
                                        backplacement=bpl, penalty=15)
                     metadata.append(meta)

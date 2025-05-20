@@ -62,6 +62,8 @@ compoundsep = '_'
 numberpattern = r'^[\d\.,]+$'
 numberre = re.compile(numberpattern)
 
+topcat = 'top'
+
 # next 3 derived from the alpino dtd
 allrels = ['hdf', 'hd', 'cmp', 'sup', 'su', 'obj1', 'pobj1', 'obj2', 'se', 'pc', 'vc', 'svp', 'predc', 'ld', 'me',
            'predm', 'obcomp', 'mod', 'body', 'det', 'app', 'whd', 'rhd', 'cnj', 'crd', 'nucl', 'sat', 'tag', 'dp',

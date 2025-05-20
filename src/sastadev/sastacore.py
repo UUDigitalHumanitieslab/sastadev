@@ -23,7 +23,7 @@ from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone
 from sastadev.treebankfunctions import (getattval, getnodeendmap,
                                         getxmetatreepositions, getxsid,
-                                        getyield, showtree)
+                                        getyield, showtree, topcat)
 
 singlewordWquery = """//node[@pt="ww"]/ancestor::node[@cat="top" and count(.//node[@pt!="let" and @pt!="tsw"]) = 1 ] """
 
@@ -178,6 +178,15 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     return allresults, samplesizetuple
 
 
+def getexactposition(m: SynTree) -> int:
+    mcat = getattval(m, 'cat')
+    if mcat == topcat:
+        result = 0
+    else:
+        result = int(getattval(m, 'begin')) + 1
+    return result
+
+
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
               criterion: Callable[[Query], bool], invalidqueries):
     # global invalidqueries
@@ -219,7 +228,7 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
                     allmatches[(reskey, uttid)].append((m, syntree))
                 else:
                     allmatches[(reskey, uttid)] = [(m, syntree)]
-                exactresult = (uttid, int(getattval(m, 'begin')) + 1)
+                exactresult = (uttid, getexactposition(m))
                 if reskey in exactresults:
                     exactresults[reskey].append(exactresult)
                 else:

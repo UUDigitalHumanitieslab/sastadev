@@ -769,7 +769,7 @@ delpv_nonfincat = """(@cat="ppres" or @cat="ppart" or @cat="ti" or @cat="oti" or
 delpv_clausecat = """(@cat="smain" or @cat="ssub" or @cat="sv1" or @cat="ppres" or @cat="ppart" or @cat="ti" or @cat="oti" or @cat="ahi" or @cat="inf")"""
 delpv_nonfinww = """(@pt="ww" and (@wvorm="td" or (@wvorm="inf" and @positie!="nom") or @wvorm="vd") )"""
 
-coredelpv = """((%delpv_nonfincat% or %delpv_nonfinww% ) and not(ancestor::node[%delpv_clausecat%]) )"""
+coredelpv = """(@cat="top" and not(.//node[@wvorm="pv"]) and .//node[((%delpv_nonfincat% or %delpv_nonfinww% ) and not(ancestor::node[%delpv_clausecat%]) )])"""
 
 robustdelpv = """(not(@rel="dp" and @begin > ancestor::node[@cat="top"]/descendant::node[@rel="dp"]/descendant::node[@pt="ww" and @wvorm="pv"]/@begin))"""
 
