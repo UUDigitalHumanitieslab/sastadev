@@ -81,7 +81,7 @@ smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 class Criterion():
     def __init__(self, name, getfunction, polarity, description):
         self.name: str = name
-        self. getfunction: Callable[[SynTree], bool] = getfunction
+        self.getfunction: Callable[[SynTree], bool] = getfunction
         self.polarity: int = polarity
         self.description: str = description
 
