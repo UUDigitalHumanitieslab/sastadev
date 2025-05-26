@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
+from sastadev.correctionlabels import casevariant, regionalform, grammar
 from sastadev.deregularise import correctinflection
 from sastadev.metadata import bpl_word, defaultpenalty, modifypenalty as mp
 from sastadev.sastatoken import Token
@@ -258,6 +259,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('drinken', 'voedsel',  avoidambiguity, wwnambiguity, wwnambiguity, dp ),
                                                 ('heelboel', 'heleboel', pron, infpron, schwadrop, dp),
                                                 ('jou', 'jouw', pron, infpron, codared, -dp), # Td 22, 30 ik wil ook keer naar jou huis find criterion
+                                                ('hun', 'zij', grammar, regionalform, casevariant, mp(0) )
                                                 # ('kijke', 'kijk', pron, infpron, emphasis, dp), # TD05, 32 moved to disambuguationdict
                                                 # ('geel', 'mooi', avoidambiguity, adjnambiguity, dp), #TD05, 24
                                                 # ('Roy', 'Jan', avoidambiguity, pnnambiguity, dp)
