@@ -51,6 +51,8 @@ def allok(query: Query, xs: ExactResultsDict, x: ExactResult) -> bool:
     return True
 
 
+
+
 class Method:
     '''
 
@@ -95,6 +97,7 @@ def astalemmafilter(query: Query, xrs: ExactResultsDict, xr: ExactResult) -> boo
                 return result
 
     return True
+
 
 
 # filter specifies what passes the filter

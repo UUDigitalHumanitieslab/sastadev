@@ -477,7 +477,19 @@ ASTA_adverbial = """
  
 ASTA_modalww = """  (@lemma="zullen" or @lemma="willen" or @lemma="moeten" or @lemma="mogen" or @lemma="kunnen" or @lemma="hoeven") """
 
-ASTA_kopww = """ ( %ASTA_basickopww% or %ASTA_geboren_kopww% )"""
+CHAT_unintelligible_speech = """(@name="Unintelligible Speech")"""
+CHAT_phonological_coding = """(@name="Phonological Coding")"""
+CHAT_untranscribed_material = """(@name="Untranscribed Material")"""
+
+xxxcondition = """(%CHAT_unintelligible_speech%  or 
+                   %CHAT_phonological_coding% or 
+				   %CHAT_untranscribed_material%)"""
+
+ASTA_XXX = """ancestor::alpino_ds/descendant::xmeta[%xxxcondition%]"""
+
+ASTA_kopww = """ (( %ASTA_basickopww% or %ASTA_geboren_kopww% ) and
+                   not(%ASTA_XXX%) 
+                 )"""
 
 ASTA_basickopww = """ (@pt="ww" and @rel="hd" and @lemma!="uit_zien" and @lemma!="heten" and @lemma!="gaan" and @lemma!="zitten" and (contains(@frame, "copula") or not(@stype="topic_drop")) and parent::node[node[@rel="predc"] and not(node[@rel="obj1"]) ] )""" 
 

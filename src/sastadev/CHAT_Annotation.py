@@ -14,6 +14,9 @@ CHAT_repetition = 'Repetition'
 CHAT_replacement = 'Replacement'
 CHAT_retracing = 'Retracing'
 CHAT_wordnoncompletion = 'Noncompletion of a Word'
+CHAT_unintelligible_speech = 'Unintelligible Speech'
+CHAT_phonological_coding = 'Phonological Coding'
+CHAT_untranscribed_material = 'Untranscribed Material'
 
 monadic = 1
 dyadic = 2
@@ -696,9 +699,9 @@ annotations = [
                     CHAT_SimpleScopedRegex(r'\[\<[0-9]?\]', keep, True, monadic), simplescopedmetafunction),
     CHAT_Annotation(specialform, '6.3:37', '8.3:43-44', CHAT_SimpleRegex(specialformpat, getsfword, False),
                     simplemetafunction(getsfvalue)),
-    CHAT_Annotation('Unintelligible Speech', '6.4:41', '8.4:47', CHAT_SimpleRegex(r'xxx', keep, False),
+    CHAT_Annotation(CHAT_unintelligible_speech, '6.4:41', '8.4:47', CHAT_SimpleRegex(r'[xX][xX][xX]', keep, False),
                     simplemetafunction(epsf)),
-    CHAT_Annotation('Phonological Coding', '6.4:41', '8.4:47', CHAT_SimpleRegex(r'yyy', keep, False),
+    CHAT_Annotation(CHAT_phonological_coding, '6.4:41', '8.4:47', CHAT_SimpleRegex(r'[yY][yY][yY]', keep, False),
                     simplemetafunction(epsf)),
     CHAT_Annotation(CHAT_wordnoncompletion, '6.5:43', '8.5:48',
                     CHAT_NoncompletionRegex(r'\(([\w]+)\)', r'\1', r''), noncompletionmetafunction),
@@ -878,7 +881,7 @@ annotations = [
     CHAT_Annotation('Blocked Segments', '10:85,11:89', '13:91', CHAT_InWordRegex(u'\u2260.*?\u2260', ''),
                     complexmetafunction),
     # these must be applied after [/], [//], [///] etc
-    CHAT_Annotation('Untranscribed Material', '6.4:42', '8.4:47', CHAT_SimpleRegex(r'www', eps, False),
+    CHAT_Annotation('Untranscribed Material', '6.4:42', '8.4:47', CHAT_SimpleRegex(r'[wW][wW][wW]', eps, False),
                     simplemetafunction(epsf)),
     CHAT_Annotation('Phonological Fragment', '6.4:42', '8.4:48',
                     CHAT_SimpleRegex(r'&' + simplewordpat, eps, False), simplemetafunction(identity)),
