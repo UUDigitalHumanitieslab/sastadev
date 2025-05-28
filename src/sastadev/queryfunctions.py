@@ -40,6 +40,12 @@ voslashbijxpath = expandmacros(""".//node[node[@pt="vz" and @rel="hd"] and
 vobijxpath = expandmacros('.//node[%Vobij%]')
 
 
+mvznxpath = """.//node[@pt = "n" and  @getal ="mv"]"""
+mvznsuffixes = ['en', 'e', 's', 'n']
+
+verklxpath = expandmacros(""".//node[@pt="n" and @graad="dim" and not(%nodimlemma%)]""")
+verklsuffixes = ['je', 'jes', 'ie', 'ies', 'ke', 'kes']
+
 def notadjacent(n1, n2, t): return not adjacent(n1, n2, t)
 
 
@@ -98,7 +104,7 @@ def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) 
     (which should be analysed as TARSP *Vobij*) from those that are not adjacent (which should be analysed as TARSP
     Vo/Bij).
 
-    .. autodata:: queryfunctions::voslashbijxpath
+    .. autodata:: sastadev.queryfunctions::voslashbijxpath
 
     '''
     RPnodes = stree.xpath(voslashbijxpath)
@@ -126,11 +132,11 @@ def vobij(stree: SynTree) -> List[SynTree]:
 
     * The *vobijxpath* expression matches with so-called adverbial pronouns:
 
-      .. autodata:: queryfunctions::vobijxpath
+      .. autodata:: sastadev.queryfunctions::vobijxpath
 
     * The function *auxvobij*  finds adjacent R-pronoun + adposition cases:
 
-      .. autofunction:: queryfunctions::auxvobij
+      .. autofunction:: sastadev.queryfunctions::auxvobij
 
     '''
     results1 = stree.xpath(vobijxpath)
@@ -147,7 +153,7 @@ def voslashbij(stree: SynTree) -> List[SynTree]:
 
     The function *voslashbij* uses the function *auxvobij* to find non-adjacent R-pronoun + adposition cases:
 
-    .. autofunction:: queryfunctions::auxvobij
+    .. autofunction:: sastadev.queryfunctions::auxvobij
           :noindex:
 
 
@@ -198,7 +204,18 @@ vudiversxpath = """
 def vudivers(syntree: SynTree) -> List[SynTree]:
 
     expandedvudiversxpath = expandmacros(vudiversxpath)
+    expandedvudiversxpath = expandmacros(vudiversxpath)
     rawresults = syntree.xpath(expandedvudiversxpath)
     heresults = hequery(syntree)
     results = [result for result in rawresults if result not in heresults]
     return results
+
+def tarsp_mvzn(stree: SynTree) -> List[SynTree]:
+     mvzns = stree.xpath(mvznxpath)
+     realmvzns = [mvzn for mvzn in mvzns if any([mvzn.attrib['word'].endswith(suf) for suf in mvznsuffixes])]
+     return realmvzns
+
+def tarsp_verkl(stree: SynTree) -> List[SynTree]:
+    verkls = stree.xpath(verklxpath)
+    realverkls = [verkl for verkl in verkls if any([verkl.attrib['word'].endswith(suf) for suf in verklsuffixes])]
+    return realverkls

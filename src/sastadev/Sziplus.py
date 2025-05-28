@@ -3,14 +3,14 @@ The module *Sziplus* implements two TARSP language measures:
 
 * Vr5+: through the function *vr5plus*:
 
-  .. autofunction:: Sziplus::vr5plus
+  .. autofunction:: sastadev.Sziplus::vr5plus
 
   In the meantime a different implementation using macros has replaced this function,
   so it has become obsolete
 
 * 6+: through the function *sziplus6*:
 
-  .. autofunction:: Sziplus::sziplus6
+  .. autofunction:: sastadev.Sziplus::sziplus6
 
 '''
 
@@ -56,7 +56,7 @@ def isindexnode(node: SynTree) -> bool:
 
     The function *noposcatin* is defined as follows:
 
-    .. autofunction:: Sziplus::noposcatin
+    .. autofunction:: sastadev.Sziplus::noposcatin
 
     * **Remark** The function *noposcatin* is better replaced by a function that checks for the absence of the attributes *cat* and *word*.
 
@@ -70,7 +70,7 @@ def isvcinforppart(node: SynTree) -> bool:
     The function *isvcinforppart* determines whether a node is a node for a nonfinite
     verbal complement. That is the case if
 
-    *  its category is one of *inf*, *teinf*, or *ppart*
+    * its category is one of *inf*, *teinf*, or *ppart*
     * its relation has the value *vc*
 
     '''
@@ -85,16 +85,16 @@ def isvcinforppart(node: SynTree) -> bool:
 
 def isrealnode(node: SynTree) -> bool:
     '''
-    The fucntion *isrealnode* determines whether a nide is a real node, which it is if:
+    The function *isrealnode* determines whether a node is a real node, which it is if:
 
     * it is not a node for an interpunction sign
     * it is not a nonfinite complement
     * if it is not a separable particle word of a verb
-    * if it is not an index node 9as detemined by the function *isindexnode*)
+    * if it is not an index node (as determined by the function *isindexnode*)
 
     The function *isindexnode* is defined as follows:
 
-    .. autofunction:: Sziplus::isindexnode
+    .. autofunction:: sastadev.Sziplus::isindexnode
     '''
     pt = getattval(node, 'pt')
     rel = getattval(node, 'rel')
@@ -102,7 +102,7 @@ def isrealnode(node: SynTree) -> bool:
         result = False
     elif isvcinforppart(node):
         result = False
-    elif rel == 'svp' and 'pt' in node.attrib:
+    elif rel == 'svp' and 'word' in node.attrib:
         result = False
     elif isindexnode(node):
         result = False
@@ -134,11 +134,11 @@ def getnodecount(clause: SynTree) -> int:
 
     The function *isrealnode* is defined as follows:
 
-    .. autofunction:: Sziplus::isrealnode
+    .. autofunction:: sastadev.Sziplus::isrealnode
 
     The function *isvcinforppart* is defined as follows:
 
-    .. autofunction:: Sziplus::isvcinforppart
+    .. autofunction:: sastadev.Sziplus::isvcinforppart
 
     '''
     nodectr = 0
@@ -157,11 +157,11 @@ def sziplus(syntree: SynTree, i: int) -> List[SynTree]:
     The function *sziplus* takes a SynTree *syntree* and an integer *i* and uses the
     function *nodeiplus* by applying it to  *syntree*, *i*, and *clausequery*:
 
-    .. autodata:: Sziplus::clausequery
+    .. autodata:: sastadev.Sziplus::clausequery
 
     The function *nodeiplus* is defined as follows:
 
-    .. autofunction:: Sziplus::nodeiplus
+    .. autofunction:: sastadev.Sziplus::nodeiplus
 
     '''
     results = nodeiplus(syntree, i, clausequery)
@@ -178,11 +178,12 @@ def vr5plus(syntree: SynTree) -> List[SynTree]:
 
     The Xpath *vrquery* is defined as follows:
 
-    .. autodata:: Sziplus::vrquery
+    .. autodata:: sastadev.Sziplus::vrquery
 
     The function *nodeiplus* is defined as follows:
 
-    .. autofunction:: Sziplus::nodeiplus
+    .. autofunction:: sastadev.Sziplus::nodeiplus
+
     '''
     results = nodeiplus(syntree, 5, vrquery)
     return results
@@ -198,7 +199,8 @@ def nodeiplus(syntree: SynTree,
 
     It makes use of the function *getnodecount*, which is defined as follows:
 
-    .. autofunction:: Sziplus::getnodecount
+    .. autofunction:: sastadev.Sziplus::getnodecount
+
     '''
     clauses = syntree.xpath(query)
     results = []
@@ -211,14 +213,12 @@ def nodeiplus(syntree: SynTree,
 
 def sziplus6(syntree: SynTree) -> List[SynTree]:
     '''
-    The function *sziplus6* implements the TARSP language measure *6+*. It makes use of
-    the function *sziplus*, which is applied to the *syntree* in combination with the
-    integer *6*.
+    The function *sziplus6* implements the TARSP language measure *6+*. It makes use of the function *sziplus*, which is applied to the *syntree* in combination with the     integer *6*.
 
-    .. autofunction:: Sziplus::sziplus
+    .. autofunction:: sastadev.Sziplus::sziplus
 
-    * **Remark** The function *sziplus* was written in an early stage, but probably can now be better
-    rewritten as a composed language measure.
+    * **Remark** The function *sziplus* was written in an early stage, but probably can now be better  rewritten as a composed language measure.
+
 
     '''
     results = sziplus(syntree, 6)

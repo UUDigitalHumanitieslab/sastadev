@@ -3,7 +3,7 @@ This module contains definitions of types used in multiple modules
 """
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from typing_extensions import TypeAlias
 
 from lxml import etree
@@ -50,6 +50,7 @@ QId = str  # in the future perhaps NewType('QId', str)
 UttId = str  # in the future perhaps NewType('UttId', str)
 Position = int  # in the future perhaps NewType('Position', int)
 PositionStr = str
+Relation = str
 Stage = int
 SynTree = etree._Element  # type: ignore
 GoldTuple = Tuple[str, str, Counter]
@@ -79,6 +80,8 @@ Span = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict = Dict[Item_Level, QId]
 Nort = Union[SynTree, Token]
 ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
+Table = List[List[Any]]
+Header = List[str]
 Targets = int
 Treebank = etree.Element
 TreePredicate = Callable[[SynTree], bool]
@@ -116,6 +119,10 @@ UttWordDict: TypeAlias = Dict[UttId, List[str]]
 WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode],
                             Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
 XpathExpression = str
+
+MethodVariant = str
+DataSetName = str
+HeadedTable = Tuple[Header, Table]
 # moved the following to allresults.py
 # CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 # PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]

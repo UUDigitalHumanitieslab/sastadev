@@ -188,7 +188,7 @@ def incompletetreeleaves(stree: SynTree) -> List[SynTree]:
     The function *incompletetreeleaves returns a list of all nodes for words that are
     part of an incomplete sentence. A sentence is incomplete if it matches a query from the list of queries in the variable *incompletexpaths*.
 
-    .. autodata:: dedup::incompletexpaths
+    .. autodata:: sastadev.dedup::incompletexpaths
 
     '''
     results = []
@@ -222,7 +222,7 @@ def isfilledpausenort(nort: Nort) -> bool:
     '''
     The function *isfilledpausenort* returns the result of the function *isfilledpause* applied to the *word* of *nort*.
 
-      * .. autofunction:; dedup::isfilledpause
+      * .. autofunction:: sastadev.dedup::isfilledpause
     '''
 
     theword = getword(nort)
@@ -235,7 +235,7 @@ def getfilledpauses(nortlist: List[Nort]) -> List[Nort]:
     The function *getfilledpauses returns Norts that are in nortlist for which the
     function *isfilledpausenort* yields True.
 
-      * .. autofunction:: dedup::isfilledpausenort
+      * .. autofunction:: sastadev.dedup::isfilledpausenort
 
     '''
     resultlist = [tok for tok in nortlist if isfilledpausenort(tok)]
@@ -441,7 +441,7 @@ def normalisestring(str1: str) -> str:
     The function *normalisestring* carries out normalisation by means of the function
     *phoneticise* from the *phonetics* module:
 
-    .. autofunction:: phonetics::phoneticise
+    .. autofunction:: sastadev.phonetics::phoneticise
 
     '''
     result = phoneticise(str1)
@@ -457,7 +457,7 @@ def isnortduplicate(tlist1: List[Nort], tlist2: List[Nort]) -> bool:
     Normalisation is carried out to be robust against certain spelling variations and
     is taken care of by the function *normalisestring*:
 
-    *  .. autofunction:: dedup::normalisestring
+    *  .. autofunction:: sastadev.dedup::normalisestring
 
     '''
     result = True
@@ -559,7 +559,7 @@ def mlux(stree: SynTree) -> List[SynTree]:
     *mlux2* to *stree*. The latter function returns a node list and metadata on the
     excluded word nodes.
 
-    .. autofunction:: dedup::mlux2
+    .. autofunction:: sastadev.dedup::mlux2
 
     '''
     result, _ = mlux2(stree)
@@ -588,25 +588,25 @@ def mlux2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
     * it updates these variables for nodes for filledpauses as found in the :ref:`filledpauseslexicon`
     * it updates these variables for nodes for words and word sequences that are duplicated, using the function *find_simpleduplicates2*:
 
-       * .. autofunction:: dedup::find_simpleduplicates2
+       * .. autofunction:: sastadev.dedup::find_simpleduplicates2
 
     * it updates these variables for nodes for word sequences that are duplicated, using the function *find_duplicates2*:
 
-       * .. autofunction:: dedup::find_duplicates2
+       * .. autofunction:: sastadev.dedup::find_duplicates2
 
     * it updates these variables for nodes for words the prefix of which is a repetition of its successor, where the prefix is larger than 50% of the length of its successor (long duplications). It does so by means of the function *getprefixwords2*:
 
-       * .. autofunction:: dedup::getprefixwords2
+       * .. autofunction::sastadev.dedup::getprefixwords2
 
    * it updates these variables for nodes for unknown words that are a substring of their successor. It does so using the function  *find_substringduplicates2*:
 
-       * .. autofunction:: dedup::find_substringduplicates2
+       * .. autofunction:: sastadev.dedup::find_substringduplicates2
 
    * it updates these variables for nodes for words that consist of consonants only
    * it updates these variables for nodes for words in incomplete sentences.
    Determining the incompleteness of a sentence is very difficult and is so far only done for a limited number of sentence types. It uses the function *incompletetreeleaves* for this purpose:
 
-      * .. autofunction:: dedup::incompletetreeleaves
+      * .. autofunction:: sastadev.dedup::incompletetreeleaves
 
    The function does not (yet) deal with:
     *  false starts, e.g. word + *nee* / *eh* word;  w of pos1 w of pos1
@@ -871,7 +871,7 @@ def getunwantedtokens(nortlist: List[Nort]) -> List[Nort]:
     The function *getunwantedtokens* returns nodes for tokens that are to be discarded
     for sample size as defined in the constant *unwantedtokenlist*
 
-       * .. autodata:: dedup::unwantedtokenlist
+       * .. autodata:: sastadev.dedup::unwantedtokenlist
 
     '''
     results = []
@@ -887,7 +887,7 @@ def samplesize(stree: SynTree) -> List[SynTree]:
     The function *samplesize* yields the tokens to be excluded from the samplesize. It does so by applying the function
     *samplesize2* and ignoring the DupInfo object that is returned in the tuple.
 
-    .. autofunction:: dedup::samplesize2
+    .. autofunction:: sastadev.dedup::samplesize2
 
     '''
     result, _ = samplesize2(stree)
@@ -913,17 +913,17 @@ def samplesize2(stree: SynTree) -> Tuple[List[SynTree], DupInfo]:
     * The function first adds nodes to the *resultlist* that have been found by the *reduce* function in the correction module and that are represented in the metadata.
     * It next adds nodes for symbols that should be discarded. It obtains these nodes via the function *getunwantedtokens*
 
-        * .. autofunction:: dedup::getunwantedtokens
+        * .. autofunction:: sastadev.dedup::getunwantedtokens
 
 
     * It adds nodes for interjections and filledpauses to the resultlist via the function *getfilledpauses*
 
-        * .. autofunction:: dedup::getfilledpauses
+        * .. autofunction:: sastadev.dedup::getfilledpauses
 
     * It adds duplicates of the words *ja*, *nee*, *nou*
     * It adds short repetitions in the tokenlist with *ja*, *nee*, *nou* removed by applying the function *getprefixwords2*
 
-        * .. autofunction:: dedup::getprefixwords2
+        * .. autofunction:: sastadev.dedup::getprefixwords2
 
     '''
 

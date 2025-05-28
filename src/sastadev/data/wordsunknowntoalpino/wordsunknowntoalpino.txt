@@ -1,9 +1,14 @@
 gymmen	trainen
 gymt	traint
 gym	train
+gym	gymnastiek
 gegymd	getraind
 gymmend	trainend
 gymmende	trainende
 gymmenden	trainenden
 gymde	trainde
 gymden	trainden
+smarties	toffees
+Smarties	toffees
+smartie	toffee
+Smartie	toffee

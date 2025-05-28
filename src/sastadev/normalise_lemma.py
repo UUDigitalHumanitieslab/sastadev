@@ -4,7 +4,7 @@ lemma for the compound parts separated by underscores.
 
 Example: word = verkeerslichtjes. Alpino lemma = verkeer_licht.
 But for many applications we need the 'normal' lemma for such as compound, i.e.
-for *verkeerslichtje* that is *verkeersicht*. This is achieved by the function *normalizelemma*
+for *verkeerslichtje* that is *verkeerslicht*. This is achieved by the function *normalizelemma*
 
 The function has been tested against all noun compounds in Lassy-Klein
 

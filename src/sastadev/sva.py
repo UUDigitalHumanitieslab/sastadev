@@ -1,3 +1,4 @@
+import copy
 from typing import List
 
 from lxml import etree
@@ -5,7 +6,7 @@ from lxml import etree
 from sastadev.conf import settings
 from sastadev.lexicon import (getinflforms, getwordposinfo, informlexiconpos,
                               pvinfl2dcoi)
-from sastadev.metadata import bpl_node, mkSASTAMeta
+from sastadev.metadata import bpl_node_nolemma, bpl_word, mkSASTAMeta
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree, UttId
 from sastadev.tokenmd import TokenListMD
@@ -411,6 +412,7 @@ def ti(node: SynTree, tree: SynTree) -> bool:
 
 def getsvacorrectedutt(snode, thepv, tokens, metadata):
     newtokens = []
+    newmetadata = copy.deepcopy(metadata)
     pvbegin = getattval(thepv, 'begin')
     inversion = inverted(snode, thepv)
     reducedtokens = [t for t in tokens if not t.skip]
@@ -427,10 +429,10 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
                 oldtoken = token
                 newtokens.append(newtoken)
                 meta = mkSASTAMeta(oldtoken, newtoken, name='GrammarError', value='SVAerror', cat='Error',
-                                   backplacement=bpl_node)
-                metadata.append(meta)
+                                   backplacement=bpl_node_nolemma)
+                newmetadata.append(meta)
 
-        results = [TokenListMD(newtokens, metadata)]
+        results = [TokenListMD(newtokens, newmetadata)]
     return results
 
 
@@ -489,7 +491,7 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> 
     else:
         tree = indextransform(rawtree)
         tokens = tokensmd.tokens
-        metadata = tokensmd.metadata
+        metadata = copy.deepcopy(tokensmd.metadata)
         ltokens = len(tokens)
         newtokens = []
 

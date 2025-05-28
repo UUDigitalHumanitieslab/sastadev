@@ -22,7 +22,7 @@ def phoneticise(instr: str) -> str:
     The function *phoneticise* carries out substitutions for string patterns as given
     in the variable *replacements* derived from the variable *replacementpatterns*.
 
-    .. autodata:: phonetics::replacementpatterns
+    .. autodata:: sastadev.phonetics::replacementpatterns
 
     '''
     result = instr

@@ -144,7 +144,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from optparse import OptionParser
-from typing import Any, Callable, Dict, List, Pattern, Tuple
+from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple
 
 import xlsxwriter
 from lxml import etree
@@ -154,48 +154,54 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
                                  ResultsKey, mkresultskey, scores2counts,
                                  showreskey)
 from sastadev.conf import settings
-from sastadev.constants import (bronzefolder, bronzesuffix, checkeditedsuffix,
-                                checksuffix, formsfolder, intreebanksfolder,
-                                loggingfolder, outtreebanksfolder, permprefix,
-                                platinumeditedsuffix, platinumsuffix,
-                                resultsfolder, silverfolder, silverpermfolder,
-                                silversuffix)
+from sastadev.constants import (analysissuffix, bronzefolder, bronzesuffix,
+                                byuttscoressuffix, checksuffix, formsfolder,
+                                intreebanksfolder, loggingfolder,
+                                outtreebanksfolder, resultsfolder,
+                                silverfolder, silverpermfolder, silversuffix)
+from sastadev.context import getcontextdict
+from sastadev.correctionparameters import CorrectionParameters
 from sastadev.correcttreebank import (corr0, correcttreebank, corrn,
                                       errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
+from sastadev.datasets import dsname2ds
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
-from sastadev.history import (donefiles, donefilesfullname, gathercorrections,
+from sastadev.history import (adult_samplecorrections,
+                              adult_samplecorrectionsfullname,
+                              children_samplecorrections,
+                              children_samplecorrectionsfullname, donefiles,
+                              donefilesfullname, gathercorrections,
                               mergecorrections, putcorrections,
-                              putdonefilenames, samplecorrections,
-                              samplecorrectionsfullname)
+                              putdonefilenames)
 from sastadev.macros import expandmacros
-from sastadev.methods import (Method, astamethods, stapmethods,
-                              supported_methods, tarspmethods, treatmethod)
+from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, literalmissedmatches
-from sastadev.permcomments import getallcomments, pcheaders
+from sastadev.permcomments import (getallcomments, pcheaders,
+                                   platinumcheck_column_widths)
 from sastadev.query import (Query, is_preorcore, post_process, query_exists,
                             query_inform)
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.reduceresults import (exact2results, reduceallresults,
-                                    reduceexactgoldscores, reduceresults)
+from sastadev.reduceresults import exact2results, reduceexactgoldscores
+from sastadev.resultsbyutterance import (byuttheader, mkscoresbyuttrows,
+                                         silverf1col)
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
                                 richscores2scores)
+from sastadev.sas_impact import mksas_impactrows, sas_impact
 from sastadev.sastacore import (SastaCoreParameters, doauchann, dopostqueries,
-                                getreskey, isxpathquery, sastacore)
-from sastadev.sastatypes import (AltCodeDict, ExactResultsDict, FileName,
-                                 GoldTuple, MatchesDict, MethodName, QId,
-                                 QIdCount, QueryDict, ResultsCounter, SynTree,
-                                 TreeBank, UttId)
+                                isxpathquery, sastacore)
+from sastadev.sastatypes import (AltCodeDict, DataSetName, ExactResultsDict,
+                                 FileName, GoldTuple, MatchesDict,
+                                 MethodVariant, QId, QIdCount, QueryDict,
+                                 ResultsCounter, SynTree, TreeBank, UttId)
 from sastadev.SRFreader import read_referencefile
-from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets, target_all
-from sastadev.treebankfunctions import (find1, getattval, getnodeendmap,
-                                        getuttid, getxmetatreepositions,
-                                        getxsid, getyield, showtree)
-from sastadev.xlsx import mkworkbook
+from sastadev.treebankfunctions import (find1, getattval,
+                                        getxmetatreepositions, getxsid,
+                                        getyield, showtree)
+from sastadev.xlsx import add_worksheet, mkworkbook
 
 start_time = time.time()
 
@@ -273,6 +279,7 @@ altcodes: AltCodeDict = {}
 
 emptycounter: Counter = Counter()
 invalidqueries: Dict[QId, Exception] = {}
+
 
 
 def checkplatinum(goldscores: Dict[ResultsKey, Counter], platinumscores: Dict[ResultsKey, Counter],
@@ -810,9 +817,17 @@ def addxsid(xsid, stree: SynTree) -> SynTree:
     return outstree
 
 
+def getmax_xsid(treebank: TreeBank) -> int:
+    xsids = treebank.xpath('.//meta[@name="xsid"]/@value')
+    intxsids = [int(xsid) for xsid in xsids]
+    max_xsid = max(intxsids) if intxsids != [] else 0
+    return max_xsid
+
+
 def tb_addxsid(treebank: TreeBank, targets) -> TreeBank:
     newtreebank = etree.Element('treebank')
-    newxsidcounter = 0
+    max_xsid = getmax_xsid(treebank)
+    newxsidcounter = max_xsid + 1
     for syntree in treebank:
         mustbedone = get_mustbedone(syntree, targets)
         if mustbedone:
@@ -830,6 +845,29 @@ def tb_addxsid(treebank: TreeBank, targets) -> TreeBank:
         newtreebank.append(newsyntree)
     return newtreebank
 
+def getdatasetname(fn: FileName) -> DataSetName:
+    r"""
+    gets the dataset name that the file belongs to
+    :param fn: has the form r"D:\Dropbox\jodijk\Utrecht\Projects\SASTADATA\VKLTarsp\intreebanks\TARSP_08.xml"
+    :return: the name of the folder that is the dataset (VKLTarsp for the input example)
+    """
+
+    head1, tail1 = os.path.split(fn)
+    head2, tail2 = os.path.split(head1)
+    head3, tail3 = os.path.split(head2)
+    return tail3
+
+def getvariant(infilename:FileName, optionsvariant: Optional[str]) -> Optional[MethodVariant]:
+    if optionsvariant is not None:
+        return optionsvariant
+    ds = getdatasetname(infilename)
+    dslc = ds.lower()
+    if dslc in dsname2ds:
+        result = dsname2ds[dslc].variant
+    else:
+        result = None
+    return result
+
 
 
 def main():
@@ -839,6 +877,8 @@ def main():
     parser.add_option("-m", "--method", dest="methodname",
                       help="Name of the method or (for backwards compatibility) "
                            "file containing definition of assessment method (SAM)")
+    parser.add_option("-v", "--variant", dest="variant",
+                      help="Name of the variant of the method ")
     parser.add_option("-a", "--anno", dest="annotationfilename",
                       help="SASTA Annotation Format File containing annotations to derive a  reference")
     parser.add_option("-g", "--gold", dest="goldfilename",
@@ -856,6 +896,16 @@ def main():
                            "n=correction with multiple alternatives (default) ")
     parser.add_option("--mf", "--mfile", dest="methodfilename",
                       help="File containing definition of assessment method (SAM)")
+    parser.add_option("--no_spell",  dest="dospellingcorrection", action="store_false",
+                      help="Do no spelling correction")
+    parser.add_option("--no_auchann", dest="doauchann", action="store_false",
+                      help="Do no Automatic CHAT annotation (AuCHAnn)")
+    parser.add_option("--no_history", dest="dohistory", action="store_false",
+                      help="Do no History Creation")
+    parser.add_option("--no_history_extension", dest="extendhistory", action="store_false",
+                      help="Use History but do not extend it")
+
+
 
     (options, args) = parser.parse_args()
 
@@ -879,6 +929,20 @@ def main():
         settings.LOGGER.error(
             'File {} not found. Aborting'.format(options.infilename))
         exit(1)
+
+    if options.dospellingcorrection is None:
+        options.dospellingcorrection = True
+
+    if options.doauchann is None:
+        options.doauchann = True
+
+    if options.dohistory is None:
+        options.dohistory = True
+
+    if options.extendhistory is None:
+        options.extendhistory = True
+
+
     (inbase, inext) = os.path.splitext(options.infilename)
     basepath, basefilename = os.path.split(options.infilename)
     corepath, lastfolder = os.path.split(basepath)
@@ -976,12 +1040,15 @@ def main():
         else:
             options.goldcountsfilename = inbase + ".goldcounts" + xlsxext
 
+    # determine the method variant to be used
+    variant = getvariant(options.infilename, options.variant)
+
     # adapted this so that the method is read in directly as a Method object
     # (queries, item2idmap, altcodes, postorformquerylist) = read_method(options.methodname, options.methodfilename)
     # defaultfilter = defaultfilters[options.methodname]
     # themethod = Method(options.methodname, queries, item2idmap, altcodes, postorformquerylist,
     #                   options.methodfilename, defaultfilter)
-    themethod = read_method(options.methodname, options.methodfilename)
+    themethod = read_method(options.methodname, options.methodfilename, variant=variant)
 
     # print('annotationfilename=', options.annotationfilename, file=sys.stderr )
 
@@ -1124,32 +1191,55 @@ def main():
                               options.includeimplies, options.infilename, targets)
 
     if not annotationinput:
-        treebank1 = doauchann(origtreebank)
+        if options.doauchann:
+            treebank1 = doauchann(origtreebank)
+        else:
+            treebank1 = origtreebank
 
         methodname = scp.themethod.name
         corr = scp.corr
         themethod = scp.themethod
 
-        # add xsid to trees that should have one but do not
-        treebank2 = tb_addxsid(treebank1, targets)
+        # add xsid to trees that should have one but do not; put off becuase not needed anymore
+        # treebank2 = tb_addxsid(treebank1, targets)
+        treebank2 = treebank1
 
-        if corr != corr0:
-            reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
-            if reducedtreebankfullname not in donefiles:
-                thissamplecorrections = gathercorrections(treebank2)
+        thissamplecorrections = {}
+        if options.dohistory:
+            if options.methodname.lower() in {'tarsp', 'stap'}:
+                samplecorrectionsfullname = children_samplecorrectionsfullname
+                samplecorrections = children_samplecorrections
+            elif options.methodname.lower() in {'asta'}:
+                samplecorrectionsfullname = adult_samplecorrectionsfullname
+                samplecorrections = adult_samplecorrections
+            else: # should not occur
+                settings.LOGGER.error(f'Illegal method name used: {options.method}')
+                exit(-1)
+            if corr != corr0:
+                reducedtreebankfullname = os.path.relpath(options.infilename, start=settings.DATAROOT)
+                if reducedtreebankfullname not in donefiles:
+                    thissamplecorrections = gathercorrections(treebank2)
+                else:
+                    thissamplecorrections = {}
+                # merge the corrections from this sample with the samplecorrections and update the file
+                if options.extendhistory:
+                    mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
+                    putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
+                    donefiles.add(reducedtreebankfullname)
+                    putdonefilenames(donefiles, donefilesfullname)
+                else:
+                    mergedsamplecorrections = samplecorrections
             else:
-                thissamplecorrections = {}
-            # merge the corrections from this sample with the samplecorrections and update the file
-            mergedsamplecorrections = mergecorrections(samplecorrections, thissamplecorrections)
-            putcorrections(mergedsamplecorrections, samplecorrectionsfullname)
-            donefiles.add(reducedtreebankfullname)
-            putdonefilenames(donefiles, donefilesfullname)
+                mergedsamplecorrections = samplecorrections
         else:
-            mergedsamplecorrections = samplecorrections
+            mergedsamplecorrections = {}
 
+        contextdict = getcontextdict(treebank2, lambda x: True)
 
+        correctionparameters = CorrectionParameters(methodname, options, mergedsamplecorrections,
+                                                    thissamplecorrections, treebank2, contextdict)
 
-        treebank, errordict, allorandalts = correcttreebank(treebank2, targets, methodname, mergedsamplecorrections, corr)
+        treebank, errordict, allorandalts = correcttreebank(treebank2, targets,  correctionparameters, corr=corr)
 
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)
@@ -1216,12 +1306,27 @@ def main():
     silverscores = exact2results(exactsilverscores)  # ongoing
     silvercounts = scores2counts(silverscores)
 
+    # scores by utterance
+    # bronzescoresbyutt = getscoresbyutt(allresults.coreresults, goldscores)
+    # silverscoresbyutt = getscoresbyutt(allresults.coreresults, silverscores)
+
+    byuttrows = mkscoresbyuttrows(allresults, goldscores, silverscores, themethod)
+    not100count = len([row for row in byuttrows if row[silverf1col] != 100])
+    scoresbyuttoutfullname = os.path.join(resultspath, corefilename + byuttscoressuffix + '.xlsx')
+    wb = mkworkbook(scoresbyuttoutfullname, [byuttheader], byuttrows, freeze_panes=(1,0) )
+    allbyuttscores = sas_impact(allresults.coreresults, silverscores, themethod)
+    sasheader, sasimpactrows = mksas_impactrows(allbyuttscores, not100count)
+    add_worksheet(wb,[sasheader], sasimpactrows, sheetname='SAS_impact', freeze_panes=(1,0))
+    wb.close()
+
+
+
     # netx is now obsolete
     # platinumresults: Dict[ResultsKey, Counter] = reduceresults(platinumresults, samplesizetuple, options.methodname)
 
     (base, ext) = os.path.splitext(options.infilename)
     outputfullname = os.path.join(
-        resultspath, corefilename + "_analysis" + tsvext + txtext)
+        resultspath, corefilename + analysissuffix + tsvext + txtext)
     outfile = open(outputfullname, 'w', encoding='utf8')
 
     outxlsx = os.path.join(resultspath, corefilename + "_analysis" + xlsxext)
@@ -1309,7 +1414,7 @@ def main():
     allrows += literalmissedrows
 
     # breakpoint()
-    platinumcheck_column_widths = {'F:F': 9, 'G:G': 8.11, 'K:K': 6.44, 'L:L': 5.44, 'M:M': 26, 'N:N': 26, 'O:O': 26 }
+
     wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9),
                     column_widths=platinumcheck_column_widths)
     wb.close()
