@@ -29,18 +29,18 @@ def get_predc_v_mismatches(stree: SynTree) -> List[SynTree]:
     results = []
     matches1 = stree.xpath(predcvxpath1)
     for match in matches1:
-        headverb = find1(match, f'./node[{headverb}]')
-        predc = find1(match, f'./node[{nppred}]')
-        pvagr = gav(headverb, 'pvagr')
+        theheadverb = find1(match, f'./node[{headverb}]')
+        predc = find1(match, f'./node[{nppred}]/node[@rel="hd"]')
+        pvagr = gav(theheadverb, 'pvagr')
         getal = gav(predc, 'getal')
         if not compatible(pvagr, getal):
             results.append(match)
 
-    matches2 = stree.xpath(predcvxpath1)
+    matches2 = stree.xpath(predcvxpath2)
     for match in matches2:
-        headverb = find1(match, f'./node[{headverb}]')
+        theheadverb = find1(match, f'./node[{headverb}]')
         predc = find1(match, f'./node[{npred}]')
-        pvagr = gav(headverb, 'pvagr')
+        pvagr = gav(theheadverb, 'pvagr')
         getal = gav(predc, 'getal')
         if not compatible(pvagr, getal):
             results.append(match)

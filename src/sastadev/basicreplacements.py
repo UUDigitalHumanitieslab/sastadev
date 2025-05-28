@@ -70,6 +70,7 @@ voweldel = 'vowel deletion'
 avoidambiguity = 'Avoiding ambiguity'
 wwnambiguity = 'Verb - Noun ambiguity'
 pnnambiguity = 'Person name - combined surname ambiguity'
+ww_vnw_ambiguity = 'Verb - Pronoun ambiguity'
 
 
 def combine(strlist: List[str]) -> str:
@@ -259,7 +260,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('drinken', 'voedsel',  avoidambiguity, wwnambiguity, wwnambiguity, dp ),
                                                 ('heelboel', 'heleboel', pron, infpron, schwadrop, dp),
                                                 ('jou', 'jouw', pron, infpron, codared, -dp), # Td 22, 30 ik wil ook keer naar jou huis find criterion
-                                                ('hun', 'zij', grammar, regionalform, casevariant, mp(0) )
+                                                ('hun', 'zij', grammar, regionalform, casevariant, mp(0) ),
+                                                ('zijn', "z'n", avoidambiguity, avoidambiguity, ww_vnw_ambiguity, dp)
                                                 # ('kijke', 'kijk', pron, infpron, emphasis, dp), # TD05, 32 moved to disambuguationdict
                                                 # ('geel', 'mooi', avoidambiguity, adjnambiguity, dp), #TD05, 24
                                                 # ('Roy', 'Jan', avoidambiguity, pnnambiguity, dp)
@@ -448,6 +450,7 @@ disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
      (dtp, ['Roy'], 'Jan'),
      # (dtp, ['kijke'], 'he'),
      (dtp, ['surf'], 'turf'),
+     # (dtp, ['zijn'], "z'n"),
      (welnietttp, ['wel', 'niet'], 'ietsjes')  # find a different adverb that does not get inside constituents (ietsjes?)
      ]
 

@@ -22,6 +22,7 @@ from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_
                                HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
                                )
 from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp
+from sastadev.predcvagreement import get_predc_v_mismatches
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
@@ -1358,6 +1359,11 @@ def getmaaradvcount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
     return result
 
 
+def get_predc_v_mismatch_count(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    predc_v_mismatches = get_predc_v_mismatches(nt)
+    result = len(predc_v_mismatches)
+    return result
+
 # The constant *criteria* is a list of objects of class *Criterion* that are used, in the order given, to evaluate parses
 criteria = [
     Criterion("unknownwordcount", getunknownwordcount, negative, "Number of unknown words"),
@@ -1376,6 +1382,8 @@ criteria = [
     Criterion('RelativeMainSuborder', getrelasmainsubordercount, negative, 'Number of Main Relative Clauses with subordinate order'),
     Criterion("lonelytoecount", getlonelytoecount, negative, "Number of occurrences of lonely 'toe'"),
     Criterion("noun1c_count", getnoun1c_count, negative, "Number of nouns that consist of a single character"),
+    Criterion("Predc - V mismatches", get_predc_v_mismatch_count, negative, "Number of mismatches between "
+                                                                            "nominal predicate and copular verb"),
     Criterion('ReplacementPenalty', getreplacementpenalty, negative, 'Plausibility of the replacement'),
     Criterion('Total Edit Distance', gettotaleditdistance, negative, "Total of the edit distances for all replaced words"),
     # Criterion('Subcatscore', getsubcatprefscore, positive,
