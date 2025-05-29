@@ -1325,6 +1325,10 @@ def main():
     allbyuttscores = sas_impact(allresults.coreresults, silverscores, themethod)
     sasheader, sasimpactrows = mksas_impactrows(allbyuttscores, not100count)
     add_worksheet(wb,[sasheader], sasimpactrows, sheetname='SAS_impact', freeze_panes=(1,0))
+
+    samplesizetupledata = [[comma.join(samplesizetuple[0]), samplesizetuple[1], samplesizetuple[2]]]
+    samplesizetupleheader = ['utt ids', '# words', 'cutoff']
+    add_worksheet(wb, [samplesizetupleheader], samplesizetupledata, sheetname='SampleSizeTuple', freeze_panes=(1,0))
     wb.close()
 
 
