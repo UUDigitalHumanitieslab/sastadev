@@ -1485,17 +1485,17 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             penalty = basepenalties[THISSAMPLECORRECTIONS] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
             if (token.word, hc.correction) not in basicreplacementpairs:
-                if hc.correctiontype == 'noncompletion':
+                if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
                                                     source=f'{SASTA}/{THISSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'replacement':
+                elif hc.correctiontype == correctionlabels.replacement:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.replacement, value='', cat='TBD',
                                                     source=f'{SASTA}/{THISSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'explanation':
+                elif hc.correctiontype == correctionlabels.explanation:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.explanation, value='', cat='TBD',
                                                     source=f'{SASTA}/{THISSAMPLECORRECTIONS}',
@@ -1513,17 +1513,17 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             penalty = basepenalties[ALLSAMPLECORRECTIONS] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
             if (token.word, hc.correction) not in basicreplacementpairs:
-                if hc.correctiontype == 'noncompletion':
+                if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
                                                     source=f'{SASTA}/{ALLSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'replacement':
+                elif hc.correctiontype == correctionlabels.replacement:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.replacement, value='', cat='TBD',
                                                     source=f'{SASTA}/{ALLSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'explanation':
+                elif hc.correctiontype == correctionlabels.explanation:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.explanation, value='', cat='TBD',
                                                     source=f'{SASTA}/{ALLSAMPLECORRECTIONS}',
@@ -1548,17 +1548,17 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             penalty = basepenalties[HISTORY] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
             if (token.word, hc.correction) not in basicreplacementpairs:
-                if hc.correctiontype == 'noncompletion':
+                if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
                                                     source=f'{SASTA}/{HISTORY}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'replacement':
+                elif hc.correctiontype == correctionlabels.replacement:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.replacement, value='', cat='TBD',
                                                     source=f'{SASTA}/{HISTORY}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'explanation':
+                elif hc.correctiontype == correctionlabels.explanation:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.explanation, value='', cat='TBD',
                                                     source=f'{SASTA}/{HISTORY}',
@@ -1602,7 +1602,8 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
         for nw, metavalue in nwms:
             if validword(nw, methodname):
                 newtokenmds += updatenewtokenmds(newtokenmds, token, [nw], beginmetadata,
-                                                 name=correctionlabels.inflectionerror, value=metavalue, cat=correctionlabels.morphology,
+                                                 name=correctionlabels.morphologicalerror, value=metavalue,
+                                                 cat=correctionlabels.morphology,
                                                  backplacement=bpl_word)
 
     # wrong verb forms: gekeekt -> gekeken: done!

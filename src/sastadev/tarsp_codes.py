@@ -18,11 +18,43 @@ Vcombinations = {}
 VBcombinationsbystage = {}
 Vcombinationsbystage = {}
 
+noVcombinations = {}
+noVcombinationsbystage = {}
 
-stage2noVcombinations = ['T030', 'T064', 'T071', 'T078']         # BX OndB OndVC Ov2
-stage3noVcombinations = ['T014', 'T065', 'T079', 'T140']         # BBX OndBVC Ov3 Xneg
+noVcombinationsbystage[stage2] = ['T030', 'T035', 'T064', 'T071', 'T078']         # BX een OndB OndVC Ov2: all 2
+noVcombinationsbystage[stage3] = ['T014', 'T065', 'T079', 'T140', 'T027', 'T117']
+    # BBX (3) OndBVC (3) Ov3 (3) Xneg (2) # BvZn (2)  VzN (2)
+noVcombinationsbystage[stage4] =  ['T010', 'T012', 'T013', 'T016', 'T017', 'T025', 'T032',
+                                   'T033', 'T083', 'T111', 'T116', 'T147', 'T156']
+                                #    BBBv (3) Bbv/B (2) BBvZn (3) BepZnBv (3) BezZn (2) BvBepZn (3)  de (2)
+                                #    die/dezeZn (2)  Ov4 (4) Vr(XY) (2) VzBepZn (3)  OvZnBv4 (3) ZnZn (2)
 
-Vcombinationsbystage[(stage2, decl)] = ['T030', 'T072','T099', 'T140']
+noVcombinationsbystage[stage5] = ['T015', 'T115', 'T034', 'T042', 'T084']
+                                # BepBvZn (3) BvBepZn (3) dit/datZn (2) hetZn (2) Ov5 (5)
+
+noVcombinationsbystage[stage6] = ['T038', 'T114', 'T138']
+                                # geen X (2) VzB (2) XenX (3)
+
+noVcombinationsbystage[stage7] = ['T115']
+                                # VzBepBvZn (4)
+
+noVcombinations[2] = ['T030', 'T035', 'T064', 'T071', 'T078'] + \
+                     ['T140', 'T027', 'T117'] + \
+                     ['T012', 'T017',  'T032', 'T033', 'T111', 'T156'] + \
+                     ['T034', 'T042'] + \
+                     ['T038', 'T114'] + \
+                     []
+noVcombinations[3] = ['T014', 'T065', 'T079'] + \
+                     ['T010', 'T013', 'T016', 'T025', 'T116', 'T147'] + \
+                     ['T015', 'T115'] + \
+                     ['T138']
+
+noVcombinations[4] = ['T083'] + ['T115']
+
+noVcombinations[5] = ['T084']
+
+
+Vcombinationsbystage[(stage2, decl)] = ['T030', 'T072', 'T099', 'T140']
 Vcombinationsbystage[(stage2, question)] = ['T001']              # because an utterance can consist of two words: is
 # dat ?
 VBcombinationsbystage[stage2] = ['T030', 'T064']
@@ -90,5 +122,6 @@ V1questioncodes = ['T001', 'T129', 'T130', 'T131']
 noV1questioncodes = ['T111', 'T112', 'T113']
 
 allVcombinations = list(itertools.chain.from_iterable([Vcombinations[tuple] for tuple in Vcombinations]))
+allnoVcombinations = list(itertools.chain.from_iterable([noVcombinations[tuple] for tuple in noVcombinations]))
 
 allVBcombinations = list(itertools.chain.from_iterable([VBcombinations[stage] for stage in VBcombinations]))

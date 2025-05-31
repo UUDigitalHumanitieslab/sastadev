@@ -1,6 +1,7 @@
 from collections import defaultdict, Counter
 import copy
 from dataclasses import dataclass
+from sastadev import correctionlabels
 from sastadev.basicreplacements import innereplacements, innureplacements
 from sastadev.CHAT_Annotation import CHAT_explanation, CHAT_replacement, CHAT_wordnoncompletion
 from sastadev.cleanCHILDEStokens import cleantext
@@ -28,14 +29,18 @@ class HistoryCorrection:
 HistoryCorrectionDict = Dict[str, List[HistoryCorrection]]
 space = ' '
 eps = ''
-nocorrectiontype = 'nocorrectiontype'
 
-correctionset = [nocorrectiontype, CHAT_explanation, CHAT_replacement, CHAT_wordnoncompletion]
+correctionset = [correctionlabels.nocorrectiontype,
+                 CHAT_explanation, correctionlabels.explanation,
+                 CHAT_replacement, correctionlabels.replacement,
+                 CHAT_wordnoncompletion, correctionlabels.noncompletion]
 
-chatshorttypedict = {CHAT_explanation: 'explanation',
-                     CHAT_wordnoncompletion: 'noncompletion',
-                     CHAT_replacement: 'replacement',
-                     nocorrectiontype: nocorrectiontype}
+chatshorttypedict = {CHAT_explanation: correctionlabels.explanation,
+                     CHAT_wordnoncompletion: correctionlabels.noncompletion,
+                     CHAT_replacement: correctionlabels.replacement,
+                     correctionlabels.nocorrectiontype: correctionlabels.nocorrectiontype,
+                     correctionlabels.noncompletion: correctionlabels.noncompletion,
+                     correctionlabels.explanationasreplacement:  correctionlabels.replacement}
 
 shortcorrectionset =  [chatshorttypedict[v] for v in correctionset]
 
@@ -73,6 +78,19 @@ def gathercorrections(treebank: TreeBank) -> defaultdict:
         resultdict[wrong].append(newhc)
     return resultdict
 
+def normalise_correctiontype(corrtype: str) -> str:
+    if corrtype == 'noncompletion':
+        result = correctionlabels.noncompletion
+    elif corrtype == 'replacement':
+        result = correctionlabels.replacement
+    elif corrtype == 'explanation':
+        result = correctionlabels.explanation
+    elif corrtype == 'explanationasreplacement':
+        result = correctionlabels.explanationasreplacement
+    else:
+        result = corrtype
+    return result
+
 
 def getcorrections(filename) -> defaultdict:
     resultdict = defaultdict(list)
@@ -81,7 +99,9 @@ def getcorrections(filename) -> defaultdict:
     for i, row in idata:
         wrong = row[0]
         correction = row[1]
-        newhc = HistoryCorrection(wrong=wrong, correction=correction, correctiontype=row[2], frequency=int(row[3]))
+        correctiontype = normalise_correctiontype(row[2])
+        newhc = HistoryCorrection(wrong=wrong, correction=correction, correctiontype=correctiontype,
+                                  frequency=int(row[3]))
         tempdict[(wrong, correction)].append(newhc)
 
     for (wrong, correction) in tempdict:
@@ -91,7 +111,7 @@ def getcorrections(filename) -> defaultdict:
 
 
 def unifycorrections(hcs: List[HistoryCorrection]) -> HistoryCorrection:
-    currentcorrectiontype = nocorrectiontype
+    currentcorrectiontype = correctionlabels.nocorrectiontype
     totalfrq = 0
     for hc in hcs:
         wrong = hc.wrong

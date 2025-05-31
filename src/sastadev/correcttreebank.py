@@ -10,6 +10,7 @@ from lxml import etree
 from sastadev.basicreplacements import basicreplacements
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
+from sastadev import correctionlabels
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips, initialmaarvgxpath)
@@ -175,7 +176,7 @@ def get_origandparsedas(metadatalist: List[MetaElement]) -> Tuple[Optional[str],
     for meta in metadatalist:
         if parsed_as is None or origutt is None:
             key = meta.attrib['name']
-            if key == 'parsed_as':
+            if key == correctionlabels.parsedas:
                 parsed_as = meta.attrib['value']
             if key == 'origutt':
                 origutt = meta.attrib['value']
@@ -661,7 +662,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         # if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
         if correctionwordlist != fatstreewordlist and correctionwordlist != []:
             correction, tokenposlist = mkuttwithskips(correctiontokenlist)
-            cwmdmetadata += [Meta('parsed_as', correction,
+            cwmdmetadata += [Meta(correctionlabels.parsedas, correction,
                                   cat='Correction', source='SASTA', penalty=0)]
             reducedcorrectiontokenlist = [
                 token for token in correctiontokenlist if not token.skip]

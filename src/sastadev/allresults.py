@@ -54,7 +54,7 @@ class AllResults:
         self.postresults: Dict[ResultsKey, Any] = postresults
         self.allmatches: MatchesDict = allmatches
         self.filename: FileName = filename
-        self.analysedtrees: List[SynTree] = analysedtrees
+        self.analysedtrees: List[Tuple[UttId, SynTree]] = analysedtrees
         self.allutts: UttWordDict = allutts
         self.annotationinput: bool = annotationinput
 

@@ -1247,6 +1247,10 @@ def main():
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)
 
+    treebank = etree.Element('treebank')
+    for _, tree in allresults.analysedtrees:
+        treebank.append(tree)
+
     exactresults = allresults.exactresults
     exactresultsoutput = False
     if exactresultsoutput:

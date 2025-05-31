@@ -8,6 +8,7 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
 from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from sastadev.conf import settings
 from sastadev.external_functions import str2functionmap
+from sastadev.grammarerrors import find_grammar_errors_in_allresults
 from sastadev.imply import removeimplies
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, astamethods, stapmethods, tarspmethods
@@ -174,6 +175,8 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     dopostqueries(allresults, postquerylist, themethod.queries)
 
     dopostqueries(allresults, formquerylist, themethod.queries)
+
+    allresults = find_grammar_errors_in_allresults(allresults)
 
     return allresults, samplesizetuple
 

@@ -16,11 +16,13 @@ nppred = """(@cat="np" and @rel="predc" and
 npred = """(@rel="predc" and @pt="n")"""
 
 predcvxpath1 = f"""//node[node[{headverb} ] and 
-                          node[{nppred}   ]
+                          node[{nppred} and 
+                          not(node[@rel="obj1"])  ]
                         ]"""
 
 predcvxpath2 = f"""//node[node[{headverb} ] and 
-                          node[ {npred}] 
+                          node[ {npred}] and 
+                          not(node[@rel="obj1"]) 
                          ]"""
 
 

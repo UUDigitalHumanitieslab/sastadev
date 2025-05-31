@@ -765,28 +765,29 @@ def getmarkedyield(wordlist: List[str], positions: List[Position]) -> List[str]:
     return resultlist
 
 
-def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
-    """
-    adds  meta of class Metadata to stree
-    :param stree:
-    :param meta: type Metadata
-    :return: stree
-    """
-    if stree is None:
-        result = stree
-    elif meta is None:
-        result = stree
-    else:
-        metadatanodes = stree.xpath('//metadata')
-        if metadatanodes == []:
-            metadatanode = etree.Element('metadata')
-            stree.append(metadatanode)
-        else:
-            metadatanode = metadatanodes[
-                0]  # we append to the first metadata node if there would be multiple (which should not be the case)
-        metadatanode.append(meta)
-        result = stree
-    return result
+# addmetadata was wrong and not used and has been commented out. use add_metadata instead
+# def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
+#     """
+#     adds  meta of class Metadata to stree
+#     :param stree:
+#     :param meta: type Metadata
+#     :return: stree
+#     """
+#     if stree is None:
+#         result = stree
+#     elif meta is None:
+#         result = stree
+#     else:
+#         metadatanodes = stree.xpath('//metadata')
+#         if metadatanodes == []:
+#             metadatanode = etree.Element('metadata')
+#             stree.append(metadatanode)
+#         else:
+#             metadatanode = metadatanodes[
+#                 0]  # we append to the first metadata node if there would be multiple (which should not be the case)
+#         metadatanode.append(meta)
+#         result = stree
+#     return result
 
 
 def iswordnode(thenode: SynTree) -> bool:
