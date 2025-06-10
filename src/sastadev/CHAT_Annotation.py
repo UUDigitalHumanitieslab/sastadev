@@ -8,6 +8,7 @@ from sastadev.sastatoken import Token, show
 
 CHAT = 'CHAT'
 
+CHAT_errormarking = 'Error Marking'
 CHAT_explanation = 'Explanation'
 CHAT_reformulation = 'Reformulation'
 CHAT_repetition = 'Repetition'
@@ -31,10 +32,15 @@ scope_close = '>'
 emptyreplacement = eps
 anybutrb = r'[^\]]*'
 
-errormarking = 'Error Marking'
 omittedword = 'Omitted Word'
 specialform = 'Special Form'
 
+real_word_replacement_pattern_open = r'\[::'
+replacement_pattern_open = r'\[:\s'
+replacement_pattern_core = '([^\]]+)'
+replacement_pattern_close = r'\]'
+
+replacement_error_marking = replacement_pattern_open + replacement_pattern_core + replacement_pattern_close
 
 def fullre(pat):
     result = r'^' + pat + r'$'
@@ -109,12 +115,13 @@ def doreplacement(repltokens, replacement, tokens):
 
 
 class CHAT_Annotation:
-    def __init__(self, name, v2015, v2020, regex, metadatafunction, message=None):
+    def __init__(self, name, v2015, v2020, regex, metadatafunction, inpatterns= True, message=None):
         self.name = name
         self.v2015 = v2015
         self.v2020 = v2020
         self.regex = regex
         self.metadatafunction = metadatafunction
+        self.inpatterns = inpatterns
         self.message = message
 
     def apply(self, tokens, repkeep=False):
@@ -528,6 +535,7 @@ class CHAT_ComplexRegex(CHAT_Regex):
                     annotatedpositions = [
                         t.pos for t in tobereplacedtokens if t.word not in ['<', '>']]
                     thevalue = [token.word for token in cleanannotationtokens]
+                    # annotationwords = [token.word for token in cleanannotationtokens]
                     annotationpositions = [
                         token.pos for token in cleanannotationtokens]
                     newmeta = annotation.metadatafunction(annotation, thevalue, annotatedpositions, annotatedwords,
@@ -615,13 +623,14 @@ def simplescopedmetafunction(ann, annotationwordlist, annotatedposlist, annotate
 
 
 def complexmetafunction(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist):
-    return Meta(ann.name, annotationwordlist,
+    return Meta(ann.name, annotationwordlist, annotationwordlist=annotationwordlist,
                 annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
                 annotatedposlist=annotatedposlist, source=CHAT, penalty=0)
 
 
 def complexmetafunction_replbpl(ann, annotationwordlist, annotatedposlist, annotatedwordlist, annotationposlist): return \
     Meta(ann.name, annotationwordlist, annotationposlist=annotationposlist, annotatedwordlist=annotatedwordlist,
+         annotationwordlist=annotationwordlist,
          annotatedposlist=annotatedposlist, source=CHAT, backplacement=bpl_replacement, penalty=0)
 
 
@@ -784,10 +793,19 @@ annotations = [
     CHAT_Annotation('Other Completion', '7.10:66', '9.11:69-70', CHAT_SimpleRegex(r'\+\+', eps, False),
                     simplemetafunction(identity)),
 
-    # erroR marking crucially before [/] [//] [///] etc
-    CHAT_Annotation(errormarking, '8.5:75', '10.5:78', CHAT_SimpleScopedRegex(r'\[\*\]', keep, True, monadic),
+    # error marking crucially before [/] [//] [///] etc
+
+    # This one must be done in a different way
+    # CHAT_Annotation(errormarking, '8.5:75', '10.5:78',
+    #                 CHAT_ComplexRegex(
+    #                     (fr'{replacement_error_marking}\s*\[\*', r'[\w:\-\+=]+', r'\]'), (keep, eps), False),
+    #                 complexmetafunction,
+    #                 inpatterns=False),
+
+    CHAT_Annotation(CHAT_errormarking, '8.5:75', '10.5:78', CHAT_SimpleScopedRegex(r'\[\*\]', keep, True, monadic),
                     simplescopedmetafunction),
-    CHAT_Annotation(errormarking, '8.5:75', '10.5:78',
+
+    CHAT_Annotation(CHAT_errormarking, '8.5:75', '10.5:78',
                     CHAT_ComplexRegex(
                         (r'\[\*', r'[\w:\-\+=]+', r'\]'), (keep, eps), False),
                     complexmetafunction),
@@ -824,7 +842,9 @@ annotations = [
                     complexmetafunction),
     CHAT_Annotation(CHAT_replacement, '8.3:69', '10.3:73',
                     CHAT_ComplexRegex(
-                        (r'\[:\s', r'([^\]]+)', r'\]'), (eps, keep), True, containswords=True),
+                        (replacement_pattern_open, replacement_pattern_core, replacement_pattern_close),
+                        (eps, keep), True,
+                        containswords=True),
                     complexmetafunction_replbpl),
     CHAT_Annotation('Replacement of Real Word', '8.3:70', '10.3:73',
                     CHAT_ComplexRegex((r'\[::', r'([^\]]+)', r'\]'), (eps, keep), True), complexmetafunction),
@@ -980,6 +1000,8 @@ def get_CHATpatterns(annotations):
     closebrackets = set()
     # include regular expressions from the annotations
     for annotation in annotations:
+        if not annotation.inpatterns:
+            continue
         newpats = set()
         theregex = annotation.regex
         if isinstance(theregex, CHAT_SimpleRegex):
@@ -1002,3 +1024,5 @@ def get_CHATpatterns(annotations):
 
 
 (CHAT_patterns, openbrackets, closebrackets) = get_CHATpatterns(annotations)
+
+junk = 0

@@ -34,7 +34,7 @@ The different subcases are dealt with by the function *smallclauses*:
 .. autofunction:: sastadev.smallclauses::smallclauses
 
 '''
-
+import copy
 from typing import List
 
 from sastadev.conf import settings
@@ -411,7 +411,7 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
 
 
 
-    metadata = tokensmd.metadata
+    metadata = copy.deepcopy(tokensmd.metadata)
 
     if len(reducedleaves) >= 2:
         first = leaves[0]

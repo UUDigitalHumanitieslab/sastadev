@@ -34,7 +34,7 @@ from sastadev.subcatprefs import getsubcatprefscore
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (adaptsentence, add_metadata, clausecats, countav, deflate,
+from sastadev.treebankfunctions import (adaptsentence, add_metadata, attach_metadata, clausecats, countav, deflate,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
                                         getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
@@ -613,7 +613,9 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         if lmetadatalist > 1:
             settings.LOGGER.error(
                 'Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
-        origmetadata = metadatalist[0]
+        origmetadatalist = metadatalist[0].xpath('./meta')    # otherwise the chatmetadata will be duplicated
+        origmetadata = etree.Element('metadata')
+        origmetadata.extend(origmetadatalist)
 
     # allmetadata += origmetadata
     # clean in the tokenized manner
@@ -640,6 +642,8 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         showtree(fatstree, text='fatstree na:')
     debug = False
     # (fatstree, text='fattened tree:')
+    origmetadatalist2 = deepcopy(origmetadatalist)
+    fatstree = attach_metadata(fatstree, origmetadatalist2)
 
     rawctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
 

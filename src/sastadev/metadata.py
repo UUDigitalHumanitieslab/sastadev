@@ -162,6 +162,42 @@ class Meta:
                                penalty=str(self.penalty))
         return result
 
+    def __eq__(self, other):
+        if self is other:
+            return True
+        result = (self.atype == other.atype and
+                  self.name == other.name and
+                  self.annotationwordlist == other.annotationwordlist  and
+                  self.annotationposlist == other.annotationposlist and
+                  self.annotatedwordlist == other.annotatedwordlist and
+                  self.annotatedposlist == other.annotatedposlist and
+                  self.annotationcharlist == other.annotationcharlist and
+                  self.annotationcharposlist == other.annotationcharposlist and
+                  self.annotatedcharlist == other.annotatedcharlist and
+                  self.annotatedcharposlist == other.annotatedcharposlist and
+                  self.value == other.value and
+                  self.cat == other.cat and
+                  self.subcat == other.subcat and
+                  self.source == other.source and
+                  self.penalty == other.penalty and
+                  self.backplacement == other.backplacement and
+                  self.fmstr == other.fmstr and
+                  self.xmlformat == other.xmlformat)
+        return result
+
+
+def remove_md_duplicates(metadata: List[Meta]) -> List[Meta]:
+    newlist = []
+    for meta in metadata:
+        if not foundin(meta, newlist):
+            newlist.append(meta)
+    return newlist
+
+def foundin(meta: Meta, metadata:List[Meta]) -> bool:
+    for el in metadata:
+        if el == meta:
+            return True
+    return False
 
 def selectmeta(name, metadatalist):
     for meta in metadatalist:

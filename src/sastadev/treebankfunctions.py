@@ -2308,6 +2308,20 @@ def add_metadata(intree: SynTree, metalist: List[Meta]) -> SynTree:
         metadata.append(meta.toElement())
     return tree
 
+
+def attach_metadata(intree: SynTree, metalist: List[SynTree]) -> SynTree:
+    tree = deepcopy(intree)
+    metadata = tree.find('.//metadata')
+    if metadata is None:
+        metadata = etree.Element('metadata')
+        tree.insert(0, metadata)
+
+    for meta in metalist:
+        metadata.append(meta)
+
+    return tree
+
+
 def getneighbourwordnode(node: SynTree, step: int) -> SynTree:
     syntree = find1(node, './ancestor::node[@cat="top"]')
     theyield = getnodeyield(syntree)

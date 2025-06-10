@@ -1484,7 +1484,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             relfrq = hc.frequency / sumfrq
             penalty = basepenalties[THISSAMPLECORRECTIONS] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
-            if (token.word, hc.correction) not in basicreplacementpairs:
+            if (token.word, hc.correction) not in basicreplacementpairs and hc.correction != '':  # no deletions
                 if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
@@ -1512,7 +1512,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             relfrq = hc.frequency / sumfrq
             penalty = basepenalties[ALLSAMPLECORRECTIONS] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
-            if (token.word, hc.correction) not in basicreplacementpairs:
+            if (token.word, hc.correction) not in basicreplacementpairs and hc.correction != '':
                 if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
@@ -1547,7 +1547,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             relfrq = hc.frequency / sumfrq
             penalty = basepenalties[HISTORY] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
-            if (token.word, hc.correction) not in basicreplacementpairs:
+            if (token.word, hc.correction) not in basicreplacementpairs  and hc.correction != '':
                 if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,

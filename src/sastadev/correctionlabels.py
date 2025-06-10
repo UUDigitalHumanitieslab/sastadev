@@ -37,6 +37,7 @@ regionalform = 'RegionalForm'
 regionalvariantorlexicalerror = 'Regional Variant / Lexical Error'
 repetition = 'Repetition'
 replacement = 'Replacement'
+replacement_error_marking = "Replacement Error Marking"
 retracing = 'Retracing'
 svaerror = 'SVAerror'
 syntax = 'Syntax'
