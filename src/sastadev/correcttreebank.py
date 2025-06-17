@@ -20,13 +20,15 @@ from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_
                                ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT,
                                HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
                                )
+from sastadev.methods import Method
 from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp
 from sastadev.predcvagreement import get_predc_v_mismatches
+from sastadev.sas_filter import filterbymetadata
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
-                                 SynTree, Targets, Treebank, UttId)
+                                 SynTree, Targets, Treebank, UttId, ExactResultsDict)
 from sastadev.semantic_compatibility import semincompatiblecount
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
@@ -967,11 +969,11 @@ post_complemental_subjects_xpath = """.//node[@rel="su"   and
                 @begin >= ../node[(@word or @cat) and 
                                   (not(@pdtype) or @pdtype!="adv-pron") and 
                                   (@rel="ld" or @rel="obj1" or @rel="pc" or @rel="obj2")]/@end]"""
-def get_post_complemental_subject_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
+def get_post_complemental_subject_nodes(tree: SynTree) -> List:
     return tree.xpath(post_complemental_subjects_xpath)
 
-def getpostcomplsucount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    post_complemental_subject_nodes = get_post_complemental_subject_nodes(tree, metadata, method_name)
+def getpostcomplsucount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    post_complemental_subject_nodes = get_post_complemental_subject_nodes(tree)
     return len(post_complemental_subject_nodes)
 
 
@@ -1096,7 +1098,7 @@ def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
     return results
 
 
-def getsvaokcount(nt: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
+def getsvaokcount(nt: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     subjects = nt.xpath('.//node[@rel="su"]')
     counter = 0
     for subject in subjects:
@@ -1106,9 +1108,7 @@ def getsvaokcount(nt: SynTree, metadata: List[Meta], method_name: MethodName) ->
     return counter
 
 
-def get_de_plus_neuter_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_de_plus_neuter_nodes(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
     word_nodes = getnodeyield(tree)
     found_nodes = []
     # Consecutive pairs of nodes. (A, B), (B, C), (C, D), ...
@@ -1130,13 +1130,13 @@ def get_de_plus_neuter_nodes(
         if is_neuter and is_singular:
             found_nodes.append(node_1)
 
-    return found_nodes
+    return filterbymetadata(found_nodes, exact_results, method)
 
 
 def getdeplusneutcount(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
+    tree: SynTree, exact_results: ExactResultsDict, method: Method
 ) -> int:
-    de_plus_neuter_nodes = get_de_plus_neuter_nodes(tree, metadata, method_name)
+    de_plus_neuter_nodes = get_de_plus_neuter_nodes(tree, exact_results, method)
     return len(de_plus_neuter_nodes)
 
 
@@ -1157,26 +1157,23 @@ def isvalidword(w: str, mn: MethodName, includealpinonouncompound=True) -> bool:
         return False
 
 
-def get_ambiguous_word_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
+def get_ambiguous_word_nodes(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
     nodes = getnodeyield(tree)
     ambiguous_word_nodes = [node for node in nodes if getattval(
         node, 'word').lower() in disambiguationdict]
-    return ambiguous_word_nodes
+    return filterbymetadata(ambiguous_word_nodes, exact_results, method)
 
-def countambigwords(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    ambignodes = get_ambiguous_word_nodes(tree, metadata, method_name)
-    result = len(ambignodes)
-    return result
+def countambigwords(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    ambignodes = get_ambiguous_word_nodes(tree, exact_results, method)
+    return len(ambignodes)
 
-
-def getunknownwordcount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
+def getunknownwordcount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     words = [w for w in tree.xpath('.//node[@pt!="tsw"]/@word')]
-    unknownwords = [w for w in words if not isvalidword(w.lower(), method_name) ]
-    result = len(unknownwords)
-    return result
+    unknownwords = [w for w in words if not isvalidword(w.lower(), method.name) ]
+    return len(unknownwords)
 
 wrongposwordxpathtemplate = './/node[@lemma="{word}" and @pt="{pos}"]'
-def get_wrong_pos_word_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
+def get_wrong_pos_word_nodes(tree: SynTree) -> List:
     wrong_pos_words = []
     for word, pos in wrongposwordslexicon:
         wrong_pos_word_xpath = wrongposwordxpathtemplate.format(word=word, pos=pos)
@@ -1185,24 +1182,23 @@ def get_wrong_pos_word_nodes(tree: SynTree, metadata: List[Meta], method_name: M
             wrong_pos_words.append(match)
     return wrong_pos_words
 
-def getwrongposwordcount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    wrong_pos_word_matches = get_wrong_pos_word_nodes(tree, metadata, method_name)
+def getwrongposwordcount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    wrong_pos_word_matches = get_wrong_pos_word_nodes(tree)
     return len(wrong_pos_word_matches)
 
 sucountxpath = './/node[@rel="su" and not(@pt="ww" and @wvorm="inf") and not(node[@rel="hd" and @pt="ww" and @wvorm="inf"])] '
-def getsucount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
+def getsucount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     matches = tree.xpath(sucountxpath)
-    result = len(matches)
-    return result
+    return len(matches)
 
 d_hyphen_xpath = './/node[@rel="--" and @pt and @pt!="let"]'
-def get_double_hyphen_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
-    return tree.xpath(d_hyphen_xpath)
+def get_double_hyphen_nodes(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
+    double_hyphen_nodes = tree.xpath(d_hyphen_xpath)
+    return filterbymetadata(double_hyphen_nodes, exact_results, method)
 
-def getdhyphencount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    matches = get_double_hyphen_nodes(tree, metadata, method_name)
-    result = len(matches)
-    return result
+def getdhyphencount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    matches = get_double_hyphen_nodes(tree, exact_results, method)
+    return len(matches)
 
 localgetcompoundcount = lambda nt, md, mn: getcompoundcount(nt)
 getdpcount = lambda nt, md, mn: countav(nt, 'rel', 'dp')
@@ -1261,87 +1257,74 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
 
 # smainsuxpath = '//node[@cat="smain"  and @begin = node[@rel="su"]/@begin]' # yields unexpected errors (TD12:31; TARSP_08:31)
 smainsuxpath =  './/node[@cat="smain" and node[@rel="su"]]'
-def get_smain_with_subject_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_smain_with_subject_nodes(tree: SynTree) -> List:
     return tree.xpath(smainsuxpath)
 
-def countsmainsu(nt: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    matches = get_smain_with_subject_nodes(nt, metadata, method_name)
+def countsmainsu(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    matches = get_smain_with_subject_nodes(tree)
     return len(matches)
 
 
 bad_category_xpath = './/node[@cat and (@cat="du") and node[@rel="dp"]]'
-def get_bad_category_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_bad_category_nodes(tree: SynTree) -> List:
     return tree.xpath(bad_category_xpath)
 
 
-def getbadcatcount(tree: SynTree, metadata: List[Meta], method_name: MethodName):
-    nodes = get_bad_category_nodes(tree, metadata, method_name)
+def getbadcatcount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    nodes = get_bad_category_nodes(tree)
     return len(nodes)
 
 
 noun_1_character_xpath = './/node[@pt!="let" and string-length(@word)=1]'
 def get_single_character_noun_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
+    tree: SynTree, exact_results: ExactResultsDict, method: Method
 ) -> List:
-    return tree.xpath(noun_1_character_xpath)
+    single_character_noun_nodes = tree.xpath(noun_1_character_xpath)
+    return filterbymetadata(single_character_noun_nodes, exact_results, method)
 
-
-def getnoun1c_count(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> int:
+def getnoun1c_count(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     single_character_noun_nodes = get_single_character_noun_nodes(
-        tree, metadata, method_name
+        tree, exact_results, method
     )
     return len(single_character_noun_nodes)
 
 adverbial_deze_xpath = './/node[@pt="bw" and @lemma="deze"]'
-def get_adverbial_deze_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
-    return tree.xpath(adverbial_deze_xpath)
+def get_adverbial_deze_nodes(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
+    adverbal_deze_nodes = tree.xpath(adverbial_deze_xpath)
+    return filterbymetadata(adverbal_deze_nodes, exact_results, method)
 
-def getdezebwcount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    adverbial_deze_nodes = get_adverbial_deze_nodes(tree, metadata, method_name)
+def getdezebwcount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    adverbial_deze_nodes = get_adverbial_deze_nodes(tree, exact_results, method)
     return len(adverbial_deze_nodes)
 
 unknown_noun_xpath = './/node[@pt="n" and @frame="noun(both,both,both)"]'
-def get_unknown_noun(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_unknown_noun(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
     unknown_noun_nodes = tree.xpath(unknown_noun_xpath)
     unknown_lemma_nodes = [
         node
         for node in unknown_noun_nodes
         if getattval(node, "lemma") not in validnouns
     ]
-    return unknown_lemma_nodes
+    return filterbymetadata(unknown_lemma_nodes, exact_results, method)
 
 
-def getunknownnouncount(nt: SynTree, metadata: List[Meta], mn: MethodName) -> int:
-    unknown_noun_nodes = get_unknown_noun(nt, metadata, mn)
+def getunknownnouncount(nt: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    unknown_noun_nodes = get_unknown_noun(nt, exact_results, method)
     return len(unknown_noun_nodes)
 
 
 unknown_name_xpath = './/node[@pt="n" and @frame="proper_name(both)"]'
-def get_unknown_name(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_unknown_name_nodes(tree: SynTree) -> List:
     return [node for node in tree.xpath(unknown_name_xpath)]
 
 
-def getunknownnamecount(tree: SynTree, metadata: List[Meta], mn: MethodName) -> int:
-    unknown_name_nodes = get_unknown_name(tree, metadata, mn)
+def getunknownnamecount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    unknown_name_nodes = get_unknown_name_nodes(tree)
     return len(unknown_name_nodes)
 
 
 main_clause_xpath = './/node[@cat="smain" or @cat="whq" or (@cat="sv1" and @rel!="body" and @rel!="cnj")]'
-def get_multiple_main_clause_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_multiple_main_clause_nodes(tree: SynTree) -> List:
     """
     Clauses with more than one main clause node are bad.
     """
@@ -1349,21 +1332,19 @@ def get_multiple_main_clause_nodes(
     return nodes if len(nodes) > 1 else []
 
 
-def getmainclausecount(
-    nt: SynTree, metadata: List[Meta], method_name: MethodName
-) -> int:
-    main_clause_nodes = get_multiple_main_clause_nodes(nt, metadata, method_name)
+def getmainclausecount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    main_clause_nodes = get_multiple_main_clause_nodes(tree)
     return len(main_clause_nodes)
 
 
 mainrelxpath = './/node[@rel="--" and (@cat="rel" or @cat="whrel")]'
-def mainrelcount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
+def mainrelcount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     mainrels = tree.xpath(mainrelxpath)
     return len(mainrels)
 
 
 topxpath = './/node[@cat="top"]'
-def gettopclause(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
+def gettopclause(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     tops = tree.xpath(topxpath)
     if tops == []:
         return 0
@@ -1380,9 +1361,7 @@ def gettopclause(tree: SynTree, metadata: List[Meta], method_name: MethodName) -
 
 toe_xpath = './/node[@lemma="toe" or (@lemma="tot" and @vztype="fin")]'
 naar_xpath = './/node[@lemma="naar"]'
-def get_lonely_toe_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_lonely_toe_nodes(tree: SynTree) -> List:
     toe_matches = tree.xpath(toe_xpath)
     naar_matches = tree.xpath(naar_xpath)
     if toe_matches == []:
@@ -1402,9 +1381,9 @@ def get_lonely_toe_nodes(
 
 
 def getlonelytoecount(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
+    tree: SynTree, exact_results: ExactResultsDict, method: Method
 ) -> int:
-    lonely_toe_matches = get_lonely_toe_nodes(tree, metadata, method_name)
+    lonely_toe_matches = get_lonely_toe_nodes(tree)
     return len(lonely_toe_matches)
 
 
@@ -1414,18 +1393,12 @@ relative_main_clause_subordinate_order_xpath = """.//node[(@cat="rel" or @cat="w
 """
 
 
-def get_relative_main_clause_subordinate_order_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_relative_main_clause_subordinate_order_nodes(tree: SynTree) -> List:
     return tree.xpath(relative_main_clause_subordinate_order_xpath)
 
 
-def getrelasmainsubordercount(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-):
-    matches = get_relative_main_clause_subordinate_order_nodes(
-        tree, metadata, method_name
-    )
+def getrelasmainsubordercount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    matches = get_relative_main_clause_subordinate_order_nodes(tree)
     return len(matches)
 
 
@@ -1436,7 +1409,7 @@ def compute_penalty(nt: SynTree, md: List[Meta], method_name: MethodName) -> Pen
     return totalpenalty
 
 words_xpath = """.//node[@word]"""
-def get_not_known_by_alpino_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
+def get_not_known_by_alpino_nodes(tree: SynTree) -> List:
     word_nodes = tree.xpath(words_xpath)
     unknown_word_nodes = [
         node
@@ -1445,47 +1418,44 @@ def get_not_known_by_alpino_nodes(tree: SynTree, metadata: List[Meta], method_na
     ]
     return unknown_word_nodes
 
-def getnotknownbyalpinocount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    unknown_word_nodes = get_not_known_by_alpino_nodes(tree, metadata, method_name)
+def getnotknownbyalpinocount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    unknown_word_nodes = get_not_known_by_alpino_nodes(tree)
     return len(unknown_word_nodes)
 
-def get_basic_replacement_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
+def get_basic_replacement_nodes(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
     word_nodes = tree.xpath(words_xpath)
     basic_replacement_nodes = [
         node
         for node in word_nodes
         if getattval(node, "word").lower() in basicreplacements
     ]
-    return basic_replacement_nodes
+    return filterbymetadata(basic_replacement_nodes, exact_results, method)
 
-def getbasicreplaceecount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    basic_replacement_nodes = get_basic_replacement_nodes(tree, metadata, method_name)
+def getbasicreplaceecount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    basic_replacement_nodes = get_basic_replacement_nodes(tree, exact_results, method)
     return len(basic_replacement_nodes)
 
 
 hyphen_xpath = './/node[contains(@word, "-")]'
-def get_hyphen_nodes(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> List:
-    return tree.xpath(hyphen_xpath)
+def get_hyphen_nodes(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
+    hyphen_nodes = tree.xpath(hyphen_xpath)
+    return filterbymetadata(hyphen_nodes, exact_results, method)
 
-def gethyphencount(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
-    hyphen_nodes = get_hyphen_nodes(tree, metadata, method_name)
+def gethyphencount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    hyphen_nodes = get_hyphen_nodes(tree, exact_results, method)
     return len(hyphen_nodes)
 
 
 subjunctive_xpath = './/node[@pvtijd="conj"]'
-def get_subjunctive_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_subjunctive_nodes(tree: SynTree) -> List:
     return tree.xpath(subjunctive_xpath)
 
-def getsubjunctivecount(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> int:
-    subjunctive_nodes = get_subjunctive_nodes(tree, metadata, method_name)
+def getsubjunctivecount(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    subjunctive_nodes = get_subjunctive_nodes(tree)
     return len(subjunctive_nodes)
 
 
-def gettotaleditdistance(tree: SynTree, metadata: List[Meta], method_name: MethodName) -> int:
+def gettotaleditdistance(tree: SynTree, metadata: List[Meta], method: Method) -> int:
     wordlist = getyield(tree)
     totaldistance = 0
     for meta in metadata:
@@ -1502,31 +1472,27 @@ def gettotaleditdistance(tree: SynTree, metadata: List[Meta], method_name: Metho
 
 
 nominal_pp_modifier_xpath = """//node[@cat='pp' and node[@rel='hd' and @lemma!='van'] and parent::node[@cat='np']]"""
-def get_postnominal_pp_modifier_nodes(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
-) -> List:
+def get_postnominal_pp_modifier_nodes(tree: SynTree) -> List:
     return tree.xpath(nominal_pp_modifier_xpath)
 
 def getpostnominalppmodcount(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
+    tree: SynTree, exact_results: ExactResultsDict, method: Method
 ) -> int:
-    postnominal_pp_modifier_nodes = get_postnominal_pp_modifier_nodes(
-        tree, metadata, method_name
-    )
+    postnominal_pp_modifier_nodes = get_postnominal_pp_modifier_nodes(tree
+)
     return len(postnominal_pp_modifier_nodes)
 
 
 def getmaaradvcount(
-    tree: SynTree, metadata: List[Meta], method_name: MethodName
+    tree: SynTree, exact_results: ExactResultsDict, method: Method
 ) -> int:
     initialmaaradvs = tree.xpath(initialmaarvgxpath)
     return len(initialmaaradvs)
 
 
-def get_predc_v_mismatch_count(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
-    predc_v_mismatches = get_predc_v_mismatches(nt)
-    result = len(predc_v_mismatches)
-    return result
+def get_predc_v_mismatch_count(tree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
+    predc_v_mismatches = get_predc_v_mismatches(tree)
+    return len(predc_v_mismatches)
 
 # The constant *criteria* is a list of objects of class *Criterion* that are used, in the order given, to evaluate parses
 criteria = [
