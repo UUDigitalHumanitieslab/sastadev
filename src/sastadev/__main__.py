@@ -179,7 +179,9 @@ from sastadev.query import (Query, is_preorcore,
                             post_process, query_exists, query_inform)
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
-from sastadev.resultsbyutterance import getscoresbyutt, mkscoresbyuttrows, byuttheader, silverf1col
+from sastadev.resultsbyutterance import getexactbyutt, exactbyuttdict2table, exactresultsbyuttheader, getscoresbyutt, \
+    mkscoresbyuttrows, \
+    byuttheader, silverf1col
 from sastadev.sas_impact import getcomparisoncounts, mksas_impactrows, sas_impact
 from sastadev.sastatypes import (AltCodeDict, DataSetName, ExactResultsDict, FileName,
                                  GoldTuple, MatchesDict, MethodName, MethodVariant, QId,
@@ -1245,6 +1247,10 @@ def main():
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)
 
+    treebank = etree.Element('treebank')
+    for _, tree in allresults.analysedtrees:
+        treebank.append(tree)
+
     exactresults = allresults.exactresults
     exactresultsoutput = False
     if exactresultsoutput:
@@ -1315,9 +1321,18 @@ def main():
     not100count = len([row for row in byuttrows if row[silverf1col] != 100])
     scoresbyuttoutfullname = os.path.join(resultspath, corefilename + byuttscoressuffix + '.xlsx')
     wb = mkworkbook(scoresbyuttoutfullname, [byuttheader], byuttrows, freeze_panes=(1,0) )
+
+    exactresultsbyutt = getexactbyutt(allresults.exactresults)
+    exactresultsbyutttable = exactbyuttdict2table(exactresultsbyutt)
+    add_worksheet(wb, [exactresultsbyuttheader], exactresultsbyutttable, sheetname='ExactResults', freeze_panes=(1,0))
+
     allbyuttscores = sas_impact(allresults.coreresults, silverscores, themethod)
     sasheader, sasimpactrows = mksas_impactrows(allbyuttscores, not100count)
     add_worksheet(wb,[sasheader], sasimpactrows, sheetname='SAS_impact', freeze_panes=(1,0))
+
+    samplesizetupledata = [[comma.join(samplesizetuple[0]), samplesizetuple[1], samplesizetuple[2]]]
+    samplesizetupleheader = ['utt ids', '# words', 'cutoff']
+    add_worksheet(wb, [samplesizetupleheader], samplesizetupledata, sheetname='SampleSizeTuple', freeze_panes=(1,0))
     wb.close()
 
 

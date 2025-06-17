@@ -62,6 +62,8 @@ compoundsep = '_'
 numberpattern = r'^[\d\.,]+$'
 numberre = re.compile(numberpattern)
 
+topcat = 'top'
+
 # next 3 derived from the alpino dtd
 allrels = ['hdf', 'hd', 'cmp', 'sup', 'su', 'obj1', 'pobj1', 'obj2', 'se', 'pc', 'vc', 'svp', 'predc', 'ld', 'me',
            'predm', 'obcomp', 'mod', 'body', 'det', 'app', 'whd', 'rhd', 'cnj', 'crd', 'nucl', 'sat', 'tag', 'dp',
@@ -763,28 +765,29 @@ def getmarkedyield(wordlist: List[str], positions: List[Position]) -> List[str]:
     return resultlist
 
 
-def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
-    """
-    adds  meta of class Metadata to stree
-    :param stree:
-    :param meta: type Metadata
-    :return: stree
-    """
-    if stree is None:
-        result = stree
-    elif meta is None:
-        result = stree
-    else:
-        metadatanodes = stree.xpath('//metadata')
-        if metadatanodes == []:
-            metadatanode = etree.Element('metadata')
-            stree.append(metadatanode)
-        else:
-            metadatanode = metadatanodes[
-                0]  # we append to the first metadata node if there would be multiple (which should not be the case)
-        metadatanode.append(meta)
-        result = stree
-    return result
+# addmetadata was wrong and not used and has been commented out. use add_metadata instead
+# def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
+#     """
+#     adds  meta of class Metadata to stree
+#     :param stree:
+#     :param meta: type Metadata
+#     :return: stree
+#     """
+#     if stree is None:
+#         result = stree
+#     elif meta is None:
+#         result = stree
+#     else:
+#         metadatanodes = stree.xpath('//metadata')
+#         if metadatanodes == []:
+#             metadatanode = etree.Element('metadata')
+#             stree.append(metadatanode)
+#         else:
+#             metadatanode = metadatanodes[
+#                 0]  # we append to the first metadata node if there would be multiple (which should not be the case)
+#         metadatanode.append(meta)
+#         result = stree
+#     return result
 
 
 def iswordnode(thenode: SynTree) -> bool:
@@ -2304,6 +2307,20 @@ def add_metadata(intree: SynTree, metalist: List[Meta]) -> SynTree:
     for meta in metalist:
         metadata.append(meta.toElement())
     return tree
+
+
+def attach_metadata(intree: SynTree, metalist: List[SynTree]) -> SynTree:
+    tree = deepcopy(intree)
+    metadata = tree.find('.//metadata')
+    if metadata is None:
+        metadata = etree.Element('metadata')
+        tree.insert(0, metadata)
+
+    for meta in metalist:
+        metadata.append(meta)
+
+    return tree
+
 
 def getneighbourwordnode(node: SynTree, step: int) -> SynTree:
     syntree = find1(node, './ancestor::node[@cat="top"]')

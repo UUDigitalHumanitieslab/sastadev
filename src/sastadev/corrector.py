@@ -99,7 +99,7 @@ wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee', 'wat', 'alles', 
 #: The constant *e2een_excluded_nouns* contains words that lead to incorrect
 #: replacement of e or schwa  and
 #: therefore have to be excluded from determiner replacement.
-e2een_excluded_nouns = ['kijke', 'kijken']
+e2een_excluded_nouns = ['kijke', 'kijken', 'weer']
 
 interpunction = '.?!'
 comma = ","
@@ -318,6 +318,7 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     # we must exclude here the vuwords unless they are in the appropriate position (hoor at the end, but toe only at the beginning
     # remove tsw incl goh och hé oke but not ja, nee, nou
     tswtokens = [n for n in reducedtokens if n.pos in token2nodemap
+                 and n.word not in ['e', 'ee', 'ə']
                  and getattval(token2nodemap[n.pos], 'pt') == 'tsw'
                  and getattval(token2nodemap[n.pos], 'lemma') not in {'ja', 'nee', 'nou'}
                  and getattval(token2nodemap[n.pos], 'lemma') not in tswnouns
@@ -986,7 +987,8 @@ def updatenewtokenmds(newtokenmds: List[TokenMD], token: Token, newwords: List[s
                       penalty: Penalty = defaultpenalty, backplacement: BackPlacement = defaultbackplacement) \
         -> List[TokenMD]:
     for nw in newwords:
-        nwt = Token(nw, token.pos)
+        skipval = True if nw == 'skip' else False
+        nwt = Token(nw, token.pos, skip=skipval)
         meta = mkSASTAMeta(token, nwt, name=name, value=value, cat=cat, subcat=subcat, source=source, penalty=penalty,
                            backplacement=backplacement)
         metadata = [meta] + beginmetadata
@@ -1034,6 +1036,70 @@ def isnounsg(token: Token) -> bool:
         if infl in ['e', 'de']:
             return True
     return False
+
+def isdimsg(token: Token) -> bool:
+    if token is None:
+        return False
+    wordinfos, _ = getdehetwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (_, _, infl, _) = wordinfo
+        if infl in ['de']:
+            return True
+    return False
+
+
+def canhavept(token: Token, wpt: str) -> bool:
+    if token is None:
+        return False
+    wordinfos = getwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (pt, _, _, _) = wordinfo
+        if pt == wpt:
+            return True
+    return False
+
+
+def isnounpl(token: Token) -> bool:
+    if token is None:
+        return False
+    wordinfos, _ = getdehetwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (_, _, infl, _) = wordinfo
+        if infl in ['m', 'dm']:
+            return True
+    return False
+
+
+def hasgender(token: Token, reqgender: int) -> bool:
+    if token is None:
+        return False
+    wordinfos, _ = getdehetwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (_, gender, _, _) = wordinfo
+        if gender == reqgender:
+            return True
+    return False
+
+def isinfinitive(token: Token) -> bool:
+    if token is None:
+        return False
+    wordinfos = getwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (_, _ , infl, _) = wordinfo
+        if infl == 'i':
+            return True
+    return False
+
+def canbenonnoun(token: Token) -> bool:
+    if token is None:
+        return False
+    wordinfos = getwordinfo(token.word)
+    for wordinfo in wordinfos:
+        (pt, _ , _, _) = wordinfo
+        if pt != 'n':
+            return True
+    return False
+
 
 def initdevoicing(token: Token, voiceless: str, voiced: str, methodname: MethodName, newtokenmds: List[TokenMD], beginmetadata: List[Meta]) \
         -> List[TokenMD]:
@@ -1124,7 +1190,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         backplacement=bpl_word)
 
     # deduplicate jaaaaa -> ja; heeeeeel -> heel
-    if not validword(token.word, methodname) :
+    if not validword(token.word, methodname) and token.word != 'ee':
         newwords = dutchdeduplicate(token.word, lambda x: validword(x, methodname), exceptions=chatxxxcodes)
         deduplicated = newwords != []
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
@@ -1256,7 +1322,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         backplacement=bpl_word)
 
 
-    # clause intial maar must be parsed as conjunction not as ana dverb: we replace it by "en" to avoid the ambiguity
+    # clause intial maar must be parsed as conjunction not as an adverb: we replace it by "en" to avoid the ambiguity
     if token.word == 'maar':
         initialmaars = tree.xpath(initialmaarvgxpath)
         for initialmaar in initialmaars:
@@ -1295,15 +1361,89 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
 
 
 
-    # e or schwa -> een if followed by a singular noun
+    # e or schwa -> een de het dat, deletio; en rejected, dat(vg) only after a verb
     nexttoken = tokens[tokenctr+1] if tokenctr < len(tokens) - 1 else None
-    if token.word in ['e', 'ə'] and isnounsg(nexttoken) and token.word not in e2een_excluded_nouns:
-        newwords = ['een']
-        newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
-                                        name=correctionlabels.wrongpronunciation, value=correctionlabels.finalndrop,
-                                        cat=correctionlabels.pronunciation,
-                                        subcat=correctionlabels.codareduction,
-                                        backplacement=bpl_word, penalty=mp(50))
+    prevtoken = tokens[tokenctr - 1] if tokenctr > 0 else None
+    if token.word in ['e', 'ə']:
+        if isnounsg(nexttoken) and nexttoken.word not in e2een_excluded_nouns:
+            newwords = ['een']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.wrongpronunciation, value=correctionlabels.finalndrop,
+                                            cat=correctionlabels.pronunciation,
+                                            subcat=correctionlabels.codareduction,
+                                            backplacement=bpl_word, penalty=mp(30))
+
+        if hasgender(nexttoken, de)  or isnounpl(nexttoken):
+            newwords = ['de']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.wrongpronunciation,
+                                            value=correctionlabels.onsetreduction,
+                                            cat=correctionlabels.pronunciation,
+                                            subcat=correctionlabels.onsetreduction,
+                                            backplacement=bpl_word, penalty=mp(40))
+
+
+        if ((hasgender(nexttoken, het) or isdimsg(nexttoken) )and isnounsg(nexttoken)) or \
+            (prevtoken is not None and prevtoken.word == 'aan' and isinfinitive(nexttoken)) or \
+            canbenonnoun(nexttoken):
+            newwords = ['het']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.wrongpronunciation,
+                                            value=correctionlabels.onsetandcodadrop,
+                                            cat=correctionlabels.pronunciation,
+                                            subcat=correctionlabels.onsetandcodadrop,
+                                            backplacement=bpl_word, penalty=mp(50))
+
+         # it is expected that replacement by dat as a determiner or pronoun is always beaten by 'het'. so this will
+        # only be selected when dat has a different function, e.g. subordinate conjuntion as in TD24,9. This is
+        # false. Instead we conditioned it to apply only after verbs: still goes wromg for hebben e auto
+
+        # if canhavept(prevtoken,'ww'):
+        #     newwords = ['dat']
+        #     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+        #                                     name=correctionlabels.wrongpronunciation,
+        #                                     value=correctionlabels.onsetandcodadrop,
+        #                                     cat=correctionlabels.pronunciation,
+        #                                     subcat=correctionlabels.onsetandcodadrop,
+        #                                     backplacement=bpl_word, penalty=mp(90))
+
+
+        if hasgender(nexttoken, het) and isnounsg(nexttoken):
+            newwords = ['het']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.wrongpronunciation,
+                                            value=correctionlabels.onsetandcodadrop,
+                                            cat=correctionlabels.pronunciation,
+                                            subcat=correctionlabels.onsetandcodadrop,
+                                            backplacement=bpl_word, penalty=mp(50))
+
+
+        # if True:
+        #     newwords = ['en']
+        #     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+        #                                     name=correctionlabels.wrongpronunciation,
+        #                                     value=correctionlabels.finalndrop,
+        #                                     cat=correctionlabels.pronunciation,
+        #                                     subcat=correctionlabels.codareduction,
+        #                                     backplacement=bpl_word, penalty=mp(60))
+
+        if True:
+            newwords = ['']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.unknownword,
+                                            value=correctionlabels.unknownword,
+                                            cat=correctionlabels.pronunciation,
+                                            subcat=correctionlabels.unknownword,
+                                            backplacement=bpl_none, penalty=mp(70))
+
+    if token.word in ['ee']:
+        if isnounsg(nexttoken):
+            newwords = ['een']
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.wrongpronunciation, value=correctionlabels.finalndrop,
+                                            cat=correctionlabels.pronunciation,
+                                            subcat=correctionlabels.codareduction,
+                                            backplacement=bpl_word, penalty=mp(30))
 
 
 
@@ -1344,18 +1484,18 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             relfrq = hc.frequency / sumfrq
             penalty = basepenalties[THISSAMPLECORRECTIONS] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
-            if (token.word, hc.correction) not in basicreplacementpairs:
-                if hc.correctiontype == 'noncompletion':
+            if (token.word, hc.correction) not in basicreplacementpairs and hc.correction != '':  # no deletions
+                if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
                                                     source=f'{SASTA}/{THISSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'replacement':
+                elif hc.correctiontype == correctionlabels.replacement:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.replacement, value='', cat='TBD',
                                                     source=f'{SASTA}/{THISSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'explanation':
+                elif hc.correctiontype == correctionlabels.explanation:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.explanation, value='', cat='TBD',
                                                     source=f'{SASTA}/{THISSAMPLECORRECTIONS}',
@@ -1372,18 +1512,18 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             relfrq = hc.frequency / sumfrq
             penalty = basepenalties[ALLSAMPLECORRECTIONS] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
-            if (token.word, hc.correction) not in basicreplacementpairs:
-                if hc.correctiontype == 'noncompletion':
+            if (token.word, hc.correction) not in basicreplacementpairs and hc.correction != '':
+                if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
                                                     source=f'{SASTA}/{ALLSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'replacement':
+                elif hc.correctiontype == correctionlabels.replacement:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.replacement, value='', cat='TBD',
                                                     source=f'{SASTA}/{ALLSAMPLECORRECTIONS}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'explanation':
+                elif hc.correctiontype == correctionlabels.explanation:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.explanation, value='', cat='TBD',
                                                     source=f'{SASTA}/{ALLSAMPLECORRECTIONS}',
@@ -1407,18 +1547,18 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             relfrq = hc.frequency / sumfrq
             penalty = basepenalties[HISTORY] + max(1, int(defaultpenalty * (1 - relfrq)))
             newwords = [hc.correction]
-            if (token.word, hc.correction) not in basicreplacementpairs:
-                if hc.correctiontype == 'noncompletion':
+            if (token.word, hc.correction) not in basicreplacementpairs  and hc.correction != '':
+                if hc.correctiontype == correctionlabels.noncompletion:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.noncompletion, value='', cat=correctionlabels.pronunciation,
                                                     source=f'{SASTA}/{HISTORY}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'replacement':
+                elif hc.correctiontype == correctionlabels.replacement:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.replacement, value='', cat='TBD',
                                                     source=f'{SASTA}/{HISTORY}',
                                                     backplacement=bpl_word, penalty=penalty)
-                elif hc.correctiontype == 'explanation':
+                elif hc.correctiontype == correctionlabels.explanation:
                     newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                                     name=correctionlabels.explanation, value='', cat='TBD',
                                                     source=f'{SASTA}/{HISTORY}',
@@ -1462,12 +1602,13 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
         for nw, metavalue in nwms:
             if validword(nw, methodname):
                 newtokenmds += updatenewtokenmds(newtokenmds, token, [nw], beginmetadata,
-                                                 name=correctionlabels.inflectionerror, value=metavalue, cat=correctionlabels.morphology,
+                                                 name=correctionlabels.morphologicalerror, value=metavalue,
+                                                 cat=correctionlabels.morphology,
                                                  backplacement=bpl_word)
 
     # wrong verb forms: gekeekt -> gekeken: done!
 
-    # me ze (grote/oudere/ kleine) moeder /vader/zusje/ broer -> mijn me s done by Alpino, here we do ze
+    # me ze (grote/oudere/ kleine) moeder /vader/zusje/ broer -> mijn me is done by Alpino, here we do ze
     # next xpath does not work because it must be preceded by a . !!
     # zexpathmodel = """//node[@word="ze" and @begin={begin} and (@rel="--"  or (@rel="obj1" and parent::node[@cat="pp"])) and @end = ancestor::node[@cat="top"]/descendant::node[@pt="n"]/@begin]"""
     if token.word == 'ze' or token.word == 'su':
@@ -1854,7 +1995,7 @@ def correctPdit(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[Toke
                         indezemwp:
                     newtoken = Token('hem', token.pos, subpos=token.subpos)
                     bpl = bpl_indeze if indezemwp else bpl_node
-                    meta = mkSASTAMeta(token, newtoken, name=correctionlabels.parsedas, value='hem',
+                    meta = mkSASTAMeta(token, newtoken, name=correctionlabels.alpinoimprovement, value='hem',
                                        cat=correctionlabels.alpinoimprovement,
                                        backplacement=bpl, penalty=15)
                     metadata.append(meta)

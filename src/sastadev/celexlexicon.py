@@ -256,7 +256,7 @@ def getdehet(lemmakey: str) -> Optional[str]:
     '''
     yields the dehet property of the lemma identifier lemmakey
     :param lemmakey:
-    :return: retrunnvalues are lexicon.de, lexicon.het, 'n/a' or None
+    :return: return values are lexicon.de, lexicon.het, 'n/a' or None
     '''
     if lemmakey in dsldict:
         dehet = dsldict[lemmakey][dslDeHetNum]
@@ -312,7 +312,7 @@ def getposlist(word: str) -> List[str]:
 
 def getinfls(word: str) -> List[CELEX_INFL]:
     '''
-    returns a list of CELEX inflection codes for the input strin gword
+    returns a list of CELEX inflection codes for the input string word
     :param word:
     :return:
     '''

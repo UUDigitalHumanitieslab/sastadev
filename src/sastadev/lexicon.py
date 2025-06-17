@@ -261,7 +261,7 @@ comma = ','
 compoundsep = '_'
 
 def validword(wrd: str, methodname: MethodName, includealpinonouncompound=True) -> bool:
-    result = known_word(wrd, includealpinonouncompound=includealpinonouncompound)
+    result = wrd == '' or known_word(wrd, includealpinonouncompound=includealpinonouncompound)
     if methodname in {tarsp, stap}:
         result = result and not nochildword(wrd)
     return result

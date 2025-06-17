@@ -2,7 +2,7 @@ import copy
 from typing import List
 
 from lxml import etree
-
+from sastadev import correctionlabels
 from sastadev.conf import settings
 from sastadev.lexicon import (getinflforms, getwordposinfo, informlexiconpos,
                               pvinfl2dcoi)
@@ -428,7 +428,9 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
             else:
                 oldtoken = token
                 newtokens.append(newtoken)
-                meta = mkSASTAMeta(oldtoken, newtoken, name='GrammarError', value='SVAerror', cat='Error',
+                meta = mkSASTAMeta(oldtoken, newtoken, name=correctionlabels.grammarerror,
+                                   value=correctionlabels.svaerror,
+                                   cat=correctionlabels.syntax,
                                    backplacement=bpl_node_nolemma)
                 newmetadata.append(meta)
 
