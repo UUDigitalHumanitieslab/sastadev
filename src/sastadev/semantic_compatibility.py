@@ -2,9 +2,9 @@ from lxml import etree
 import re
 from sastadev.conf import settings
 from sastadev.metadata import Meta
-from sastadev.methods import MethodName
+from sastadev.methods import MethodName, Method
 from sastadev.NLtypes import Animate, AnyType, Event, Human, Object, SemType, UnKnown, Alt, And
-from sastadev.sastatypes import List, SynTree
+from sastadev.sastatypes import ExactResultsDict, List, SynTree
 from sastadev.semtypelexicon import sh, vnwsemdict, wwsemdict, wwreqsemdict, defaultreqsemdict
 from sastadev.treebankfunctions import getattval, getheadof, getsentence
 
@@ -171,7 +171,7 @@ def barebarecompatible(sem1: SemType, sem2: SemType) -> bool:
     else:
         return False
 
-def _semantically_incompatible_node_count(stree: SynTree, md: List[Meta], mn: MethodName) -> int:
+def _semantically_incompatible_node_count(stree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     word_node_count = 0
     reqs_list = semreqlookup(stree)
     if not reqs_list:
@@ -191,21 +191,21 @@ def _semantically_incompatible_node_count(stree: SynTree, md: List[Meta], mn: Me
 
 
 word_node_xpath = './/node[@word]'
-def semincompatiblecount(stree: SynTree, md: List[Meta], mn: MethodName) -> int:
+def semincompatiblecount(stree: SynTree, exact_results: ExactResultsDict, method: Method) -> int:
     sentence = getsentence(stree)        # mainly for debugging ease
     result = 0
     # gather the words
     word_nodes = stree.xpath(word_node_xpath)
     for node in word_nodes:
-        node_count = _semantically_incompatible_node_count(node, md, mn)
+        node_count = _semantically_incompatible_node_count(node, exact_results, method)
         result += node_count
     return result
 
-def get_semantically_incompatible_nodes(stree: SynTree, md: List[Meta], mn: MethodName) -> List:
+def get_semantically_incompatible_nodes(stree: SynTree, exact_results: ExactResultsDict, method: Method) -> List:
     incompatible_nodes = []
     word_nodes = stree.xpath(word_node_xpath)
     for node in word_nodes:
-        node_count = _semantically_incompatible_node_count(node, md, mn)
+        node_count = _semantically_incompatible_node_count(node, exact_results, method)
         if node_count > 0:
             incompatible_nodes.append(node)
     return incompatible_nodes
