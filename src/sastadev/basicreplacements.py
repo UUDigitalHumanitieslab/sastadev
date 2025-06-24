@@ -261,7 +261,8 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('heelboel', 'heleboel', pron, infpron, schwadrop, dp),
                                                 ('jou', 'jouw', pron, infpron, codared, -dp), # Td 22, 30 ik wil ook keer naar jou huis find criterion
                                                 ('hun', 'zij', grammar, regionalform, casevariant, mp(0) ),
-                                                ('zijn', "z'n", avoidambiguity, avoidambiguity, ww_vnw_ambiguity, dp)
+                                                ('zijn', "z'n", avoidambiguity, avoidambiguity, ww_vnw_ambiguity, dp),
+                                                ('teefee', 'tv', pron, infpron, vzdevoicing, dp),
                                                 # ('kijke', 'kijk', pron, infpron, emphasis, dp), # TD05, 32 moved to disambuguationdict
                                                 # ('geel', 'mooi', avoidambiguity, adjnambiguity, dp), #TD05, 24
                                                 # ('Roy', 'Jan', avoidambiguity, pnnambiguity, dp)

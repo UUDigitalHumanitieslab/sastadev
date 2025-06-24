@@ -35,6 +35,7 @@ pronunciation = 'Pronunciation'
 pronunciationvariant = 'Pronunciation Variant'
 regionalform = 'RegionalForm'
 regionalvariantorlexicalerror = 'Regional Variant / Lexical Error'
+repeatedword = 'Word token of a repeated word token sequence'
 repetition = 'Repetition'
 replacement = 'Replacement'
 replacement_error_marking = "Replacement Error Marking"

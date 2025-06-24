@@ -28,6 +28,8 @@ gravevowels = 'àèìòù\u00FD'
 tremavowels = 'äëïöüÿ'
 circumflexvowels = 'âêîôû\u0177'
 
+
+digits = '0123456789'
 consonants = 'bcdfghjklmnpqrstvwxz\u00E7'  # \u00E7 is c cedilla
 dutch_base_vowels = barevowels + aiguvowels + \
                     gravevowels + tremavowels + circumflexvowels
@@ -528,6 +530,11 @@ def remove_underscore(lemma: str) -> str:
     lemmaparts = lemma.split(underscore)
     newlemma = ''.join(lemmaparts)
     return newlemma
+
+def normalise_word(wrd: str) -> str:
+    cleanwrd = wrd.lower()
+    cleanwrd = strip_accents(cleanwrd)
+    return cleanwrd
 
 if __name__ == '__main__':
     test()

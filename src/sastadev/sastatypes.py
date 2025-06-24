@@ -79,6 +79,7 @@ ReplacementMode = int
 ResultsCounter = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict = Dict[QId, ResultsCounter]
 SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
+SAS_Result_List = List[Tuple[SynTree, str, List[str]]]
 Span = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict = Dict[Item_Level, QId]
 Nort = Union[SynTree, Token]

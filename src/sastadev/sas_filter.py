@@ -1,16 +1,19 @@
-from typing import List
+from typing import List, Tuple
 
 from sastadev.allresults import mkresultskey
 from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_wordnoncompletion
 from sastadev.correctionlabels import (
     alpinoimprovement,
+    ambiguityavoidance,
     codareduction,
     contextcorrection,
     dehyphenation,
+    disambiguation,
     emphasis,
     error,
     explanationasreplacement,
     finalndrop,
+    grammarerror,
     inflectionerror,
     informalpronunciation,
     lexicalerror,
@@ -19,13 +22,16 @@ from sastadev.correctionlabels import (
     regionalform,
     regionalvariantorlexicalerror,
     repetition,
+    repeatedword,
     replacement,
     pronunciationvariant,
     spellingcorrection,
     unknownword,
     unknownwordsubstitution,
+    wordunknowntoalpino,
     wrongpronunciation,
 )
+from sastadev.lexicon import valid_ambiguous_words
 from sastadev.metadata import (
     ALLSAMPLECORRECTIONS,
     BASICREPLACEMENTS,
@@ -33,8 +39,9 @@ from sastadev.metadata import (
     THISSAMPLECORRECTIONS,
 )
 from sastadev.methods import Method, asta
-from sastadev.sastatypes import ExactResults, ExactResultsDict, SynTree
+from sastadev.sastatypes import ExactResults, ExactResultsDict, SAS_Result_List, SynTree
 from sastadev.ASTApostfunctions import mluxqid, samplesizeqid
+from sastadev.stringfunctions import normalise_word
 from sastadev.treebankfunctions import (
     getattval,
     getmeta,
@@ -49,13 +56,16 @@ samplesizereskey = mkresultskey(samplesizeqid)
 
 wordreplacementtypes = [
     alpinoimprovement,
+    ambiguityavoidance,
     codareduction,
     contextcorrection,
+    disambiguation,
     dehyphenation,
     emphasis,
     error,
     explanationasreplacement,
     finalndrop,
+    grammarerror,
     inflectionerror,
     informalpronunciation,
     lexicalerror,
@@ -63,12 +73,14 @@ wordreplacementtypes = [
     noncompletion,
     regionalform,
     regionalvariantorlexicalerror,
+    repeatedword,
     repetition,
     replacement,
     pronunciationvariant,
     spellingcorrection,
     unknownword,
     unknownwordsubstitution,
+    wordunknowntoalpino,
     wrongpronunciation,
     CHAT_replacement,
     CHAT_wordnoncompletion,
@@ -105,29 +117,37 @@ def wnisanASTAX(wn: SynTree, tree: SynTree, exactresult: ExactResults) -> bool:
 
 
 def filterbymetadata(
-    rawunknownwordnodes: List[SynTree], exactresults: ExactResultsDict, method: Method
+    rawresults: SAS_Result_List, exact_results_dict: ExactResultsDict, method_name: str
 ) -> List[SynTree]:
     """
     Removes nodes from a list of nodes if they have already been replaced by
     SASTA. These can be found in the metadata of the utterance.
+    and remove nodes, under the ASTA method, for words that have also been marked for SampleSize (SSZX) or MLU (MLUX)
     """
     unknownwordnodes = []
-    for wn in rawunknownwordnodes:
+    for item in rawresults:
+        (wn, message, suggestions) = item
+        wnword = getattval(wn, 'word')
+        normalised_wnword = normalise_word(wnword)
+        if normalised_wnword in valid_ambiguous_words:
+            continue
         fulltrees = wn.xpath("ancestor::alpino_ds")
         fulltree = fulltrees[0] if fulltrees != [] else None
         uttid = getxsid(fulltree)
         session = getmeta(fulltree, "session")
         wnbegin = getattval(wn, "begin")
-        mdxpath = f"""./ancestor::alpino_ds/descendant::xmeta[({fullcondition}) and @annotationposlist="[{wnbegin}]"]"""
+        mdxpath = f"""./ancestor::alpino_ds/descendant::xmeta[({fullcondition}) and 
+                       (@annotatedposlist="[{wnbegin}]" or @annotationposlist="[{wnbegin}]")]"""
         replacements = wn.xpath(mdxpath)
-        exactresult = exactresults[uttid] if uttid in exactresults else []
-        if exactresult == []:
+        exact_results = exact_results_dict[uttid] if uttid in exact_results_dict else []
+        if exact_results == []:
             print(
-                f'{session}: Empty exactresult: {getattval(wn, "word")} in {uttid}: {getyieldstr(fulltree)}'
+                f'{session}: Empty exactresults: {getattval(wn, "word")} in {uttid}: {getyieldstr(fulltree)}'
             )
         isASTAX = (
-            wnisanASTAX(wn, fulltree, exactresult) if method.name == asta else False
+            wnisanASTAX(wn, fulltree, exact_results) if method_name == asta else False
         )
+
         if replacements == [] and not isASTAX:
-            unknownwordnodes.append(wn)
+            unknownwordnodes.append((wn, message, suggestions))
     return unknownwordnodes

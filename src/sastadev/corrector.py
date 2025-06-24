@@ -373,7 +373,8 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     allremovetokens += shortprefixtokens
     allremovepositions += shortprefixpositions
     metadata = [
-        mkSASTAMeta(token, repeatedtokens[token], EXTRAGRAMMATICAL, shortrep, correctionlabels.tokenisation, subcat=correctionlabels.repetition) for
+        mkSASTAMeta(token, repeatedtokens[token], repeatedseqtoken, shortrep, correctionlabels.tokenisation,
+                    subcat=correctionlabels.repetition) for
         token in reducedtokens if token in repeatedtokens]
     allmetadata += metadata
     reducedtokens = [
@@ -389,7 +390,9 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     allremovetokens += longprefixtokens
     allremovepositions += longprefixpositions
     metadata = [
-        mkSASTAMeta(token, repeatedtokens[token], EXTRAGRAMMATICAL, longrep, correctionlabels.tokenisation, subcat=correctionlabels.repetition) for
+        mkSASTAMeta(token, repeatedtokens[token], correctionlabels.repeatedword, longrep,
+                    correctionlabels.tokenisation,
+                    subcat=correctionlabels.repetition) for
         token in reducedtokens if token in repeatedtokens]
     allmetadata += metadata
     reducedtokens = [
@@ -401,7 +404,7 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     repeatedtokens = getrepeatedtokens(reducedtokens, substringtokens)
     allremovetokens += substringtokens
     allremovepositions += substringpositions
-    metadata = [mkSASTAMeta(token, repeatedtokens[token], EXTRAGRAMMATICAL, substringrep, correctionlabels.tokenisation,
+    metadata = [mkSASTAMeta(token, repeatedtokens[token], substringrep, substringrep, correctionlabels.tokenisation,
                             subcat=correctionlabels.repetition) for token in reducedtokens if token in repeatedtokens]
     allmetadata += metadata
     reducedtokens = [
@@ -413,9 +416,9 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     repeatedtokens = getrepeatedtokens(reducedtokens, dupnodetokens)
     allremovetokens += dupnodetokens
     allremovepositions += dupnodepositions
-    metadata = [mkSASTAMeta(token, repeatedtokens[token], EXTRAGRAMMATICAL,
-                            repeated, correctionlabels.tokenisation, subcat=correctionlabels.repetition) for token in reducedtokens if
-                token in repeatedtokens]
+    metadata = [mkSASTAMeta(token, repeatedtokens[token], correctionlabels.repeatedword,
+                            correctionlabels.repeatedword, correctionlabels.tokenisation,
+                            subcat=correctionlabels.repetition) for token in reducedtokens if token in repeatedtokens]
     allmetadata += metadata
     reducedtokens = [tok for tok in reducedtokens if tok not in dupnodetokens]
 
@@ -431,7 +434,7 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
                 break
     allremovetokens += dupnodetokens
     allremovepositions += dupnodepositions
-    metadata = [mkSASTAMeta(token, nwt, EXTRAGRAMMATICAL,
+    metadata = [mkSASTAMeta(token, nwt, repeatedseqtoken,
                             repeatedseqtoken, correctionlabels.tokenisation, subcat=correctionlabels.repetition)
                 for token, nwt in duppairs]
     allmetadata += metadata
