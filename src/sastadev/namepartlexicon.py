@@ -9,8 +9,8 @@ The namepartlexicon module:
 
 
 
-.. autofunction:: namepart_isa_namepart
-.. autofunction:: namepart_isa_namepart_uc
+.. autofunction:: sastadev.namepartlexicon.namepart_isa_namepart
+.. autofunction:: sastadev.namepartlexicon.namepart_isa_namepart_uc
 
 '''
 

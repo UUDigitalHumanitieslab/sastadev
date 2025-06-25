@@ -58,7 +58,7 @@ def doauchann(intreebank: SynTree) -> SynTree:
 
 def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
               annotatedfileresults: Optional[AllResults],
-              scp: SastaCoreParameters):
+              scp: SastaCoreParameters) -> Tuple[AllResults, SampleSizeTuple]:
     invalidqueries = {}
 
     annotationinput = scp.annotationinput

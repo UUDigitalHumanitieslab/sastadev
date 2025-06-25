@@ -1,7 +1,12 @@
 from dataclasses import dataclass
+from typing import List
 
 @dataclass
-class Top:
+class SemType:
+    name: str = "SemType"
+
+@dataclass
+class Top(SemType):
     name: str = "Top"
 
 @dataclass
@@ -33,11 +38,11 @@ class Event(Top):
 
 @dataclass
 class Locational(Top):
-    name: str = "Temporal"
+    name: str = "Locational"
 
 @dataclass
 class Location(Locational):
-    name: str = "Locational"
+    name: str = "Location"
 
 @dataclass
 class Path(Locational):
@@ -52,7 +57,7 @@ class Animate(Object):
 
 @dataclass
 class NonAnimate(Object):
-    name: str = "NoneAnimate"
+    name: str = "NonAnimate"
 
 @dataclass
 class Human(Animate):
@@ -79,10 +84,38 @@ class State(Event):
 
 @dataclass
 class Property(Event):
-    name: str = "property"
+    name: str = "Property"
+
+@dataclass
+class Quantity(Top):
+    name: str = "Quantity"
+
+@dataclass
+class UnKnown:
+    name: str = "UnKnown"
+
+
+@dataclass
+class AnyType:
+    name: str = "AnyType"
+
+@dataclass
+class And:
+    options: List[Top]
+
+@dataclass
+class Alt:
+    options: List[And]
 
 
 
+SemType = Top
+
+def alt(semtypelist: List[SemType]) -> Alt:
+    return Alt([And([semtype]) for semtype in semtypelist])
+
+def sand(semtypelist: List[SemType]) -> And:
+    return And(semtypelist)
 
 def tryhierarchy():
     person = Human()
@@ -98,6 +131,10 @@ def tryhierarchy():
     r = isinstance(christmas, Object)
     print(r)
     r = isinstance(christmas, Human)
+    print(r)
+    r = issubclass(Human, Object)
+    print(r)
+    r = issubclass(Human, Top)
     print(r)
 
 

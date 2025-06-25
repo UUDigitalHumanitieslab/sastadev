@@ -1,7 +1,7 @@
 '''
 This module defines the function read_method to read in a method:
 
-* read_method(methodfilename: FileName) -> Tuple[QueryDict, Item_Level2QIdDict, AltCodeDict, List[QId]]:
+* read_method(methodfilename: FileName) -> Method:
 '''
 
 from typing import List
@@ -12,6 +12,7 @@ from sastadev.methods import Method, defaultfilters
 from sastadev.query import Query, form_process, post_process
 from sastadev.sastatypes import (AltCodeDict, FileName, Item_Level2QIdDict,
                                  QId, QueryDict)
+from sastadev.stringfunctions import str2list
 
 comma = ','
 
@@ -128,7 +129,7 @@ def empty(row: list) -> bool:
     return True
 
 
-def read_method(methodname: str, methodfilename: FileName) -> Method:
+def read_method(methodname: str, methodfilename: FileName, variant=None) -> Method:
     header, data = xlsx.getxlsxdata(methodfilename)
 
     idcol, catcol, subcatcol, levelcol, itemcol, altcol, impliescol, \
@@ -162,28 +163,30 @@ def read_method(methodname: str, methodfilename: FileName) -> Method:
             literal: str = row[literalcol].strip()
             stars: str = row[starscol].strip()
             filter: str = row[filtercol].strip()
-            variants: str = row[variantscol]
+            variants: str = str2list(row[variantscol])
             unused1: str = row[unused1col]
             unused2: str = row[unused2col]
             comments: str = row[commentscol]
 
-            queries[id] = Query(id, cat, subcat, level, item, altitems, implies, original, pages, fase, query,
-                                inform, screening, process, literal,
-                                stars, filter, variants, unused1, unused2, comments)
-            if queries[id].process in [post_process, form_process]:
-                postquerylist.append(id)
-            lcitem = item.lower()
-            lclevel = level.lower()
-            if (lcitem, lclevel) in item2idmap:
-                settings.LOGGER.error('Duplicate (item, level) pair for {} and {}'.format(
-                    item2idmap[(lcitem, lclevel)], id))
-            item2idmap[(lcitem, lclevel)] = id
-            for altitem in altitems:
-                lcaltitem = altitem.lower()
-                if (lcaltitem, lclevel) in altcodes:
-                    settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(
-                        altcodes[(lcaltitem, lclevel)], id))
-                altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
+            if variant is None or variants == [] or variant in variants:
+
+                queries[id] = Query(id, cat, subcat, level, item, altitems, implies, original, pages, fase, query,
+                                    inform, screening, process, literal,
+                                    stars, filter, variants, unused1, unused2, comments)
+                if queries[id].process in [post_process, form_process]:
+                    postquerylist.append(id)
+                lcitem = item.lower()
+                lclevel = level.lower()
+                if (lcitem, lclevel) in item2idmap:
+                    settings.LOGGER.error('Duplicate (item, level) pair for {} and {}'.format(
+                        item2idmap[(lcitem, lclevel)], id))
+                item2idmap[(lcitem, lclevel)] = id
+                for altitem in altitems:
+                    lcaltitem = altitem.lower()
+                    if (lcaltitem, lclevel) in altcodes:
+                        settings.LOGGER.error('Duplicate (alternative item, level) pair for {} and {}'.format(
+                            altcodes[(lcaltitem, lclevel)], id))
+                    altcodes[(lcaltitem, lclevel)] = (lcitem, lclevel)
 
     defaultfilter = defaultfilters[methodname]
     themethod = Method(methodname, queries, item2idmap, altcodes, postquerylist,
