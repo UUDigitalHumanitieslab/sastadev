@@ -37,6 +37,7 @@ from sastadev.metadata import (
     BASICREPLACEMENTS,
     SASTA,
     THISSAMPLECORRECTIONS,
+    HISTORY
 )
 from sastadev.methods import Method, asta
 from sastadev.sastatypes import ExactResults, ExactResultsDict, SAS_Result_List, SynTree
@@ -88,7 +89,7 @@ wordreplacementtypes = [
 
 namecondition = " or ".join([f'@name="{wrt}"' for wrt in wordreplacementtypes])
 
-sources = [BASICREPLACEMENTS, ALLSAMPLECORRECTIONS, THISSAMPLECORRECTIONS]
+sources = [BASICREPLACEMENTS, ALLSAMPLECORRECTIONS, THISSAMPLECORRECTIONS, HISTORY]
 
 sourcecondition = "or ".join([f'@source="{SASTA}/{source}"' for source in sources])
 
