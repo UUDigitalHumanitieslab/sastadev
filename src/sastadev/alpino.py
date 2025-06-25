@@ -4,7 +4,7 @@ it provides the function *getdehetwordinfo*:
 
 * obtaining grammatical information from nouns in an Alpino parse
 
-  .. autofunction:: alpino::getdehetwordinfo
+  .. autofunction:: sastadev.alpino::getdehetwordinfo
 
 '''
 #from __future__ import annotations
@@ -55,7 +55,7 @@ def getdehetwordinfo(wrd: str) -> Tuple[List[WordInfo], str]:
     It returns a tuple consisting of a list of WordInfo objects and a string indicating the source where the properties
     have been found.
 
-    .. autofunction:: alpino::getalpinowordinfo
+    .. autofunction:: sastadev.alpino::getalpinowordinfo
     '''
 
     wordinfos = lexicon.getwordinfo(wrd)

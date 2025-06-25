@@ -79,7 +79,7 @@ def neologisme(stree: SynTree) -> List[SynTree]:
     n]" or the special form "@n" applies. It uses the function *mdbasedquery* to
     achieve this.
 
-    .. autofunction:: ASTApostfunctions::mdbasedquery
+    .. autofunction:: sastadev.ASTApostfunctions::mdbasedquery
 
     '''
     results1 = mdbasedquery(stree, errormarking, "['n']")
@@ -93,7 +93,7 @@ def sempar(stree: SynTree) -> List[SynTree]:
     The function *sempar* identifies the nodes for which the CHAT error marking "[*
     s]"  applies. It uses the function *mdbasedquery* to achieve this.
 
-    .. autofunction:: ASTApostfunctions::mdbasedquery
+    .. autofunction:: sastadev.ASTApostfunctions::mdbasedquery
 
 
     '''
@@ -106,7 +106,7 @@ def phonpar(stree: SynTree) -> List[SynTree]:
     The function *phonpar* identifies the nodes for which the CHAT error marking "[*
     p]"  applies. It uses the function *mdbasedquery* to achieve this.
 
-    .. autofunction:: ASTApostfunctions::mdbasedquery
+    .. autofunction:: sastadev.ASTApostfunctions::mdbasedquery
 
     '''
     results = mdbasedquery(stree, errormarking, "['p']")
@@ -280,7 +280,7 @@ def getnounlemmas(allresults, _):
     *allresults* and the query identifier for nouns to obtain the lemmas
     for nouns.
 
-    .. autofunction:: ASTApostfunctions::getposlemmas
+    .. autofunction:: sastadev.ASTApostfunctions::getposlemmas
 
     '''
     result = getposlemmas(allresults, nounreskey)
@@ -293,7 +293,7 @@ def getlexlemmas(allresults, _):
     *allresults* and the query identifier for lexical verbs to obtain the lemmas
     for lexical verbs.
 
-    .. autofunction:: ASTApostfunctions::getposlemmas
+    .. autofunction:: sastadev.ASTApostfunctions::getposlemmas
     '''
     result = getposlemmas(allresults, lexreskey)
     return result

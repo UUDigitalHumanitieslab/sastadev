@@ -19,10 +19,12 @@ from sastadev.sastatok import gettokensplusxmeta
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.tokenmd import TokenListMD
+from sastadev import correctionlabels
 
 # import CHAT_Annotation as schat  # put off because it causes an error: AttributeError: module 'CHAT_Annotation' has no attribute 'wordpat'
 
 defaultsettings = AlignmentSettings()
+
 
 sentenceinitialconjunctions = {'en', 'maar'}
 # interjections = ['hee', 'hè', 'ja', 'nee', 'kijk']
@@ -94,9 +96,9 @@ def explanationasreplacement(tokensmd: TokenListMD, tree: SynTree) -> Optional[T
             if known_word(newword):
                 newtokens = tokenreplace(newtokens, newtoken)
                 # bpl = bpl_node if known_word(oldword) else bpl_word
-                meta = mkSASTAMeta(oldtoken, newtoken, name='ExplanationasReplacement',
-                                   value='ExplanationasReplacement',
-                                   cat='Lexical Error', backplacement=bpl_replacement)
+                meta = mkSASTAMeta(oldtoken, newtoken, name=correctionlabels.explanationasreplacement,
+                                   value=correctionlabels.explanationasreplacement,
+                                   cat=correctionlabels.lexicalerror, backplacement=bpl_replacement)
                 newmetadata.append(meta)
                 result = TokenListMD(newtokens, newmetadata)
     return result
@@ -121,7 +123,7 @@ def finaltokenmultiwordexplanation(tree: SynTree) -> Optional[str]:
     result = None
     #    origmetadata = tokensmd.metadata
     origmetadata = xmetalist
-    explanations = [xm for xm in xmetalist if xm.name == 'Explanation']
+    explanations = [xm for xm in xmetalist if xm.name == correctionlabels.explanation]
     finalmwexplanations = []
     for xm in explanations:
         lxm = len(xm.annotationwordlist)
@@ -300,14 +302,14 @@ def finalexplanation_adapttree(tree: SynTree) -> SynTree:
         newtree = sdsettings.PARSE_FUNC(cleanutt)
         sentelem = tbf.find1(tree, './/sentence')
         sentid = sentelem.attrib['sentid']
-        newsentelem = tbf.find1(newtree, './/sentence')
-        newsentelem.attrib['sentid'] = sentid
         # tbf.showtree(newtree, 'newly parsed tree')
         if newtree is None:
             newtree = tree
             sdsettings.LOGGER.warning(
                 'Parsing for <{cleanutt}> failed. No changes applied')
         else:
+            newsentelem = tbf.find1(newtree, './/sentence')
+            newsentelem.attrib['sentid'] = sentid if newsentelem is not None else '@@'
             newmetaelements = [meta.toElement() for meta in newmetadata]
             newmetadataElement = etree.Element('metadata')
             for newmetaelement in newmetaelements:

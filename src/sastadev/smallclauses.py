@@ -31,7 +31,7 @@ interpunction signs, CHAT codes such as *xxx*, etc.
 
 The different subcases are dealt with by the function *smallclauses*:
 
-.. autofunction:: smallclauses::smallclauses
+.. autofunction:: sastadev.smallclauses::smallclauses
 
 '''
 
@@ -39,7 +39,7 @@ from typing import List
 
 from sastadev.conf import settings
 from sastadev.dedup import filledpauseslexicon
-from sastadev.lexicon import known_word, tswnouns
+from sastadev.lexicon import known_word, tswnouns, getwordinfo
 from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
                                defaultpenalty, insertion,
                                insertiontokenmapping, modifypenalty as mp, smallclause,
@@ -50,7 +50,7 @@ from sastadev.sastatypes import SynTree
 from sastadev.tokenmd import TokenListMD
 from sastadev.top3000 import (genlexicon, intransitive, isanimate, ishuman,
                               pseudotr, transitive)
-from sastadev.treebankfunctions import getattval, getnodeyield
+from sastadev.treebankfunctions import getattval, getnodeyield, trueclausecats
 
 space = ' '
 biglocvzs = ['achter', 'beneden', 'binnen', 'boven', 'bovenop', 'buiten', 'dichtbij']
@@ -168,7 +168,9 @@ def rpronoun(node):
 
 
 def bw(node):
-    result = getattval(node, 'pt') == 'bw'
+    nodept = getattval(node, 'pt')
+    result = nodept == 'bw' or rpronoun(node)
+    result = result and getattval(node, 'lemma') != 'er'
     return result
 
 
@@ -210,6 +212,9 @@ def istswnoun(node):
     result = getattval(node, 'lemma') in tswnouns
     return result
 
+def tgwmv(node: SynTree) -> bool:
+    result = getattval(node, 'pvtijd') == 'tgw' and getattval(node, 'pvagr') == 'mv'
+    return result
 
 def getleavestr(leaves):
     leaveseq = ['{}:{}:{}:{}'.format(getattval(leave, 'end'), getattval(leave, 'word'), getattval(leave, 'lemma'),
@@ -293,7 +298,7 @@ def getauxform(aux: str, node:SynTree) -> str:
             result = 'heeft' if aux == 'hebben' else 'is'
     return result
 
-def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty):
+def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty, cat=smallclause):
     insertposs = [token.pos + token.subpos for token in inserttokens]
     insertwordlist = [token.word for token in inserttokens]
     tokenmappinglist = [token.pos if token.subpos == 0 else None for token in resultlist]
@@ -336,6 +341,11 @@ def ispropernoun(node: SynTree) -> bool:
     result = lemma[0].isupper() if lemma != "" else False
     return result
 
+def canbeinfinitive(wrd: str) -> bool:
+    wordinfos = getwordinfo(wrd)
+    result = any([wordinfo[2] == 'i' for wordinfo in wordinfos])
+    return result
+
 def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     '''
 
@@ -373,21 +383,40 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     reducedleaves = [leave for leave in leaves if realword(leave)]
     if reducedleaves != [] and iscoord(reducedleaves[0]):
         reducedleaves = reducedleaves[1:]
-    if not (len(reducedleaves) > 1 and len(reducedleaves) <= 3):
+    if not (len(reducedleaves) > 1 and len(reducedleaves) <= 5):
         return resultlist
+    verbs = [leave for leave in reducedleaves if getattval(leave, 'pt') == 'ww' and
+             getattval(leave.getparent(), 'cat') not in trueclausecats]
+    if len(verbs) > 1:
+        return resultlist
+
     tokens = tokensmd.tokens
     treewords = [word(tokennode) for tokennode in leaves]
     tokenwords = [token.word for token in tokens if not token.skip]
     if treewords != tokenwords:
         settings.LOGGER.error('Token mismatch: {} v. {}'.format(treewords, tokenwords))
         return []
-    themap = {bg(tokennode): token.pos for (tokennode, token) in zip(leaves, tokens)}
+    themap = {bg(tokennode): token for (tokennode, token) in zip(leaves, tokens)}
+    if len(verbs) == 1:
+        theverb = verbs[0]
+        verbtoken = themap[bg(theverb)]
+        if verbtoken.word == getattval(theverb, 'word'):
+            theverbok = getattval(theverb, 'wvorm') != 'pv' or tgwmv(theverb)
+        else:
+            theverbok = canbeinfinitive(verbtoken.word)  # this is needed because the verb may have been changed, e..g by sva
+        if not theverbok:
+            return resultlist
+    else:
+        theverb = None
+
+
+
     metadata = tokensmd.metadata
 
-    if len(reducedleaves) <= 3:
+    if len(reducedleaves) >= 2:
         first = leaves[0]
         second = leaves[1]
-    if len(reducedleaves) == 3:
+    if len(reducedleaves) >= 3:
         third = leaves[0]
 
     if len(reducedleaves) == 2:
@@ -462,6 +491,21 @@ def smallclauses(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
             inserttokens = [Token(insertform, fpos, subpos=5)]
             resultlist = mktokenlist(tokens, fpos, inserttokens)
             metadata += mkinsertmeta(inserttokens, resultlist)
+    elif len(reducedleaves) >= 2:
+        if theverb is not None and nomperspro(first):  # jij zelf  doen, DLD11,19
+            fpos = int(getattval(first, 'begin'))
+            insertform = 'moeten' if getal(first) == 'mv' else 'moet'
+            inserttokens = [Token(insertform, fpos, subpos=5)]
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
+            metadata += mkinsertmeta(inserttokens, resultlist)
+        elif any([getattval(leave, 'wvorm') == 'inf' for leave in reducedleaves]) and getattval(first, 'pt') == 'bw' \
+            and nomperspro(second):   # nu jij 't doen. DLD16, 6
+            fpos = int(getattval(first, 'begin'))
+            insertform = 'moeten' if getal(second) == 'mv' else 'moet'
+            inserttokens = [Token(insertform, fpos, subpos=5)]
+            resultlist = mktokenlist(tokens, fpos, inserttokens)
+            metadata += mkinsertmeta(inserttokens, resultlist)
+
 
     if resultlist == []:
         result = []

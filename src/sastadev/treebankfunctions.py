@@ -85,10 +85,14 @@ trueclausecats = ['smain', 'cp', 'rel', 'whrel', 'whsub', 'whq', 'sv1', 'svan']
 complrels = ['su', 'obj1', 'pobj1', 'obj2',
              'se', 'pc', 'vc', 'svp', 'predc', 'ld']
 
+headrels = ['hd', 'crd']
+
+extendedheadrels  = ['hdf']
+
 mainclausecats = ['smain', 'whq', 'sv1']
 
 ptsubclasspairs = [('n', 'ntype'), ('tw', 'numtype'), ('vnw', 'vwtype'), ('lw', 'lwtype'), ('vz', 'vztype'),
-                   ('vg', 'conjtype'), ('spec', 'spectype')]
+                   ('vg', 'conjtype'), ('spec', 'spectype'), ('ww', 'wvorm')]
 ptsubclassdict = {pt: subclass for (pt, subclass) in ptsubclasspairs}
 
 pluralcrds = [('en',)]
@@ -589,9 +593,33 @@ def number2intstring(numberstr: str) -> str:
     return result
 
 
+def keycheck(key: Any, dict: Dict[Any, Any]) -> bool:
+    if key not in dict:
+        settings.LOGGER.error(
+            'key {}  not in dictionary. Contents of dictionary:'.format(key))
+        for akey, val in dict.items():
+            valbgn = getattval(val, 'begin')
+            valpt = getattval(val, 'pt')
+            valword = getattval(val, 'word')
+            valstr = '{}:{}:{}'.format(valbgn, valpt, valword)
+            settings.LOGGER.error('{}={}'.format(akey, valstr))
+    return key in dict
+
+
+def mktoken2nodemap(tokens: List[Token], tree: SynTree) -> Dict[int, SynTree]:
+    tokennodes = tree.xpath('.//node[@pt or @pos or @word]')
+    tokennodesdict = {int(getattval(n, 'begin')): n for n in tokennodes}
+    token2nodemap = {token.pos: tokennodesdict[token.pos]
+                     for token in tokens if not token.skip and keycheck(token.pos, tokennodesdict)}
+    return token2nodemap
+
+
+
 def getqueryresult(syntree: SynTree, xpathquery: Optional[str] = None,
                    noxpathquery: Callable[[SynTree], List[str]] = None) -> Optional[str]:
-    # etree.dump(syntree)
+    debug = False
+    if debug:
+        showtree(syntree, 'getqueryresults')
     if syntree is None:
         result = None
     else:
@@ -760,7 +788,8 @@ def addmetadata(stree: SynTree, meta: Metadata) -> SynTree:
 
 
 def iswordnode(thenode: SynTree) -> bool:
-    result = 'pt' in thenode.attrib or 'pos' in thenode.attrib
+    # result = 'pt' in thenode.attrib or 'pos' in thenode.attrib
+    result = 'word' in thenode.attrib
     return result
 
 
@@ -785,7 +814,7 @@ def iscompound(node: SynTree) -> bool:
     This is the case if the *lemma* attribute contains the compound separator
     *compoundsep*
 
-    .. autodata:: treebankfunctions::compoundsep
+    .. autodata:: sastadev.treebankfunctions::compoundsep
     """
     lemma = getattval(node, 'lemma')
     result = compoundsep in lemma
@@ -858,7 +887,7 @@ def sasta_long(node: SynTree) -> bool:
     The function sasta_long checks whether the length of the *word* attribute of the
     node is greater or equal to *min_sasta_length*:
 
-    .. autodata:: treebankfunctions::min_sasta_length
+    .. autodata:: sastadev.treebankfunctions::min_sasta_length
 
     """
     word = getattval(node, 'word')
@@ -912,7 +941,7 @@ def onbvnwdet(node: SynTree) -> bool:
 #     This is the case if *pt* equals *ww* and the node is not a substantivised verb as
 #     determined by the function *issubstantivised_verb*:
 #
-#     .. autofunction:: treebankfunctions::issubstantivised_verb
+#     .. autofunction:: sastadev.treebankfunctions::issubstantivised_verb
 #
 #     """
 #     if issubstantivised_verb(node):
@@ -945,45 +974,45 @@ def ismonthname(node: SynTree) -> bool:
 #
 #     * either the node meets the conditions of *sasta_pseudonym*
 #
-#        .. autofunction:: treebankfunctions::sasta_pseudonym
+#        .. autofunction:: sastadev.treebankfunctions::sasta_pseudonym
 #
 #     * or the node is part of name (pt = *spec*, spectype= *deeleigen*)
 #
-#        .. autofunction:: treebankfunctions::isspecdeeleigen
+#        .. autofunction:: sastadev.treebankfunctions::isspecdeeleigen
 #
 #     * or the node is a month name (these are not always nouns in Alpino)
 #
-#        .. autofunction:: treebankfunctions::ismonthname
+#        .. autofunction:: sastadev.treebankfunctions::ismonthname
 #
 #     * or the node meets the conditions of *spec_noun*
 #
-#        .. autofunction:: treebankfunctions::spec_noun
+#        .. autofunction:: sastadev.treebankfunctions::spec_noun
 #
 #     * or the node meets the conditions of *is_duplicate_spec_noun*
 #
-#        .. autofunction:: treebankfunctions::is_duplicate_spec_noun
+#        .. autofunction:: sastadev.treebankfunctions::is_duplicate_spec_noun
 #
 #     * or the node meets the conditions of *sasta_long*
 #
-#        .. autofunction:: treebankfunctions::sasta_long
+#        .. autofunction:: sastadev.treebankfunctions::sasta_long
 #
 #     * or the node meets the conditions of *recognised_wordnodepos*
 #
-#        .. autofunction:: treebankfunctions::recognised_wordnodepos
+#        .. autofunction:: sastadev.tblex::recognised_wordnodepos
 #
 #     * or the node meets the conditions of *recognised_lemmanodepos(node, pos)*
 #
-#        .. autofunction:: treebankfunctions::recognised_lemmanodepos(node, pos)
+#        .. autofunction:: sastadev.treebankfunctions::recognised_lemmanodepos(node, pos)
 #
 #     However, the node should:
 #
 #     * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
 #
-#        .. autofunction:: treebankfunctions::all_lower_consonantsnode
+#        .. autofunction:: sastadev.treebankfunctions::all_lower_consonantsnode
 #
 #     * nor satisfy the conditions of *short_nucl_n*:
 #
-#        .. autofunction:: treebankfunctions::short_nucl_n
+#        .. autofunction:: sastadev.treebankfunctions::short_nucl_n
 #
 #     """
 #
@@ -1029,7 +1058,7 @@ def sasta_short(inval: str) -> bool:
     The function *sasta_short* determines whether the string *inval* is short, i.e,
     with a length smaller or equal than *sasta_short_length*:
 
-    .. autodata:: treebankfunctions::sasta_short_length
+    .. autodata:: sastadev.treebankfunctions::sasta_short_length
 
     """
     result = len(inval) <= sasta_short_length
@@ -1042,7 +1071,7 @@ def short_nucl_n(node: SynTree) -> bool:
     *pt* equal to *n*, relation *nucl*, and whose *word* attribute is short (as
     determined by the  function *sasta_short*)
 
-    .. autofunction:: treebankfunctions::sasta_short
+    .. autofunction:: sastadev.treebankfunctions::sasta_short
     """
     pt = getattval(node, 'pt')
     rel = getattval(node, 'rel')
@@ -1060,10 +1089,10 @@ def sasta_pseudonym(node: SynTree) -> bool:
     pseudonym regular
     expressions have been created using the constant sasta_pseudonyms:
 
-    .. autodata:: treebankfunctions::sasta_pseudonyms
+    .. autodata:: sastadev.anonymization::sasta_pseudonyms
        :noindex:
 
-    .. autodata:: treebankfunctions::pseudonym_patternlist
+    .. autodata:: sastadev.anonymization::pseudonym_patternlist
 
     """
     word = getattval(node, 'word')
@@ -1169,7 +1198,7 @@ def getindexednodesmap(basicdict: Dict[str, SynTree]) -> Dict[str, SynTree]:
     The function *getindexednodesmap* creates a new dictionary for each item in *basicdict* in which the bare index nodes have been replaced by
     their antecedents by applying the function *expandtree*:
 
-    .. autofunction:: treebankfunctions::expandtree
+    .. autofunction:: sastadev.treebankfunctions::expandtree
 
     """
     newdict = {}
@@ -1294,17 +1323,17 @@ def indextransform(stree: SynTree) -> SynTree:
     It first gathers the antecedents of bare index nodes in a dictionary (*basicindexednodesmap*) of index-SynTree
     items by means of the function *getbasicindexednodesmap*.
 
-    .. autofunction:: treebankfunctions::getbasicindexednodesmap
+    .. autofunction:: sastadev.treebankfunctions::getbasicindexednodesmap
 
     The antecedents can contain bare index nodes themselves. So, in a second step, each antecedent is expanded
     so that bare index nodes are replaced by their antecedents. This is done by the function *getindexednodesmap*,
     which creates a new dictionary of index-SynTree items called *indexnodesmap*
 
-    .. autofunction:: treebankfunctions::getindexednodesmap
+    .. autofunction:: sastadev.treebankfunctions::getindexednodesmap
 
     Finally, the input tree is transformed by the function *indextransform2*, which uses  *indexnodesmap*:
 
-    .. autofunction:: treebankfunctions::indextransform2
+    .. autofunction:: sastadev.treebankfunctions::indextransform2
 
     """
 
@@ -1702,6 +1731,17 @@ def findfirstnode(tree: SynTree, condition: Callable[[SynTree], bool]) -> Option
     return None
 
 
+def hasnominativehead(node: SynTree) -> bool:
+    hd = find1(node, './node[@rel="hd"]')
+    cnjs = node.xpath('./node[@rel="cnj"]')  # coordinations
+    if cnjs != []:
+        result = any([hasnominativehead(cnj) for cnj in cnjs])
+    elif hd is not None:
+        result = getattval(hd, 'naamval') == 'nomin'
+    else:
+        result = False
+    return result
+
 def nominal(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
     cat = getattval(node, 'cat')
@@ -2006,6 +2046,23 @@ def treeinflate(stree: SynTree, start: int = 10, inc: int = 10) -> None:
                 stree.attrib['end'] = str((ie * 10) + 1)
 
 
+def deflate(stree: SynTree) -> SynTree:
+    newstree = deepcopy(stree)
+    deflate2(newstree)
+    return newstree
+
+def deflate2(stree: SynTree):
+    if stree.tag == 'node':
+        ib = int(getattval(stree, 'begin'))
+        ie = int(getattval(stree, 'end'))
+        newib = (ib //10) - 1
+        stree.attrib['begin'] = str(newib)
+        newie = (ie - 1) // 10
+        stree.attrib['end'] = str(newie)
+    for child in stree:
+            deflate2(child)
+
+
 def isidentitymap(dct: Dict[Any, Any]) -> bool:
     result = all([key == value for key, value in dct.items()])
     return result
@@ -2099,7 +2156,8 @@ def subclasscompatible(sc1, sc2):
     result = (sc1 == sc2) or \
              (sc1 in ['pr', 'refl'] and sc2 in ['pr', 'refl']) or \
              (sc1 in ['pr', 'pers'] and sc2 in ['pr', 'pers']) or \
-             (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm'])
+             (sc1 in ['init', 'versm'] and sc2 in ['init', 'versm']) or \
+             (sc1 in ['pv', 'inf']) and sc2 in ['pv', 'inf']
     return result
 
 
@@ -2191,7 +2249,7 @@ def normalisebeginend2(stree: SynTree, sortedbegins: List[PositionStr]) -> None:
     :param sortedbegins: sorted list of begin values of @pt or @pos nodes
     :return: None
     """
-    children = list(stree)
+    children = list(stree)   # adapt this to seelct only children with tag node (because of the  ud extensions)
     for child in children:
         normalisebeginend2(child, sortedbegins)
     if stree.tag == "node":
