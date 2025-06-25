@@ -178,6 +178,48 @@ def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
     return final
 
 
+def getignorewordcount(allresults, uttid):
+    result = 0
+    if samplesizereskey in allresults.coreresults:
+        if uttid in allresults.coreresults[samplesizereskey]:
+            result = allresults.coreresults[samplesizereskey][uttid]
+    return result
+
+
+def getastamaxsamplesizeuttidsandcutoff(allresults: AllResults) -> Tuple[List[UttId], int, Position]:
+    cutoffpoint = None
+    words = getallrealwords(allresults)
+    cumwordcount = 0
+    wordcounts: Dict[UttId, Tuple[int, int, int]] = {}
+    uttidlist = []
+    for uttid in allresults.allutts:
+        basewordcount = sum(words[uttid].values())
+        ignorewordcount = getignorewordcount(allresults, uttid)
+        wordcount = basewordcount - ignorewordcount
+        wordcounts[uttid] = (basewordcount, ignorewordcount, wordcount)
+        uttidlist.append(uttid)
+        if cumwordcount + wordcount <= astamaxwordcount:
+            cumwordcount += wordcount
+        else:
+            diff = astamaxwordcount - cumwordcount
+            cumwordcount = astamaxwordcount
+            cutoffpoint = getcutoffpoint(allresults, uttid, diff)
+            break
+    result = (uttidlist, cumwordcount, cutoffpoint)
+    return result
+
+
+def getcutoffpoint(allresults: AllResults, uttid: UttId, diff: int) -> int:
+    theutt = allresults.allutts[uttid]
+    final = diff
+    for i, w in enumerate(theutt):
+        if samplesizereskey in allresults.exactresults and \
+            (uttid, i + 1) in allresults.exactresults[samplesizereskey]:
+            final += 1
+        if i + 1 == final:
+            break
+    return final
+
 def finietheidsindex(allresults, _):
     allpvs = allresults.coreresults[
         pvreskey] if pvreskey in allresults.coreresults else Counter()

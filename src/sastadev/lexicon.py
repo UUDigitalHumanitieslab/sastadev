@@ -114,6 +114,13 @@ def pvinfl2dcoi(word: str, infl: CELEX_INFL, lemma: Lemma) -> Optional[DCOITuple
     return result
 
 
+def isa_vd(word) -> bool:
+    return celexlexicon.isa_vd(word)
+
+def isa_inf(word) -> bool:
+    return celexlexicon.isa_inf(word)
+
+
 def getwordposinfo(word: str, pos: str) -> List[WordInfo]:
     '''
     yields the list of WordInfo for word str with part of speech code pos by looking it up in the lexicon in use
@@ -223,3 +230,17 @@ lexiconfoldername = 'data/wordsunknowntoalpino'
 wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
 wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
 wordsunknowntoalpinolexicondict = initializelexicondict(wordsunknowntoalpinofullname)
+
+lexiconfoldername = 'data/filledpauseslexicon'
+
+filledpausesfilename = 'filledpauseslexicon.txt'
+filledpausesfullname = os.path.join(settings.SD_DIR, lexiconfoldername, filledpausesfilename)
+filledpauseslexicon = initializelexicon(filledpausesfullname)
+
+nomlulexiconfilename = 'notanalyzewords.txt'
+nomlulexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, nomlulexiconfilename)
+nomlulexicon = initializelexicon(nomlulexiconfullname)
+
+vuwordslexiconfilename = 'vuwordslexicon.txt'
+vuwordslexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, vuwordslexiconfilename)
+vuwordslexicon = initializelexicondict(vuwordslexiconfullname)

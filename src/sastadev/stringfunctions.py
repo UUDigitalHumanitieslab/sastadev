@@ -9,6 +9,7 @@ hyphen = '-'
 slash = '/'
 tab = '\t'
 comma = ','
+underscore = '_'
 
 # for selecting nonempty tokens from a csvstring ; comma between single quotes is allowed
 csvre = "'[^']+'|[^,' ]+"
@@ -126,9 +127,10 @@ def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str
 
     then
 
-    * it checks whether the string with  the character sequence reduced to one character is a word
-    according to the function *inlexicon*, and if so,  it adds this string to the result variable *newwords*
     * it checks whether the string with  the character sequence reduced to two characters is a word
+    according to the function *inlexicon*,
+        * if so,  it adds this string to the result variable *newwords*
+        * else it checks whether the string with  the character sequence reduced to one character is a word
     according to the function *inlexicon*, and if so,  it adds this string to the result variable *newwords*
 
     and then it returns the value of the result variable *newwords*
@@ -138,12 +140,13 @@ def deduplicate(word: str, inlexicon: Callable[[str], bool], exceptions: Set[str
         newwords = []
     # we want to exclude tokens consisting of interpunction symbols only e.g  ---, --
     elif wre.match(word):
-        newword = dupre.sub(r'\1', word)
-        if inlexicon(newword):
-            newwords.append(newword)
         newword = dupre.sub(r'\1\1', word)
         if inlexicon(newword):
             newwords.append(newword)
+        else:
+            newword = dupre.sub(r'\1', word)
+            if inlexicon(newword):
+                newwords.append(newword)
     return newwords
 
 
@@ -462,6 +465,10 @@ def getallrealwords(allresults):
         result[uttid] = Counter(words)
     return result
 
+def remove_underscore(lemma: str) -> str:
+    lemmaparts = lemma.split(underscore)
+    newlemma = ''.join(lemmaparts)
+    return newlemma
 
 if __name__ == '__main__':
     test()

@@ -62,8 +62,8 @@ def getdehetwordinfo(wrd: str) -> Tuple[List[WordInfo], str]:
 
     # we only want to consider nouns or words of unknown word class (such as kopje in CELEX)
     wordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[0] in ['n', 'None']]
-    # if any of the alternatives is a de-word, we keep only these
-    dewordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[1] == lexicon.de]
+    # if any of the alternatives is a de-word but no diminutive singular, we keep only these
+    dewordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[1] == lexicon.de and wordinfo[2] != 'de']
     if dewordinfos != []:
         wordinfos = dewordinfos
     #if any([wordinfo[1] == lexicon.de for wordinfo in wordinfos]):

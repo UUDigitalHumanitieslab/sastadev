@@ -39,6 +39,7 @@ from typing import Dict, List, Tuple
 from sastadev.conf import settings
 from sastadev.namepartlexicon import namepart_isa_namepart
 from sastadev.sastatypes import DCOIPt, SynTree
+from sastadev.stringfunctions import remove_underscore
 from sastadev.treebankfunctions import getattval
 from sastadev.xlsx import getxlsxdata
 
@@ -51,7 +52,7 @@ def ishuman(node: SynTree) -> bool:
     pt = getattval(node, 'pt')
     vwtype = getattval(node, 'vwtype')
     result = (lemma, pt) in semlexicon and 'human' in semlexicon[(lemma, pt)]
-    result = result or vwtype == 'pers'
+    result = result or (vwtype == 'pers' and lemma != 'het')
     result = result or namepart_isa_namepart(lemma)
     return result
 
@@ -71,7 +72,8 @@ def transitivity(node: SynTree, tr: str) -> bool:
     '''
     The function transitivity determines whether the string tr occurs in trlexicon for (lemma, pt) of the node
     '''
-    lemma = getattval(node, 'lemma')
+    rawlemma = getattval(node, 'lemma')
+    lemma = remove_underscore(rawlemma)
     pt = getattval(node, 'pt')
     result = (lemma, pt) in semlexicon and tr in trlexicon[(lemma, pt)]
     return result
@@ -123,6 +125,3 @@ for row in lexicondata:
     rawgens = row[9].split(semicolon)
     gens = [el.strip() for el in rawgens]
     genlexicon[(lemma, pt)] = gens
-
-#next statement for debugging purposes
-junk = 0

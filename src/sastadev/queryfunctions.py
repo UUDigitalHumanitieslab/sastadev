@@ -3,7 +3,7 @@ from typing import Callable, List
 from sastadev.macros import expandmacros
 from sastadev.sastatypes import SynTree
 from sastadev.treebankfunctions import (adjacent, find1, get_left_siblings,
-                                        getattval, parent)
+                                        getattval, getnodeyield, parent)
 
 nietxpath = './/node[@lemma="niet"]'
 wordxpath = './/node[@pt]'
@@ -166,3 +166,39 @@ def vobijpred(obj1node, headnode, stree) -> bool:
     result = cond1 and cond2
     return result
 
+
+def hequery(syntree: SynTree) -> List[SynTree]:
+    """
+
+    :param syntree:
+    :return: the node for hè or he, sentence final or prefinal and followed by a punctuation sign
+    """
+    henodes = syntree.xpath('.//node[@lemma="hè" or @lemma="he"]')
+    if henodes != []:
+        henode = max(henodes, key=lambda node: int(getattval(node, 'end')))
+        nodeyield = getnodeyield(syntree)
+        barenodeyield = [node for node in nodeyield if getattval(node, 'pt') != 'let']
+        result = [henode] if henode == barenodeyield[
+            -1] else []  # the found node must be the last one if punctuation is removed
+    else:
+        result = []
+    return result
+
+
+vudiversxpath = """
+.// node[(@ lemma != "ja" and @ lemma != "nee" and @ word != "xxx" and @ lemma != "mama" and @ word != "xx" and
+         (( @ pt="tsw" ) or
+          ((@ lemma="au" or @ lemma="hoepla" or @ lemma="dag" or @ lemma="kijk" or @ lemma="hap" or @ lemma="aai") and
+           (@ rel="--" or @ rel="sat" or @ rel="tag")
+		  )
+         ) 
+		) or %Tarsp_kijkVU% or %Tarsp_hehe% or %aanloopzo%
+    ]
+"""
+def vudivers(syntree: SynTree) -> List[SynTree]:
+
+    expandedvudiversxpath = expandmacros(vudiversxpath)
+    rawresults = syntree.xpath(expandedvudiversxpath)
+    heresults = hequery(syntree)
+    results = [result for result in rawresults if result not in heresults]
+    return results
