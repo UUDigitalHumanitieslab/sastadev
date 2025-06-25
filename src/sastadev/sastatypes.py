@@ -4,9 +4,9 @@ This module contains definitions of types used in multiple modules
 
 from collections import Counter
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from typing_extensions import TypeAlias
 
 from lxml import etree
+from typing_extensions import TypeAlias
 
 from sastadev.query import Query
 from sastadev.sastatoken import Token
@@ -75,7 +75,6 @@ FileName = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode = int
 ResultsCounter = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict = Dict[QId, ResultsCounter]
-SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
 Span = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict = Dict[Item_Level, QId]
 Nort = Union[SynTree, Token]
@@ -103,7 +102,7 @@ FileName: TypeAlias = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode: TypeAlias = int
 ResultsCounter: TypeAlias = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
-SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
+SampleSizeTuple: TypeAlias = Tuple[List[UttId], int, Optional[PositionStr]]
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
 Nort: TypeAlias = Union[SynTree, Token]
