@@ -2,7 +2,7 @@
 The module cleanCHILDEStokens provides the function cleantext to tokenize and clean utterances,
 yielding a cleaned text and associated metadata.
 
-* ..autofunction:: cleantext
+* ..autofunction:: sastadev.cleantext
 
 '''
 import re
@@ -109,6 +109,37 @@ def purifytokens(tokens: List[Token]) -> List[Token]:
     return result
 
 
+def removebareangledbrackets(tokens:List[Token]) -> Tuple[List[Token], Metadata]:
+    newtokens = []
+    removetokens = []
+    openbfound = False
+    metadata = []
+    for token  in tokens:
+        if token.word == '<':
+            openbfound = True
+        if openbfound:
+            if token.word == '>':
+                removetokens.append(token)
+                removewords = [token.word for token in removetokens[1:-1]]
+                removepositions = [token.pos for token in removetokens[1:-1]]
+                newmeta = Meta('Bare Angled Brackets',  [], annotatedwordlist = removewords, annotatedposlist= removepositions,
+                               atype='list', cat='Tokenisation', subcat='Robustness',  source='Tokenisation',
+                               backplacement=bpl_none, penalty=0)
+                metadata.append(newmeta)
+                removetokens = []
+                openbfound = False
+
+            else:
+                removetokens.append(token)
+        else:
+            newtokens.append(token)
+    if openbfound:
+        newtokens += removetokens
+
+    return newtokens, metadata
+
+
+
 CleanedText = Union[List[Token], str]
 
 
@@ -126,14 +157,22 @@ def cleantext(utt: str, repkeep: bool, tokenoutput: bool = False, verbose=False)
     intokenstrings = [str(token) for token in tokens]
     # print(space.join(intokenstrings))
     (newtokens, metadata) = cleantokens(tokens, repkeep)
+
+ #  remove bare angled brackets
+    (newtokens, babmetadata) = removebareangledbrackets(newtokens)
+    metadata += babmetadata
+
     #remove symbol tokens that should not be there anymore
     newtokens = purifytokens(newtokens)
     resultwordlist = [t.word for t in newtokens]
     resultstring = smartjoin(resultwordlist)
     resultposlist = [t.pos for t in newtokens]
-    newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
-    newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
-    newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none)
+    newmeta1 = Meta('tokenisation', inwordlist, atype='list', source='CHAT/Tokenisation', backplacement=bpl_none,
+                    penalty=0)
+    newmeta2 = Meta('cleanedtokenisation', resultwordlist, atype='list', source='CHAT/Tokenisation',
+                    backplacement=bpl_none, penalty=0)
+    newmeta3 = Meta('cleanedtokenpositions', resultposlist, annotationposlist=resultposlist, atype='list',
+                    source='CHAT/Tokenisation', backplacement=bpl_none, penalty=0)
     #newmeta4 = Meta('cleantext',  'done')
     metadata += [newmeta1, newmeta2, newmeta3]
     resultmetadata = metadata
@@ -194,19 +233,22 @@ def removesuspecttokens(tokens: List[Token]) -> List[Token]:
 
 
 
-RobustnessTuple = Tuple[Pattern, str, str, str]
+RobustnessTuple = Tuple[Pattern, str, str, str]  # regex, instring, outstring, message
 
 robustnessrules: List[RobustnessTuple] = [(re.compile(r'\u2026'), '\u2026', '...', 'Horizontal Ellipsis (\u2026, Unicode U+2026) replaced by a sequence of three Full Stops (..., Unicode U+002E) '),
                                           (re.compile('#'), '#', '', 'Number Sign (#, Unicode U+0023) removed'),
                                           #(re.compile('#'), '#', '(.)', 'Number Sign (#, Unicode U+0023) replaced by CHAT (short) pause code: (.)'),
-                                          (re.compile(r'\[\+bch\]'), '[+bch]', '[+ bch]', 'Missing space'),
-                                          (re.compile(r'\[\+trn\]'), '[+trn]', '[+ trn]', 'Missing space'),
+                                          (re.compile(r'\[\+bch\]', re.I), '[+bch]', '[+ bch]', 'Missing space'),
+                                          (re.compile(r'\[\+trn\]', re.I), '[+trn]', '[+ trn]', 'Missing space'),
+                                          (re.compile(r'\[\+ea\]', re.I), '[+ea]', '[+ ea]', 'Missing space'),
+                                          (re.compile(r'\[%(?![\s])'), '[%', '[% ', 'Missing space'),
                                           (re.compile(r'\[:(?![:\s])'), '[:', '[: ', 'Missing space'),
                                           (re.compile(r'(?<=\w)\+\.\.\.'), '+...', ' +...', 'Missing space'),
                                           (re.compile(r'\u2018'), '\u2018', "'", "Left Single Quotation Mark (\u2018. Unicode U+2018) replaced by Apostrophe ' (Unicode U+0027)"),
                                           (re.compile(r'\u2019'), '\u2019', "'", "Right Single Quotation Mark (\u2019, Unicode U+2019) replaced by Apostrophe ' (Unicode U+0027)"),
                                           (re.compile(r'\u201C'), '\u201C', '"', 'Left Double Quotation Mark (\u201C, Unicode U+201C) replaced by Quotation Mark (", Unicode U+0022)'),
-                                          (re.compile(r'\u201D'), '\u201D', '"', 'Right Double Quotation Mark (\u201D, Unicode U+201D) replaced by Quotation Mark (", Unicode U+0022)')
+                                          (re.compile(r'\u201D'), '\u201D', '"', 'Right Double Quotation Mark (\u201D, Unicode U+201D) replaced by Quotation Mark (", Unicode U+0022)'),
+                                          # (re.compile(r'<[^>]+>'), '<...>', '', 'Bare angled brackets with contents deleted ')
                                           ]
 
 

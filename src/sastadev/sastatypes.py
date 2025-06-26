@@ -3,10 +3,10 @@ This module contains definitions of types used in multiple modules
 """
 
 from collections import Counter
-from typing import Callable, Dict, List, Optional, Tuple, Union
-from typing_extensions import TypeAlias
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from lxml import etree
+from typing_extensions import TypeAlias
 
 from sastadev.query import Query
 from sastadev.sastatoken import Token
@@ -50,6 +50,7 @@ QId = str  # in the future perhaps NewType('QId', str)
 UttId = str  # in the future perhaps NewType('UttId', str)
 Position = int  # in the future perhaps NewType('Position', int)
 PositionStr = str
+Relation = str
 Stage = int
 SynTree = etree._Element  # type: ignore
 GoldTuple = Tuple[str, str, Counter]
@@ -74,11 +75,12 @@ FileName = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode = int
 ResultsCounter = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict = Dict[QId, ResultsCounter]
-SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
 Span = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict = Dict[Item_Level, QId]
 Nort = Union[SynTree, Token]
 ExactResultsFilter = Callable[[Query, ExactResultsDict, ExactResult], bool]
+Table = List[List[Any]]
+Header = List[str]
 Targets = int
 Treebank = etree.Element
 TreePredicate = Callable[[SynTree], bool]
@@ -100,7 +102,7 @@ FileName: TypeAlias = str  # perhaps in the future NewType('FileName', str)
 ReplacementMode: TypeAlias = int
 ResultsCounter: TypeAlias = Counter  # Counter[UttId]  # Dict[UttId, int]
 ResultsDict: TypeAlias = Dict[QId, ResultsCounter]
-SampleSizeTuple = Tuple[List[UttId], int, Optional[PositionStr]]
+SampleSizeTuple: TypeAlias = Tuple[List[UttId], int, Optional[PositionStr]]
 Span: TypeAlias = Tuple[PositionStr, PositionStr]
 Item_Level2QIdDict: TypeAlias = Dict[Item_Level, QId]
 Nort: TypeAlias = Union[SynTree, Token]
@@ -116,6 +118,10 @@ UttWordDict: TypeAlias = Dict[UttId, List[str]]
 WordInfo: TypeAlias = Tuple[Optional[CELEXPosCode],
                             Optional[DeHet], Optional[CELEX_INFL], Optional[Lemma]]
 XpathExpression = str
+
+MethodVariant = str
+DataSetName = str
+HeadedTable = Tuple[Header, Table]
 # moved the following to allresults.py
 # CoreQueryFunction = Callable[[SynTree], List[SynTree]]
 # PostQueryFunction = Callable[[SynTree, allresults.AllResults], List[SynTree]]

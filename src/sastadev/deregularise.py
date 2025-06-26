@@ -8,19 +8,19 @@ It provides:
 * functions for generating a list of overgeneralised forms, with their corrections and a characterisation of the error made. The main function for this is *makeparadigm*.
 Generating these forms and string them in a file is done by the module *update_inflectioncorrection*
 
-  .. autofunction:: deregularise::makeparadigm
+  .. autofunction:: sastadev.deregularise::makeparadigm
 
 * functions for finding the correct form for a wrongly inflected verb. The main function for this is *correctinflection*:
 
-  .. autofunction:: deregularise::correctinflection
+  .. autofunction:: sastadev.deregularise::correctinflection
 
 The module initialises the dictionary *correction* by reading in the file with the name contained in the constant *correctionfullname*
 
-  .. autodata:: deregularise::correctionfullname
+  .. autodata:: sastadev.deregularise::correctionfullname
 
 which uses the constsnt *correctionfilename*
 
-  .. autodata:: deregularise::correctionfilename
+  .. autodata:: sastadev.deregularise::correctionfilename
 
 
   **Remark** The function does not work perfectly yet for certain past participles (
@@ -105,10 +105,10 @@ def correctinflection(word: str) -> List[Tuple[str, str]]:
     metadata) for (wrongly inflected) *word*. It does so by calling the function
     *getcorrections* applied to *word* and the dictionary *correction*.
 
-    .. autodata:: deregularise::correction
+    .. autodata:: sastadev.deregularise::correction
        :annotation:
 
-    .. autofunction:: deregularise::getcorrections
+    .. autofunction:: sastadev.deregularise::getcorrections
 
     '''
 
@@ -430,7 +430,7 @@ def getcorrections(thestr: str, correction: Dict[str, Tuple[str, str]]) -> List[
     * Otherwise, it splits the word up into a separable prefix, a nonseparable prefix, and a base by means of the function *desep*.
     * If the function *desep* returns an empty list, *getcorrections* also returns an empty list.
 
-      .. autofunction:: deregularise::desep
+      .. autofunction:: sastadev.deregularise::desep
 
       **Remark** The prefix *ge* is incorrectly added to verbs with inseparable
       prefixes, e.g. *vervald* is incorrectly mapped on *vergevallen* (instead of on

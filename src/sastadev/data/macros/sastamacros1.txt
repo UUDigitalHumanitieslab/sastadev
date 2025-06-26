@@ -99,7 +99,8 @@ hwwprtverb = """
 	@lemma = "rond_lopen" or
 	@lemma = "vol_lopen" or
 	@lemma = "weg_lopen" or
-	@lemma = "vast_zitten" 
+	@lemma = "vast_zitten" or
+	@lemma = "terug_komen"
 )
 """
  
@@ -130,26 +131,39 @@ old_Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and (@pt="ww" and @rel="hd" and @wvorm="p
  )
 """
 
+bvbvraagwoord = """((@pt="vnw" and @lemma="waar") or (@pt="bw" and (@lemma="wanneer" or @lemma="hoe" or contains(@frame, "waar_adverb"))))"""
+
 ahi_sibling = """../node[@rel="vc" and @cat="ahi"]"""
 
-Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and not(%ahi_sibling%) and (@pt="ww" and @rel="hd" and @wvorm="pv" and not(%MvTT%) and @pvtijd!="verl" and
- ((
-   %Tarsp_hww% or
-   @lemma = "hebben" or
-   @lemma = "zijn"
-   ) and 
-   not(%Tarsp_vc_sibling%)) 
+nomvttorverl = """(@wvorm!="pv" or (not(%MvTT%) and @pvtijd!="verl"))"""
 
- )  and @wvorm="pv" and
-    not(%Tarsp_Kop%)
- )
-"""
+basic_hww = """(%Tarsp_hww% or @lemma = "hebben" or @lemma = "zijn")"""
+
+Tarsp_HwwZ = """(not(%Tarsp_Hwwi%) and 
+                 not(%Tarsp_Hwwvd%) and 
+				 not(%ahi_sibling%) and 
+				 @pt="ww" and 
+				 @rel="hd" and 
+				 %nomvttorverl%  and
+                 %basic_hww% and
+                 not(%Tarsp_vc_sibling%) and 
+				 @wvorm="pv" and
+                 not(%Tarsp_Kop%)
+                )
+            """
+
+lonelynonfinww = """(@wvorm!="pv" and not(ancestor::node[@cat="top"]/descendant::node[@pt="ww" and @wvorm="pv"]))"""
 
 MvTT = """(@pt="ww" and @pvagr="mv" and @pvtijd="tgw" and ../node[@rel="su"])"""
 
 
 vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")
 """
+
+Tarsp_Hwwvd = """((@pt="ww" and @rel="hd" and 
+           (@lemma="hebben" or @lemma="worden" or @lemma="zijn") and
+       parent::node[node[@rel="vc" and ((@cat="ppart" and node[@rel="hd"]) or (@pt="ww" and @wvorm="vd"))]
+       ]) or %robusthwwvd%)""""
 
 Tarsp_Kop = """
  (   @pt="ww" and @wvorm="pv" and @pvtijd="tgw" and @rel="hd" and not(%Tarsp_hww%) and
@@ -204,7 +218,7 @@ adjadv = """
 
 
 bbvb = """((node[@rel="mod" and %adjoradv%] and
-       node[@rel="hd"  and %adjoradv%])     
+       node[@rel="hd"  and %adjoradv% and not(@positie="nom")])     
    )"""
 
 
@@ -226,7 +240,8 @@ Tarsp_Basic_B = """(@rel="mod" or @rel="ld" or @rel="predm"  or %Tarsp_B_predc%)
 
 Tarsp_B_predc = """(@rel=predc and (@pt="vz" or @pt="bw" or @cat="pp" or @cat="advp" or %Rpronoun%))"""
 
-Tarsp_B = """( not(%aanloopzo%) and
+Tarsp_B = """( not(%adjacentnogeen%) and 
+              not(%aanloopzo%) and
        (((((@rel="mod" or @rel="ld" or @rel="predm") and
           (not(@cat) or @cat!="conj") and
 		  (not(@pt) or @pt!="tsw")
@@ -234,13 +249,13 @@ Tarsp_B = """( not(%aanloopzo%) and
          (%predcB%
          )
          ) and 
-         (../node[@pt="ww" and @rel="hd"])
+         ((../node[@pt="ww" and @rel="hd"]) or parent::node[@cat="smain"])
         ) or
         ((@pt="vz" or @pt="bw" or %Rpronoun%) and (@lemma!="kijk") and (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and %notonlyrealnode%) or
         (@cat="pp" and (@rel="--" or @rel="dp") and %notonlyrealnode%) or
 		(@rel="pc" and ../node[@rel="hd" and %locverb%]) or
         (@rel="cnj" and parent::node[@rel="mod" or @rel="ld" or @rel="predm"]) or
-        (@rel="mod" and @pt="bw" and parent::node[@cat="np"] ) or
+        (@rel="mod" and @pt="bw" and @lemma!="nog" and parent::node[@cat="np"] ) or
 		%Tarsp_nonmodadvcp% or
 		%Tarsp_pc_vc_exception% or
         %vzdisguisedasadj% or
@@ -272,7 +287,7 @@ hwwwithsvp = """(contains(@lemma,"_kunnen") or
                  contains(@lemma,"_zijn") 
 				) """
 
-hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan")""" 
+hwwwithsvpexception = """(@lemma="terug_komen" or @lemma="vast_zitten" or @lemma="weg_gaan" or @lemma="aan_hebben" or @lemma="op_hebben")""" 
 
 complement = """((@rel="obj1" or @rel="obj2") or 
                  (@rel="predc" and not(%predcB%)) or
@@ -341,10 +356,13 @@ ahiaspp = """(@cat="pp" and node[@rel="hd" and @lemma="aan"] and node[@cat="np" 
 
 oldcoreBX = """((node[@cat="du" and node[%singlewordbw% and @lemma!="niet" ] and node[(%corephrase% or (@pt and not(%pv%))) and @begin!=../node[%singlewordbw% and @lemma!="niet"]/@begin ]]) )"""
 
+nonominorsubj = """(not(node[@naamval="nomin"]) and not(node[@cat and node[@rel="hd" and @naamval="nomin"]]) and not(node[@rel="su"]))"""
+
+
 coreBX1 = """(@cat and 
              count(node[%bxrealnode%]) = 2 and 
 			 node[%corebnode%]  and
-			 not(node[@naamval="nomin" or @rel="su"]) and
+			 %nonominorsubj% and
 			 %onlythesearerealwords% and		
              count(.//node[%corebnode%]) = 1				
  
@@ -353,7 +371,7 @@ coreBX1 = """(@cat and
 coreBX2 = """(@cat and 
              count(node[%bxrealnode%]) = 2 and 
 			 count(node[%corebnode%]) =2  and
-			 not(node[@naamval="nomin" or @rel="su"]) and
+			 %nonominorsubj% and
 			 %onlythesearerealwords% and		
              count(.//node[%corebnode%]) = 2				
 			)""" 
@@ -376,7 +394,7 @@ corebnodesibling = """../node[not(%clausecat%) and
 """
 
 ooknogmod = """(@rel="mod" and (@lemma="ook" or @lemma="nog"))"""
-ookXP = """(((@cat="np"  and count(node) = 2) or  @cat="pp") and node[%ooknogmod%]  and not(node[@naamval="nomin"])and %onlythesearerealwords% )"""
+ookXP = """(((@cat="np"  and count(node) = 2) or  @cat="pp") and node[%ooknogmod%]  and %nonominorsubj% and %onlythesearerealwords% )"""
 
 
 bxrealnode = """(%bxrealwordnode% or count(.//node[%bxrealwordnode%]) > 0)"""
@@ -392,6 +410,7 @@ dlinkvg = """(@pt="vg" and (@rel="dlink" or @rel="--"))"""
 clausalbx1 = """((@cat="smain" or @cat="sv1" or @cat="inf" or @cat="ppart") and 
        node[%Tarsp_B% and @lemma!="niet" and @rel!="svp" and not(%Tarsp_kijkVU%)] and 
        count(node) = 2 and 
+	   %nonominorsubj% and
        %onlythesearerealwords% and		
        count(.//node[%corebnode%]) = 1				
  
@@ -411,6 +430,8 @@ clausalbx2 = """((@cat="smain" or @cat="sv1") and
  
      )
 """
+
+adjacentnogeen = """(@lemma="nog" and @end=ancestor::node[@cat="top"]/descendant::node[@lemma="een"]/@begin)"""
 
 old_Tarsp_BX = """((@cat="top" and 
                 not(.//node[%pv%]) and 
@@ -734,6 +755,7 @@ Tarsp_nonmodadvcp = """(@cat="cp" and (@rel="dp" or @rel="--") and node[@pt="vg"
 
 directerede_vcbijzin = """( %clausecat% and not(@rel="cnj") and (preceding-sibling::node[%metasmain%] or following-sibling::node[%metasv1%]))"""
 
+maarvg = """(@lemma="maar" and @begin=ancestor::node[%clausecat%]/@begin and not(../node[@rel="nucl"]))""" 
 
 clausecat = """(@cat="smain" or @cat="whq" or %baresv1% )"""
 metaverb = """(@lemma="zeggen" or @lemma="denken" or @lemma="vinden" or @lemma="vragen" or @lemma="schreeuwen" or @lemma="fluisteren" )"""

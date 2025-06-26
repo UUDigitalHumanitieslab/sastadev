@@ -1,28 +1,38 @@
 from collections import defaultdict
 from copy import copy, deepcopy
+from dataclasses import dataclass
+from editdistance import distance
 import os
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from lxml import etree
 
 from sastadev.basicreplacements import basicreplacements
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
+from sastadev.correctionparameters import CorrectionParameters
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
-                                mkuttwithskips)
-from sastadev.lexicon import de, dets, known_word, nochildwords
+                                mkuttwithskips, initialmaarvgxpath)
+from sastadev.lexicon import de, dets, known_word, nochildword, nochildwords, validnouns, validword, \
+    wordsunknowntoalpinolexicondict, wrongposwordslexicon
 from sastadev.macros import expandmacros
-from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node,
-                               bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion)
+from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_nolemma, defaultpenalty,
+                               bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion,
+                               SASTA, ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT,
+                               HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
+                               )
+from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp
 from sastadev.sastatok import sasta_tokenize
-from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist
+from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
+from sastadev.semantic_compatibility import semincompatiblecount
+from sastadev.subcatprefs import getsubcatprefscore
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
+from sastadev.treebankfunctions import (adaptsentence, add_metadata, clausecats, countav, deflate,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
                                         getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
@@ -32,8 +42,15 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, countav,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
+from sastadev.treetransform import adaptlemmas, transformtagcomma, transformtreeld, transformtreenogeen, \
+    transformtreenogde, nognietsplit
 
 ampersand = '&'
+
+positive = +1
+negative = -1
+
+subsourcesep = '/'
 
 corr0, corr1, corrn = '0', '1', 'n'
 validcorroptions = [corr0, corr1, corrn]
@@ -54,49 +71,28 @@ contextualproperties = ['rel', 'index', 'positie']
 ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
 TupleNint = Tuple[19 * (int,)]
 
-altpropertiesheader = ['penalty', 'dpcount', 'dhyphencount', 'complsucount', 'dimcount', 'compcount', 'supcount',
-                       'compoundcount', 'unknownwordcount', 'sucount', 'svaokcount', 'deplusneutcount', 'badcatcount',
-                       'hyphencount', 'basicreplaceecount', 'ambigcount', 'subjunctivecount', 'unknownnouncount',
-                       'unknownnamecount', 'dezebwcount', 'noun1c_count']
 
-errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
-                ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
-                ['altid', 'altsent', 'score'] + \
-                altpropertiesheader
 
 smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn')]
 smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 
 
+
+class Criterion():
+    def __init__(self, name, getfunction, polarity, description):
+        self.name: str = name
+        self. getfunction: Callable[[SynTree], bool] = getfunction
+        self.polarity: int = polarity
+        self.description: str = description
+
+
+
 class Alternative():
-    def __init__(self, stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount,
-                 compcount, supcount, compoundcount, unknownwordcount, sucount, svaok, deplusneutcount, badcatcount,
-                 hyphencount, basicreplaceecount, ambigcount, subjunctivecount, unknownnouncount, unknownnamecount,
-                 dezebwcount, noun1c_count):
+    def __init__(self, stree, altid, altsent, criteria):
         self.stree: SynTree = stree
         self.altid: AltId = altid
         self.altsent: str = altsent
-        self.penalty: Penalty = int(penalty)
-        self.dpcount: int = int(dpcount)
-        self.dhyphencount: int = int(dhyphencount)
-        self.complsucount: int = int(complsucount)
-        self.dimcount: int = int(dimcount)
-        self.compcount: int = int(compcount)
-        self.supcount: int = int(supcount)
-        self.compoundcount: int = int(compoundcount)
-        self.unknownwordcount: int = int(unknownwordcount)
-        self.sucount: int = int(sucount)
-        self.svaok: int = int(svaok)
-        self.deplusneutcount: int = int(deplusneutcount)
-        self.badcatcount: int = int(badcatcount)
-        self.hyphencount: int = int(hyphencount)
-        self.basicreplaceecount: int = int(basicreplaceecount)
-        self.ambigcount: int = int(ambigcount)
-        self.subjunctivecount = int(subjunctivecount)
-        self.unknownnouncount = int(unknownnouncount)
-        self.unknownnamecount = int(unknownnamecount)
-        self.dezebwcount = int(dezebwcount)
-        self.noun1c_count : int = int(noun1c_count)
+        self.criteria = criteria
 
     def alt2row(self, uttid: UttId, base: str, user1: str = '', user2: str = '', user3: str = '',
                 bestaltids: List[AltId] = [],
@@ -110,12 +106,7 @@ class Alternative():
             scores.append('IDENTICAL')
         score = ampersand.join(scores)
         part4 = list(
-            map(str, [self.altid, self.altsent, score, self.penalty, self.dpcount, self.dhyphencount, self.complsucount,
-                      self.dimcount, self.compcount, self.supcount, self.compoundcount, self.unknownwordcount,
-                      self.sucount,
-                      self.svaok, self.deplusneutcount, self.badcatcount, self.hyphencount,
-                      self.basicreplaceecount, self.ambigcount, self.subjunctivecount, self.unknownnouncount,
-                      self.unknownnamecount, self.dezebwcount, self.noun1c_count]))
+            map(str, [self.altid, self.altsent, score] + self.criteria))
         therow: list = [base, user1, user2, user3] + \
                        ['Alternative', uttid] + 2 * [''] + part4
 
@@ -230,7 +221,7 @@ def adaptpv(node):
         node.attrib['postag'] = 'WW(pv,tgw,mv)'
 
 
-def smartreplace(node: SynTree, word: str) -> SynTree:
+def smartreplace(node: SynTree, word: str, mn: MethodName) -> SynTree:
     '''
     replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class and
      if it does not occur in nochildwords;  otherwise by
@@ -244,23 +235,30 @@ def smartreplace(node: SynTree, word: str) -> SynTree:
     newnode = find1(wordtree, './/node[@pt]')
     newnodept = getattval(newnode, 'pt')
     nodept = getattval(node, 'pt')
+    nodelemma = getattval(node, 'lemma')
     newnodelemma = getattval(newnode, 'lemma')
-    if isvalidword(word) and \
+    if isvalidword(word, mn) and \
             issamewordclass(node, newnode) and \
             not isrobustnoun(newnode) and \
             newnodelemma not in nochildwords:
         result = newnode
-        result.attrib['begin'] = getattval(node, 'begin')
-        result.attrib['end'] = getattval(node, 'end')
-        result.attrib['rel'] = getattval(node, 'rel')
+        if nodept == 'ww' and '_' in nodelemma and newnodelemma in nodelemma and '_' not in newnodelemma:
+            # e.g. nodelemma == 'op_hebben', newnodelemma='hebben'
+            cpseppos = nodelemma.find('_')
+            prt = nodelemma[:cpseppos]
+            result.set('lemma', f'{prt}_{newnodelemma}')
+        result.set('begin', getattval(node, 'begin'))
+        result.set('end', getattval(node, 'end'))
+        result.set('rel', getattval(node, 'rel'))
         if 'index' in node.attrib:
-            result.attrib['index'] = getattval(node, 'index')
+            result.set('index', getattval(node, 'index'))
         if infpvpair(newnode, node):
             adaptpv(result)
     else:
         result = copy(node)
         result.attrib['word'] = word
-        if '_' in node.attrib['lemma'] and countsyllables(word) == 1:
+        nodept = getattval(node, 'pt')
+        if '_' in node.attrib['lemma'] and countsyllables(word) == 1 and nodept == 'n':
             result.attrib['lemma'] = word
     return result
 
@@ -292,7 +290,7 @@ def updateerrordict(errordict: ErrorDict, uttid: UttId, oldtree: SynTree, newtre
     return errordict
 
 
-def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, allsamplecorrections,
+def correcttreebank(treebank: Treebank, targets: Targets, correctionparameters: CorrectionParameters,
                     corr: CorrectionMode = corrn) -> Tuple[Treebank, ErrorDict, List[Optional[OrigandAlts]]]:
 
     '''
@@ -302,8 +300,9 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, al
     * targets: a specification of the utterances that have to be analysed
     * treebankfullname: name of the file that contains the treebank
     * method: the method to be used. Some corrections are method-specific
-    * corr: to indicate how the corrections should be done: no corrections at all, all corrections but the last one (usually the one with most adaptations) is selected; all  corrections but the best one according to the evaluation  criterion is selected.
-
+    * corr: to indicate how the corrections should be done: no corrections at all, all corrections but the last one
+     (usually the one with most adaptations) is selected; all  corrections but the best one according to the evaluation  criterion is selected.
+    * options: the input parameters for sastadev
 
     It returns a triple consisting of
 
@@ -323,12 +322,13 @@ def correcttreebank(treebank: Treebank, targets: Targets, method: MethodName, al
         # errorlogrows = []
         for stree in treebank:
             uttid = getxsid(stree)
+            uttno = find1(stree, './/metadata/meta[@name="uttno"]/@value')
             # print(uttid)
             mustbedone = get_mustbedone(stree, targets)
             if mustbedone:
-                # to implement
+                # to implementf
                 sentence = getsentence(stree)
-                newstree, orandalts = correct_stree(stree, method, corr, allsamplecorrections)
+                newstree, orandalts = correct_stree(stree, corr, correctionparameters)
                 if newstree is not None:
                     errordict = updateerrordict(
                         errordict, uttid, stree, newstree)
@@ -498,16 +498,15 @@ def cleantextdone(metadataelement):
     return False
 
 
-def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, thissamplecorrections) -> Tuple[SynTree, Optional[OrigandAlts]]:
+def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: CorrectionParameters) \
+        -> Tuple[SynTree, Optional[OrigandAlts]]:
     '''
 
      The function *correct_stree* takes as input:
 
     * stree: input syntactic structure
-    * method:  MethodName (tarsp, asta, stap)
     * corr: CorrectionMode (corr0, corr1, corrn)
-    * thissamplecorrections: Dict[str, HistoryCorrection] with the corrections occurring in this sample
-    (correction= CHAT replacement, single word explanation, or incomplete word)
+    * correctionparameters: CorrectionParameters
 
     and returns a tuple consisting of:
 
@@ -572,6 +571,20 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
         simpleshow(stree)
         print(showflatxml(stree))
 
+    # tree transformations
+    if correctionparameters.method in ['tarsp', ' stap']:
+        stree = transformtagcomma(stree)
+        stree = transformtreeld(stree)
+        stree = transformppinnp(stree)
+        stree = transformbwinnp(stree)
+        stree = transformmodRinnp(stree)
+        stree = transformtreenogeen(stree)
+        stree = transformtreenogde(stree)
+        # stree = nognietsplit(stree)  # put off because it should not be done
+
+    # adapt lemmas for words of which we know Alpino does it wrong
+    stree = adaptlemmas(stree)
+
     allmetadata = []
     # orandalts = []
 
@@ -593,7 +606,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     lmetadatalist = len(metadatalist)
     if lmetadatalist == 0:
         settings.LOGGER.error('Missing metadata in utterance {}'.format(uttid))
-        origmetadata = []
+        origmetadata = None
     else:
         if lmetadatalist > 1:
             settings.LOGGER.error(
@@ -626,9 +639,10 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     debug = False
     # (fatstree, text='fattened tree:')
 
-    ctmds: List[Correction] = getcorrections(cleanutttokens, method, fatstree, thissamplecorrections=thissamplecorrections)
+    rawctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
 
-
+    ctmds = reducecorrections(rawctmds, correctionparameters.method)
+    # ctmds = rawctmds
 
     debug = False
     if debug:
@@ -665,7 +679,8 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
                 # newstree = insertskips(newstree, correctiontokenlist, stree)
                 # simpleshow(stree)
                 mdcopy = deepcopy(origmetadata)
-                fatnewstree.insert(0, mdcopy)
+                if mdcopy is not None:
+                    fatnewstree.insert(0, mdcopy)
                 # copy the sentid attribute
                 sentencenode = getsentencenode(fatnewstree)
                 if sentencenode is not None:
@@ -678,7 +693,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
             # make sure to include the xmeta from CHAT cleaning!! variable allmetadata, or better metadata but perhaps rename to chatmetadata
             fatnewstree = add_metadata(fatstree, chatmetadata)
 
-        ptmds.append((correctionwordlist, fatnewstree, cwmdmetadata))
+        ptmds.append((correctiontokenlist, fatnewstree, cwmdmetadata))
 
     # select the stree for the most promising correction
     debug = False
@@ -688,16 +703,16 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     debug = False
 
     if ptmds == []:
-        thecorrection, orandalts = (cleanutt, fatstree, origmetadata), None
+        thecorrection, orandalts = (cleanutttokens, fatstree, origmetadata), None
     elif corr in [corr1, corrn]:
-        thecorrection, orandalts = selectcorrection(fatstree, ptmds, corr)
+        thecorrection, orandalts = selectcorrection(fatstree, ptmds, corr, correctionparameters.method)
     else:
         settings.LOGGER.error(
             'Illegal correction value: {}. No corrections applied'.format(corr))
-        thecorrection, orandalts = (cleanutt, fatstree, origmetadata), None
+        thecorrection, orandalts = (cleanutttokens, fatstree, origmetadata), None
 
     thetree = deepcopy(thecorrection[1])
-
+    correctiontokenlist = thecorrection[0]
     debuga = False
     # debuga = False
     if debuga:
@@ -731,7 +746,7 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     nextbackplacement = None
     for mctr, meta in enumerate(thecorrection[2]):
         curbackplacement = nextbackplacement if nextbackplacement is not None else meta.backplacement
-        if curbackplacement == bpl_node:
+        if curbackplacement in [bpl_node, bpl_node_nolemma]:
             nodeend = meta.annotationposlist[-1] + 1
             newnode = myfind(
                 thetree, './/node[@pt and @end="{}"]'.format(nodeend))
@@ -740,33 +755,39 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
             if newnode is not None and oldnode is not None:
                 # adapt oldnode1 for contextual features
                 contextoldnode = contextualise(oldnode, newnode)
+                if curbackplacement == bpl_node_nolemma:
+                    newnodelemma = getattval(newnode, 'lemma')
+                    contextoldnode.set('lemma', newnodelemma)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
         elif curbackplacement == bpl_replacement:
             # showtree(fatstree, 'fatstree')
-            nodeend = meta.annotationposlist[-1] + 1
-            newnode = myfind(
-                thetree, './/node[@pt and @end="{}"]'.format(nodeend))
-            oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [
-            ] else None
-            if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
-                settings.LOGGER.error(
-                    f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
+            if len(meta.annotationposlist) > 1:
+                pass
+            else:
+                nodeend = meta.annotationposlist[-1] + 1
+                newnode = myfind(
+                    thetree, './/node[@pt and @end="{}"]'.format(nodeend))
+                oldword = meta.annotatedwordlist[0] if meta.annotatedwordlist != [
+                ] else None
+                if newnode is None:  # @@todo first check here whether the node is in a left-out retracing part @@
+                    settings.LOGGER.error(
+                        f'Error in metadata:\n meta={meta}\n No changes applied\nsentence={getsentencenode(thetree).text}')
 
-            if newnode is not None and oldword is not None:
-                # wproplist = getwordinfo(oldword)
-                # wprop = wproplist[0] if wproplist != [] else None
-                # # (pt, dehet, infl, lemma)
-                # newnode.attrib['word'] = oldword
-                # if wprop is None:
-                #    newnode.attrib['lemma'] = oldword
-                # else:
-                #    newnode.attrib['lemma'] = wprop[3]
-                substnode = smartreplace(newnode, oldword)
+                if newnode is not None and oldword is not None:
+                    # wproplist = getwordinfo(oldword)
+                    # wprop = wproplist[0] if wproplist != [] else None
+                    # # (pt, dehet, infl, lemma)
+                    # newnode.attrib['word'] = oldword
+                    # if wprop is None:
+                    #    newnode.attrib['lemma'] = oldword
+                    # else:
+                    #    newnode.attrib['lemma'] = wprop[3]
+                    substnode = smartreplace(newnode, oldword, correctionparameters.method)
 
-                newnodeparent = newnode.getparent()
-                newnodeparent.remove(newnode)
-                newnodeparent.append(substnode)
-        # showtree(thetree, 'thetree after smart replace')
+                    newnodeparent = newnode.getparent()
+                    newnodeparent.remove(newnode)
+                    newnodeparent.append(substnode)
+            # showtree(thetree, 'thetree after smart replace')
 
         elif curbackplacement in [bpl_word, bpl_wordlemma]:
             nodeend = meta.annotationposlist[-1] + 1
@@ -908,8 +929,100 @@ def correct_stree(stree: SynTree, method: MethodName, corr: CorrectionMode, this
     # return this stree
     # print('dump 2:')
     # etree.dump(fulltree, pretty_print=True)
+
+    # tree transformations
+    if correctionparameters.method in ['tarsp', ' stap']:
+        fulltree = transformtagcomma(fulltree)
+        fulltree = transformtreeld(fulltree)
+        fulltree = transformppinnp(fulltree)
+        fulltree = transformbwinnp(fulltree)
+        fulltree = transformmodRinnp(fulltree)
+        fulltree = transformtreenogeen(fulltree)
+        fulltree = transformtreenogde(fulltree)
+        # fulltree = nognietsplit(fulltree) # put off because it should not be done
+
+    # adapt lemmas for words of which we know Alpino does it wrong
+    fulltree = adaptlemmas(fulltree)
+
+
+    # fulltree = deflate(fulltree)  # put off becuase there may be expanded elements
+    debug = False
+    if debug:
+        showtree(fulltree, 'Deflated')
+
     return fulltree, orandalts
 
+
+def splitsource(fullsource: str) -> Tuple[str, str]:
+    parts = fullsource.split(subsourcesep, maxsplit=2)
+    if len(parts) == 2:
+        return (parts[0], parts[1])
+    elif len(parts) == 1:
+        return (parts[0], '')
+    else:      #  == 0 or > 2
+        # should never occur
+        return ('', '')
+
+
+postcomplsuxpath = """.//node[@rel="su"   and 
+                parent::node[@cat="ssub" and not(parent::node[@cat="whsub" or @cat="whrel" or @cat="rel"])] and 
+                @begin >= ../node[(@word or @cat) and 
+                                  (not(@pdtype) or @pdtype!="adv-pron") and 
+                                  (@rel="ld" or @rel="obj1" or @rel="pc" or @rel="obj2")]/@end]"""
+def getpostcomplsucount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    postcomplsus = nt.xpath(postcomplsuxpath)
+    result = len(postcomplsus)
+    return result
+def getstreereplacementpenalty(stree: SynTree) -> int:
+    contextpositions = set()
+    spellingcorrectionpositions = set()
+    fullpenalty = 0
+    metadatas = stree.xpath('.//metadata')
+    if metadatas != []:
+        metadata = metadatas[0]
+        for meta in metadata:
+            if meta.tag != 'xmeta':
+                continue
+            fullsource = meta.attrib['source'] if 'source' in meta.attrib else ''
+            mainsource, subsource = splitsource(fullsource)
+            if subsource in {BASICREPLACEMENTS, ALLSAMPLECORRECTIONS, HISTORY, CONTEXT, CHILDRENSPELLINGCORRECTION,
+                             ADULTSPELLINGCORRECTION, THISSAMPLECORRECTIONS}:
+                penalty = meta.attrib['penalty'] if 'penalty' in meta.attrib else 0
+                fullpenalty += penalty
+                annotatedposlist = meta.attrib['annotatedpositions'] if 'annotatedposlist' in meta.attrib else '[]'
+                position = annotatedposlist[1:-1]
+                if subsource in [ADULTSPELLINGCORRECTION, CHILDRENSPELLINGCORRECTION] and position != '':
+                    spellingcorrectionpositions.add(position)
+                if subsource == CONTEXT and position != '':
+                    contextpositions.add(position)
+        spellcontextintersection = contextpositions.intersection(spellingcorrectionpositions)
+        reduction = len(spellcontextintersection) * defaultpenalty
+        fullpenalty = fullpenalty - reduction
+
+    return fullpenalty
+
+
+def getreplacementpenalty(nt: SynTree, mds: List[Meta], mn:MethodName) -> int:
+    contextpositions = set()
+    spellingcorrectionpositions = set()
+    fullpenalty = 0
+    for meta in mds:
+        fullsource = meta.source
+        mainsource, subsource = splitsource(fullsource)
+        if subsource in {BASICREPLACEMENTS, ALLSAMPLECORRECTIONS, HISTORY, CONTEXT, CHILDRENSPELLINGCORRECTION,
+                         ADULTSPELLINGCORRECTION, THISSAMPLECORRECTIONS}:
+            penalty = meta.penalty
+            fullpenalty += penalty
+            position = meta.annotatedposlist[0] if meta.annotatedposlist != [] else ''
+            if subsource in [CHILDRENSPELLINGCORRECTION, ADULTSPELLINGCORRECTION] and position != '':
+                spellingcorrectionpositions.add(position)
+            if subsource == CONTEXT and position != '':
+                contextpositions.add(position)
+    spellcontextintersection = contextpositions.intersection(spellingcorrectionpositions)
+    reduction = len(spellcontextintersection) * defaultpenalty
+    fullpenalty = fullpenalty - reduction
+
+    return fullpenalty
 
 def getsentencenode(stree: SynTree) -> SynTree:
     sentnodes = stree.xpath('.//sentence')
@@ -944,18 +1057,29 @@ def oldgetuttid(stree: SynTree) -> UttId:
         uttid = uttidlist[0]
     return uttid
 
+def reducecorrections(ctmds: List[Correction], mn:MethodName) -> List[Correction]:
+    tempdict = {}
+    for tokenlist, metadata in ctmds:
+        tokenstr = tokenlist2string(tokenlist)
+        newpenalty = compute_penalty(None, metadata, mn)
+        if tokenstr in tempdict:
+           oldpenalty = tempdict[tokenstr][0]
+           if newpenalty < oldpenalty:
+               tempdict[tokenstr] = (newpenalty, tokenlist, metadata)
+        else:
+            tempdict[tokenstr] = (newpenalty, tokenlist, metadata)
 
+    resultlist = []
+    for tokenstr in tempdict:
+        cand = tempdict[tokenstr]
+        result = (cand[1], cand[2])
+        resultlist.append(result)
+
+    return resultlist
 
 
 def scorefunction(obj: Alternative) -> TupleNint:
-    return (-obj.unknownwordcount, -obj.unknownnouncount, -obj.unknownnamecount, -obj.ambigcount, -obj.dpcount,
-            -obj.dhyphencount,
-            -obj.complsucount, -obj.badcatcount,
-            -obj.basicreplaceecount, -obj.ambigcount, -obj.hyphencount,
-            -obj.subjunctivecount, obj.dimcount,
-            obj.compcount, obj.supcount, obj.compoundcount, obj.sucount, obj.svaok,
-            -obj.deplusneutcount,
-            -obj.dezebwcount, -obj.noun1c_count, -obj.penalty)
+    return tuple(obj.criteria)
 
 
 def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
@@ -970,7 +1094,7 @@ def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
     return results
 
 
-def getsvaokcount(nt: SynTree) -> int:
+def getsvaokcount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
     subjects = nt.xpath('.//node[@rel="su"]')
     counter = 0
     for subject in subjects:
@@ -980,7 +1104,7 @@ def getsvaokcount(nt: SynTree) -> int:
     return counter
 
 
-def getdeplusneutcount(nt: SynTree) -> int:
+def getdeplusneutcount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
     theyield = getnodeyield(nt)
     ltheyield = len(theyield)
     counter = 0
@@ -998,12 +1122,14 @@ def getdeplusneutcount(nt: SynTree) -> int:
     return counter
 
 
-validwords = {"z'n", 'dees', 'cool'}
+validwords = {"z'n", 'dees', 'cool', "'k"}
 punctuationsymbols = """.,?!:;"'"""
 
 
-def isvalidword(w: str) -> bool:
-    if known_word(w):
+def isvalidword(w: str, mn: MethodName, includealpinonouncompound=True) -> bool:
+    if nochildword(w):
+        return False
+    elif validword(w, mn, includealpinonouncompound=includealpinonouncompound):
         return True
     elif w in punctuationsymbols:
         return True
@@ -1013,7 +1139,7 @@ def isvalidword(w: str) -> bool:
         return False
 
 
-def countambigwords(stree: SynTree) -> int:
+def countambigwords(stree: SynTree, md:List[Meta], mn:MethodName) -> int:
     leaves = getnodeyield(stree)
     ambignodes = [leave for leave in leaves if getattval(
         leave, 'word').lower() in disambiguationdict]
@@ -1021,15 +1147,64 @@ def countambigwords(stree: SynTree) -> int:
     return result
 
 
-def getunknownwordcount(nt: SynTree) -> int:
+def getunknownwordcount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
     words = [w for w in nt.xpath('.//node[@pt!="tsw"]/@word')]
-    unknownwords = [w for w in words if not (
-            isvalidword(w.lower()) or isvalidword(w.title()))]
+    unknownwords = [w for w in words if not isvalidword(w.lower(), mn) ]
     result = len(unknownwords)
     return result
 
+wrongposwordxpathtemplate = './/node[@lemma="{word}" and @pt="{pos}"]'
+def getwrongposwordcount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    result = 0
+    for word, pos in wrongposwordslexicon:
+        wrongposwordxpath = wrongposwordxpathtemplate.format(word=word, pos=pos)
+        matches = nt.xpath(wrongposwordxpath)
+        result += len(matches)
+    return result
 
-def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode) -> Tuple[
+sucountxpath = './/node[@rel="su" and not(@pt="ww" and @wvorm="inf") and not(node[@rel="hd" and @pt="ww" and @wvorm="inf"])] '
+def getsucount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    matches = nt.xpath(sucountxpath)
+    result = len(matches)
+    return result
+
+def getdhyphencount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    matches = nt.xpath('.//node[@rel="--" and @pt and @pt!="let"]')
+    result = len(matches)
+    return result
+
+localgetcompoundcount = lambda nt, md, mn: getcompoundcount(nt)
+getdpcount = lambda nt, md, mn: countav(nt, 'rel', 'dp')
+# getdhyphencount = lambda nt, md, mn: countav(nt, 'rel', '--')
+getdimcount = lambda nt, md, mn: countav(nt, 'graad', 'dim')
+getcompcount = lambda nt, md, mn: countav(nt, 'graad', 'comp')
+getsupcount = lambda nt, md, mn: countav(nt, 'graad', 'sup')
+# getsucount = lambda nt, md, mn: countav(nt, 'rel', 'su')
+getbadcatcount = lambda nt, md, mn: len(
+    [node for node in nt.xpath('.//node[@cat and (@cat="du") and node[@rel="dp"]]')])
+gethyphencount = lambda nt, md, mn: len(
+    [node for node in nt.xpath('.//node[contains(@word, "-")]')])
+getbasicreplaceecount = lambda nt, md, mn: len([node for node in nt.xpath('.//node[@word]')
+                          if getattval(node, 'word').lower() in basicreplacements])
+getsubjunctivecount = lambda nt, md, mn: len(
+    [node for node in nt.xpath('.//node[@pvtijd="conj"]')])
+def getunknownnouncount(nt: SynTree, md:List[Meta], mn: MethodName):
+    candidates = nt.xpath('.//node[@pt="n" and @frame="noun(both,both,both)"]')
+    realones = [cand for cand in candidates if getattval(cand, 'lemma') not in validnouns]
+    result = len(realones)
+    return result
+
+getunknownnamecount = lambda nt, md, mn: len([node for node in nt.xpath(
+    './/node[@pt="n" and @frame="proper_name(both)"]')])
+complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and
+                                             @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and
+                                       not(node[%Rpronoun%])]""")
+getcomplsucount = lambda nt, md, mn: len([node for node in nt.xpath(complsuxpath)])
+getdezebwcount = lambda nt, md, mn: len([node for node in nt.xpath(dezebwxpath)])
+getnoun1c_count = lambda nt, md, mn: len([node for node in nt.xpath(noun1cxpath)])
+
+
+def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode, mn:MethodName) -> Tuple[
     ParsedCorrection, OrigandAlts]:
     # to be implemented@@
     # it is presupposed that ptmds is not []
@@ -1039,46 +1214,14 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
 
     altid: AltId = 0
     alts: Dict[AltId, Alternative] = {}
-    for cw, nt, md in ptmds:
+    for ct, nt, md in ptmds:
+        cw = tokenlist2stringlist(ct)
         altsent = space.join(cw)
-        penalty = compute_penalty(md)
-        dpcount = countav(nt, 'rel', 'dp')
-        dhyphencount = countav(nt, 'rel', '--')
-        dimcount = countav(nt, 'graad', 'dim')
-        compcount = countav(nt, 'graad', 'comp')
-        supcount = countav(nt, 'graad', 'sup')
-        compoundcount = getcompoundcount(nt)
-        unknownwordcount = getunknownwordcount(nt)
-        sucount = countav(nt, 'rel', 'su')
-        svaokcount = getsvaokcount(nt)
-        deplusneutcount = getdeplusneutcount(nt)
-        badcatcount = len(
-            [node for node in nt.xpath('.//node[@cat and (@cat="du") and node[@rel="dp"]]')])
-        hyphencount = len(
-            [node for node in nt.xpath('.//node[contains(@word, "-")]')])
-        basicreplaceecount = len([node for node in nt.xpath('.//node[@word]')
-                                  if getattval(node, 'word').lower() in basicreplacements])
-        ambigwordcount = countambigwords(nt)
-        subjunctivecount = len(
-            [node for node in nt.xpath('.//node[@pvtijd="conj"]')])
-        unknownnouncount = len([node for node in nt.xpath(
-            './/node[@pt="n" and @frame="noun(both,both,both)"]')])
-        unknownnamecount = len([node for node in nt.xpath(
-            './/node[@pt="n" and @frame="proper_name(both)"]')])
-        complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and
-                                                     @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and
-                                               not(node[%Rpronoun%])]""")
-        complsucount = len([node for node in nt.xpath(complsuxpath)])
-        dezebwcount = len([node for node in nt.xpath(dezebwxpath)])
-        noun1c_count = len([node for node in nt.xpath(noun1cxpath)])
-        # overregcount but these will mostly be unknown words
-        # mwunamecount well maybe unknownpropernoun first
+        # penalty = compute_penalty(md)
 
-        alt = Alternative(stree, altid, altsent, penalty, dpcount, dhyphencount, complsucount, dimcount, compcount,
-                          supcount,
-                          compoundcount, unknownwordcount, sucount, svaokcount, deplusneutcount, badcatcount,
-                          hyphencount, basicreplaceecount, ambigwordcount, subjunctivecount, unknownnouncount,
-                          unknownnamecount, dezebwcount, noun1c_count)
+        criteriavalues = [criterion.getfunction(nt, md, mn) * criterion.polarity for criterion in criteria]
+
+        alt = Alternative(stree, altid, altsent, criteriavalues)
         alts[altid] = alt
         altid += 1
     orandalts = OrigandAlts(orig, alts)
@@ -1086,7 +1229,6 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
     if corr == corr1:
         orandalts.selected = altid - 1
     elif corr == corrn:
-        # @@to be implemented@@
         bestaltids = getbestaltids(alts)
         if bestaltids != []:
             bestaltid = bestaltids[0]  # or perhaps better the last one?
@@ -1105,9 +1247,162 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
     result = ptmds[orandalts.selected]
     return result, orandalts
 
+# smainsuxpath = '//node[@cat="smain"  and @begin = node[@rel="su"]/@begin]' # yields unexpected errros (TD12:31; TARSP_08:31)
+smainsuxpath =  './/node[@cat="smain" and node[@rel="su"]]'
 
-def compute_penalty(md: List[Meta]) -> Penalty:
+def countsmainsu(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    matches = nt.xpath(smainsuxpath)
+    result = len(matches)
+    return result
+
+mainclausexpath = './/node[@cat="smain" or @cat="whq" or (@cat="sv1" and @rel!="body" and @rel!="cnj")]'
+def getmainclausecount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    """
+    parses with more than 1 main clause node are bad
+    :param nt:
+    :return:
+    """
+    matches = nt.xpath(mainclausexpath)
+    lmatches = len(matches)
+    if lmatches == 1:
+        result = 0   # if there is a clause, it is a single main clause what we want
+    else:
+        result = lmatches
+    return result
+
+mainrelxpath = './/node[@rel="--" and (@cat="rel" or @cat="whrel")]'
+def mainrelcount(stree: SynTree, md:List[Meta], mn:MethodName) -> int:
+    mainrels = stree.xpath(mainrelxpath)
+    result = len(mainrels)
+    return result
+
+
+topxpath = './/node[@cat="top"]'
+def gettopclause(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    tops = nt.xpath(topxpath)
+    if tops == []:
+        return 0
+    top = tops[0]
+    realchildren = [child for child in top if getattval(child, 'pt') not in ['let', 'tsw']]
+    if len(realchildren) != 1:
+        return 0
+    else:
+       thechild = realchildren[0]
+       thechildcat = getattval(thechild, 'cat')
+       result = 1 if thechildcat in clausecats else 0
+       return result
+
+toexpath = './/node[@lemma="toe" or (@lemma="tot" and @vztype="fin")]'
+naarxpath = './/node[@lemma="naar"]'
+def getlonelytoecount(nt: SynTree, md:List[Meta], mn:MethodName) -> int:
+    toematches = nt.xpath(toexpath)
+    naarmatches = nt.xpath(naarxpath)
+    if toematches == []:
+        return 0
+    if toematches != [] and naarmatches == []:
+        return len(toematches)
+
+    result = 0
+    for toematch in toematches:
+        if all([int(getattval(naarmatch, 'begin')) > int(getattval(toematch, 'begin')) for naarmatch in naarmatches]):
+            result += 1
+    return result
+
+relasmainsuborderxpath = """.//node[(@cat="rel" or @cat="whrel" )and @rel="--" and 
+                            parent::node[@cat="top"] and 
+                            node[@rel="body" and @cat="ssub" and .//node[@word]/@end<=node[@rel="hd" and @pt="ww"]/@begin] ]
+"""
+def getrelasmainsubordercount(nt: SynTree, md: List[Meta], mn: MethodName):
+    matches = nt.xpath(relasmainsuborderxpath)
+    result = len(matches)
+    return result
+
+def compute_penalty(nt: SynTree, md: List[Meta], mn:MethodName) -> Penalty:
     totalpenalty = 0
     for meta in md:
         totalpenalty += meta.penalty
     return totalpenalty
+
+wordsxpath = """.//node[@word]"""
+def getnotknownbyalpinocount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    wordnodes = nt.xpath(wordsxpath)
+    words = [getattval(wordnode, 'word') for wordnode in wordnodes]
+    unknownwords = [word for word in words if word in wordsunknowntoalpinolexicondict]
+    result = len(unknownwords)
+    return result
+
+def gettotaleditdistance(nt: SynTree, md: List[Meta], mn:MethodName) -> int:
+    wordlist = getyield(nt)
+    totaldistance = 0
+    for meta in md:
+        fullsource = meta.source
+        mainsource, subsource = splitsource(fullsource)
+        if subsource in replacementsubsources and \
+                len(meta.annotationwordlist) == 1 and \
+                len(meta.annotatedwordlist) == 1:
+            correctword = meta.annotationwordlist[0]
+            wrongword = meta.annotatedwordlist[0]
+            dst = distance(wrongword, correctword)
+            totaldistance += dst
+    return totaldistance
+
+ppinnpxpath = """//node[@cat='pp' and node[@rel='hd' and @lemma!='van'] and parent::node[@cat='np']]"""
+def getpostnominalppmodcount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    ppinnpmods = nt.xpath(ppinnpxpath)
+    result = len(ppinnpmods)
+    return result
+
+def getmaaradvcount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    initialmaaradvs = nt.xpath(initialmaarvgxpath)
+    result = len(initialmaaradvs)
+    return result
+
+
+# The constant *criteria* is a list of objects of class *Criterion* that are used, in the order given, to evaluate parses
+criteria = [
+    Criterion("unknownwordcount", getunknownwordcount, negative, "Number of unknown words"),
+    Criterion('Alpinounknownword', getnotknownbyalpinocount, negative, "Number of words unknown to Alpino"),
+    Criterion("wrongposwordcount", getwrongposwordcount, negative, "Number of words with the wrong part of speech"),
+    Criterion("unknownnouncount", getunknownnouncount, negative, "Count of unknown nouns according to Alpino"),
+    Criterion("unknownnamecount", getunknownnamecount, negative, "Count of unknown names"),
+    Criterion('semincompatibilitycount', semincompatiblecount, negative, "Count of the number of semantic incompatibilities"),
+    Criterion('maaradvcount', getmaaradvcount, negative, "Count of number of occurrences of clause initial 'maar' as an adverb"),
+    Criterion("ambigcount", countambigwords, negative, "Number of ambiguous words"),
+    Criterion("dpcount", getdpcount, negative, "Number of nodes with relation dp"),
+    Criterion("dhyphencount", getdhyphencount, negative, "Number of nodes with relation --"),
+    Criterion("postcomplsucount", getpostcomplsucount, negative,
+              "Number of subjects to the right of a complement in a subordinate clause"),
+    Criterion('Nominal PP modifier count', getpostnominalppmodcount, negative, "Number of postnominal PP modifiers"),
+    Criterion('RelativeMainSuborder', getrelasmainsubordercount, negative, 'Number of Main Relative Clauses with subordinate order'),
+    Criterion("lonelytoecount", getlonelytoecount, negative, "Number of occurrences of lonely 'toe'"),
+    Criterion("noun1c_count", getnoun1c_count, negative, "Number of nouns that consist of a single character"),
+    Criterion('ReplacementPenalty', getreplacementpenalty, negative, 'Plausibility of the replacement'),
+    Criterion('Total Edit Distance', gettotaleditdistance, negative, "Total of the edit distances for all replaced words"),
+    # Criterion('Subcatscore', getsubcatprefscore, positive,
+    #          'Score based on the frequency of the subcategorisation pattern'),  # put off needs revision
+    #    Criterion('mainrelcount', mainrelcount, negative, 'Dislike main relative clauses'),  # removed, leads to worse results
+    Criterion("mainclausecount", getmainclausecount, negative, "Number of main clauses"),
+    Criterion("topclause", gettopclause, positive, "Single clause under top"),
+    Criterion("complsucount", getcomplsucount, negative, ""),
+    Criterion("badcatcount", getbadcatcount, negative, "Count of bad categories: du that contains a node with relation dp"),
+    Criterion("basicreplaceecount", getbasicreplaceecount, negative, "Number of words from the basic replacements"),
+    Criterion("hyphencount", gethyphencount, negative, "Number rof words that contain hyphens"),
+    Criterion("subjunctivecount", getsubjunctivecount, negative, "Number of subjunctive verb forms"),
+    Criterion("smainsucount", countsmainsu, positive, "Count of smain nodes that contain a subject"),
+    Criterion("dimcount", getdimcount, positive, "Number of words that are diminutives"),
+    Criterion("compcount", getcompcount, positive, "Number of words that are comparatives"),
+    Criterion("supcount", getsupcount, positive, "Number of words that are superlatives"),
+    Criterion("compoundcount", localgetcompoundcount, positive, "Number of nouns that are compounds"),
+    Criterion("sucount", getsucount, positive, "Number of subjects"),
+    Criterion("svaok", getsvaokcount, positive, "Number of time subject verb agreement is OK"),
+    Criterion("deplusneutcount", getdeplusneutcount, negative, "Number of deviant configuratios with de-determeine + neuiter noun"),
+    Criterion("dezebwcount", getdezebwcount, negative, "Count of 'deze' as adverb"),
+    Criterion("penalty", compute_penalty, negative, "Penalty for the changes made")
+]
+
+altpropertiesheader = [criterion.name for criterion in criteria]
+
+errorwbheader = ['Sample', 'User1', 'User2', 'User3'] + \
+                ['Status', 'Uttid', 'Origutt', 'Origsent'] + \
+                ['altid', 'altsent', 'score'] + \
+                altpropertiesheader

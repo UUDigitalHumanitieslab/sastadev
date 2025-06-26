@@ -1,7 +1,7 @@
 '''
 The module *compounds*:
 
-* initialisez the compound dictionary *compounds*, which is a multidimensional Python dictionary
+* initialises the compound dictionary *compounds*, which is a multidimensional Python dictionary
   Dict[str, Dict[int, str]], which maps a string (for a lemma in CELEX orthography HeadDiaNew)
   and a column number to the value of the cell with this column number in the CSV file from which it is derived:
 
@@ -31,8 +31,12 @@ import os
 from collections import defaultdict
 from typing import Dict, List
 
+from sastadev.CHAT_Annotation import CHAT_wordnoncompletion, CHAT_replacement
 from sastadev.conf import settings
+from sastadev.correctionlabels import contextcorrection, explanationasreplacement
 from sastadev.sastatypes import SynTree
+from sastadev.smartcompoundcomparison import issmartcompound
+from sastadev.stringfunctions import string2list
 from sastadev.treebankfunctions import getattval
 
 underscore = "_"
@@ -51,6 +55,11 @@ dictfilename = os.path.join(settings.SD_DIR, 'data', 'compoundfiles', 'Ncompound
 dictfile = open(dictfilename, 'r', encoding='utf8')
 
 getwordsxpath = ".//node[@pt]"
+correctionsmetaxpath = f""".//xmeta[@name = "{explanationasreplacement}" or 
+                                    @name = "{CHAT_replacement}" or 
+                                    @name = "{CHAT_wordnoncompletion}" or
+                                    @name = "{contextcorrection}"
+                                   ]"""
 
 
 def getcompounds(syntree: SynTree) -> List[SynTree]:
@@ -65,13 +74,32 @@ def getcompounds(syntree: SynTree) -> List[SynTree]:
     '''
     results = []
     tlist = syntree.xpath(getwordsxpath)
+    corrections = syntree.xpath(correctionsmetaxpath)
     for t in tlist:
         w = getattval(t, 'word')
         lemma = getattval(t, 'lemma')
         pt = getattval(t, 'pt')
-        if pt == 'n' and iscompound(lemma):
-            results.append(t)
+        if pt == 'n':
+            if lemma in compounds:
+                results.append(t)
+            else:
+                correction = getcorrection(t, corrections)
+                if issmartcompound(w, correction, lemma):
+                    results.append(t)
     return results
+
+
+def getcorrection(t: SynTree, corrections) -> str:
+    w = getattval(t, 'word')
+    position = getattval(t, 'begin')
+    for correction in corrections:
+        annotationposlist = string2list(correction.attrib["annotationposlist"])
+        annotationwordlist = string2list(correction.attrib["annotationwordlist"], quoteignore=True)
+        if  annotationposlist == [position]:
+            result = annotationwordlist[0]
+            return result
+    return w
+
 
 # I do not know how to type this, because the nesting can be arbitrarily deep
 

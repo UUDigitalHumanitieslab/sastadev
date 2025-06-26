@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+from sastadev.sastatypes import FileName
 
 reportwidth = 0
 
@@ -61,3 +62,7 @@ def savecopy(infullname, prevsuffix='_previous', prevprefix='', outpath=None):
     shutil.copyfile(infullname, previousinfullname)
 
 
+def getsamplename(fn: FileName) -> str:
+    basename = getbasename(fn)
+    samplename = basename[:basename.rfind('_')]
+    return samplename

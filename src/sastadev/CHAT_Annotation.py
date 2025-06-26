@@ -9,9 +9,11 @@ from sastadev.sastatoken import Token, show
 CHAT = 'CHAT'
 
 CHAT_explanation = 'Explanation'
-CHAT_wordnoncompletion = 'Noncompletion of a Word'
+CHAT_reformulation = 'Reformulation'
+CHAT_repetition = 'Repetition'
 CHAT_replacement = 'Replacement'
-
+CHAT_retracing = 'Retracing'
+CHAT_wordnoncompletion = 'Noncompletion of a Word'
 
 monadic = 1
 dyadic = 2
@@ -78,7 +80,7 @@ wordorpuncpat = r'(:?' + wordpat + '|' + interpunction + ')'
 specialformpat = wordpat + r'(?:@z:\w\w\w|@\w\w?\w?)'
 fullspecialformpat = fullre(specialformpat)
 specialformre = re.compile(fullspecialformpat)
-repkeepannotations = ['Repetition', 'Retracing', 'Reformulation']
+repkeepannotations = [CHAT_repetition, CHAT_retracing, CHAT_reformulation]
 
 
 def getreplacement(repkeep, annotation):
@@ -817,7 +819,7 @@ annotations = [
                     CHAT_ComplexRegex(
                         (r'\[=', anybutrb, r'\]'), (keep, eps), False),
                     complexmetafunction),
-    CHAT_Annotation('Replacement', '8.3:69', '10.3:73',
+    CHAT_Annotation(CHAT_replacement, '8.3:69', '10.3:73',
                     CHAT_ComplexRegex(
                         (r'\[:\s', r'([^\]]+)', r'\]'), (eps, keep), True, containswords=True),
                     complexmetafunction_replbpl),
@@ -832,13 +834,13 @@ annotations = [
                     CHAT_ComplexRegex((r'\[%\s+', anybutrb, r'\]'), (keep, eps), True), complexmetafunction),
     CHAT_Annotation('Best Guess', '8.3:70-71', '10.3:74', CHAT_SimpleScopedRegex(r'\[\?\]', keep, True, monadic),
                     simplescopedmetafunction),
-    CHAT_Annotation('Repetition', '8.4:72', '10.4:75-76', CHAT_SimpleScopedRegex(r'\[/\]', eps, True, monadic),
+    CHAT_Annotation(CHAT_repetition, '8.4:72', '10.4:75-76', CHAT_SimpleScopedRegex(r'\[/\]', eps, True, monadic),
                     simplescopedmetafunction),
     CHAT_Annotation('Multiple Repetition', '8.4:72-73', '10.4:76',
                     CHAT_ComplexRegex((r'\[x', r'[0-9]+', r'\]'), (keep, eps), True), complexmetafunction),
-    CHAT_Annotation('Retracing', '8.4:73', '10.4:76-77', CHAT_SimpleScopedRegex(r'\[//\]', eps, True, monadic),
+    CHAT_Annotation(CHAT_retracing, '8.4:73', '10.4:76-77', CHAT_SimpleScopedRegex(r'\[//\]', eps, True, monadic),
                     simplescopedmetafunction),
-    CHAT_Annotation('Reformulation', '8.4:73-74', '10.4:77', CHAT_SimpleScopedRegex(r'\[///\]', eps, True, monadic),
+    CHAT_Annotation(CHAT_reformulation, '8.4:73-74', '10.4:77', CHAT_SimpleScopedRegex(r'\[///\]', eps, True, monadic),
                     simplescopedmetafunction),
     CHAT_Annotation('False Start Without Retracing', '8.4:74', '10.4:77',
                     CHAT_SimpleScopedRegex(r'\[/\-\]', eps, True, dyadic), simplescopedmetafunction),
