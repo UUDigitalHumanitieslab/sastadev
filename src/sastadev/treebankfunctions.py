@@ -2134,11 +2134,15 @@ def treewithtokenpos(thetree: SynTree, tokenlist: List[Token]) -> SynTree:
     intbegins = [int(getattval(n, 'begin')) for n in thetreeleaves]
     tokenlistbegins = [t.pos + t.subpos for t in tokenlist]
     if len(intbegins) != len(tokenlistbegins):
-        settings.LOGGER.error('treewithtokenpos: token mismatch')
-        settings.LOGGER.error('treewithtokenpos: tree yield={}'.format(getyield(thetree)))
-        settings.LOGGER.error('treewithtokenpos: tokenlist={}'.format(tokenlist))
-        settings.LOGGER.error('treewithtokenpos: intbegins={}'.format(intbegins))
-        settings.LOGGER.error('treewithtokenpos: tokenlistbegins ={}'.format(tokenlistbegins))
+        settings.LOGGER.warning('treewithtokenpos: token mismatch')
+        settings.LOGGER.warning(
+            'treewithtokenpos: tree yield={}'.format(getyield(thetree)))
+        settings.LOGGER.warning(
+            'treewithtokenpos: tokenlist={}'.format(tokenlist))
+        settings.LOGGER.warning(
+            'treewithtokenpos: intbegins={}'.format(intbegins))
+        settings.LOGGER.warning(
+            'treewithtokenpos: tokenlistbegins ={}'.format(tokenlistbegins))
     pospairs = zip(intbegins, tokenlistbegins)
     thetreetokenposdict = {treepos + 1: tokenpos + 1 for treepos, tokenpos in pospairs}
     resulttree = updatetokenpos(resulttree, thetreetokenposdict)
