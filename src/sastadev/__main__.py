@@ -150,7 +150,8 @@ import xlsxwriter
 from lxml import etree
 
 from sastadev import compounds
-from sastadev.allresults import mkresultskey, scores2counts, showreskey
+from sastadev.allresults import (AllResults, mkresultskey, scores2counts,
+                                 showreskey)
 from sastadev.conf import settings
 from sastadev.constants import (analysissuffix, bronzefolder, bronzesuffix,
                                 byuttscoressuffix, checksuffix, formsfolder,
