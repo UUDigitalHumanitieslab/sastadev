@@ -17,7 +17,7 @@ from typing import Callable, Dict
 
 from sastadev.allresults import QueryFunction
 from sastadev.asta_queries import (asta_bijzin, asta_delpv, asta_lemma,
-                                   asta_lex, asta_noun, astalemmafunction)
+                                   asta_lex, asta_noun, astalemmafunction, asta_xxx)
 from sastadev.astaforms import astaform
 from sastadev.ASTApostfunctions import (KMcount, countwordsandcutoff,
                                         finietheidsindex, getalllemmas,
@@ -76,7 +76,8 @@ thestapfunctions = [BB_totaal, GLVU, GL5LVU, makestapform]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
-                    asta_bijzin, asta_lex, asta_delpv, allok, sempar, phonpar, astalemmafilter, asta_lemma,
+                    asta_bijzin, asta_lex, asta_delpv, asta_xxx, allok, sempar, phonpar,
+                    astalemmafilter, asta_lemma,
                     astalemmafunction]
 
 thefunctions = thetarspfunctions + thestapfunctions + theastafunctions

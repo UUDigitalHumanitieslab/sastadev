@@ -33,6 +33,7 @@ samplesizemdvalues = {repeatedjaneenou,
 mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou,
                fstoken}
 
+filled_pause_exceptions = ['e', 'ə', 'ee']
 
 class DupInfo:
     '''
@@ -238,9 +239,13 @@ def getfilledpauses(nortlist: List[Nort]) -> List[Nort]:
       * .. autofunction:: sastadev.dedup::isfilledpausenort
 
     '''
-    resultlist = [tok for tok in nortlist if isfilledpausenort(tok)]
+    resultlist = [tok for tok in nortlist if isfilledpausenort(tok) and not isfilledpauseexceptionnort(tok)]
     return resultlist
 
+def isfilledpauseexceptionnort(nort: Nort) -> bool:
+    word = getword(nort)
+    result = word in filled_pause_exceptions
+    return result
 
 def infilledpauses(word: str) -> bool:
     return (word in filledpauseslexicon)

@@ -10,6 +10,7 @@ from lxml import etree
 from sastadev.basicreplacements import basicreplacements
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
+from sastadev import correctionlabels
 from sastadev.correctionparameters import CorrectionParameters
 from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips, initialmaarvgxpath)
@@ -22,6 +23,7 @@ from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_
                                HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
                                )
 from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp
+from sastadev.predcvagreement import get_predc_v_mismatches
 from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
@@ -32,7 +34,7 @@ from sastadev.subcatprefs import getsubcatprefscore
 from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
-from sastadev.treebankfunctions import (adaptsentence, add_metadata, clausecats, countav, deflate,
+from sastadev.treebankfunctions import (adaptsentence, add_metadata, attach_metadata, clausecats, countav, deflate,
                                         deletewordnodes, fatparse, find1,
                                         getattval, getbeginend,
                                         getcompoundcount, getneighbourwordnode, getnodeyield, getorigutt,
@@ -174,7 +176,7 @@ def get_origandparsedas(metadatalist: List[MetaElement]) -> Tuple[Optional[str],
     for meta in metadatalist:
         if parsed_as is None or origutt is None:
             key = meta.attrib['name']
-            if key == 'parsed_as':
+            if key == correctionlabels.parsedas:
                 parsed_as = meta.attrib['value']
             if key == 'origutt':
                 origutt = meta.attrib['value']
@@ -611,7 +613,9 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         if lmetadatalist > 1:
             settings.LOGGER.error(
                 'Multiple metadata ({}) in utterance {}'.format(lmetadatalist, uttid))
-        origmetadata = metadatalist[0]
+        origmetadatalist = metadatalist[0].xpath('./meta')    # otherwise the chatmetadata will be duplicated
+        origmetadata = etree.Element('metadata')
+        origmetadata.extend(origmetadatalist)
 
     # allmetadata += origmetadata
     # clean in the tokenized manner
@@ -638,6 +642,8 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         showtree(fatstree, text='fatstree na:')
     debug = False
     # (fatstree, text='fattened tree:')
+    origmetadatalist2 = deepcopy(origmetadatalist)
+    fatstree = attach_metadata(fatstree, origmetadatalist2)
 
     rawctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
 
@@ -660,7 +666,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         # if correctionwordlist != cleanuttwordlist and correctionwordlist != []:
         if correctionwordlist != fatstreewordlist and correctionwordlist != []:
             correction, tokenposlist = mkuttwithskips(correctiontokenlist)
-            cwmdmetadata += [Meta('parsed_as', correction,
+            cwmdmetadata += [Meta(correctionlabels.parsedas, correction,
                                   cat='Correction', source='SASTA', penalty=0)]
             reducedcorrectiontokenlist = [
                 token for token in correctiontokenlist if not token.skip]
@@ -1358,6 +1364,11 @@ def getmaaradvcount(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
     return result
 
 
+def get_predc_v_mismatch_count(nt: SynTree, md: List[Meta], mn: MethodName) -> int:
+    predc_v_mismatches = get_predc_v_mismatches(nt)
+    result = len(predc_v_mismatches)
+    return result
+
 # The constant *criteria* is a list of objects of class *Criterion* that are used, in the order given, to evaluate parses
 criteria = [
     Criterion("unknownwordcount", getunknownwordcount, negative, "Number of unknown words"),
@@ -1376,6 +1387,8 @@ criteria = [
     Criterion('RelativeMainSuborder', getrelasmainsubordercount, negative, 'Number of Main Relative Clauses with subordinate order'),
     Criterion("lonelytoecount", getlonelytoecount, negative, "Number of occurrences of lonely 'toe'"),
     Criterion("noun1c_count", getnoun1c_count, negative, "Number of nouns that consist of a single character"),
+    Criterion("Predc - V mismatches", get_predc_v_mismatch_count, negative, "Number of mismatches between "
+                                                                            "nominal predicate and copular verb"),
     Criterion('ReplacementPenalty', getreplacementpenalty, negative, 'Plausibility of the replacement'),
     Criterion('Total Edit Distance', gettotaleditdistance, negative, "Total of the edit distances for all replaced words"),
     # Criterion('Subcatscore', getsubcatprefscore, positive,

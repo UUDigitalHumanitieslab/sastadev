@@ -8,13 +8,13 @@ for this purpose.
 
 
 '''
-from collections import defaultdict
 import os
+from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from sastadev import celexlexicon, treebankfunctions
 from sastadev.conf import settings
-from sastadev.methods import asta, stap, tarsp, MethodName
+from sastadev.methods import MethodName, asta, stap, tarsp
 from sastadev.namepartlexicon import (namepart_isa_namepart,
                                       namepart_isa_namepart_uc)
 from sastadev.readcsv import readcsv
@@ -261,7 +261,7 @@ comma = ','
 compoundsep = '_'
 
 def validword(wrd: str, methodname: MethodName, includealpinonouncompound=True) -> bool:
-    result = known_word(wrd, includealpinonouncompound=includealpinonouncompound)
+    result = wrd == '' or known_word(wrd, includealpinonouncompound=includealpinonouncompound)
     if methodname in {tarsp, stap}:
         result = result and not nochildword(wrd)
     return result
@@ -383,4 +383,4 @@ cardinallexiconfilename = 'cardinalnumerals.tsv'
 cardinallexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, cardinallexiconfilename)
 cardinallexicon = geninitializelexicondict(cardinallexiconfullname, 0)
 
-junk = 0  # to have a breapoint after the last lexicon read
+# to have a breapoint after the last lexicon read

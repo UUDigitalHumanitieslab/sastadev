@@ -8,6 +8,7 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
 from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from sastadev.conf import settings
 from sastadev.external_functions import str2functionmap
+from sastadev.grammarerrors import find_grammar_errors_in_allresults
 from sastadev.imply import removeimplies
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, astamethods, stapmethods, tarspmethods
@@ -23,7 +24,7 @@ from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone
 from sastadev.treebankfunctions import (getattval, getnodeendmap,
                                         getxmetatreepositions, getxsid,
-                                        getyield, showtree)
+                                        getyield, showtree, topcat)
 
 singlewordWquery = """//node[@pt="ww"]/ancestor::node[@cat="top" and count(.//node[@pt!="let" and @pt!="tsw"]) = 1 ] """
 
@@ -175,7 +176,18 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
 
     dopostqueries(allresults, formquerylist, themethod.queries)
 
+    allresults = find_grammar_errors_in_allresults(allresults)
+
     return allresults, samplesizetuple
+
+
+def getexactposition(m: SynTree) -> int:
+    mcat = getattval(m, 'cat')
+    if mcat == topcat:
+        result = 0
+    else:
+        result = int(getattval(m, 'begin')) + 1
+    return result
 
 
 def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDict, allmatches: MatchesDict,
@@ -218,7 +230,7 @@ def doqueries(syntree: SynTree, queries: QueryDict, exactresults: ExactResultsDi
                     allmatches[(reskey, uttid)].append((m, syntree))
                 else:
                     allmatches[(reskey, uttid)] = [(m, syntree)]
-                exactresult = (uttid, int(getattval(m, 'begin')) + 1)
+                exactresult = (uttid, getexactposition(m))
                 if reskey in exactresults:
                     exactresults[reskey].append(exactresult)
                 else:

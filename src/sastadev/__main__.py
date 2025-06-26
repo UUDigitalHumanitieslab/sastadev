@@ -150,8 +150,7 @@ import xlsxwriter
 from lxml import etree
 
 from sastadev import compounds
-from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
-                                 ResultsKey, mkresultskey, scores2counts,
+from sastadev.allresults import (AllResults, mkresultskey, scores2counts,
                                  showreskey)
 from sastadev.conf import settings
 from sastadev.constants import (analysissuffix, bronzefolder, bronzesuffix,
@@ -184,7 +183,9 @@ from sastadev.query import (Query, is_preorcore, post_process, query_exists,
 from sastadev.readcsv import writecsv
 from sastadev.readmethod import itemseppattern, read_method
 from sastadev.reduceresults import exact2results, reduceexactgoldscores
-from sastadev.resultsbyutterance import (byuttheader, mkscoresbyuttrows,
+from sastadev.resultsbyutterance import (byuttheader, exactbyuttdict2table,
+                                         exactresultsbyuttheader,
+                                         getexactbyutt, mkscoresbyuttrows,
                                          silverf1col)
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.SAFreader import (get_golddata, richexact2global,
@@ -195,7 +196,8 @@ from sastadev.sastacore import (SastaCoreParameters, doauchann, dopostqueries,
 from sastadev.sastatypes import (AltCodeDict, DataSetName, ExactResultsDict,
                                  FileName, GoldTuple, MatchesDict,
                                  MethodVariant, QId, QIdCount, QueryDict,
-                                 ResultsCounter, SynTree, TreeBank, UttId)
+                                 ResultsCounter, ResultsKey, SynTree, TreeBank,
+                                 UttId)
 from sastadev.SRFreader import read_referencefile
 from sastadev.targets import get_mustbedone, get_targets, target_all
 from sastadev.treebankfunctions import (find1, getattval,
@@ -1244,6 +1246,10 @@ def main():
     allresults, samplesizetuple = sastacore(
         origtreebank, treebank, annotatedfileresults, scp)
 
+    treebank = etree.Element('treebank')
+    for _, tree in allresults.analysedtrees:
+        treebank.append(tree)
+
     exactresults = allresults.exactresults
     exactresultsoutput = False
     if exactresultsoutput:
@@ -1314,9 +1320,18 @@ def main():
     not100count = len([row for row in byuttrows if row[silverf1col] != 100])
     scoresbyuttoutfullname = os.path.join(resultspath, corefilename + byuttscoressuffix + '.xlsx')
     wb = mkworkbook(scoresbyuttoutfullname, [byuttheader], byuttrows, freeze_panes=(1,0) )
+
+    exactresultsbyutt = getexactbyutt(allresults.exactresults)
+    exactresultsbyutttable = exactbyuttdict2table(exactresultsbyutt)
+    add_worksheet(wb, [exactresultsbyuttheader], exactresultsbyutttable, sheetname='ExactResults', freeze_panes=(1,0))
+
     allbyuttscores = sas_impact(allresults.coreresults, silverscores, themethod)
     sasheader, sasimpactrows = mksas_impactrows(allbyuttscores, not100count)
     add_worksheet(wb,[sasheader], sasimpactrows, sheetname='SAS_impact', freeze_panes=(1,0))
+
+    samplesizetupledata = [[comma.join(samplesizetuple[0]), samplesizetuple[1], samplesizetuple[2]]]
+    samplesizetupleheader = ['utt ids', '# words', 'cutoff']
+    add_worksheet(wb, [samplesizetupleheader], samplesizetupledata, sheetname='SampleSizeTuple', freeze_panes=(1,0))
     wb.close()
 
 
