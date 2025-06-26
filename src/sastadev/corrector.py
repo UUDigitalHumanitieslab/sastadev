@@ -7,8 +7,8 @@ import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sastadev.alpino import getdehetwordinfo
-from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements,
-                                        getdisambiguationdict)
+from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements, ervzvariantsdict,
+                                        getdisambiguationdict, is_er_pronoun)
 from sastadev.CHAT_Annotation import CHAT_retracing
 from sastadev.childesspellingcorrector import (adult_correctionsdict, adult_correctspelling,
                                                children_correctionsdict, children_correctspelling,  allfrqdict)
@@ -1223,9 +1223,10 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
         for (r, c, n, v, p) in basicreplacements[token.word]:
             newpenalty = basepenalties[BASICREPLACEMENTS] + adaptpenalty(token.word, r, p-defaultpenalty)
             newwords = [r]
+            bpl = bpl_wordlemma if is_er_pronoun(r) and token.word not in ervzvariantsdict else bpl_word
             newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                             name=n, value=v, cat=c, source=f'{SASTA}/{BASICREPLACEMENTS}',
-                                            backplacement=bpl_word, penalty=newpenalty)
+                                            backplacement=bpl, penalty=newpenalty)
 
     # final r realized as w weew, ew
     if not validword(token.word, methodname)  and token.word.endswith('w') and \

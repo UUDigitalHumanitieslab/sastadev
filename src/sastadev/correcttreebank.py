@@ -5,7 +5,7 @@ from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from lxml import etree
 
-from sastadev.basicreplacements import basicreplacements
+from sastadev.basicreplacements import basicreplacements, ervzvariantsdict, is_er_pronoun
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings
 from sastadev import correctionlabels
@@ -255,7 +255,9 @@ def smartreplace(node: SynTree, word: str, mn: MethodName) -> SynTree:
         result = copy(node)
         result.attrib['word'] = word
         nodept = getattval(node, 'pt')
-        if '_' in node.attrib['lemma'] and countsyllables(word) == 1 and nodept == 'n':
+        if is_er_pronoun(nodelemma) and word not in ervzvariantsdict:
+            result.attrib['lemma'] = word
+        elif '_' in node.attrib['lemma'] and countsyllables(word) == 1 and nodept == 'n':
             result.attrib['lemma'] = word
     return result
 
