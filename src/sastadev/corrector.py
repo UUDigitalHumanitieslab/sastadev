@@ -612,7 +612,7 @@ def getcorrections(rawtokens: List[Token], correctionparameters: CorrectionParam
 # def getalternatives(origtokensmd, method, llremovedtokens, tree, uttid):
 def getalternatives(origtokensmd: TokenListMD,  tree: SynTree, uttid: UttId,
                     correctionparameters: CorrectionParameters):
-    methodname = correctionparameters.method
+    methodname = correctionparameters.method.name
     newtokensmd = explanationasreplacement(origtokensmd, tree)
     if newtokensmd is not None:
         tokensmd = newtokensmd
@@ -1161,7 +1161,7 @@ def nocorrectparse(tree: SynTree) -> bool:
 
 def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int,
                            tree: SynTree, uttid: UttId, correctionparameters: CorrectionParameters) -> List[TokenMD]:
-    methodname = correctionparameters.method
+    methodname = correctionparameters.method.name
     token = tokenmd.token
     beginmetadata = tokenmd.metadata
     newtokenmds: List[TokenMD] = []
@@ -1179,7 +1179,8 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
 
     # decapitalize initial token  except when it is a known name
     # do  this only for ASTA
-    if correctionparameters.method in {asta} and tokenctr == 0 and token.word.istitle() and not isa_namepart(token.word):
+    if correctionparameters.method.name in {asta} and tokenctr == 0 and token.word.istitle() and not isa_namepart(
+            token.word):
         newword = token.word.lower()
 
         newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
@@ -1462,7 +1463,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
 
 
     # replace unknown words by similar words from the context --tarsp and stap only, for asta more needs to be doen
-    if not validword(token.word, methodname) and correctionparameters.method in {tarsp, stap}:
+    if not validword(token.word, methodname) and correctionparameters.method.name in {tarsp, stap}:
         xsid = getxsid(tree)
         thecontextdict = correctionparameters.contextdict
         if xsid in thecontextdict and token.word in thecontextdict[xsid]:
@@ -1652,7 +1653,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
     newtokenmds = initdevoicing(token, 'f', 'v', methodname, newtokenmds, beginmetadata)
 
     # replaceambiguous words with one reading not known by the child by a nonambiguous word with the same properties
-    if correctionparameters.method in {'tarsp', 'stap'}:
+    if correctionparameters.method.name in {'tarsp', 'stap'}:
         if token.word in disambiguationdict:
             cond, newword = disambiguationdict[token.word]
             if cond(token, tree):
@@ -1711,10 +1712,10 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
              not validword(token.word, methodname) and applyspellingcorrectionisok(token.word) and \
             not schwandropfound and not postviefound and not token.word[0].isupper() and not deduplicated and \
             not(token.word.endswith('ie') or token.word.endswith('ies')) and token.word[-3:] not in vvs:
-        if correctionparameters.method in {'tarsp', 'stap'}:
+        if correctionparameters.method.name in {'tarsp', 'stap'}:
             corrtuples = children_correctspelling(token.word, children_correctionsdict, max=5)
             subsource = CHILDRENSPELLINGCORRECTION
-        elif correctionparameters.method in {'asta'}:
+        elif correctionparameters.method.name in {'asta'}:
             corrtuples = []
             subsource = ADULTSPELLINGCORRECTION
             # put off because it causes a lot of errors: the X-words should all have been removed

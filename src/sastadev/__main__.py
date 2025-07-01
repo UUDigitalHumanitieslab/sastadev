@@ -156,7 +156,7 @@ from sastadev.allresults import (AllResults, ExactResultsDict, MatchesDict,
                                  showreskey)
 from sastadev.conf import settings
 from sastadev.constants import (analysissuffix, bronzefolder, bronzesuffix, byuttscoressuffix, checksuffix, checkeditedsuffix,
-                                formsfolder, intreebanksfolder,
+                                correctedsuffix, formsfolder, intreebanksfolder,
                                 loggingfolder, outtreebanksfolder, permprefix, platinumsuffix,
                                 platinumeditedsuffix,
                                 resultsfolder, silverfolder, silverpermfolder, silversuffix)
@@ -165,6 +165,7 @@ from sastadev.correctionparameters import CorrectionParameters
 from sastadev.correcttreebank import (correcttreebank, corr0, corrn, errorwbheader, validcorroptions)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.datasets import dsname2ds
+from sastadev.filefunctions import make_filelist, get_dataset_samplename, getsamplename
 from sastadev.external_functions import str2functionmap
 from sastadev.goldcountreader import get_goldcounts
 from sastadev.history import (donefiles, donefilesfullname, gathercorrections, mergecorrections, putcorrections,
@@ -182,6 +183,7 @@ from sastadev.readmethod import itemseppattern, read_method
 from sastadev.resultsbyutterance import getexactbyutt, exactbyuttdict2table, exactresultsbyuttheader, getscoresbyutt, \
     mkscoresbyuttrows, \
     byuttheader, silverf1col
+from sastadev.sample_uttid_tuples import get_samplename_uttids_tuples
 from sastadev.sas_impact import getcomparisoncounts, mksas_impactrows, sas_impact
 from sastadev.sastatypes import (AltCodeDict, DataSetName, ExactResultsDict, FileName,
                                  GoldTuple, MatchesDict, MethodName, MethodVariant, QId,
@@ -199,6 +201,7 @@ from sastadev.sastatypes import (AltCodeDict, GoldTuple, QId, QIdCount,
 from sastadev.SRFreader import read_referencefile
 from sastadev.stringfunctions import getallrealwords
 from sastadev.targets import get_mustbedone, get_targets, target_all
+from sastadev.treebank2trees import treebank2trees
 from sastadev.treebankfunctions import (find1, getattval, getnodeendmap, getuttid,
                                         getxmetatreepositions, getxsid,
                                         getyield, showtree)
@@ -1239,7 +1242,7 @@ def main():
 
         contextdict = getcontextdict(treebank2, lambda x: True)
 
-        correctionparameters = CorrectionParameters(methodname, options, mergedsamplecorrections,
+        correctionparameters = CorrectionParameters(themethod, options, mergedsamplecorrections,
                                                     thissamplecorrections, treebank2, contextdict)
 
         treebank, errordict, allorandalts = correcttreebank(treebank2, targets,  correctionparameters, corr=corr)
@@ -1263,12 +1266,16 @@ def main():
     allmatches = allresults.allmatches
 
     # create the new treebank
+    correctedfilename = f'{corefilename}{correctedsuffix}.xml'
     if treebank is not None:
         fulltreebank = etree.ElementTree(treebank)
         newtreebankfullname = os.path.join(
-            outtreebankspath, corefilename + '_corrected' + '.xml')
+            outtreebankspath, correctedfilename)
         fulltreebank.write(newtreebankfullname, encoding="UTF8", xml_declaration=False,
                            pretty_print=True)
+
+    # create the individual trees and filelists for inspection via Tred
+    treebank2trees(treebank, dataset, newtreebankfullname)
 
     # create error file
     errorreportfilename = os.path.join(
@@ -1436,6 +1443,19 @@ def main():
     wb.close()
 
     writecsv(allrows, platinumcheckfilename, header=pcheaders[0])
+
+    # add filelist
+    # first remove not in form messages
+    # first create tuples
+    samplecol = 0
+    uttidcol = 10
+    informcol = 6
+    filteredrows = [row for row in allrows if row[informcol] == 'yes']
+    datasetname, samplename = get_dataset_samplename(options.infilename)
+    sample_uttids_tuples = get_samplename_uttids_tuples(filteredrows, samplecol, uttidcol)
+    make_filelist(f'{samplename}_platinum_check', datasetname, sample_uttids_tuples, resultspath)
+
+
 
     # compute the gold postresults
     goldpostresults: Dict[UttId, int] = {}

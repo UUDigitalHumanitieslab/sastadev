@@ -536,5 +536,15 @@ def normalise_word(wrd: str) -> str:
     cleanwrd = strip_accents(cleanwrd)
     return cleanwrd
 
+def lpad(id: str, size:int = 3, sym: str= '0') -> str:
+    lid = len(id)
+    if lid > size:
+        properid = id
+        # issue a warning
+    else:
+        properid = (size - lid) * sym + id
+    return properid
+
+
 if __name__ == '__main__':
     test()

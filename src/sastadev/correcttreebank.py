@@ -1,6 +1,5 @@
 from collections import defaultdict
 from copy import copy, deepcopy
-from editdistance import distance
 from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from lxml import etree
@@ -14,24 +13,18 @@ from sastadev.corrector import (Correction, disambiguationdict, getcorrections,
                                 mkuttwithskips, initialmaarvgxpath)
 from sastadev.lexicon import de, dets, nochildword, nochildwords, validnouns, validword, \
     wordsunknowntoalpinolexicondict, wrongposwordslexicon
-from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_nolemma, defaultpenalty,
                                bpl_none, bpl_replacement, bpl_word, bpl_wordlemma, bpl_word_delprec, insertion,
                                ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT,
                                HISTORY, CHILDRENSPELLINGCORRECTION, THISSAMPLECORRECTIONS, replacementsubsources
                                )
-from sastadev.methods import Method, asta
+from sastadev.methods import Method
+from sastadev.parse_criteria import compute_penalty, criteria, isvalidword
 from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp
-from sastadev.predcvagreement import get_predc_v_mismatches
-from sastadev.sas_filter import filterbymetadata
-from sastadev.sastatok import sasta_tokenize
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Penalty, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId, ExactResults, ExactResultsDict)
-from sastadev.semantic_compatibility import semincompatiblecount
-from sastadev.stringfunctions import digits, ispunctuation
-from sastadev.sva import phicompatible
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
 from sastadev.treebankfunctions import (adaptsentence, add_metadata, attach_metadata, clausecats, countav, deflate,
@@ -48,11 +41,6 @@ from sastadev.treetransform import adaptlemmas, transformtagcomma, transformtree
     transformtreenogde
 
 ampersand = '&'
-
-positive = +1
-negative = -1
-
-subsourcesep = '/'
 
 corr0, corr1, corrn = '0', '1', 'n'
 validcorroptions = [corr0, corr1, corrn]
@@ -76,12 +64,6 @@ smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn')]
 smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 
 
-class Criterion():
-    def __init__(self, name, getfunction, polarity, description):
-        self.name: str = name
-        self.getfunction: Callable[[SynTree], bool] = getfunction
-        self.polarity: int = polarity
-        self.description: str = description
 
 
 class Alternative():
@@ -218,7 +200,7 @@ def adaptpv(node):
         node.attrib['postag'] = 'WW(pv,tgw,mv)'
 
 
-def smartreplace(node: SynTree, word: str, mn: MethodName) -> SynTree:
+def smartreplace(node: SynTree, word: str, method: Method) -> SynTree:
     '''
     replaces *node* by a different node if the parse of *word* yields a node with a valid word and the same word class and
      if it does not occur in nochildwords;  otherwise by
@@ -228,6 +210,7 @@ def smartreplace(node: SynTree, word: str, mn: MethodName) -> SynTree:
     :return:
     '''
 
+    mn = method.name
     wordtree = settings.PARSE_FUNC(word)
     newnode = find1(wordtree, './/node[@pt]')
     newnodept = getattval(newnode, 'pt')
@@ -571,7 +554,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         print(showflatxml(stree))
 
     # tree transformations
-    if correctionparameters.method in ['tarsp', ' stap']:
+    if correctionparameters.method.name in ['tarsp', ' stap']:
         stree = transformtagcomma(stree)
         stree = transformtreeld(stree)
         stree = transformppinnp(stree)
@@ -644,7 +627,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
 
     rawctmds: List[Correction] = getcorrections(cleanutttokens, correctionparameters, fatstree)
 
-    ctmds = reducecorrections(rawctmds, correctionparameters.method)
+    ctmds = reducecorrections(rawctmds, correctionparameters.method.name)
     # ctmds = rawctmds
 
     debug = False
@@ -934,7 +917,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     # etree.dump(fulltree, pretty_print=True)
 
     # tree transformations
-    if correctionparameters.method in ['tarsp', ' stap']:
+    if correctionparameters.method.name in ['tarsp', ' stap']:
         fulltree = transformtagcomma(fulltree)
         fulltree = transformtreeld(fulltree)
         fulltree = transformppinnp(fulltree)
@@ -956,80 +939,8 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     return fulltree, orandalts
 
 
-def splitsource(fullsource: str) -> Tuple[str, str]:
-    parts = fullsource.split(subsourcesep, maxsplit=2)
-    if len(parts) == 2:
-        return (parts[0], parts[1])
-    elif len(parts) == 1:
-        return (parts[0], '')
-    else:      #  == 0 or > 2
-        # should never occur
-        return ('', '')
 
 
-post_complemental_subjects_xpath = """.//node[@rel="su"   and 
-                parent::node[@cat="ssub" and not(parent::node[@cat="whsub" or @cat="whrel" or @cat="rel"])] and 
-                @begin >= ../node[(@word or @cat) and 
-                                  (not(@pdtype) or @pdtype!="adv-pron") and 
-                                  (@rel="ld" or @rel="obj1" or @rel="pc" or @rel="obj2")]/@end]"""
-def get_post_complemental_subject_nodes(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> List:
-    return tree.xpath(post_complemental_subjects_xpath)
-
-def getpostcomplsucount(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    post_complemental_subject_nodes = get_post_complemental_subject_nodes(tree)
-    return len(post_complemental_subject_nodes)
-
-
-def getstreereplacementpenalty(stree: SynTree) -> int:
-    contextpositions = set()
-    spellingcorrectionpositions = set()
-    fullpenalty = 0
-    metadatas = stree.xpath('.//metadata')
-    if metadatas != []:
-        metadata = metadatas[0]
-        for meta in metadata:
-            if meta.tag != 'xmeta':
-                continue
-            fullsource = meta.attrib['source'] if 'source' in meta.attrib else ''
-            mainsource, subsource = splitsource(fullsource)
-            if subsource in {BASICREPLACEMENTS, ALLSAMPLECORRECTIONS, HISTORY, CONTEXT, CHILDRENSPELLINGCORRECTION,
-                             ADULTSPELLINGCORRECTION, THISSAMPLECORRECTIONS}:
-                penalty = meta.attrib['penalty'] if 'penalty' in meta.attrib else 0
-                fullpenalty += penalty
-                annotatedposlist = meta.attrib['annotatedpositions'] if 'annotatedposlist' in meta.attrib else '[]'
-                position = annotatedposlist[1:-1]
-                if subsource in [ADULTSPELLINGCORRECTION, CHILDRENSPELLINGCORRECTION] and position != '':
-                    spellingcorrectionpositions.add(position)
-                if subsource == CONTEXT and position != '':
-                    contextpositions.add(position)
-        spellcontextintersection = contextpositions.intersection(spellingcorrectionpositions)
-        reduction = len(spellcontextintersection) * defaultpenalty
-        fullpenalty = fullpenalty - reduction
-
-    return fullpenalty
-
-
-def getreplacementpenalty(nt: SynTree, mds: List[Meta], method_name: MethodName) -> int:
-    contextpositions = set()
-    spellingcorrectionpositions = set()
-    fullpenalty = 0
-    for meta in mds:
-        fullsource = meta.source
-        mainsource, subsource = splitsource(fullsource)
-        if subsource in {BASICREPLACEMENTS, ALLSAMPLECORRECTIONS, HISTORY, CONTEXT, CHILDRENSPELLINGCORRECTION,
-                         ADULTSPELLINGCORRECTION, THISSAMPLECORRECTIONS}:
-            penalty = meta.penalty
-            fullpenalty += penalty
-            position = meta.annotatedposlist[0] if meta.annotatedposlist != [] else ''
-            if subsource in [CHILDRENSPELLINGCORRECTION, ADULTSPELLINGCORRECTION] and position != '':
-                spellingcorrectionpositions.add(position)
-            if subsource == CONTEXT and position != '':
-                contextpositions.add(position)
-    spellcontextintersection = contextpositions.intersection(spellingcorrectionpositions)
-    reduction = len(spellcontextintersection) * defaultpenalty
-    fullpenalty = fullpenalty - reduction
-
-    return fullpenalty
 
 def getsentencenode(stree: SynTree) -> SynTree:
     sentnodes = stree.xpath('.//sentence')
@@ -1101,131 +1012,7 @@ def getbestaltids(alts: Dict[AltId, Alternative]) -> List[AltId]:
     return results
 
 
-def getsvaokcount(nt: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    subjects = nt.xpath('.//node[@rel="su"]')
-    counter = 0
-    for subject in subjects:
-        pv = find1(subject, '../node[@rel="hd" and @pt="ww" and @wvorm="pv"]')
-        if phicompatible(subject, pv):
-            counter += 1
-    return counter
-
-
-def get_de_plus_neuter_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    word_nodes = getnodeyield(tree)
-    found_nodes = []
-    # Consecutive pairs of nodes. (A, B), (B, C), (C, D), ...
-    for node_1, node_2 in zip(word_nodes, word_nodes[1:]):
-        word_1 = getattval(node_1, "word").lower()
-
-        # Skip if the first node is not a 'de' determiner.
-        if word_1 not in dets[de]:
-            continue
-
-        word_2 = getattval(node_2, "word").lower()
-        verbose = False
-        if verbose:
-            xsid = getxsid(tree)
-            sent = getsentence(tree)
-            print(f'processing {xsid}: {sent}')
-        if ispunctuation(word_2):  # punctuation needs no parsing and causes an error in the parsing URL
-            continue
-        parsed_word_2_tree = settings.PARSE_FUNC(word_2)
-        parsed_word_2_node = find1(parsed_word_2_tree, ".//node[@pt]")
-        if parsed_word_2_node is None:
-            continue
-
-        is_neuter = getattval(parsed_word_2_node, "genus") == "onz"
-        is_singular = getattval(parsed_word_2_node, "getal") == "ev"
-        if is_neuter and is_singular:
-            found_nodes.append(node_1)
-
-    return found_nodes
-
-
-def getdeplusneutcount(
-    tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    de_plus_neuter_nodes = get_de_plus_neuter_nodes(tree, mds, method_name)
-    return len(de_plus_neuter_nodes)
-
-
-validwords = {"z'n", 'dees', 'cool', "'k"}
-punctuationsymbols = """.,?!:;"'"""
-
-
-def isvalidword(w: str, mn: MethodName, includealpinonouncompound=True) -> bool:
-    if nochildword(w):
-        return False
-    elif validword(w, mn, includealpinonouncompound=includealpinonouncompound):
-        return True
-    elif w in punctuationsymbols:
-        return True
-    elif w in validwords:
-        return True
-    else:
-        return False
-
-
-def get_ambiguous_word_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    if method_name == asta:
-        return []
-    nodes = getnodeyield(tree)
-    ambiguous_word_nodes = [node for node in nodes if getattval(node, 'word').lower() in disambiguationdict]
-    return ambiguous_word_nodes
-
-def countambigwords(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    ambignodes = get_ambiguous_word_nodes(tree, mds, method_name)
-    return len(ambignodes)
-
-def getunknownwordcount(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    words = [w for w in tree.xpath('.//node[@pt!="tsw"]/@word')]
-    unknownwords = [w for w in words if not isvalidword(w.lower(), methodname) ]
-    return len(unknownwords)
-
-wrongposwordxpathtemplate = './/node[@lemma="{word}" and @pt="{pos}"]'
-def get_wrong_pos_word_nodes(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> List:
-    wrong_pos_words = []
-    for word, pos in wrongposwordslexicon:
-        wrong_pos_word_xpath = wrongposwordxpathtemplate.format(word=word, pos=pos)
-        matches = tree.xpath(wrong_pos_word_xpath)
-        for match in matches:
-            wrong_pos_words.append(match)
-    return wrong_pos_words
-
-def getwrongposwordcount(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    wrong_pos_word_matches = get_wrong_pos_word_nodes(tree)
-    return len(wrong_pos_word_matches)
-
-sucountxpath = './/node[@rel="su" and not(@pt="ww" and @wvorm="inf") and not(node[@rel="hd" and @pt="ww" and @wvorm="inf"])] '
-def getsucount(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    matches = tree.xpath(sucountxpath)
-    return len(matches)
-
-# d_hyphen_xpath = './/node[@rel="--" and @pt and @pt!="let"]'
-# revised to:
-d_hyphen_xpath = """.//node[@rel="--" and @pt!="let"  and @pt!="tsw" and @word!="kijk" and 
-                 ancestor::node[@cat="top" and count(node[@pt!="let" and @pt!="tsw" and @word!="kijk"]) > 1 ]]"""
-def get_double_hyphen_nodes(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> List:
-    double_hyphen_nodes = tree.xpath(d_hyphen_xpath)
-    return double_hyphen_nodes
-
-def getdhyphencount(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    matches = get_double_hyphen_nodes(tree, mds, methodname)
-    return len(matches)
-
-localgetcompoundcount = lambda nt, md, mn: getcompoundcount(nt)
-getdpcount = lambda nt, md, mn: countav(nt, 'rel', 'dp')
-# getdhyphencount = lambda nt, md, mn: countav(nt, 'rel', '--')
-getdimcount = lambda nt, md, mn: countav(nt, 'graad', 'dim')
-getcompcount = lambda nt, md, mn: countav(nt, 'graad', 'comp')
-getsupcount = lambda nt, md, mn: countav(nt, 'graad', 'sup')
-# getsucount = lambda nt, md, mn: countav(nt, 'rel', 'su')
-complsuxpath = expandmacros(""".//node[node[(@rel="ld" or @rel="pc")  and
-                                             @end<=../node[@rel="su"]/@begin and @begin >= ../node[@rel="hd"]/@end] and
-                                       not(node[%Rpronoun%])]""")
-getcomplsucount = lambda nt, md, mn: len([node for node in nt.xpath(complsuxpath)])
-
-def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode, method_name: MethodName) -> Tuple[
+def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: CorrectionMode, method: Method) -> Tuple[
     ParsedCorrection, OrigandAlts]:
     # to be implemented@@
     # it is presupposed that ptmds is not []
@@ -1240,7 +1027,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
         altsent = space.join(cw)
         # penalty = compute_penalty(md)
 
-        criteriavalues = [criterion.getfunction(nt, md, method_name) * criterion.polarity for criterion in criteria]
+        criteriavalues = [criterion.getfunction(nt, md, method) * criterion.polarity for criterion in criteria]
 
         alt = Alternative(stree, altid, altsent, criteriavalues)
         alts[altid] = alt
@@ -1268,285 +1055,7 @@ def selectcorrection(stree: SynTree, ptmds: List[ParsedCorrection], corr: Correc
     result = ptmds[orandalts.selected]
     return result, orandalts
 
-# smainsuxpath = '//node[@cat="smain"  and @begin = node[@rel="su"]/@begin]' # yields unexpected errors (TD12:31; TARSP_08:31)
-smainsuxpath =  './/node[@cat="smain" and node[@rel="su"]]'
-def get_smain_with_subject_nodes(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> List:
-    return tree.xpath(smainsuxpath)
 
-def countsmainsu(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
-    matches = get_smain_with_subject_nodes(tree)
-    return len(matches)
-
-
-bad_category_xpath = './/node[@cat and (@cat="du") and node[@rel="dp"]]'
-def get_bad_category_nodes(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> List:
-    return tree.xpath(bad_category_xpath)
-
-
-def getbadcatcount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    nodes = get_bad_category_nodes(tree)
-    return len(nodes)
-
-#: this is actually valid for all pts except let
-noun_1_character_xpath = './/node[@pt!="let"  and string-length(@word)=1]'
-
-def get_single_character_noun_nodes(
-    tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    raw_single_character_noun_nodes = tree.xpath(noun_1_character_xpath)
-    single_character_noun_nodes = [nd for nd in raw_single_character_noun_nodes if getattval(nd, 'word') not in
-                                       digits]
-    return single_character_noun_nodes
-
-def getnoun1c_count(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    single_character_noun_nodes = get_single_character_noun_nodes(tree, mds, method_name)
-    return len(single_character_noun_nodes)
-
-adverbial_deze_xpath = './/node[@pt="bw" and @lemma="deze"]'
-def get_adverbial_deze_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    adverbal_deze_nodes = tree.xpath(adverbial_deze_xpath)
-    return adverbal_deze_nodes
-
-def getdezebwcount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    adverbial_deze_nodes = get_adverbial_deze_nodes(tree, mds, method_name)
-    return len(adverbial_deze_nodes)
-
-unknown_noun_xpath = './/node[@pt="n" and @frame="noun(both,both,both)"]'
-def get_unknown_noun(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    unknown_noun_nodes = tree.xpath(unknown_noun_xpath)
-    unknown_lemma_nodes = [
-        node
-        for node in unknown_noun_nodes
-        if getattval(node, "lemma") not in validnouns
-    ]
-    return unknown_lemma_nodes
-
-
-def getunknownnouncount(nt: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    unknown_noun_nodes = get_unknown_noun(nt, mds, method_name)
-    return len(unknown_noun_nodes)
-
-
-unknown_name_xpath = './/node[@pt="n" and @frame="proper_name(both)"]'
-def get_unknown_name_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    return [node for node in tree.xpath(unknown_name_xpath)]
-
-
-def getunknownnamecount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    unknown_name_nodes = get_unknown_name_nodes(tree)
-    return len(unknown_name_nodes)
-
-
-main_clause_xpath = './/node[@cat="smain" or @cat="whq" or (@cat="sv1" and @rel!="body" and @rel!="cnj")]'
-main_clause_xpath = './/node[(@cat="smain" or @cat="whq" or (@cat="sv1" and @rel!="body")) and @rel!="cnj"]'
-def get_multiple_main_clause_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    """
-    Clauses with more than one main clause node are bad.
-    """
-    nodes = tree.xpath(main_clause_xpath)
-    return nodes if len(nodes) > 1 else []
-
-
-def getmainclausecount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    main_clause_nodes = get_multiple_main_clause_nodes(tree)
-    return len(main_clause_nodes)
-
-
-mainrelxpath = './/node[@rel="--" and (@cat="rel" or @cat="whrel")]'
-def mainrelcount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    mainrels = tree.xpath(mainrelxpath)
-    return len(mainrels)
-
-
-topxpath = './/node[@cat="top"]'
-def gettopclause(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    tops = tree.xpath(topxpath)
-    if tops == []:
-        return 0
-    top = tops[0]
-    realchildren = [child for child in top if getattval(child, 'pt') not in ['let', 'tsw']]
-    if len(realchildren) != 1:
-        return 0
-    else:
-       thechild = realchildren[0]
-       thechildcat = getattval(thechild, 'cat')
-       result = 1 if thechildcat in clausecats else 0
-       return result
-
-
-toe_xpath = './/node[@lemma="toe" or (@lemma="tot" and @vztype="fin")]'
-naar_xpath = './/node[@lemma="naar"]'
-def get_lonely_toe_nodes(tree: SynTree) -> List:
-    toe_matches = tree.xpath(toe_xpath)
-    naar_matches = tree.xpath(naar_xpath)
-    if toe_matches == []:
-        return []
-    if len(toe_matches) > 0 and len(naar_matches) == 0:
-        return toe_matches
-    result = []
-    for toe_match in toe_matches:
-        if all(
-            [
-                int(getattval(naar_match, "begin")) > int(getattval(toe_match, "begin"))
-                for naar_match in naar_matches
-            ]
-        ):
-            result.append(toe_match)
-    return result
-
-
-def getlonelytoecount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    lonely_toe_matches = get_lonely_toe_nodes(tree)
-    return len(lonely_toe_matches)
-
-
-relative_main_clause_subordinate_order_xpath = """.//node[(@cat="rel" or @cat="whrel" )and @rel="--" and 
-                            parent::node[@cat="top"] and 
-                            node[@rel="body" and @cat="ssub" and .//node[@word]/@end<=node[@rel="hd" and @pt="ww"]/@begin] ]
-"""
-
-
-def get_relative_main_clause_subordinate_order_nodes(tree: SynTree) -> List:
-    return tree.xpath(relative_main_clause_subordinate_order_xpath)
-
-
-def getrelasmainsubordercount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    matches = get_relative_main_clause_subordinate_order_nodes(tree)
-    return len(matches)
-
-
-def compute_penalty(nt: SynTree, md: List[Meta], method_name: MethodName) -> Penalty:
-    totalpenalty = 0
-    for meta in md:
-        totalpenalty += meta.penalty
-    return totalpenalty
-
-words_xpath = """.//node[@word]"""
-def get_not_known_by_alpino_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    word_nodes = tree.xpath(words_xpath)
-    unknown_word_nodes = [
-        node
-        for node in word_nodes
-        if getattval(node, "word") in wordsunknowntoalpinolexicondict
-    ]
-    return unknown_word_nodes
-
-def getnotknownbyalpinocount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    unknown_word_nodes = get_not_known_by_alpino_nodes(tree)
-    return len(unknown_word_nodes)
-
-def get_basic_replacement_nodes(tree: SynTree, mds: List[Meta] = [], method: Method={}) -> List:
-    word_nodes = tree.xpath(words_xpath)
-    basic_replacement_nodes = [
-        node
-        for node in word_nodes
-        if getattval(node, "word").lower() in basicreplacements
-    ]
-    return basic_replacement_nodes
-
-def getbasicreplaceecount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    basic_replacement_nodes = get_basic_replacement_nodes(tree, mds, method_name)
-    return len(basic_replacement_nodes)
-
-
-hyphen_xpath = './/node[contains(@word, "-")]'
-def get_hyphen_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    hyphen_nodes = tree.xpath(hyphen_xpath)
-    return hyphen_nodes
-
-def gethyphencount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    hyphen_nodes = get_hyphen_nodes(tree, mds, method_name)
-    return len(hyphen_nodes)
-
-
-subjunctive_xpath = './/node[@pvtijd="conj"]'
-def get_subjunctive_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    return tree.xpath(subjunctive_xpath)
-
-def getsubjunctivecount(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    subjunctive_nodes = get_subjunctive_nodes(tree)
-    return len(subjunctive_nodes)
-
-
-def gettotaleditdistance(tree: SynTree, metadata: List[Meta], method: Method) -> int:
-    wordlist = getyield(tree)
-    totaldistance = 0
-    for meta in metadata:
-        fullsource = meta.source
-        mainsource, subsource = splitsource(fullsource)
-        if subsource in replacementsubsources and \
-                len(meta.annotationwordlist) == 1 and \
-                len(meta.annotatedwordlist) == 1:
-            correctword = meta.annotationwordlist[0]
-            wrongword = meta.annotatedwordlist[0]
-            dst = distance(wrongword, correctword)
-            totaldistance += dst
-    return totaldistance
-
-
-nominal_pp_modifier_xpath = """//node[@cat='pp' and node[@rel='hd' and @lemma!='van'] and parent::node[@cat='np']]"""
-def get_postnominal_pp_modifier_nodes(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> List:
-    return tree.xpath(nominal_pp_modifier_xpath)
-
-def getpostnominalppmodcount(
-    tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    postnominal_pp_modifier_nodes = get_postnominal_pp_modifier_nodes(tree)
-    return len(postnominal_pp_modifier_nodes)
-
-
-def getmaaradvcount(
-    tree: SynTree, mds: List[Meta] = [], method_name: MethodName = ''
-) -> int:
-    initialmaaradvs = tree.xpath(initialmaarvgxpath)
-    return len(initialmaaradvs)
-
-
-def get_predc_v_mismatch_count(tree: SynTree, mds: List[Meta] = [], method_name: MethodName = '') -> int:
-    predc_v_mismatches = get_predc_v_mismatches(tree)
-    return len(predc_v_mismatches)
-
-# The constant *criteria* is a list of objects of class *Criterion* that are used, in the order given, to evaluate parses
-criteria = [
-    Criterion("unknownwordcount", getunknownwordcount, negative, "Number of unknown words"),
-    Criterion('Alpinounknownword', getnotknownbyalpinocount, negative, "Number of words unknown to Alpino"),
-    Criterion("wrongposwordcount", getwrongposwordcount, negative, "Number of words with the wrong part of speech"),
-    Criterion("unknownnouncount", getunknownnouncount, negative, "Count of unknown nouns according to Alpino"),
-    Criterion("unknownnamecount", getunknownnamecount, negative, "Count of unknown names"),
-    Criterion('semincompatibilitycount', semincompatiblecount, negative, "Count of the number of semantic incompatibilities"),
-    Criterion('maaradvcount', getmaaradvcount, negative, "Count of number of occurrences of clause initial 'maar' as an adverb"),
-    Criterion("ambigcount", countambigwords, negative, "Number of ambiguous words"),
-    Criterion("dpcount", getdpcount, negative, "Number of nodes with relation dp"),
-    Criterion("dhyphencount", getdhyphencount, negative, "Number of nodes with relation --"),
-    Criterion("postcomplsucount", getpostcomplsucount, negative,
-              "Number of subjects to the right of a complement in a subordinate clause"),
-    Criterion('Postnominal PP modifier count', getpostnominalppmodcount, negative, "Number of postnominal PP modifiers"),
-    Criterion('RelativeMainSuborder', getrelasmainsubordercount, negative, 'Number of Main Relative Clauses with subordinate order'),
-    Criterion("lonelytoecount", getlonelytoecount, negative, "Number of occurrences of lonely 'toe'"),
-    Criterion("noun1c_count", getnoun1c_count, negative, "Number of nouns that consist of a single character"),
-    Criterion("Predc - V mismatches", get_predc_v_mismatch_count, negative, "Number of mismatches between "
-                                                                            "nominal predicate and copular verb"),
-    Criterion('ReplacementPenalty', getreplacementpenalty, negative, 'Plausibility of the replacement'),
-    Criterion('Total Edit Distance', gettotaleditdistance, negative, "Total of the edit distances for all replaced words"),
-    # Criterion('Subcatscore', getsubcatprefscore, positive,
-    #          'Score based on the frequency of the subcategorisation pattern'),  # put off needs revision
-    #    Criterion('mainrelcount', mainrelcount, negative, 'Dislike main relative clauses'),  # removed, leads to worse results
-    Criterion("mainclausecount", getmainclausecount, negative, "Number of main clauses"),
-    Criterion("topclause", gettopclause, positive, "Single clause under top"),
-    Criterion("complsucount", getcomplsucount, negative, ""),
-    Criterion("badcatcount", getbadcatcount, negative, "Count of bad categories: du that contains a node with relation dp"),
-    Criterion("basicreplaceecount", getbasicreplaceecount, negative, "Number of words from the basic replacements"),
-    Criterion("hyphencount", gethyphencount, negative, "Number of words that contain hyphens"),
-    Criterion("subjunctivecount", getsubjunctivecount, negative, "Number of subjunctive verb forms"),
-    Criterion("smainsucount", countsmainsu, positive, "Count of smain nodes that contain a subject"),
-    Criterion("dimcount", getdimcount, positive, "Number of words that are diminutives"),
-    Criterion("compcount", getcompcount, positive, "Number of words that are comparatives"),
-    Criterion("supcount", getsupcount, positive, "Number of words that are superlatives"),
-    Criterion("compoundcount", localgetcompoundcount, positive, "Number of nouns that are compounds"),
-    Criterion("sucount", getsucount, positive, "Number of subjects"),
-    Criterion("svaok", getsvaokcount, positive, "Number of time subject verb agreement is OK"),
-    Criterion("deplusneutcount", getdeplusneutcount, negative, "Number of deviant configurations with de-determiner + neuter noun"),
-    Criterion("dezebwcount", getdezebwcount, negative, "Count of 'deze' as adverb"),
-    Criterion("penalty", compute_penalty, negative, "Penalty for the changes made")
-]
 
 altpropertiesheader = [criterion.name for criterion in criteria]
 
