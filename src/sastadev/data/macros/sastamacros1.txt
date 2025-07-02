@@ -157,11 +157,11 @@ lonelynonfinww = """(@wvorm!="pv" and not(ancestor::node[@cat="top"]/descendant:
 MvTT = """(@pt="ww" and @pvagr="mv" and @pvtijd="tgw" and ../node[@rel="su"])"""
 
 
-vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden")
+vdhwws = """(@lemma="hebben" or @lemma="zijn" or @lemma="worden" or @lemma="komen")
 """
 
 Tarsp_Hwwvd = """((@pt="ww" and @rel="hd" and 
-           (@lemma="hebben" or @lemma="worden" or @lemma="zijn") and
+           %vdhwws% and
        parent::node[node[@rel="vc" and ((@cat="ppart" and node[@rel="hd"]) or (@pt="ww" and @wvorm="vd"))]
        ]) or %robusthwwvd%)""""
 
@@ -249,7 +249,7 @@ Tarsp_B = """( not(%adjacentnogeen%) and
          (%predcB%
          )
          ) and 
-         ((../node[@pt="ww" and @rel="hd"]) or parent::node[@cat="smain"])
+         ((../node[@pt="ww" and @rel="hd"]) or parent::node[(@cat="smain") or @cat="inf" or @cat="ppart"])
         ) or
         ((@pt="vz" or @pt="bw" or %Rpronoun%) and (@lemma!="kijk") and (@rel="dp" or @rel="--" or @rel="nucl" or @rel="body") and %notonlyrealnode%) or
         (@cat="pp" and (@rel="--" or @rel="dp") and %notonlyrealnode%) or
@@ -433,7 +433,7 @@ clausalbx2 = """((@cat="smain" or @cat="sv1") and
 
 adjacentnogeen = """(@lemma="nog" and @end=ancestor::node[@cat="top"]/descendant::node[@lemma="een"]/@begin)"""
 
-old_Tarsp_BX = """((@cat="top" and 
+old_rebx """((@cat="top" and 
                 not(.//node[%pv%]) and 
 				not(.//node[@lemma="niet"]) and not(.//node[@rel="dlink"]) and
                 (
