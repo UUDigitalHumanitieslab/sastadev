@@ -24,7 +24,7 @@ from sastadev.treebankfunctions import (clausecats, countav,
                                         getattval,
                                         getcompoundcount, getnodeyield,
                                          getsentence,  getxsid,
-                                        getyield )
+                                        getyield, isdefdet, is_neut_sg)
 from typing import Callable, Dict, List, Optional, Set, Tuple
 
 
@@ -231,6 +231,25 @@ def get_double_hyphen_nodes(tree: SynTree, mds: List[Meta] = [], methodname: str
 def getdhyphencount(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
     matches = get_double_hyphen_nodes(tree, mds, methodname)
     return len(matches)
+
+
+
+def get_e_adj_neut_nouns(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> list:
+    results = []
+    thenodeyield = getnodeyield(tree)
+    for i, node in enumerate(thenodeyield):
+        nodept = getattval(node, 'pt')
+        nodebuiging = getattval(node, 'buiging')
+        if nodept == 'adj'and nodebuiging == 'met-e':
+            nextnode = thenodeyield[i+1] if i < len(thenodeyield) - 1 else None
+            prevnode = thenodeyield[i-1] if i > 0 else None
+            if is_neut_sg(nextnode) and not isdefdet(prevnode):
+                results.append(node)
+    return results
+
+
+def get_e_adj_neut_noun_count(tree: SynTree, mds: List[Meta] = [], methodname: str='') -> int:
+    return len(get_e_adj_neut_nouns(tree, mds, methodname))
 
 localgetcompoundcount = lambda nt, md, mn: getcompoundcount(nt)
 getdpcount = lambda nt, md, mn: countav(nt, 'rel', 'dp')
@@ -501,6 +520,7 @@ criteria = [
     Criterion("noun1c_count", getnoun1c_count, negative, "Number of nouns that consist of a single character"),
     Criterion("Predc - V mismatches", get_predc_v_mismatch_count, negative, "Number of mismatches between "
                                                                             "nominal predicate and copular verb"),
+    Criterion("Wrong Adj-Noun agreement", get_e_adj_neut_noun_count, negative, "Adj-Noun agreement Error"),
     Criterion('ReplacementPenalty', getreplacementpenalty, negative, 'Plausibility of the replacement'),
     Criterion('Total Edit Distance', gettotaleditdistance, negative, "Total of the edit distances for all replaced words"),
     # Criterion('Subcatscore', getsubcatprefscore, positive,

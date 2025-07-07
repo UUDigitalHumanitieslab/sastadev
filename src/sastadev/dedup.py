@@ -29,8 +29,8 @@ positionatt = 'end'
 xmetaxpath = './/xmeta'
 
 samplesizemdvalues = {repeatedjaneenou,
-                      shortrep, intj, unknownsymbol, filled_pause}
-mlumdvalues = {repeated, repeatedseqtoken, longrep, unknownword, substringrep, janeenou,
+                      shortrep,  unknownsymbol, filled_pause}
+mlumdvalues = {repeated, repeatedseqtoken, intj, longrep, unknownword, substringrep, janeenou,
                fstoken}
 
 filled_pause_exceptions = ['e', 'ə', 'ee']
