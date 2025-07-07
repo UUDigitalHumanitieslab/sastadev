@@ -198,6 +198,7 @@ def asta_recognised_wordnode(node: SynTree) -> bool:
     result = result or recognised_wordnode(node)
     result = result or recognised_lemmanode(node)
     result = result or isnumber(node)
+    result = result or lex.isa_namepart(getattval(node, 'word'))
     result = result and not (all_lower_consonantsnode(node))
     result = result and not (short_nucl_n(node))
     return result

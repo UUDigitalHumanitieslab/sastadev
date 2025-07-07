@@ -184,6 +184,24 @@ def immediately_follows(node1: SynTree, node2: SynTree, stree: SynTree) -> bool:
     """
     return immediately_precedes(node2, node1, stree)
 
+def is_neut_sg(node: SynTree) -> bool:
+    result = getattval(node, 'pt') == 'n' and getattval(node, 'getal') == 'ev' and \
+             (getattval(node, 'genus') == 'onz' or getattval(node, 'graad') == 'dim')
+    return result
+
+def isdefdet(node: SynTree) -> bool:
+    nodelemma = getattval(node, 'lemma')
+    nodept = getattval(node, 'pt')
+    nodevwtype = getattval(node, 'vwtype')
+    nodecase = getattval(node, 'naamval')
+    if nodelemma in ['de', 'het', 'deze', 'die', 'dit', 'dat']:
+        return True
+    if nodept == 'vnw' and nodevwtype in ['bez']:
+        return True
+    if nodept == 'n' and nodecase == 'gen':
+        return True
+    return False
+
 
 def countav(stree: SynTree, att: str, val: str) -> int:
     countattvalxpath = countattvalxpathtemplate.format(att=att, val=val)

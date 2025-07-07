@@ -46,6 +46,10 @@ dets = {}
 dets[de] = ['de', 'die', 'deze', 'onze', 'welke', 'iedere', 'elke', 'zulke']
 dets[het] = ['het', 'dat', 'dit', 'ons', 'welk', 'ieder', 'elk', 'zulk']
 
+possessive_determiners = ['mijn' , "m'n", "jouw", "je", "uw", "zijn", "z'n", "haar", "d'r",
+                          "ons", "onze", "jullie", "hun"]
+definite_determiners = ['de', 'het', 'deze', 'die', 'dit', 'dat']
+
 valid_ambiguous_words = ['zijn', 'wel', 'niet', 'effe', 'mij', 'drinken', 'dees', 'hun', 'vin', 'pot', 'jou', 'ken']
 def initializelexicon(lexiconfilename) -> set:
     lexicon = set()
