@@ -96,6 +96,7 @@ class Meta:
     * cat: a label to specify a category that the metadata belongs to
     * subcat: a label to specify a subcategory that the metadata belongs to
     * source: a label to specify the source of the metadata, e.g. CHAT, SASTA/BasicReplacements, etc.
+    * omitted_pt: string. to specify the pt of an omitted word that the metadat specifies the associate of
     * penalty: an integer value to specify the costs of the change that created the metadata
     * backplacement: integer value. if the metadata describes a replacement, this is used to specify if and how the
     original item should be put back
@@ -107,8 +108,9 @@ class Meta:
     def __init__(self, name, value, annotationwordlist=[], annotationposlist=[], annotatedposlist=[],
                  annotatedwordlist=[], annotationcharlist=[
     ], annotationcharposlist=[], annotatedcharlist=[],
-            annotatedcharposlist=[], atype='text', cat=None, subcat=None, source=None, penalty=defaultpenalty,
-            backplacement=defaultbackplacement):
+            annotatedcharposlist=[], atype='text', cat=None, subcat=None, source=None,
+                 omitted_pt=None, omitted_rel=None, omitted_lemma=None, omitted_word=None,
+                 penalty=defaultpenalty, backplacement=defaultbackplacement):
         self.atype = atype
         self.name = name
         self.annotationwordlist = annotationwordlist if annotationwordlist != [] else value
@@ -123,6 +125,10 @@ class Meta:
         self.cat = cat
         self.subcat = subcat
         self.source = source
+        self.omitted_pt = omitted_pt
+        self.omitted_rel = omitted_rel
+        self.omitted_lemma = omitted_lemma
+        self.omitted_word = omitted_word
         self.penalty = penalty
         self.backplacement = backplacement
         self.fmstr = '<{}:type={}:annotationwordlist={}:annotationposlist={}:annotatedwordlist={}:annotatedposlist={}:value={}:cat={}:source={}>'
@@ -135,8 +141,9 @@ class Meta:
                                   repr(self.annotationposlist),
                                   repr(self.annotatedposlist), repr(
             self.annotatedwordlist), repr(self.atype),
-            repr(self.cat), repr(self.subcat), repr(
-                self.source), repr(self.penalty),
+            repr(self.cat), repr(self.subcat), repr(self.source),
+                repr(self.omitted_pt), repr(self.omitted_rel), repr(self.omitted_lemma), repr(self.omitted_word),
+                                  repr(self.penalty),
             repr(self.backplacement))
         return result
 
@@ -159,7 +166,10 @@ class Meta:
                                annotationposlist=str(self.annotationposlist),
                                annotatedwordlist=str(self.annotatedwordlist),
                                annotatedposlist=str(self.annotatedposlist), value=str(self.value), cat=str(self.cat),
-                               subcat=str(self.subcat), source=str(self.source), backplacement=str(self.backplacement),
+                               subcat=str(self.subcat), source=str(self.source), omitted_pt= str(self.omitted_pt),
+                               omitted_rel=str(self.omitted_rel), omitted_lemma=str(self.omitted_lemma),
+                               omitted_word=str(self.omitted_word),
+                               backplacement=str(self.backplacement),
                                penalty=str(self.penalty))
         return result
 
@@ -180,6 +190,10 @@ class Meta:
                   self.cat == other.cat and
                   self.subcat == other.subcat and
                   self.source == other.source and
+                  self.omitted_pt == other.omitted_pt and
+                  self.omitted_rel == other.omitted_rel and
+                  self.omitted_lemma == other.omitted_lemma and
+                  self.omitted_word == other.omitted_word and
                   self.penalty == other.penalty and
                   self.backplacement == other.backplacement and
                   self.fmstr == other.fmstr and

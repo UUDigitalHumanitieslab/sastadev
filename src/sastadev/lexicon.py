@@ -347,7 +347,6 @@ def getinflforms(thesubj: SynTree, thepv: SynTree, inversion: bool) -> List[str]
         results = []
     return results
 
-
 def alldutchwords(correct: str) -> bool:
     newcorrect = correct
     words = newcorrect.split()
@@ -366,18 +365,16 @@ def isvalidtoken(wrd:str) -> bool:
     result = known_word(wrd) or ispunctuation(wrd)
     return result
 
+lexiconfoldername = 'data/aux_lexicons'
 
 nochildwordsfilename = 'nochildwords.txt'
-nochildwordsfolder = 'data/nochildwords'
-nochildwordsfullname = os.path.join(settings.SD_DIR, nochildwordsfolder, nochildwordsfilename)
+nochildwordsfullname = os.path.join(settings.SD_DIR, lexiconfoldername, nochildwordsfilename)
 nochildwords = initializelexicon(nochildwordsfullname)
 
-lexiconfoldername = 'data/wordsunknowntoalpino'
 wordsunknowntoalpinofilename = 'wordsunknowntoalpino.txt'
 wordsunknowntoalpinofullname = os.path.join(settings.SD_DIR, lexiconfoldername, wordsunknowntoalpinofilename)
 wordsunknowntoalpinolexicondict = initializelexicondefdict(wordsunknowntoalpinofullname)
 
-lexiconfoldername = 'data/filledpauseslexicon'
 
 filledpausesfilename = 'filledpauseslexicon.txt'
 filledpausesfullname = os.path.join(settings.SD_DIR, lexiconfoldername, filledpausesfilename)
@@ -419,15 +416,40 @@ en_must_do_words_lexicon_filename = 'en_must_do_words_lexicon.txt'
 en_must_do_words_lexicon_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, en_must_do_words_lexicon_filename)
 en_must_do_words_lexicon = initializelexicon(en_must_do_words_lexicon_fullname)
 
+beroepenfilename = 'beroepen.txt'
+beroepenfullname = os.path.join(settings.SD_DIR, lexiconfoldername, beroepenfilename)
+# beroepenlist = readcsv(beroepenfullname)
+#beroepen = {beroep[0] for _, beroep in beroepenlist}
+beroepen = initializelexicon(beroepenfullname)
+
+mass_exceptions_filename = 'mass_exceptions.txt'
+mass_exceptions_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, mass_exceptions_filename)
+mass_exceptions = initializelexicon(mass_exceptions_fullname)
+
+both_exceptions_filename = 'both_count_mass_exceptions.txt'
+both_exceptions_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, both_exceptions_filename)
+both_exceptions = initializelexicon(both_exceptions_fullname)
+
+vz_count_n_combinations_filename = 'vz_count_n_combinations.txt'
+vz_count_n_combinations_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, vz_count_n_combinations_filename)
+vz_count_n_combinations = initializelexicon(vz_count_n_combinations_fullname)
+
+n_v_expressions_filename = 'bare_count_n_v_pairs.txt'
+n_v_expressions_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, n_v_expressions_filename)
+n_v_expression_list = initializelexicon(n_v_expressions_fullname)
+
+acronyms_filename = "acronyms.txt"
+acronyms_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, acronyms_filename)
+raw_acronyms_lexicon = initializelexicon(acronyms_fullname)
+acronyms_lexicon = {entry[0]:entry[1] for entry in raw_acronyms_lexicon}
+
 # validnouns is intended for nous  that Alpino assigns frame (both,both, both) but that are valid Dutch words
 validnouns = {'knijper', 'roosvicee'}
 
-lexiconfoldername = 'data/wordsunknowntoalpino'
 lemmalexiconfilename = 'lemmalexicon.txt'
 lemmalexiconfulname = os.path.join(settings.SD_DIR, lexiconfoldername, lemmalexiconfilename)
 lemmalexicon = initializelexicondict(lemmalexiconfulname)
 
-lexiconfoldername = 'data/wordsunknowntoalpino'
 cardinallexiconfilename = 'cardinalnumerals.tsv'
 cardinallexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, cardinallexiconfilename)
 cardinallexicon = geninitializelexicondict(cardinallexiconfullname, 0)
@@ -482,3 +504,10 @@ shortrep_exceptions = ['de']
 junk = 0
 
 # to have a breakpoint after the last lexicon read
+
+def is_acronym(wrd: str) -> bool:
+    result = wrd in acronyms_lexicon
+    result = result or wrd.upper() in acronyms_lexicon
+    return result
+
+

@@ -32,3 +32,6 @@ gekeild	gegooid
 gekeilde	gegooide
 keilend	gooiend
 keilende	gooiende
+gekolonist	gespeeld
+kolonistte	speelde
+kolonistten	speelden

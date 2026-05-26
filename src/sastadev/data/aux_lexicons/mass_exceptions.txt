@@ -6,7 +6,7 @@ aanwerving
 aarde
 achteruitgang
 acquisitie
-acte
+akte
 appel_sap
 begeleiding
 bezoek
@@ -91,6 +91,7 @@ extase
 fatsoen
 fluweel
 fraude
+fysio_therapie
 gas
 geld
 geld_nood
@@ -216,6 +217,7 @@ speelgoed
 spul
 suiker
 thee
+therapie
 tijd
 trek
 uitzicht

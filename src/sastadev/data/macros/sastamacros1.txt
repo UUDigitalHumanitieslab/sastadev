@@ -1045,4 +1045,6 @@ Tarsp_only_W = """(@pt="ww" and not(%verbal_VU%) and %thisistheonlyrealword%)"""
 
 Tarsp_en = """(@pt="vg" and @lemma="en" and @rel="dlink")"""
 
-Tarsp_Long_niet = """(@lemma="niet" and ancestor::node[@cat="top" and count(.//node[@word and @pt!="tsw" and @pt!="let"]) >= 3] and not(.//node[%Xneg%]))"""
+Tarsp_Long_niet = """(@lemma="niet" an//node[(@pt="n" or @pt="tw") and %realwordnode% and @lemma!="kijk" and %thisistheonlyrealword%d ancestor::node[@cat="top" and count(.//node[@word and @pt!="tsw" and @pt!="let"]) >= 3] and not(.//node[%Xneg%]))"""
+
+Tarsp_Zn = """((@pt="n" or @pt="tw") and %realwordnode% and @lemma!="kijk" and %thisistheonlyrealword%)"""

@@ -18,7 +18,7 @@ from sastadev.sastatypes import ExactResultsDict, SynTree, TreeBank
 from sastadev.stringfunctions import monosyllabic
 from sastadev.treebankfunctions import (clausebodycats, find1, immediately_follows, getattval as gav, getnodeyield,
                                         getxsid, getmeta, getyield, iswordnode, nodecopy, openclasspts,
-                                        adjacent, showtree, getbeginend)
+                                        adjacent, showtree, getbeginend, get_node)
 from sastadev.xlsx import getxlsxdata
 from typing import List, Optional, Tuple
 
@@ -413,123 +413,10 @@ def test3():
                        pretty_print=True)
 
 
-def get_plural(node: SynTree) -> List[str]:
-    word = gav(node, 'word')
-    lemma = gav(node, 'lemma')
-    pt = gav(node, 'pt')
-    dim = gav(node, 'graad') == 'dim'
-    if pt != 'n':
-        return []
-    ncode = pos2posnum[pt]
-    if dim:
-        newwords = getinflforms(lemma, ncode, 'dm')
-    else:
-        newwords = getinflforms(lemma, ncode, 'm')
-    return newwords
-
-get_plural_test_list = [('beer', 'beer', 'basis'), ('beer', 'beertje', 'dim')]
-def test4():
-    for lemma, word, degree in get_plural_test_list:
-        thenode = etree.Element('node', {'lemma': lemma, 'word': word, 'graad': degree, 'pt': 'n'})
-        newwords = get_plural(thenode)
-        print(f'{word}: {str(newwords)}')
-
-def requires_plural_tw(node: SynTree) -> bool:
-    lemma = gav(node, 'lemma')
-    pt = gav(node, 'pt')
-    result = pt == 'tw' and lemma != 'één'
-    return result
 
 
-def keeropkeer(node: SynTree) -> bool:
-    top = find1(node, 'ancestor::alpino_ds')
-    if top is None:
-        return False
-    node_lemma = gav(node, 'lemma')
-    wordnodelist = getnodeyield(top)
-    for ctr, n in enumerate(wordnodelist):
-        prevn = wordnodelist[ctr - 1] if ctr >0 else None
-        prevprevn = wordnodelist[ctr - 2] if ctr > 1 else None
-        nextn = wordnodelist[ctr + 1]  if ctr < len(wordnodelist) - 1 else None
-        nextnextn = wordnodelist[ctr + 2] if ctr < len(wordnodelist) - 2 else None
-        if n == node:
-            prevn_pt = gav(prevn, 'pt')
-            prevprevn_lemma = gav(prevprevn, 'lemma')
-            result1 = prevn_pt == 'vz' and prevprevn_lemma == node_lemma
-            if result1:
-                return result1
-            nextn_pt = gav(nextn, 'pt')
-            nextnextn_lemma = gav(nextnextn, 'lemma')
-            result2 = nextn_pt == 'vz' and nextnextn_lemma == node_lemma
-            if result2:
-                return result2
-    return False
-
-def really_no_det(node: SynTree) -> bool:
-    top = find1(node, 'ancestor::alpino_ds')
-    if top is None:
-        return False
-    wordnodelist = getnodeyield(top)
-    for ctr, wordnode in wordnodelist:
-        prevn = wordnodelist[ctr - 1] if ctr > 0 else None
-        if wordnode == node:
-            prevn_pt = gav(prevn, 'pt')
-            if prevn_pt in ['lw', 'tw']:
-                return False
-    return True
-
-volgend_vorig_nouns = ['jaar', 'maand', 'week', 'seizoen', 'semester']
-
-def volgend_vorig(node: SynTree) -> bool:
-    node_lemma = gav(node, 'lemma')
-    if node_lemma not in volgend_vorig_nouns:
-        return False
-    mods = node.xpath('../node[@rel="mod" and (@lemma="vorig" or (@lemma="volgen" and @wtype = "od")) ]')
-    if mods == []:
-        return False
-    return True
-
-def get_first_word_node_of(node: SynTree) -> Optional[SynTree]:
-    if 'word' in node.attrib:
-        result = node
-    else:
-        result = find1(node, f"node[@begin = '{gav(node, 'begin')}'] ]")
-    return result
 
 
-def get_associate(node: SynTree) -> Optional[SynTree]:
-    """
-    function to obtain the word node that an omitted word should be marked on. Possibly none is found.
-    If there is none, the marking will be on the whole sentence
-    """
-    node_pt = gav(node, 'pt')
-    node_conjtype = gav(node, 'vwtype')
-    if node_pt == '':     # only defined for word nodes with a pt attributes
-        return None
-    # if cnj then crd if there is one
-    if gav(node, 'rel') == 'cnj':
-        result = find1(node, "../node[@rel='crd']")
-    # if content word then its governing head, if there is one
-    elif node_pt in openclasspts:
-        result = find1(node, "../node[@rel='hd']")
-        if gav(result, 'cat') == 'mwu':
-            result = get_first_word_node_of(result)
-        # if crd then the first word of the first conjunct
-    elif node_pt == "vg" and node_conjtype == 'neven':
-        node_parent = node.getparent()
-        first_conjunct = find1(node_parent, f"./node[@rel='cnj' and @begin = {gav(node_parent, 'begin')}]")
-        result = get_first_word_node_of(first_conjunct)
-    # if function word then the head of its complement if there is one else its governing head
-    elif node_pt == "vz":
-        compl = find1(node, '../node[@rel="obj1" or @rel="pobj1"]')
-        result = get_first_word_node_of(compl)
-    elif node_pt == "vw" and node_conjtype == 'onder':
-        compl = find1(node, '../node[@rel="body"]')
-        result = get_first_word_node_of(compl)
-    # else None
-    else:
-        result = None
-    return result
 
 
 deheterror = 'deheterror'
@@ -548,19 +435,6 @@ def mk_xpath_condition(att: str, values: List[str]) -> str:
     result = f'({or_list_str})'
     return result
 
-def get_nodes(stree: SynTree, meta: Meta, xpath_cond="") -> List[SynTree]:
-    annotatedposlist_str = getattr(meta, 'annotatedposlist')
-    annotatedposlist = eval(annotatedposlist_str)
-    results = []
-    xpath_cond_str = f'and {xpath_cond}' if xpath_cond != '' else ''
-    for pos in annotatedposlist:
-        new_node = stree.xpath(f'.//node[@word and @begin="{pos} {xpath_cond_str}"]')
-    return results
-
-def get_node(stree: SynTree, meta: Meta, xpath_cond="") -> SynTree:
-    nodes = get_nodes(stree, meta)
-    node = nodes[0] if len(nodes) > 0 else None
-    return node
 
 
 def sublid(stree: SynTree) -> List[SynTree]:
@@ -579,7 +453,7 @@ def sublid(stree: SynTree) -> List[SynTree]:
 def sub_pt(stree: SynTree, pt: str) -> List[SynTree]:
     """
     finds substitutions of words with part of speech == pt in stree
-    It finds them on the basis of the the metad
+    It finds them on the basis of the metadata
     """
     results = []
     replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(CHAT_replacement))

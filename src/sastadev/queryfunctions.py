@@ -1,7 +1,10 @@
 from typing import Callable, List, Tuple
 
 from sastadev.basicreplacements import is_pronominal_adverb
-from sastadev.sasta_explanation import get_prefix_and_core
+from sastadev.CHAT_Annotation import CHAT_replacement
+from sastadev import correctionlabels
+# from sastadev.sasta_explanation import get_prefix_and_core
+from sastadev.missing_det import get_missing_det
 from sastadev.imperatives import wx, imperatives
 from sastadev.lexicon import vuwordslexicon
 from sastadev.macros import expandmacros
@@ -9,11 +12,14 @@ from sastadev.sastatypes import SynTree
 from sastadev.stringfunctions import punctuationchars
 from sastadev.tblex import get_aanloop_and_core
 from sastadev.treebankfunctions import (adjacent, find1, get_left_siblings,
-                                        getattval, getnodeyield, parent)
+                                        getattval, get_node, getnodeyield, mdbasedquery, mdnameonlyxpathtemplate, parent)
 
 gav = getattval
 
 comma = ','
+
+articles = ['de', 'een', 'het', "'t", "'n"]
+
 
 nietxpath = './/node[@lemma="niet"]'
 wordxpath = './/node[@pt]'
@@ -76,6 +82,7 @@ def xneg(stree):
             theleftsibling = leftnietsiblings[0]
         else:
             result = False
+            theleftsibling = None
         if result:
             nodepairs.append((theleftsibling, nietnode))
     if nodepairs == []:
@@ -104,7 +111,7 @@ def VzN(stree):
 
 
 def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) -> List[SynTree]:
-    '''
+    """
 
     :param stree: the syntactic structure to be analysed
     :param pred: a predicate that the results found must satisfy
@@ -117,7 +124,7 @@ def auxvobij(stree: SynTree, pred: Callable[[SynTree, SynTree, SynTree], bool]) 
 
     .. autodata:: sastadev.queryfunctions::voslashbijxpath
 
-    '''
+    """
     RPnodes = stree.xpath(voslashbijxpath)
     results = []
     for RPnode in RPnodes:
@@ -234,7 +241,7 @@ def tarsp_verkl(stree: SynTree) -> List[SynTree]:
 
 
 def getuitloop(nodeyield: List[SynTree]) -> Tuple[List[SynTree], List[SynTree]]:
-    lastlemma = getattval(nodeyield[-1], 'lemma')
+    lastlemma = getattval(nodeyield[-1], 'lemma') if nodeyield != [] else ''
     if lastlemma in punctuationchars:
         if lastlemma == comma:
             return nodeyield, []
@@ -403,3 +410,53 @@ def ov2(stree: SynTree) -> List[SynTree]:
         return []
     results = stree.xpath(ov2_xpath)
     return results
+
+zn_xpath = expandmacros(".//node[%Tarsp_Zn%]")
+
+def tarsp_dellid(stree: SynTree) -> List[SynTree]:
+    raw_results = get_missing_det(stree)
+    zn_results = stree.xpath(zn_xpath)
+    results = [result for result in raw_results if result not in zn_results]
+    return results
+
+
+
+def sublid(stree: SynTree) -> List[SynTree]:
+
+    # deheterror
+    deheterror_nodes = mdbasedquery(stree, correctionlabels.grammarerror, correctionlabels.deheterror)
+
+    # hetdeerrors
+
+    hetdeerror_nodes = mdbasedquery(stree, correctionlabels.grammarerror, correctionlabels.hetdeerror)
+
+    other_nodes = sub_pt(stree, 'lid')
+    results = deheterror_nodes + hetdeerror_nodes + other_nodes
+    return results
+
+def sub_pt(stree: SynTree, pt: str) -> List[SynTree]:
+    """
+    finds substitutions of words with part of speech == pt in stree
+    It finds them on the basis of the metadata
+    """
+    results = []
+    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
+    explanation_as_replacement_metadata = (
+        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
+    all_metadata = replacement_metadata + explanation_as_replacement_metadata
+    pt_replacement_metadata = []
+    for replacement in all_metadata:
+        annotated_list = eval(gav(replacement, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement, 'annotationwordlist'))
+        annotated = annotated_list[0] if annotated_list else None
+        annotation = annotation_list[0] if annotation_list else None
+        # if annotation in articles:    # this is not needed and may be wrong
+                                        # if there are unexpected variants of articles
+        #    pt_replacement_metadata.append(replacement)
+        pt_replacement_metadata.append(replacement)
+    for art_replacement in pt_replacement_metadata:
+        new_node = get_node(stree, art_replacement, xpath_cond=f'@pt="{pt}"', annotation=True)
+        if new_node is not None:
+            results.append(new_node)
+    return results
+

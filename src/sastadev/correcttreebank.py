@@ -589,6 +589,8 @@ def bare_angled_brackets_replace_tree(stree: SynTree) -> SynTree:
     cleanutt, chatmetadata = cleantext(origutt, False, tokenoutput=False)
     if any([meta.name == bare_angled_brackets for meta in chatmetadata]):
         newstree = settings.PARSE_FUNC(cleanutt)
+        if newstree is None:
+            newstree = stree
     else:
         newstree = stree
     return newstree
@@ -1046,7 +1048,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         showtree(thetree, text='thetree before deletion:')
 
     nodes2deleteintbegins = [int(b) for b in nodes2deletebegins]
-    thetree = deletewordnodes(thetree, nodes2deleteintbegins, wordsonly=True)
+    thetree, deletion_metadata = deletewordnodes(thetree, nodes2deleteintbegins, wordsonly=True)
 
     if debug:
         showtree(thetree, text='thetree after deletion:')
@@ -1093,6 +1095,9 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         metadata = origmetadata
 
     for meta in newcorrection2:
+        metadata.append(meta.toElement())
+
+    for meta in deletion_metadata:
         metadata.append(meta.toElement())
 
     if debug:

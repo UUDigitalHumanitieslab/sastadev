@@ -1,80 +1,91 @@
 from collections import defaultdict
 from lxml import etree
 import os
+
+from sastadev.CHAT_Annotation import CHAT_omittedword
 from sastadev.anonymization import sasta_pseudonyms
 from sastadev.conf import settings
 from sastadev.constants import datafolder, outtreebanksfolder
+from sastadev import correctionlabels
+from sastadev.lexicon import beroepen, both_exceptions, mass_exceptions, n_v_expression_list, vz_count_n_combinations, \
+    cardinallexicon
 from sastadev.readcsv import readcsv
 from sastadev.stringfunctions import compoundsep
 from sastadev.sastatypes import SynTree
-from sastadev.treebankfunctions import find1, getattval as gav, getnodeyield, getxsid
+from sastadev.treebankfunctions import (find1, get_associate_meta, getattval as gav, get_node,
+                                        getnodeyield, getxsid, mdnameonlyxpathtemplate)
 from typing import List, Tuple
 
 eps = ''
 
 treesfolder = 'trees'
 
-beroepenfilename = 'beroepen.txt'
-beroepenfullname = os.path.join(settings.SD_DIR, datafolder, 'filledpauseslexicon', beroepenfilename)
-beroepenlist = readcsv(beroepenfullname)
-beroepen = {beroep[0] for _, beroep in beroepenlist}
+# moved to lexicon
+# beroepenfilename = 'beroepen.txt'
+# beroepenfullname = os.path.join(settings.SD_DIR, datafolder, 'filledpauseslexicon', beroepenfilename)
+# beroepenlist = readcsv(beroepenfullname)
+# beroepen = {beroep[0] for _, beroep in beroepenlist}
 
-robust_pseudonyms = ['BUURMAN', 'BUURVROUW', 'CLUB', 'JUF', 'KLASGENOOT', 'KLASGENOTE', 'Sastagroep',
+robust_pseudonyms = ['BUURMAN', 'BUURVROUW', 'CLUB', 'CLUBNAAM', 'JUF', 'KLASGENOOT', 'KLASGENOTE',
+                     'NAAM', 'Sastagroep',
                      'STAD', 'TEAMGENOOT', 'TEAMGENOTE', 'VRIEND', 'VRIENDIN']
 
-wellformed_vz_n_combinations = [
-('aan', 'tafel'),
-    ('aan', 'zee'),
-    ('boven', 'baas'),
-    ('boven', 'wonder'),
-    ('in', 'bad'),
-('in', 'bed'),
-('in', 'brand'),
-('in', 'coma'),
-('in', 'galop'),
-    ('in', 'huis'),
-    ('in', 'kas'),
-    ('in', 'principe'),
-    ('in', 'werking'),
-    ('in', 'zee'),
-    ('na', 'school'),
-('naar', 'bed'),
-('naar', 'huis'),
-('naar', 'school'),
-    ('naar', 'zee'),
-    ('op', 'bed'),
-('op', 'bezoek'),
-('op', 'brood'),
-('op', 'goal'),
-('op', 'kool'),
-    ('op', 'kop'),
-('op', 'reis'),
-('op', 'school'),
-    ('op', 'school_reis'),
-('op', 'schoot'),
-('op', 'slot'),
-    ('op', 'stal'),
-('op', 'straat'),
-('op', 'tafel'),
-('op', 'televisie'),
-('op', 'tv'),
-('op', 'vakantie'),
-    ('op', 'volgorde'),
-    ('op', 'zee'),
-    ('op', 'zolder'),
-    ('uit', 'bad'),
-    ('uit', 'bed'),
-    ('uit', 'huis'),
-    ('van', 'huis'),
-    ('van', 'slag'),
-    ('van', 'school'),
-    ('van', 'stapel'),
+# moved to lexicon
+# wellformed_vz_n_combinations = [
+# ('aan', 'tafel'),
+#     ('aan', 'zee'),
+#     ('boven', 'baas'),
+#     ('boven', 'wonder'),
+#     ('in', 'bad'),
+# ('in', 'bed'),
+# ('in', 'brand'),
+# ('in', 'coma'),
+# ('in', 'galop'),
+#     ('in', 'huis'),
+#     ('in', 'kas'),
+#     ('in', 'principe'),
+#     ('in', 'werking'),
+#     ('in', 'zee'),
+#     ('na', 'school'),
+# ('naar', 'bed'),
+# ('naar', 'huis'),
+# ('naar', 'school'),
+#     ('naar', 'zee'),
+#     ('op', 'bed'),
+# ('op', 'bezoek'),
+# ('op', 'brood'),
+# ('op', 'goal'),
+# ('op', 'kool'),
+#     ('op', 'kop'),
+# ('op', 'reis'),
+# ('op', 'school'),
+#     ('op', 'school_reis'),
+# ('op', 'schoot'),
+# ('op', 'slot'),
+#     ('op', 'stal'),
+# ('op', 'straat'),
+# ('op', 'tafel'),
+# ('op', 'televisie'),
+# ('op', 'tv'),
+# ('op', 'vakantie'),
+#     ('op', 'volgorde'),
+#     ('op', 'zee'),
+#     ('op', 'zolder'),
+#     ('uit', 'bad'),
+#     ('uit', 'bed'),
+#     ('uit', 'huis'),
+#     ('van', 'huis'),
+#     ('van', 'slag'),
+#     ('van', 'school'),
+#     ('van', 'stapel'),
+#
+#     ('van', 'tafel')
+# ]
 
-    ('van', 'tafel')
-]
+wellformed_vz_n_combinations = [tuple(el.split()) for el in vz_count_n_combinations]
 
-
-n_v_expression_list = ['stage lopen', 'rekening houden']
+# moved to lexicon
+# n_v_expression_list = ['stage lopen', 'rekening houden']
 n_v_expression_pairs = [tuple(el.split()) for el in n_v_expression_list]
 
 detless_count_nouns = ['papa', 'mama', 'oma', 'opa', 'moeder', 'sinterklaas', 'mam'] + \
@@ -88,18 +99,19 @@ detless_count_nouns = ['papa', 'mama', 'oma', 'opa', 'moeder', 'sinterklaas', 'm
 predc_detless_count_nouns = ['avond', 'ochtend', 'middag', 'nacht', 'weer']
 
 color_names = ['rood', 'wit', 'blauw', 'oranje', 'zwart', 'geel', 'groen']
-mass_exceptions = ['acquisitie', 'acte', 'appel_sap', 'begeleiding', 'bezoek', 'brood', 'buiten',
-                   'cement', 'coördinatie', 'deeg', 'druk', 'goed', 'gym',
-                   'klei', 'hout', 'geld',  'informatie', 'ijzer', 'kaas',  'kraak_been',
-                   'kracht', 'last', 'logo', 'melk', 'migraine',
-                   'pap', 'patat', 'plastic', 'plezier', 'pijn', 'productie',
-                   'speelgoed', 'spul', 'suiker',  'thee', 'tijd', 'trek', 'uitzicht', 'vakantie', 'verf', 'visite', 'vloeistof',
-                    'water', 'werk', 'yogi_drink', 'zeep' ] + color_names
-both_exceptions = ['ananas', 'angst', 'beeld', 'familie', 'flapoor',
-                   'geluid', 'geschiedenis',  'glas', 'groente', 'hersen_letsel',  'hulp', 'kip', 'onderzoek',
-                   'pak_DIM_avond', 'pizza', 'ruzie', 'saxofoon', 'saxofoon_les', 'spons', 'straf', 'techniek',
-                   'troep' , 'verkoop', 'vis', 'vuur',
-                   'worst', 'zekerheid', 'zijde',  'zin', 'zwem_les']
+# moved to lexicon
+# mass_exceptions = ['acquisitie', 'acte', 'appel_sap', 'begeleiding', 'bezoek', 'brood', 'buiten',
+#                    'cement', 'coördinatie', 'deeg', 'druk', 'goed', 'gym',
+#                    'klei', 'hout', 'geld',  'informatie', 'ijzer', 'kaas',  'kraak_been',
+#                    'kracht', 'last', 'logo', 'melk', 'migraine',
+#                    'pap', 'patat', 'plastic', 'plezier', 'pijn', 'productie',
+#                    'speelgoed', 'spul', 'suiker',  'thee', 'tijd', 'trek', 'uitzicht', 'vakantie', 'verf', 'visite', 'vloeistof',
+#                     'water', 'werk', 'yogi_drink', 'zeep' ] + color_names
+# both_exceptions = ['ananas', 'angst', 'beeld', 'familie', 'flapoor',
+#                    'geluid', 'geschiedenis',  'glas', 'groente', 'hersen_letsel',  'hulp', 'kip', 'onderzoek',
+#                    'pak_DIM_avond', 'pizza', 'ruzie', 'saxofoon', 'saxofoon_les', 'spons', 'straf', 'techniek',
+#                    'troep' , 'verkoop', 'vis', 'vuur',
+#                    'worst', 'zekerheid', 'zijde',  'zin', 'zwem_les']
 count_exceptions = []
 excluded_nouns = [ 'boem', 'hop', 'klik', 'piep', 'plons', 'stop', 'tik', 'facilitair']
 
@@ -108,14 +120,15 @@ volgend_vorig_nouns = ['jaar','keer', 'maand', 'week', 'seizoen', 'semester']
 
 special_vzs = ['zonder', 'per', 'ter', 'ten']
 
-small_tw_lemmas = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien',
-                   'elf', 'twaalf', 'dertien', 'veertien', 'vijftien', 'zestien', 'zeventien',
-                   'achttien', 'negentien', 'twintig', 'dertig', 'veertig', 'vijftig', 'zestig',
-                   'zeventig', 'tachtig', 'negentig', 'honderd', 'duizend']
+# replaced by cardinallexicon
+# small_tw_lemmas = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien',
+#                    'elf', 'twaalf', 'dertien', 'veertien', 'vijftien', 'zestien', 'zeventien',
+#                    'achttien', 'negentien', 'twintig', 'dertig', 'veertig', 'vijftig', 'zestig',
+#                    'zeventig', 'tachtig', 'negentig', 'honderd', 'duizend']
 
 bare_noun_xpath = """.//node[@pt="n" and @getal="ev"  and 
                              not(@rel="hd" and parent::node[@cat="np"]) and
-                             not(@rel="mwp" and parent::node[@cat="mwu" and @rel="hd"]/parent::node[@cat="np"])]"""
+                             not(@rel="mwp" and parent::node[@cat="mwu" and @rel="hd" and parent::node[@cat="np"]])]"""
 count_noun = """(@pt="n" and contains(@frame, 'count') and @getal="ev")"""
 in_detless_np = """(parent::node[@cat="np" ] and not(../node[@rel="det"]))"""
 bare_noun_in_np_xpath = f""".//node[(({count_noun}  and @rel="hd" and {in_detless_np}) or
@@ -125,6 +138,10 @@ bare_noun_in_np_xpath = f""".//node[(({count_noun}  and @rel="hd" and {in_detles
 core_app_cat = '(@pt="tw" or (@pt="n" and @ntype="eigen"))'
 app_xpath = f'../node[@rel="app" and ({core_app_cat} or (@cat="conj" and node[@rel="cnj" and {core_app_cat}]))]'
 
+def predc_mwu_parent(n: SynTree) -> bool:
+    parent = n.getparent()
+    result = gav(parent, 'cat') == 'mwu' and gav(parent, 'rel') == 'predc'
+    return result
 
 def get_missing_det(stree: SynTree) -> List[SynTree]:
     """
@@ -138,7 +155,7 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
                         gav(n, 'lemma') not in detless_count_nouns + excluded_nouns and
                         len(gav(n, 'lemma')) != 1 and
                         'count' in gav(n, 'frame') and
-                        not((gav(n, 'rel') == "predc" or no_verb_around(n)) and
+                        not((gav(n, 'rel') == "predc" or no_verb_around(n) or predc_mwu_parent(n)) and
                             is_beroep((gav(n, 'lemma'))  or gav(n, 'lemma') in predc_detless_count_nouns)) and
                         not is_pseudonym(gav(n, 'word')) and
                         not robust_is_pseudonym(gav(n, 'word')) and
@@ -155,18 +172,29 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
     gov_prep_xpath = "./parent::node[@cat='pp']/node[@pt='vz' and @rel='hd']"
     wrong_bare_count_nouns = []
     for bare_noun in bare_count_nouns:
+        vz_lemmas = []
+        n_begin = gav(bare_noun, 'begin')
+        nlemma = gav(bare_noun, 'lemma')
         gov_prep = find1(bare_noun, gov_prep_xpath)
+        vz_lemma = ''
         if gov_prep is not None:
-            vzlemma = gav(gov_prep, 'lemma')
-            nlemma = gav(bare_noun, 'lemma')
-            if ((vzlemma, nlemma) not in wellformed_vz_n_combinations and
-                    vzlemma not in special_vzs and
-                    nlemma not in detless_count_nouns) and \
+            vz_lemma = gav(gov_prep, 'lemma')
+        else:
+            associate_metadata = get_associate_meta(bare_noun)
+            for associate_meta in associate_metadata:
+                annotatedposlist = eval(gav(associate_meta, 'annotatedposlist'))
+                associate_begin = annotatedposlist[0]
+                if associate_begin == n_begin:
+                    vz_pt = gav(associate_meta, 'omitted_pt')
+                    vz_rel = gav(associate_meta, 'rel')
+                    if vz_pt == 'vz' and vz_rel == 'hd':
+                        vz_lemma = gav(associate_meta, 'omitted_lemma')
+        if (vz_lemma, nlemma) not in wellformed_vz_n_combinations and \
+                vz_lemma  not in special_vzs and \
+                    nlemma not in detless_count_nouns and \
                     not keeropkeer(bare_noun) and \
                     not volgend_vorig(bare_noun):
                 wrong_bare_count_nouns.append(bare_noun)
-        else:
-            wrong_bare_count_nouns.append(bare_noun)
 
     bare_nouns_in_np = stree.xpath(bare_noun_in_np_xpath)
     for bare_noun in bare_nouns_in_np:
@@ -192,6 +220,12 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
                 not is_begin_vz(bare_noun):
             wrong_bare_count_nouns.append(bare_noun)
 
+    # find examples of CHAT-omitted articles
+    associate_nodes = get_associate_word_nodes(stree, omitted_pts=['lid'])
+    for associate_node in associate_nodes:
+        # we only want to include the ones that are articles and have not been found yet
+        if associate_node not in wrong_bare_count_nouns:
+            wrong_bare_count_nouns.append(associate_node)
 
     return wrong_bare_count_nouns
 
@@ -223,8 +257,12 @@ def is_beroep(lemma: str) -> bool:
     return False
 
 def is_numeral(lemma: str) -> bool:
-    result = lemma in small_tw_lemmas
-    return result
+    if lemma in cardinallexicon:
+        return True
+    parts = lemma.split(compoundsep)
+    if len(parts) > 1 and all([part in cardinallexicon for part in parts]):
+        return True
+    return False
 
 als_cmp = """parent::node[@cat="cp" and node[@rel="cmp" and @lemma="als" ]]"""
 def in_als_cp(node: SynTree) -> bool:
@@ -263,7 +301,7 @@ def really_no_det(node: SynTree) -> bool:
         if wordnode == node:
             prevn_pt = gav(prevn, 'pt')
             prevn_lemma = gav(prevn, 'lemma')
-            if prevn_pt in ['lw', 'tw'] or prevn_lemma in small_tw_lemmas:
+            if prevn_pt in ['lw', 'tw'] or prevn_lemma in cardinallexicon:
                 return False
     return True
 
@@ -308,7 +346,7 @@ def volgend_vorig(node: SynTree) -> bool:
     node_lemma = gav(node, 'lemma')
     if node_lemma not in volgend_vorig_nouns:
         return False
-    mods = node.xpath('../node[@rel="mod" and (@lemma="vorig" or (@lemma="volgen" and @wtype = "od")) ]')
+    mods = node.xpath('../node[@rel="mod" and (@lemma="vorig" or (@lemma="volgen" and @wvorm = "od")) ]')
     if mods == []:
         return False
     return True
@@ -379,6 +417,19 @@ def tryme():
         for wrong_noun in wrong_nouns:
             wrong_noun_lemma = gav(wrong_noun, 'lemma')
             print(wrong_noun_lemma)
+
+def get_associate_word_nodes(stree: SynTree, omitted_pts: List[str]) -> List[SynTree]:
+    results = []
+    associate_word_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.omitted_node_associate))
+    for associate_word_meta in associate_word_metadata:
+        if gav(associate_word_meta, 'omitted_pt') in omitted_pts:
+            thenode = get_node(stree, associate_word_meta)
+            if thenode is not None:
+                results.append(thenode)
+    return results
+
+
+
 
 
 

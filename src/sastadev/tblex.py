@@ -4,6 +4,7 @@ from the lexicon module and from the treebankfunctions module
 """
 
 import sastadev.lexicon as lex
+from sastadev.lexicon import is_acronym
 from sastadev.queryconstants import Tarsp_kijkVU
 from sastadev.sastatypes import SynTree
 from sastadev.treebankfunctions import (all_lower_consonantsnode, getattval, getnodeyield,
@@ -41,11 +42,12 @@ def recognised_wordnodepos(node: SynTree, pos: str) -> bool:
     * the node is a node for a name part, as determined by the function *lex.isa_namepart*
 
 
+
     '''
     word = getattval(node, 'word')
     lcword = word.lower()
     result = lex.informlexiconpos(word, pos) or lex.informlexiconpos(lcword, pos) or \
-        iscompound(node) or isdiminutive(node) or lex.isa_namepart_uc(word)
+        iscompound(node) or isdiminutive(node) or lex.isa_namepart_uc(word)   ## is_acronym left out here
     return result
 
 
@@ -72,6 +74,7 @@ def recognised_wordnode(node: SynTree) -> bool:
     * the node is a node for a name part, as determined by the function *lex.isa_namepart*
 
 
+
     '''
 
     word = getattval(node, 'word')
@@ -80,7 +83,7 @@ def recognised_wordnode(node: SynTree) -> bool:
         or lex.informlexicon(lcword) \
         or iscompound(node) \
         or isdiminutive(node) \
-        or lex.isa_namepart(word)
+        or lex.isa_namepart(word)   ## is_acronym left out here, not used by young children, asta has its own function
     return result
 
 
@@ -155,6 +158,10 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
 
        .. autofunction:: sastadev.tblex::recognised_lemmanodepos(node, pos)
 
+    * or the lemma of the node is an acronym (function *is_acronym*)
+
+       .. autofunction:; sastadev.tblex::is_acronym
+
     However, the node should:
 
     * neither consist of lower case consonants only, as determined by *all_lower_consonantsnode*:
@@ -167,6 +174,7 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
 
     '''
 
+    lemma = getattval(node, 'lemma')
     if issubstantivised_verb(node):
         pos = 'ww'
     else:
@@ -177,6 +185,7 @@ def asta_recognised_nounnode(node: SynTree) -> bool:
     result = result or sasta_long(node)
     result = result or recognised_wordnodepos(node, pos)
     result = result or recognised_lemmanodepos(node, pos)
+    result = result or is_acronym(lemma)
     result = result and not (all_lower_consonantsnode(node))
     result = result and not (short_nucl_n(node))
     result = result and not iscardinal(node)
@@ -195,6 +204,7 @@ def iscardinal(node):
     return result
 
 def asta_recognised_wordnode(node: SynTree) -> bool:
+    word = getattval(node, 'word')
     result = sasta_pseudonym(node)
     result = result or spec_noun(node)
     result = result or is_duplicate_spec_noun(node)
@@ -202,7 +212,8 @@ def asta_recognised_wordnode(node: SynTree) -> bool:
     result = result or recognised_wordnode(node)
     result = result or recognised_lemmanode(node)
     result = result or isnumber(node)
-    result = result or lex.isa_namepart(getattval(node, 'word'))
+    result = result or lex.isa_namepart(word)
+    result = result or is_acronym(word)
     result = result and not (all_lower_consonantsnode(node))
     result = result and not (short_nucl_n(node))
     return result

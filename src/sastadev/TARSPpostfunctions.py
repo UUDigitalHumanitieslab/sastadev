@@ -18,7 +18,8 @@ from sastadev.rpf1 import sumfreq
 from sastadev.sastatypes import QId, QueryDict, Stage, SynTree
 from sastadev.stringfunctions import show_roman, conj, disj
 from sastadev.tarsp_tables import gzw_by_stage, gzw_by_age, norm_tabel_1_data, norm_tabel_2_data
-from sastadev.toelichting import LeerdoelenReportData, PFReportData, ReportData, StageReportData, FullStageReportData
+from sastadev.toelichting import LeerdoelenReportData, PFiReportData, PFReportData, ReportData, StageReportData, \
+    FullStageReportData, GZWReportData
 from sastadev.treebankfunctions import getmeta
 from typing import Callable, Tuple
 
@@ -369,18 +370,18 @@ def genpfi(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> int:
     return result
 
 
-def genpfiplus(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> PFReportData:
+def genpfiplus(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> PFiReportData:
     '''
-    The function *genpfiplus* computes a PFReportData object for the stage given by the
+    The function *genpfiplus* computes a PFiReportData object for the stage given by the
     parameter *stage* on the basis of *allresults* and the query dictionary *allqueries*.
     It selects the queries of the given stage that are core queries and that are not
     *star2* queries.
 
     From these, it only selects the ones for which the number of results is larger than 0. It stores the
-    results in the *scored_measures* field of the PFReportData object.
+    results in the *scored_measures* field of the PFiReportData object.
 
     It computes added measures (potentially for *Xneg*, *OndVC*, *OndB*, *VCW* and *BX*) and stores them
-    in the added_measures field of the PFReportData object.
+    in the added_measures field of the PFiReportData object.
     This is based on Schlichting (2005/2017, p. 23), but is more specific  than described there.
     '''
     thereskeys = [mkresultskey(qid) for qid in allqueries if allqueries[qid].fase == stage and allqueries[qid].process == core_process
@@ -408,7 +409,7 @@ def genpfiplus(stage: Stage, allresults: AllResults, allqueries: QueryDict) -> P
     if any([vrm in coreresults and len(coreresults[vrm]) > 0 for vrm in vraagzin_measures]):
         if stage == 2 and Into not in scored_reskeys:
             additional_reskeys[Into] = vraagzin_measures
-    result = PFReportData(stage=stage, scored_measures=scored_reskeys, added_measures=additional_reskeys)
+    result = PFiReportData(stage=stage, scored_measures=scored_reskeys, added_measures=additional_reskeys)
     return result
 
 
@@ -469,9 +470,9 @@ def pf7(allresults: AllResults, allqueries: QueryDict) -> int:
     result = len(pf7_report_data.scored_measures)
     return result
 
-def pfplus(allresults: AllResults, allqueries: QueryDict) -> List[PFReportData]:
+def pfplus(allresults: AllResults, allqueries: QueryDict) -> List[PFiReportData]:
     '''
-    The function *pfplus* computes a list of PFReportData objects for each stage from stage 2 through stage 7.
+    The function *pfplus* computes a list of PFiReportData objects for each stage from stage 2 through stage 7.
     It does so by applying the function *genpfiplus* for each stage.
 
     .. autofunction:: sastadev.TARSPpostfunctions::genpfiplus
@@ -487,8 +488,8 @@ def pf(allresults: AllResults, allqueries: QueryDict) -> int:
     '''
     The function *pf* computes the *'Profielscore'* for the whole sample (*PF*).
 
-    It first uses the function *pfplus* to generate a list of *PFReportData*,
-    containing one PFReportData object for each stage.
+    It first uses the function *pfplus* to generate a list of *PFiReportData*,
+    containing one PFiReportData object for each stage.
 
     .. autofunction:: sastadev.TARSPpostfunctions::pfplus
 
@@ -636,19 +637,33 @@ def mk_tarsp_p_report(pf_report_data_list, uttcount, allresults) -> List[str]:
     tarsp_p = tarsp_p_abs / uttcount
     tuple_str = ' + '.join([f'{stg} * {mcount}' for stg, mcount in tuples])
     tarsp_p_report = ["", "", "TARSP_P", "", "TARSP_P is een score die een aanduiding is voor de gemiddeldde zinscomplexiteit.",
-                      "Deze score is gedefinieerd door [Bruinsma et al. 2020]."]
-    newpars = ["Deze score staat niet vermeld op de profielkaart.", "De waarde van TARSP_P is:" ,
+                      "Deze score is gedefinieerd door [Bruinsma et al. 2020]. " +
+                      "Voor iedere fase wordt het aantal gescoorde uitingen vermenigvuldigd met de fase. " +
+                      "De zo gevonden resultaten worden bij elkaar opgeteld en en het totaal wordt gedeeld " +
+                      "door het aantal uitingen, resulterend in een score voor gemiddelde zinscomplexiteit." +
+                      "Deze score staat niet vermeld op de profielkaart.",]
+    newpars = [ "", "De waarde van TARSP_P is:" ,
                 f"({tuple_str}) / {uttcount} = {tarsp_p_abs} / {uttcount} = {tarsp_p:.2f}",
                ]
     tarsp_p_report.extend(newpars)
     return tarsp_p_report
 
 
-def mk_pf_report(allresults: AllResults, thequeries: QueryDict) -> List[str]:
-    report = ["", "", "Profielscore", ""]
+def mk_pf_report_data(allresults: AllResults, thequeries: QueryDict, report_data: ReportData) -> ReportData:
     pf_report_data_list = pfplus(allresults, thequeries)
     pfi_scores = [len(prd.scored_measures) for prd in pf_report_data_list]
     core_pf_score = sum(pfi_scores)
+    pf_report_data = PFReportData(stage_reports=pf_report_data_list, pf=core_pf_score, pfi_scores=pfi_scores )
+    report_data.pf_report_data = pf_report_data
+    return report_data
+
+
+def mk_pf_report(report_data: PFReportData, allresults: AllResults, thequeries: QueryDict) -> List[str]:
+    report = ["", "", "Profielscore", ""]
+    pf_report_data = report_data.pf_report_data
+    pf_report_data_list = pf_report_data.stage_reports
+    pfi_scores = pf_report_data.pfi_scores
+    core_pf_score = pf_report_data.pf
     sum_str = ' + '.join([str(score) for score in pfi_scores])
     newpar = f"De profielscores per fase resulteren in {sum_str} = {core_pf_score} taalmaten"
     report.append(newpar)
@@ -739,10 +754,8 @@ def mk_toelichting(allresults: AllResults, thequeries: QueryDict):
     report_data = ReportData(sample_name = getbasename(allresults.filename), speaker_metadata=allresults.speaker_metadata)
 
     report_data = mk_stage_report_data(allresults, thequeries, report_data)
-    stage_report_data = report_data.full_stage_report_data.stage_report_data
-    stage = stage_report_data.stage
-
-    age = allresults.speaker_metadata['childage'] if 'childage' in allresults.speaker_metadata else ''
+    report_data = mk_pf_report_data(allresults, thequeries, report_data)
+    report_data = mk_GZW_report_data(allresults, thequeries, report_data)
 
 
     full_report = [f"TARSP rapport  bij het taalprofielformulier voor sample {report_data.sample_name}", ""]
@@ -751,9 +764,9 @@ def mk_toelichting(allresults: AllResults, thequeries: QueryDict):
     full_report.extend(speaker_report)
     stage_report = mk_stage_report(allresults, thequeries, report_data)
     full_report.extend(stage_report)
-    pf_report = mk_pf_report(allresults, thequeries)
+    pf_report = mk_pf_report(report_data, allresults, thequeries)
     full_report.extend(pf_report)
-    GZW_report = mk_GZW_report(allresults, thequeries, stage, age)
+    GZW_report = mk_GZW_report(report_data, allresults, thequeries)
     full_report.extend(GZW_report)
 
     leerdoelen_report_data = get_leerdoelen_report_data(allresults, thequeries, report_data)
@@ -781,13 +794,24 @@ def get_GZW(allresults: AllResults) -> tuple:
     result = total_wc / utt_count
     return total_wc, utt_count, result
 
-def mk_GZW_report(allresults: AllResults, thequeries: QueryDict, stage, age) -> List[str]:
-    report = ["","","Gemiddelde Zinslengte in Woorden (GZW)", '']
+def mk_GZW_report_data(allresults: AllResults, thequeries: QueryDict, report_data: ReportData) -> ReportData:
     total_wc, utt_count, gzw = get_GZW(allresults)
+    gzw_report_data = GZWReportData(wc=total_wc, utt_count=utt_count, gzw=gzw)
+    report_data.gzw_report_data = gzw_report_data
+    return report_data
+
+
+def mk_GZW_report(report_data: ReportData, allresults: AllResults, thequeries: QueryDict) -> List[str]:
+    report = ["","","Gemiddelde Zinslengte in Woorden (GZW)", '']
+    total_wc = report_data.gzw_report_data.wc
+    utt_count = report_data.gzw_report_data.utt_count
+    gzw = report_data.gzw_report_data.gzw
     newpar = f"De Gemiddelde zinslengte in woorden (GZW) is {total_wc} / {utt_count} = {gzw:.2f}."
     report.append(newpar)
 
-    # vergelijking met norm @@ to do
+    # vergelijking met norm
+    stage = report_data.full_stage_report_data.stage_report_data.stage
+    age = report_data.speaker_metadata.get('childage') if 'childage' in report_data.speaker_metadata else ''
     newpars = mk_gwz_compare_report(gzw, stage, age)
     report.extend(newpars)
 

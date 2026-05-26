@@ -10,7 +10,7 @@ import copy
 import re
 from typing import Callable, Dict, List, Optional, Tuple
 
-from sastadev.alpino import getdehetwordinfo
+from sastadev.alpino import getdehetwordinfo, filter_wordinfos
 from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements, ervzvariantsdict,
                                         getdisambiguationdict, is_er_pronoun, Rvzlist)
 from sastadev.celexlexicon import getinflforms, pos2posnum
@@ -27,8 +27,8 @@ from sastadev.dedup import (cleanwordofnort, filled_pause_exceptions, find_dupli
                             getprefixwords, getrepeatedtokens,
                             getunwantedtokens, nodesfindjaneenou)
 from sastadev.deregularise import correctinflection, separable_prefixes
-from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7,
-                                 ngram10, ngram11, ngram16, ngram17)
+from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7, ngram9,
+                                 ngram10, ngram11, ngram16, ngram17, ngram19, ngram20)
 from sastadev.history import (childescorrections, childescorrectionsexceptions)
 from sastadev.iedims import getjeforms
 from sastadev.lexicon import (alt_pt_ww_n_pairdict, WordInfo, de, definite_determiners, dets, getwordinfo, het,
@@ -105,7 +105,8 @@ disambiguationdict = getdisambiguationdict()
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
 #: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
 #: therefore have to be excluded from determiner replacement.
-wrongdet_excluded_words = ['zijn', 'dicht', 'met', 'ik', 'mee', 'wat', 'alles', 'niet', 'spelen']
+wrongdet_excluded_words = [ 'af', 'alles', 'dicht', 'ik',  'is', 'mee', 'meer', 'met', 'niet', 'spelen',
+                            'wat', 'waren', 'weet', 'wel', 'zijn']
 
 #: The constant *e2een_excluded_nouns* contains words that lead to incorrect
 #: replacement of e or schwa  and
@@ -521,6 +522,11 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     vgdetvgdetcor = Ngramcorrection(ngram7, (0, 2), (2, 4), metaf)
     reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
                                                                  allremovepositions, allmetadata, vgdetvgdetcor)
+
+    vnwpvvnwpv = Ngramcorrection(ngram9, (0, 2), (2, 4), metaf)
+    reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
+                                                                 allremovepositions, allmetadata, vnwpvvnwpv)
+
     vnwipvjxpvjvnwi = Ngramcorrection(ngram10, (0, 2), (3, 5), metaf)
     reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
                                                                  allremovepositions, allmetadata, vnwipvjxpvjvnwi)
@@ -528,13 +534,21 @@ def reduce(tokens: List[Token], tree: Optional[SynTree]) -> Tuple[List[Token], L
     reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
                                                                  allremovepositions, allmetadata, lemilemjlemilemj)
 
-    dinjdknj = Ngramcorrection(ngram16, (0, 2), (3, 5), metaf)
+    dinjdknj = Ngramcorrection(ngram16, (0, 2), (2, 4), metaf)
     reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
                                                                  allremovepositions, allmetadata, dinjdknj)
 
     tevtev = Ngramcorrection(ngram17, (0, 2), (2, 4), metaf)
     reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
                                                                  allremovepositions, allmetadata, tevtev)
+
+    vgvg = Ngramcorrection(ngram19, (0,1), (1,2), metaf)
+    reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
+                                                                     allremovepositions, allmetadata, vgvg)
+
+    pvvnwpvvnw = Ngramcorrection(ngram20, (0, 2), (2, 4), metaf)
+    reducedtokens, allremovetokens, allmetadata = ngramreduction(reducedtokens, token2nodemap, allremovetokens,
+                                                                allremovepositions, allmetadata, pvvnwpvvnw)
 
     # reducedleaves = [token2nodemap[tok.pos] for tok in reducedtokens]
     #
@@ -2156,7 +2170,7 @@ def old_getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: Utt
     '''
     correctiondone = False
     tokens = tokensmd.tokens
-    metadata = tokensmd.metadata
+    metadata = copy.deepcopy(tokensmd.metadata)
     ltokens = len(tokens)
     tokenctr = 0
     newtokens = []
@@ -2225,13 +2239,19 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
     '''
     correctiondone = False
     tokens = tokensmd.tokens
-    metadata = tokensmd.metadata
+    metadata = copy.deepcopy(tokensmd.metadata)
     ltokens = len(tokens)
     tokenctr = 0
     newtokens = []
     thedets = dets[de] + dets[het]
     while tokenctr < ltokens:
         token = tokens[tokenctr]
+        if token.word in dets[de]:
+            dehet = de
+        elif token.word in dets[het]:
+            dehet = het
+        else:
+            dehet = None
         if not token.skip and token.word in thedets and tokenctr < ltokens - 1:
             nexttoken = tokens[tokenctr + 1]
             # we want to exclude some words
@@ -2240,7 +2260,8 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
             elif nexttoken.word in wrongdet_excluded_words:
                 wordinfos = []
             else:
-                wordinfos, _ = getdehetwordinfo(nexttoken.word)
+                raw_wordinfos, _ = getdehetwordinfo(nexttoken.word)
+                wordinfos = filter_wordinfos(raw_wordinfos, dehet=dehet)
             if wordinfos != []:
                 for wordinfo in wordinfos:  # if there are multiple alternatives we overwrite and therefore get the last alternative
                     (pos, dehet, infl, lemma) = wordinfo
@@ -2248,16 +2269,16 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
                         # newcurtoken = replacement(token, swapdehet(token))
                         newcurtokenword = swapdehet(token.word)
                         newcurtoken = Token(newcurtokenword, token.pos)
-                        meta = mkSASTAMeta(token, newcurtoken, name=correctionlabels.grammarerror, value='deheterror', cat=correctionlabels.error,
-                                           backplacement=bpl_node)
+                        meta = mkSASTAMeta(token, newcurtoken, name=correctionlabels.grammarerror, value=correctionlabels.deheterror, cat=correctionlabels.error,
+                                           backplacement=bpl_node, penalty=.10*defaultpenalty)
                         metadata.append(meta)
                         correctiondone = True
                     elif token.word in dets[het]  and ((dehet == de and infl in ['e']) or infl in ['m', 'dm']):
                         # newcurtoken = replacement(token, swapdehet(token))
                         newcurtokenword = swapdehet(token.word)
                         newcurtoken = Token(newcurtokenword, token.pos)
-                        meta = mkSASTAMeta(token, newcurtoken, name=correctionlabels.grammarerror, value='hetdeerror', cat=correctionlabels.error,
-                                           backplacement=bpl_node)
+                        meta = mkSASTAMeta(token, newcurtoken, name=correctionlabels.grammarerror, value=correctionlabels.hetdeerror, cat=correctionlabels.error,
+                                           backplacement=bpl_node, penalty=.10*defaultpenalty)
                         metadata.append(meta)
                         correctiondone = True
 
@@ -2270,7 +2291,7 @@ def getwrongdetalternatives(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) 
         else:
             newtokens.append(token)
         tokenctr += 1
-    result = TokenListMD(newtokens, metadata)
+    result = TokenListMD(newtokens, metadata)  # @@ the metadata should be attached earlier
     if correctiondone:
         results = [result]
     else:

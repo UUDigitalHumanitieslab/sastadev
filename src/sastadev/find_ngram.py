@@ -15,6 +15,7 @@ dld = 'dld'
 schl = 'schlichting'
 auris = 'auris'
 
+gav = getattval
 
 def shorten(fullname):
     _, filename = os.path.split(fullname)
@@ -23,8 +24,8 @@ def shorten(fullname):
 
 
 def getpaths(dataset):
-    result = [os.path.join(settings.DATAROOT, 'VKLStap', intreebanksfolder),
-              os.path.join(settings.DATAROOT, 'VKLStap', outtreebanksfolder)]
+    result = [os.path.join(settings.DATAROOT, dataset, intreebanksfolder),
+              os.path.join(settings.DATAROOT, dataset, outtreebanksfolder)]
     return result
 
 
@@ -159,8 +160,8 @@ def cond8(ns, lvs, i): return word(ns[2]).startswith(word(ns[0])) and word(ns[3]
 
 
 def cond9(ns, _, i): return pt(ns[0]) == 'vnw' and getattval(ns[0], 'vwtype') == 'pers' and pt(ns[1]) == 'ww' and \
-    getattval(ns[1], 'wvorm') == 'pv' and pt(ns[2]) == 'vnw' and pt(ns[3]) == 'ww' and \
-    getattval(ns[3], 'wvorm') == 'pv'  # and \
+    getattval(ns[1], 'wvorm') == 'pv' and pt(ns[2]) == 'vnw' and getattval(ns[2], 'vwtype') == 'pers' and pt(ns[3]) == 'ww' and \
+    getattval(ns[3], 'wvorm') == 'pv'  and getattval(ns[1], 'lemma') not in  ['denken', 'bedoelen'] and getattval(ns[3], 'lemma') != 'geloven' # and \
 # (word(ns[0]) == word(ns[2]) or word(ns[1]) == word(ns[3]) or lemma(ns[1]) == lemma(ns[3]))
 
 
@@ -197,6 +198,14 @@ def cond17a(ns, lvs, i): return lemma(ns[0]) == 'te' and word(ns[1]) == 'kregen'
 
 def cond18(ns, lvs, i): return pt(ns[0]) == 'vz' and lemma(ns[1]) in {'dit', 'dat', 'deze', 'die'}
 
+def cond19(ns, lcs, i): return  pt(ns[0]) == 'vg'  and pt(ns[1]) == 'vg'  and \
+                               gav(ns[0], 'conjtype') == 'onder' and gav(ns[1], 'conjtype') == 'onder' and \
+                               not (lemma(ns[0]) == 'dat' and lemma(ns[1]) == 'als') # omdat doordat
+
+def cond20(ns, _, i): return pt(ns[1]) == 'vnw' and getattval(ns[1], 'vwtype') == 'pers' and pt(ns[0]) == 'ww' and \
+    getattval(ns[0], 'wvorm') == 'pv' and pt(ns[3]) == 'vnw' and getattval(ns[3], 'vwtype') == 'pers' and pt(ns[2]) == 'ww' and \
+    getattval(ns[2], 'wvorm') == 'pv'  and getattval(ns[0], 'lemma') not in  ['denken', 'bedoelen', 'geloven'] and \
+    getattval(ns[2], 'lemma') not in  ['denken', 'bedoelen', 'geloven']
 
 ngram1 = Ngram(4, cond1)
 ngram2 = Ngram(4, cond2)
@@ -218,7 +227,8 @@ ngram16a = Ngram(4, cond16a)  # geen beroerte een beroerte test
 ngram17 = Ngram(4, cond17)  # te kregen te krijgen
 ngram17a = Ngram(4, cond17a)  # te kregen te krijgen test
 ngram18 = Ngram(2, cond18)  # met dit
-
+ngram19 = Ngram(2, cond19) # omdat doordat
+ngram20 = Ngram(4, cond20) # heb ik zie ik: pv vnw pv vnw
 
 def main():
 
@@ -239,7 +249,7 @@ def main():
                 leaves = getnodeyield(tree)
                 cleanleaves = [leave for leave in leaves if getattval(leave, 'word') not in filledpauseslexicon]
                 cleanwordlist = [getattval(leave, 'word') for leave in cleanleaves]
-                matches = findmatches(ngram18, cleanleaves)
+                matches = findmatches(ngram20, cleanleaves)
                 # matches = sipvjpvjsi(cleanleaves, tree)
                 for match in matches:
                     uttid = getuttid(tree)

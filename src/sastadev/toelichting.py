@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -23,14 +24,22 @@ class FullStageReportData():
 
 
 @dataclass
-class PFReportData():
+class PFiReportData():
     stage: int
     scored_measures: list
     added_measures: dict
 
 @dataclass
+class PFReportData():
+   stage_reports: List[PFiReportData]
+   pf : int
+   pfi_scores : List[int]
+
+@dataclass
 class GZWReportData():
-    pass
+    wc: int
+    utt_count: int
+    gzw: int
 
 @dataclass
 class LeerdoelenReportData():
@@ -44,4 +53,5 @@ class ReportData():
     speaker_metadata: dict = None
     full_stage_report_data: FullStageReportData = None
     pf_report_data: PFReportData = None
+    gzw_report_data: GZWReportData = None
     leerdoelen_report_data: LeerdoelenReportData = None
