@@ -501,6 +501,18 @@ chatcodes = ["xxx", "xx", "yyy", "yy"]
 
 shortrep_exceptions = ['de']
 
+
+hebben_zijn_map = {'hebben': 'zijn', 'gehad': 'geweest', 'hebbend': 'zijnd',
+                   'heb':'ben', 'hebt': 'bent', 'heeft': 'is',
+                   'had': 'was', 'hadden': 'waren'
+                   }
+
+disambig_words = {'gebeurd': {"buiging":"zonder", 'frame': 'verb(zijn,psp,intransitive)', 'infl': 'psp',
+                              'lcat': 'ppart',"lemma": "gebeuren", "pos": "verb", "positie": "vrij",
+                              "postag": "WW(vd,vrij,zonder)", "pt": "ww", "root": "gebeur",
+                              'sc': 'intransitive', 'sense': 'gebeur', "word": "gebeurd", "wvorm": "vd" }}
+
+
 junk = 0
 
 # to have a breakpoint after the last lexicon read

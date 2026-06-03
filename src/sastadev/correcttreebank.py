@@ -22,8 +22,6 @@ from sastadev.metadata import (Meta, bpl_delete, bpl_indeze, bpl_node, bpl_node_
                                )
 from sastadev.methods import Method, asta, tarsp, stap
 from sastadev.parse_criteria import compute_penalty, criteria, isvalidword
-from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp, transform_met_np_pp, \
-    transformalleeninnp
 from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, tokenlist2string
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Position, PositionStr,
@@ -41,11 +39,7 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, attach_meta
                                         showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
-from sastadev.treetransform import (adaptlemmas, splitpronzelf, transform_adj_pp, transform_dp_dp_rel2avn,
-                                    transformtagcomma, transformtreeld, transformtreenogeen, transformtreenogde,
-                                    transform_ppinap, transformhwwwithsvp, transform_rel2avn, transform_sep_ww,
-                                    transform_gaan_predc, transform_er_az, transform_w_vz)
-from sastadev.eenbeetje import transform_eenbeetje
+from sastadev.treetransform import (adaptlemmas, dotreetransformations)
 
 ampersand = '&'
 
@@ -595,31 +589,6 @@ def bare_angled_brackets_replace_tree(stree: SynTree) -> SynTree:
         newstree = stree
     return newstree
 
-def dotreetransformations(fulltree: SynTree, method_name: MethodName) -> SynTree:
-    fulltree = transformtagcomma(fulltree)
-    fulltree = transformtreeld(fulltree)
-    fulltree = transformppinnp(fulltree)
-    fulltree = transformbwinnp(fulltree)
-    if method_name in [tarsp]:
-        fulltree = transformalleeninnp(fulltree)
-    fulltree = transformmodRinnp(fulltree)
-    fulltree = transformtreenogeen(fulltree)
-    fulltree = transformtreenogde(fulltree)
-    fulltree = transform_eenbeetje(fulltree)
-    fulltree = transformhwwwithsvp(fulltree)
-    fulltree = splitpronzelf(fulltree)
-    fulltree = transform_ppinap(fulltree)
-    fulltree = transform_rel2avn(fulltree)
-    fulltree = transform_adj_pp(fulltree)
-    fulltree = transform_dp_dp_rel2avn(fulltree)
-    fulltree = transform_sep_ww(fulltree)
-    fulltree = transform_er_az(fulltree)
-    fulltree = transform_w_vz(fulltree)
-    # fulltree = transform_met_np_pp(fulltree)  # not needed already covered
-    # fulltree = transform_gaan_predc(fulltree) put off because it should be covered already in STAP at least
-    # stree = nognietsplit(stree)  # put off because it should not be done
-    return fulltree
-
 
 def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: CorrectionParameters) \
         -> Tuple[SynTree, Optional[OrigandAlts]]:
@@ -729,7 +698,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
 
     # Step 3
     # tree transformations
-    if correctionparameters.method.name in [tarsp, stap]:
+    if True:   # correctionparameters.method.name in [tarsp, stap]:
         stree = dotreetransformations(stree, correctionparameters.method.name)
 
     # Step 4

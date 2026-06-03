@@ -449,7 +449,7 @@ def getmeta4CHATreplacements(wrongword: str, correctword: str) -> KnownReplaceme
     return result
 
 
-#: dttp = default token tree predicate
+#: dtp = default token tree predicate
 def dtp(token, tree): return True
 
 
@@ -501,28 +501,53 @@ disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
      # (dtp, ['kijke'], 'he'),
      (dtp, ['surf'], 'turf'),
      (dtp, ['gevallen'], 'gedonderd'),
+     (dtp, ['gebeurd'], 'geschied'),
      # (dtp, ['weg'], 'boven'),  # disprefer 'weg' as noun, prefer it as an adverb problematic because weg is often
      # an svp
      # (dtp, ['zijn'], "z'n"),
      (welnietttp, ['wel', 'niet'], 'ietsjes')  # find a different adverb that does not get inside constituents (ietsjes?)
      ]
 
+adult_disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
+    [
+       # (dtp, ['gebeurd'], 'geschied')  # put off dealt with differently
+    ]
 
-def getdisambiguationdict() -> Dict[str, Tuple[TokenTreePredicate, str]]:
+def getdisambiguationdict(replacements) -> Dict[str, Tuple[TokenTreePredicate, str]]:
     '''
     :return: a dictionary with words as key and a tuple of a condition and a replacement as values
 
     The function *getdisambiguationdict* creates a dictionary with word:(cond, replacement)
-    items. It selects its content from the constant *disambiguation_replacements*:
+    items. It selects its content from the variabl *replacements*:
 
     .. autodata:: sastadev.basicreplacements::disambiguation_replacements
          :no-value:
     '''
     disambiguationdict = {}
-    for cond, ws, repl in disambiguation_replacements:
+    for cond, ws, repl in replacements:
         for w in ws:
             disambiguationdict[w] = cond, repl
     return disambiguationdict
+
+
+#: The constant *disambiguationdict* contains words that should be replaced by a
+#: different word to avoid unwanted readings of the original word, for young children. It is filled by a
+#: call to the function *getdisambiguationdict* from the module *basicreplacements*, applied to *disambiguation_replacements*.
+#:
+#: .. autofunction:: sastadev.basicreplacements::getdisambiguationdict
+#:
+disambiguationdict = getdisambiguationdict(disambiguation_replacements)
+
+#: The constant *adult_disambiguationdict* contains words that should be replaced by a
+#: different word to avoid unwanted readings of the original word, for adult speakers. It is filled by a
+#: call to the function *getdisambiguationdict* from the module *basicreplacements*, applied to *adult-disambiguation_replacements*.
+#:
+#: .. autofunction:: sastadev.basicreplacements::getdisambiguationdict
+#:
+adult_disambiguationdict = getdisambiguationdict(adult_disambiguation_replacements)
+
+
+
 
 # next replaced by wordsunknowntoalpino lexicon
 #parsereplacementslist =  [('smarties', 'toffees', alpino_unknown_word, -2*dp),

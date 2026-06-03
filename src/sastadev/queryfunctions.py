@@ -1,24 +1,35 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
+from sastadev.asta_queries import asta_delpv
 from sastadev.basicreplacements import is_pronominal_adverb
-from sastadev.CHAT_Annotation import CHAT_replacement
+from sastadev.celexlexicon import celex2dcoimap
+from sastadev.conf import settings
+from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_wordnoncompletion
 from sastadev import correctionlabels
-# from sastadev.sasta_explanation import get_prefix_and_core
-from sastadev.missing_det import get_missing_det
+from sastadev.deregularise import correctinflection, overgen, wrongovergen
 from sastadev.imperatives import wx, imperatives
-from sastadev.lexicon import vuwordslexicon
+from sastadev.lexicon import vuwordslexicon, getwordposinfo, informlexicon
 from sastadev.macros import expandmacros
+from sastadev.metadata import Meta
+from sastadev.missing_det import get_missing_det
+# from sastadev.sasta_explanation import get_prefix_and_core
 from sastadev.sastatypes import SynTree
 from sastadev.stringfunctions import punctuationchars
 from sastadev.tblex import get_aanloop_and_core
 from sastadev.treebankfunctions import (adjacent, find1, get_left_siblings,
-                                        getattval, get_node, getnodeyield, mdbasedquery, mdnameonlyxpathtemplate, parent)
+                                        getattval, get_node, getnodeyield, get_word, mdbasedquery,
+                                        mdnameonlyxpathtemplate, parent)
 
 gav = getattval
 
 comma = ','
 
 articles = ['de', 'een', 'het', "'t", "'n"]
+
+infl_error_xpath = f""".//xmeta[@name="{correctionlabels.morphologicalerror}" and 
+                                (@value="{overgen}" or @value="{wrongovergen}")]"""
+
+morph_error_xpath = f""".//xmeta[@name="{correctionlabels.morphologicalerror}" ]"""
 
 
 nietxpath = './/node[@lemma="niet"]'
@@ -62,6 +73,9 @@ mvznsuffixes = ['en', 'e', 's', 'n']
 verklxpath = expandmacros(""".//node[(@pt="n" and @graad="dim" and not(%nodimlemma%)) or %extradimlemma%]""")
 verklsuffixes = ['je', 'jes', 'ie', 'ies', 'ke', 'kes']
 
+sva_error_xpath = f""".//xmeta[@name="{correctionlabels.grammarerror}" and @value="{correctionlabels.svaerror}"]"""
+regional_pv_variants = [('heb', 'heeft')]
+regular_pv_variants = [('kun', 'kan')]
 
 def notadjacent(n1, n2, t): return not adjacent(n1, n2, t)
 
@@ -459,4 +473,193 @@ def sub_pt(stree: SynTree, pt: str) -> List[SynTree]:
         if new_node is not None:
             results.append(new_node)
     return results
+
+
+def stap_congruentiefout(stree: SynTree) -> List[SynTree]:
+    results = congruentiefout(stree)
+
+    delpv_results = asta_delpv(stree)
+
+    results += delpv_results
+
+
+    return results
+
+def congruentiefout(stree: SynTree) -> List[SynTree]:
+    errors, regionals, variants = congruentie_afwijkingen(stree)
+    return errors
+
+def pv_regionale_vorm(stree: SynTree) -> List[SynTree]:
+    errors, regionals, variants = congruentie_afwijkingen(stree)
+    return regionals
+
+def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree], List[SynTree]]:
+    errors = []
+    regionals = []
+    variants = []
+
+    # part 1 based on CHAT-replacements
+    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
+    explanation_as_replacement_metadata = (
+        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
+    all_metadata = replacement_metadata + explanation_as_replacement_metadata
+    for replacement in all_metadata:
+        new_node = get_node(stree, replacement, xpath_cond=f'@pt="ww"', annotation=True)
+        annotated = get_word(replacement, 'annotatedwordlist')
+        annotation = get_word(replacement, 'annotationwordlist')
+        if new_node is not None:
+            if (annotated, annotation) in regional_pv_variants:
+                regionals.append(new_node)
+                continue
+            if (annotated, annotation) in regular_pv_variants:
+                variants.append(new_node)
+                continue
+            # determine the grammatical properties of annotated if it is a real word
+            if informlexicon(annotated):
+                annotated_word_infos = getwordposinfo(annotated, pos='ww')
+                annotation_word_infos = getwordposinfo(annotation, pos='ww')
+                for annotated_word_info in annotated_word_infos:
+                    # determine its lemma, check if it is the same as the lemma for the annotation
+                    annotated_lemma = annotated_word_info[3]
+                    for annotation_word_info in annotation_word_infos:
+                        annotation_lemma =annotation_word_info[3]
+                        if annotated_lemma == annotation_lemma:
+                            # check whether the grammatical properties only differ in pvagr
+                            annotated_celex_infl = annotated_word_info[2]
+                            annotation_celex_infl = annotation_word_info[2]
+                            if annotated_celex_infl in celex2dcoimap and annotation_celex_infl in celex2dcoimap:
+                               annotated_infl = celex2dcoimap[annotated_celex_infl]
+                               annotation_infl = celex2dcoimap[annotation_celex_infl]
+                               ok = annotation_infl['wvorm'] == annotated_infl['wvorm'] and \
+                                    annotation_infl['pvtijd'] == annotated_infl['pvtijd'] and \
+                                    annotation_infl['pvagr'] != annotated_infl['pvagr']
+                            else:
+                                ok = False
+                                settings.LOGGER.error(f'Missing value in celex2dcoimap: {annotated_celex_infl}.')
+                            if ok:
+
+                                errors.append(new_node)
+                                break
+
+    # part 2: svaerrors
+    sva_error_metadata = stree.xpath(sva_error_xpath)
+    for sva_error_meta in sva_error_metadata:
+        new_node = get_node(stree, sva_error_meta)
+        annotated = get_word(sva_error_meta, 'annotatedwordlist')
+        annotation = get_word(sva_error_meta, 'annotationwordlist')
+
+        if (annotated, annotation) in regional_pv_variants:
+            regionals.append(new_node)
+            continue
+        if (annotated, annotation) in regular_pv_variants:
+            variants.append(new_node)
+            continue
+        if new_node is not None:
+            errors.append(new_node)
+
+
+    # we do not want duplicate nodes
+    errors = list(set(errors))
+    regionals = list(set(regionals))
+    variants = list(set(variants))
+
+    return errors, regionals, variants
+
+
+
+
+def vt_fout(stree: SynTree) -> List[SynTree]:
+    overgen_nodes = get_overgeneralisations(stree)
+    replacement_nodes = get_replacement_nodes(stree)
+    wrong_nodes = overgen_nodes + replacement_nodes
+    results = [node for node in wrong_nodes if gav(node, 'wvorm') == 'pv' and gav(node, 'pvtijd') == 'verl']
+    return results
+
+def vd_fout(stree: SynTree) -> List[SynTree]:
+    morph_error_nodes = get_morphological_errors(stree)
+    replacement_nodes = get_replacement_nodes(stree)
+    wrong_nodes = morph_error_nodes + replacement_nodes
+    results = [node for node in wrong_nodes if gav(node, 'wvorm') == 'vd' ]
+    return results
+
+
+def get_replacement_metadata(stree: SynTree) -> List[SynTree]:
+    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
+    explanation_as_replacement_metadata = (
+        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
+    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion))
+    all_metadata = replacement_metadata + explanation_as_replacement_metadata + noncompletion_metadata
+    return all_metadata
+
+
+def get_replacement_nodes(stree: SynTree) -> List[SynTree]:
+    all_metadata = get_replacement_metadata(stree)
+    raw_result = [get_node(stree, meta, annotation=True) for meta in all_metadata]
+    result = [node for node in raw_result if node is not None]
+    return result
+
+
+
+def get_morphological_errors(stree: SynTree) -> List[SynTree]:
+    errors = []
+    morph_error_metadata = stree.xpath(morph_error_xpath)
+    for morph_error_meta in morph_error_metadata:
+        new_node = get_node(stree, morph_error_meta)
+        if new_node is not None:
+            errors.append(new_node)
+
+    errors = list(set(errors))
+    return errors
+
+
+def get_overgeneralisations(stree: SynTree) -> List[SynTree]:
+    errors = []
+
+    # based on corrections by SASTA
+    infl_error_metadata = stree.xpath(infl_error_xpath)
+    for infl_error_meta in infl_error_metadata:
+        new_node = get_node(stree, infl_error_meta)
+        # annotated = get_word(stree, infl_error_meta, 'annotatedwordlist')
+        # annotation = get_word(stree, infl_error_meta, 'annotationwordlist')
+
+        if new_node is not None:
+            errors.append(new_node)
+
+    # we do not want duplicate nodes
+    errors = list(set(errors))
+
+    return errors
+
+
+def get_overgeneralisation_replacement_nodes(stree: SynTree) -> List[SynTree]:
+    errors = []
+
+    # based on CHAT-replacements
+    all_metadata = get_replacement_metadata(stree)
+    for replacement in all_metadata:
+        annotated = get_word(replacement, 'annotatedwordlist')
+        annotation = get_word(replacement, 'annotationwordlist')
+        corrected_inflections = []
+        if not informlexicon(annotated):
+            raw_corrected_inflections = correctinflection(annotated)
+            corrected_inflections = [ci for ci in raw_corrected_inflections if ci[0] == annotation]
+        if corrected_inflections != []:
+            new_node = get_node(stree, replacement, xpath_cond='', annotation=True)
+            errors.append(new_node)
+
+    # no duplicates
+    errors = list(set(errors))
+    return errors
+
+
+
+
+
+
+
+
+
+
+
+
 

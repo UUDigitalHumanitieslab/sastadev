@@ -1011,7 +1011,8 @@ def compare_with_norm_stage(romanstage: str, raw_age: str, raw_gender: str = Non
 
     # age, gender, ses check stage
     filtered_rows = [row for row in norm_tabel_1_data if (gender is None or row[3] == gender) and
-                    age >= row[1] and age < row[2] and (ses is None or row[4] == ses) and romanstage == row[6]]
+                     (age is None or (age >= row[1] and age < row[2])) and
+                     (ses is None or row[4] == ses) and romanstage == row[6]]
     if filtered_rows != []:
         message2_list = []
         for row in filtered_rows:

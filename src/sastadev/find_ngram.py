@@ -84,7 +84,7 @@ def getfilenames(ds, session=None):
         def cond(x): return (x + 1 == session)
     else:
         def cond(_): return True
-    infullnames = [os.path.join(path, ifn) for path in paths[ds] for ifn in os.listdir(path)]
+    infullnames = [os.path.join(path, ifn) for path in paths[ds] for ifn in os.listdir(path) if ifn.endswith('.xml')]
     return infullnames
 
 
@@ -145,6 +145,15 @@ def det(el): return (pt(el) == 'lid'
 
 def erhierdaar(el): return lemma(el) in {'er', 'hier', 'daar'}
 
+
+def is_def_det(el):
+    result1 = pt(el) == 'vnw' and (getattval(el, 'vwtype') in {'aanw', 'bez'})  # deze man, mijn huis, Jan zijn vrouw
+    result2 = pt(el) == 'lid' and getattval(el, 'lwtype') == 'bep'              # de man, het huis
+    result3 = pt(el) == 'n' and getattval(el, 'naamval') == 'gen'               # Jans huis
+    result4 = pt(el) == 'vnw' and getattval(el, 'naamval') == 'gen'             # wiens huis maar iemand krijgt de verkeerde naamval
+    result5 = pt(el) == 'vnw' and getattval(el, 'word').lower() == 'iemands'    # iemands huis
+    result = result1 or result2 or result3 or result4 or result5
+    return result
 
 def cond2(ns, _, i): return pt(ns[0]) == 'vz' and det(ns[1]) and (not erhierdaar(ns[1])) and pt(ns[2]) == 'vz' and \
     det(ns[3]) and (not erhierdaar(ns[3]))
@@ -207,6 +216,11 @@ def cond20(ns, _, i): return pt(ns[1]) == 'vnw' and getattval(ns[1], 'vwtype') =
     getattval(ns[2], 'wvorm') == 'pv'  and getattval(ns[0], 'lemma') not in  ['denken', 'bedoelen', 'geloven'] and \
     getattval(ns[2], 'lemma') not in  ['denken', 'bedoelen', 'geloven']
 
+def cond21(ns, _, i): return pt(ns[1]) =='adj' and getattval(ns[1], 'buiging') == 'met-e' and \
+                            pt(ns[2]) == 'n' and getattval(ns[2], 'getal') == 'ev' and \
+                            getattval(ns[2], 'genus') == 'onz' and \
+                            not is_def_det(ns[0])
+
 ngram1 = Ngram(4, cond1)
 ngram2 = Ngram(4, cond2)
 ngram3 = Ngram(2, cond3)
@@ -229,6 +243,7 @@ ngram17a = Ngram(4, cond17a)  # te kregen te krijgen test
 ngram18 = Ngram(2, cond18)  # met dit
 ngram19 = Ngram(2, cond19) # omdat doordat
 ngram20 = Ngram(4, cond20) # heb ik zie ik: pv vnw pv vnw
+ngram21 = Ngram(3, cond21) # een mooie meisje
 
 def main():
 
@@ -249,7 +264,7 @@ def main():
                 leaves = getnodeyield(tree)
                 cleanleaves = [leave for leave in leaves if getattval(leave, 'word') not in filledpauseslexicon]
                 cleanwordlist = [getattval(leave, 'word') for leave in cleanleaves]
-                matches = findmatches(ngram20, cleanleaves)
+                matches = findmatches(ngram21, cleanleaves)
                 # matches = sipvjpvjsi(cleanleaves, tree)
                 for match in matches:
                     uttid = getuttid(tree)

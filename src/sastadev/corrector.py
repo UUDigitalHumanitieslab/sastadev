@@ -12,7 +12,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from sastadev.alpino import getdehetwordinfo, filter_wordinfos
 from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements, ervzvariantsdict,
-                                        getdisambiguationdict, is_er_pronoun, Rvzlist)
+                                        disambiguationdict, adult_disambiguationdict, is_er_pronoun, Rvzlist)
 from sastadev.celexlexicon import getinflforms, pos2posnum
 from sastadev.CHAT_Annotation import CHAT_retracing
 from sastadev.childesspellingcorrector import (adult_correctionsdict, children_correctionsdict,
@@ -31,7 +31,8 @@ from sastadev.find_ngram import (Ngram, findmatches, ngram1, ngram2, ngram7, ngr
                                  ngram10, ngram11, ngram16, ngram17, ngram19, ngram20)
 from sastadev.history import (childescorrections, childescorrectionsexceptions)
 from sastadev.iedims import getjeforms
-from sastadev.lexicon import (alt_pt_ww_n_pairdict, WordInfo, de, definite_determiners, dets, getwordinfo, het,
+from sastadev.lexicon import (alt_pt_ww_n_pairdict, WordInfo, de, definite_determiners, dets, getwordinfo,
+                              hebben_zijn_map, het,
                               hwwilemmas, informlexicon, isa_namepart, isa_inf, isa_vd, known_word, nochildword,
                               possessive_determiners,
                               tswnouns, validnotalpinocompoundword, validword, vuwordslexicon,
@@ -65,6 +66,7 @@ from sastadev.tokenmd import TokenListMD, TokenMD, mdlist2listmd
 from sastadev.treebankfunctions import (fatparse, getattval, getmeta, getnodeyield, gettokenpos_str, getxsid,
                                         inflate_step, isdefdet, keycheck,
                                         mktoken2nodemap, showtree)
+from sastadev.treetransform import dotreetransformations
 from sastadev.wrong_ie_dims import get_je_from_wrong_ie_dim
 
 Correction = Tuple[List[Token], List[Meta]]
@@ -93,14 +95,6 @@ leggendict = {'leg': 'lig', 'legt': 'ligt', 'leggen': 'liggen'}
 aposfollowers = {'ochtends', 'middags', 'avonds', 'nachts', 'morgens', 'werelds', 'lands', 'anderendaags',
                  'winters', 'zomers', 'namiddags',
                  'zondags', 'maandags', 'dinsdags', 'woensdags', 'donderdags', 'vrijdags', 'zaterdags'}
-
-#: The constant *disambiguationdict* contains words that should be replaced by a
-#: different word to avoid unwanted readings of the original word. It is filled by a
-#: call to the function *getdisambiguationdict* from the module *basicreplacements*.
-#:
-#: .. autofunction:: sastadev.basicreplacements::getdisambiguationdict
-#:
-disambiguationdict = getdisambiguationdict()
 
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
 #: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
@@ -666,6 +660,58 @@ def subjectlessga(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     return allresults
 
 
+def getauxcorrections(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
+    """
+    # wrongly used aux hebben replaced by a form of 'zijn'  #Dat heeft geschied. Hij heeft naar school gegaan
+
+    """
+    allresults = []
+    tokens = tokensmd.tokens
+    reducedtokens = [token for token in tokens if not token.skip]
+    metadata = copy.deepcopy(tokensmd.metadata)
+
+    tokennodes = getnodeyield(tree)
+    tokennodesdict = {int(getattval(n, 'begin')): n for n in tokennodes}
+    token2nodemap = {token.pos: tokennodesdict[token.pos]
+                     for token in tokens if keycheck(token.pos, tokennodesdict)}
+
+    newtokens = []
+    no_zijn_aux = all([not (getattval(tn, 'pt') == 'ww' and getattval(tn, 'lemma') == 'zijn')
+                       for tn in tokennodes])
+    zijn_pastpart_found = any([is_zijn_pastpart(tn) for tn in tokennodes])
+    for tokenctr, token in enumerate(tokens):
+        if token.skip or token.word == '':
+            newtokens.append(token)
+            continue
+        if token.pos in token2nodemap:
+            tokennode = token2nodemap[token.pos]
+        else:
+            settings.LOGGER.error(f'No node for token.pos={token.pos}')
+            result = [tokensmd]
+            return result
+        if getattval(tokennode, 'lemma') == 'hebben' and \
+           no_zijn_aux and \
+           zijn_pastpart_found:
+            newword = get_aux_equivalent(token.word.lower())
+            tokennode_begin = int(gav(tokennode, 'begin'))
+            if newword is not None:
+                newtoken = Token(newword, token.pos)
+                newtokens.append(newtoken)
+                # add metadata
+                newmeta = Meta(correctionlabels.grammarerror, correctionlabels.wrongaux,
+                               annotationwordlist=[newword], annotationposlist=[tokennode_begin],
+                               annotatedwordlist=[token.word], annotatedposlist=[tokennode_begin],
+                               cat=correctionlabels.syntax,
+                               backplacement=bpl_word, source=SASTA)
+                metadata.append(newmeta)
+            else:
+                newtokens.append(token)
+        else:
+            newtokens.append(token)
+    newtokensmd = TokenListMD(newtokens, metadata)
+    allresults = [newtokensmd]
+    return allresults
+
 def getcorrections(rawtokens: List[Token], correctionparameters: CorrectionParameters,
                    tree: Optional[SynTree] = None) -> List[Correction]:
     allmetadata = []
@@ -799,6 +845,27 @@ def getalternatives(origtokensmd: TokenListMD,  tree: SynTree, uttid: UttId,
             fatntree = fatparse(utterance, noskiptokens)
             newresults += ezo2zon(uttmd, fatntree, uttid)
     allalternativemds += newresults
+
+    newresults = []
+    for uttmd in allalternativemds:
+        # utterance = space.join([token.word for token in uttmd.tokens])
+        utterance, _ = mkuttwithskips(uttmd.tokens)
+        if re.search(r'^\s*$', utterance):
+            settings.LOGGER.warning(f'Utterance  ({utterance}) is empty')
+        else:
+            noskiptokens = [t for t in uttmd.tokens if not t.skip]
+            fatntree = fatparse(utterance, noskiptokens)
+            if fatntree is not None:
+                fatntree = dotreetransformations(fatntree, methodname)
+                debug = False
+                if debug:
+                    showtree(fatntree)
+                uttalternativemds = getauxcorrections(uttmd, fatntree)
+                newresults += uttalternativemds
+            else:
+                settings.LOGGER.warning(f'Parsing {utterance} failed')
+    allalternativemds += newresults
+
 
 
     newresults = []
@@ -1371,6 +1438,25 @@ def adaptpenalty(wrong: str, correct: str, p: Penalty) -> Penalty:
             penalty = max(1, int(defaultpenalty * (1 - relfrq))) + p
             return penalty
     return p
+
+def is_zijn_pastpart(node: SynTree) -> bool:
+    node_rel = getattval(node, 'rel')
+    node_pt = getattval(node, 'pt')
+    node_wvorm = getattval(node, 'wvorm')
+    node_buiging = getattval(node, 'buiging')
+    node_frame = getattval(node, 'frame')
+    parent = node.getparent()
+    parent_rel = getattval(parent, 'rel')
+    cond2 = node_pt == 'ww' and node_wvorm == 'vd' and node_buiging == 'zonder'
+    cond3 = node_frame.startswith('verb(zijn') or node_frame.startswith('verb(unacc')
+    result = cond2 and cond3
+    return result
+
+def get_aux_equivalent(wrd: str) -> Optional[str]:
+    result = hebben_zijn_map[wrd] if wrd in hebben_zijn_map else None
+    return result
+
+
 
 
 def nocorrectparse(tree: SynTree) -> bool:
@@ -2008,6 +2094,17 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                 newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
                                                 name=correctionlabels.disambiguation, value='Avoid unknown reading',
                                                 cat=correctionlabels.lexicon, backplacement=bpl_wordlemma)
+
+
+    # replaceambiguous words with one reading less likely by a nonambiguous word with the same properties
+    if correctionparameters.method.name in {'asta'}:
+        if token.word in adult_disambiguationdict:
+            cond, newword = adult_disambiguationdict[token.word]
+            if cond(token, tree):
+                newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                                name=correctionlabels.disambiguation, value='Avoid unknown reading',
+                                                cat=correctionlabels.lexicon, backplacement=bpl_wordlemma)
+
 
     dupvowel = '[aeou]'
     aasre = rf'{dupvowel}\1s$'

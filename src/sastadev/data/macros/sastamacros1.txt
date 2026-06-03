@@ -1045,6 +1045,34 @@ Tarsp_only_W = """(@pt="ww" and not(%verbal_VU%) and %thisistheonlyrealword%)"""
 
 Tarsp_en = """(@pt="vg" and @lemma="en" and @rel="dlink")"""
 
-Tarsp_Long_niet = """(@lemma="niet" an//node[(@pt="n" or @pt="tw") and %realwordnode% and @lemma!="kijk" and %thisistheonlyrealword%d ancestor::node[@cat="top" and count(.//node[@word and @pt!="tsw" and @pt!="let"]) >= 3] and not(.//node[%Xneg%]))"""
+Tarsp_Long_niet = """(@lemma="niet" and ancestor::node[@cat="top" and count(.//node[@word and @pt!="tsw" and @pt!="let"]) >= 3] and not(.//node[%Xneg%]))"""
 
 Tarsp_Zn = """((@pt="n" or @pt="tw") and %realwordnode% and @lemma!="kijk" and %thisistheonlyrealword%)"""
+
+			
+indefinite_pt_det = """((@pt="vnw" and @vwtype="onbep") or 
+				        (@pt="lid" and @lwtype="onbep") or
+					    (@pt="adj") or
+						(@pt="bw") or
+					    (@pt="tw")
+					   )"""
+					   
+indefinite_detp = """(@cat="detp" and node[@rel="hd" and %indefinite_pt_det%])"""
+			
+indefinite_det = """(@rel="det" and 
+                    ( %indefinite_pt_det% or
+					 (@cat="np" and node[@rel="det" and %indefinite_pt_det%]) or
+					 %indefinite_detp% or
+					 (@cat="conj" and node[@rel="cnj" and %indefinite_pt_det%]) or
+					 (@cat="mwu") or
+					 (@cat="ap" and node[@rel="hd" and %indefinite_pt_det%]) or
+					 (@cat="advp" and node[@rel="hd" and %indefinite_pt_det%]) or
+					 (@cat="pp" and node[@rel="hd" and %indefinite_pt_det%]) or
+					 (@cat="sv1") or
+					 (@cat="du" and node[@rel="nucl" and (%indefinite_detp% or %indefinite_pt_det%)]) or
+					 (@cat="list" and node[@rel="lp" and %indefinite_pt_det%])
+				    ) 
+				   )"""
+				   
+definite_det = """(@rel="det" and not(%indefinite_det%)
+                  )"""

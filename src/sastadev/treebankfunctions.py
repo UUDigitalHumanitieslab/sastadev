@@ -2706,7 +2706,7 @@ def get_nodes(stree: SynTree, meta: etree.Element, xpath_cond="", annotation=Fal
         results.append(new_node)
     return results
 
-def get_node(stree: SynTree, meta: Meta, xpath_cond="", annotation=False) -> SynTree:
+def get_node(stree: SynTree, meta: etree.Element, xpath_cond="", annotation=False) -> SynTree:
     nodes = get_nodes(stree, meta, xpath_cond=xpath_cond, annotation=annotation)
     node = nodes[0] if len(nodes) > 0 else None
     return node
@@ -2750,6 +2750,12 @@ def get_associate_meta(node: SynTree) -> list:
                                                                      @annotatedposlist="['{node_begin}']"]"""
     results = node.xpath(associate_meta_xpath)
     return results
+
+def get_word(meta: SynTree, attr: str) -> Optional[str]:
+    word_list = eval(gav(meta, attr))
+    word = word_list[0] if word_list != [] else None
+    return word
+
 
 
 if __name__ == '__main__':

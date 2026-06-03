@@ -1,7 +1,7 @@
 from Levenshtein import distance
-from sastadev.basicreplacements import basicreplacements, knownreplacementsdict
+from sastadev.basicreplacements import basicreplacements, disambiguationdict, adult_disambiguationdict, knownreplacementsdict
 from sastadev.conf import settings
-from sastadev.corrector import (disambiguationdict, initialmaarvgxpath)
+from sastadev.corrector import (initialmaarvgxpath)
 from sastadev.lexicon import de, dets, nochildword, preferably_intransitive_verbs, tsw_non_words, validnouns, \
     validword, \
     wordsunknowntoalpinolexicondict, wrongposlemmaslexicon, wrongposwordslexicon
@@ -187,10 +187,12 @@ def isvalidword(w: str, mn: MethodName, includealpinonouncompound=True) -> bool:
 
 
 def get_ambiguous_word_nodes(tree: SynTree, mds: List[Meta] = [], method: Method = defaultmethod) -> List:
-    if method.name == asta:
-        return []
     nodes = getnodeyield(tree)
-    ambiguous_word_nodes = [node for node in nodes if getattval(node, 'word').lower() in disambiguationdict]
+    if method.name == asta:
+        ambiguous_word_nodes = [node for node in nodes
+                                if getattval(node, 'word').lower() in adult_disambiguationdict]
+    else:
+        ambiguous_word_nodes = [node for node in nodes if getattval(node, 'word').lower() in disambiguationdict]
     return ambiguous_word_nodes
 
 def countambigwords(tree: SynTree, mds: List[Meta] = [], method: Method = defaultmethod) -> int:

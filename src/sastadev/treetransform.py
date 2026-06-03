@@ -1,9 +1,13 @@
 import copy
 from sastadev.basicreplacements import get_pronadv_head_lemma
 from sastadev.conf import settings
+from sastadev.eenbeetje import transform_eenbeetje
 from sastadev.generatemacros import tarsp_wvzexceptions
-from sastadev.lexicon import adj_no_pp_lexicon, compoundsep, lemmalexicon
+from sastadev.lexicon import adj_no_pp_lexicon, compoundsep, disambig_words, lemmalexicon
 from sastadev.macros import expandmacros
+from sastadev.methods import MethodName, tarsp
+from sastadev.postnominalmodifiers import transformbwinnp, transformppinnp, transformmodRinnp, transform_met_np_pp, \
+    transformalleeninnp
 from sastadev.treebankfunctions import clausebodycats, find1, getattval, getbeginend, getnodeyield, getyield, \
     immediately_precedes, iswordnode, showtree, treeinflate, getposcat
 from sastadev.sastatypes import SynTree
@@ -547,6 +551,52 @@ def get_pc_head_lemma(pc: SynTree) -> str:
     else:
         result = ''
     return result
+
+
+def transform_wrong_words(instree: SynTree) -> SynTree:
+    '''
+    replaces nodes for words with the wrong properties by the right properties
+    e.g. gebeurd as vd of beuren is replaced by gebeurd as vd of gebeuren
+    '''
+    stree = copy.deepcopy(instree)
+    word_nodes = stree.xpath('.//node[@word]')
+    for word_node in word_nodes:
+        word = gav(word_node, 'word')
+        if word in disambig_words:
+            new_features = disambig_words[word]
+            for feature_name in new_features:
+                if feature_name in word_node.attrib:
+                    word_node.attrib[feature_name] = new_features[feature_name]
+
+    return stree
+
+
+def dotreetransformations(fulltree: SynTree, method_name: MethodName) -> SynTree:
+    fulltree = transformtagcomma(fulltree)
+    fulltree = transformtreeld(fulltree)
+    fulltree = transformppinnp(fulltree)
+    fulltree = transformbwinnp(fulltree)
+    if method_name in [tarsp]:
+        fulltree = transformalleeninnp(fulltree)
+    fulltree = transformmodRinnp(fulltree)
+    fulltree = transformtreenogeen(fulltree)
+    fulltree = transformtreenogde(fulltree)
+    fulltree = transform_eenbeetje(fulltree)
+    fulltree = transformhwwwithsvp(fulltree)
+    fulltree = splitpronzelf(fulltree)
+    fulltree = transform_ppinap(fulltree)
+    fulltree = transform_rel2avn(fulltree)
+    fulltree = transform_adj_pp(fulltree)
+    fulltree = transform_dp_dp_rel2avn(fulltree)
+    fulltree = transform_sep_ww(fulltree)
+    fulltree = transform_er_az(fulltree)
+    fulltree = transform_w_vz(fulltree)
+    fulltree = transform_wrong_words(fulltree)
+    # fulltree = transform_met_np_pp(fulltree)  # not needed already covered
+    # fulltree = transform_gaan_predc(fulltree) put off because it should be covered already in STAP at least
+    # stree = nognietsplit(stree)  # put off because it should not be done
+    return fulltree
+
 
 
 
