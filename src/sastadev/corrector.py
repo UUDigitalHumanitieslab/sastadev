@@ -2165,6 +2165,18 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
                                         cat=correctionlabels.orthography, backplacement=bpl_word)
 
 
+    vowel = '[aeou]'
+    consonant ='[bcdfghjklmnpqrstvwxz]'
+    casre = rf'{consonant}{vowel}s$'
+    # Lauras -> Laura's; autos -> auto's
+    matchfound = re.search(casre, token.word) is not None
+    if not token_is_valid_word and matchfound and validword(token.word[:-1], methodname):
+        newword = f"{token.word[:-1]}'s"
+        newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
+                                        name=correctionlabels.spellingcorrection, value='Missing Apostrophe',
+                                        cat=correctionlabels.orthography, backplacement=bpl_word)
+
+
     # babies -> baby's, babietje(s) -> baby'tje(s)
     if not token_is_valid_word and isbabyword(token.word) and \
             validword(getbabylemma(token.word), methodname):

@@ -41,6 +41,7 @@ from sastadev.queryfunctions import (adj_agreement_errors, bx, congruentiefout,
                                      xneg_x)
 from sastadev.stapforms import makestapform
 from sastadev.STAPpostfunctions import GL5LVU, GLVU, BB_totaal
+from sastadev.synsel import omitted_phrase
 from sastadev.Sziplus import sziplus6, vr5plus
 from sastadev.tarspform import mktarspform
 from sastadev.TARSPpostfunctions import (gofase, gtotaal, mk_toelichting, pf, pf2, pf3, pf4,
@@ -87,6 +88,7 @@ thetarspfunctions = [bx, bbx, congruentiefout, del_vz, get_avn, get_missing_det,
 thestapfunctions = [adj_agreement_errors, BB_totaal, stap_congruentiefout,
                     dan_toen_fout, del_bw, del_er, del_vg, del_vz,
                     get_missing_det, get_pronunciation_variants, GLVU, GL5LVU, makestapform,  no_copula,
+                    omitted_phrase
                     stap_sublid, sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
                     vd_fout, verb_no_pv, vt_fout]
 

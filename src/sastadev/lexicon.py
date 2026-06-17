@@ -108,6 +108,17 @@ def initializelexicondefdict(lexiconfilename) -> Dict[str,List[str]]:
         lexicon[strippedword].append(strippedreplacement)
     return lexicon
 
+def get_tuple_lexicon(lexicon_full_name) -> set:
+    lexicon = set()
+    i_rows = readcsv(lexicon_full_name, header=False)
+    for _, row in i_rows:
+        stripped_row = [el.strip() for el in row]
+        stripped_tuple = tuple(stripped_row)
+        lexicon.add(stripped_tuple)
+    return lexicon
+
+
+
 def isa_namepart(word: str) -> bool:
     '''
     is the word a name part
@@ -457,6 +468,11 @@ lemmalexicon = initializelexicondict(lemmalexiconfulname)
 cardinallexiconfilename = 'cardinalnumerals.tsv'
 cardinallexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, cardinallexiconfilename)
 cardinallexicon = geninitializelexicondict(cardinallexiconfullname, 0)
+
+known_pronunciation_variants_filename = 'known_pronunciation_variants.txt'
+known_pronunciation_variants_fullname = os.path.join(settings.SD_DIR, lexiconfoldername,
+                                                     known_pronunciation_variants_filename)
+known_pronunciation_variants = get_tuple_lexicon(known_pronunciation_variants_fullname)
 
 # put off contains too many wrong words, e.g. so
 # lexiconfoldername = 'data/spellingcorrectorlexicon'

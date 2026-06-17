@@ -10,7 +10,8 @@ from sastadev.deregularise import correctinflection, overgen, wrongovergen
 from sastadev.find_ngram import findmatches, ngram21
 from sastadev.iedims import getjeforms
 from sastadev.imperatives import wx, imperatives
-from sastadev.lexicon import vuwordslexicon, filledpauseslexicon, getwordposinfo, informlexicon, type_I_adj_n_pairs
+from sastadev.lexicon import (vuwordslexicon, filledpauseslexicon, getwordposinfo, informlexicon,
+                              type_I_adj_n_pairs, known_pronunciation_variants)
 from sastadev.macros import expandmacros
 from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
@@ -1075,9 +1076,10 @@ def lemmas_differ(lemma1:str, lemma2:str) -> bool:
     return result
 
 lexical_error_pts = ['n', 'adj', 'ww', 'bw']
-known_pronunciation_variants = [('boon', 'gewoon'), ('doe', 'toen'),('es', 'eens'),
-                                ('gun', 'ging'), ('his', 'wist'), ('me', 'maar'), ('na', 'dan'),
-                                ('sas', 'zag'), ('teek', 'betekent'), ('tof', 'toch'), ('wa', 'had')]
+# next now imported from lexicon as a set
+# known_pronunciation_variants = [('boon', 'gewoon'), ('doe', 'toen'),('es', 'eens'),
+#                                 ('gun', 'ging'), ('his', 'wist'), ('me', 'maar'), ('na', 'dan'),
+#                                 ('sas', 'zag'), ('teek', 'betekent'), ('tof', 'toch'), ('wa', 'had')]
 def sub_lexical(stree: SynTree) -> List[SynTree]:
     results = []
     replacement_metadata = get_replacement_metadata(stree, with_noncompletion=False)
@@ -1120,7 +1122,8 @@ def is_pronunciation_variant(annotated:str, annotation:str) -> bool:
     # next includes cases of noncompletion of a word
     if annotated in ['x', 'xx', 'xxx']:
         return False
-    if annotated in annotation or annotation in annotated:
+    len_diff_ok = abs(len(annotation) - len(annotated)) <= min(len(annotation), len(annotated)) # to exclude tik/tikkertje
+    if len_diff_ok  and (annotated in annotation or annotation in annotated):
         return True
     if (annotated, annotation) in known_pronunciation_variants:
         return True
