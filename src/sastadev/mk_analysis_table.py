@@ -16,13 +16,18 @@ from sastadev.reduceresults import exact2results, reduceexactgoldscores
 from sastadev.rpf1 import getevalscores, getscores, sumfreq
 from sastadev.sample_uttid_tuples import get_samplename_uttids_tuples
 from sastadev.sastacore import dopostqueries
-from sastadev.sastatypes import (ExactResultsDict, FileName, MatchesDict, QId, ResultsCounter, ResultsKey, Row, Table,
+from sastadev.sastatypes import (ExactResultsDict, FileName, MatchesDict,
+                                 QueryDict, QId, ResultsCounter, ResultsDict, ResultsKey, Row, Table,
                                  UttId, UttWordDict)
 from sastadev.stringfunctions import  sf
 from typing import Any, Dict, List, Tuple
 
 na = 'na'
 tab = '\t'
+
+g_analysis, g_errors = 0, 1  # criteria om te selecteren voor verschillende tabellen
+
+error_levels = ['foutanalyse', 'grammaticale fout', 'foutenanalyse']
 
 @dataclass
 class AnalysisTableParameters:
@@ -36,6 +41,7 @@ class AnalysisTableParameters:
     infilename: FileName
     reffilename: FileName
     qid_reskeys:  List[Tuple[QId, ResultsKey]]
+    selection: int   # om te selecteren welke queries meegenoemn moeten worden
 
 def erow(cnt: int) -> List[str]:
     result = []
@@ -186,10 +192,29 @@ def get_qid_reskeys(allresults: AllResults, themethod: Method) -> List[Tuple[QId
 #                               platinuminfilefound=platinuminfilefound, infilename=infilename, allannutts=allannutts,
 #                               reffilename=reffilename, sas=sas)
 
+def select_scores(scores: ResultsDict, thequeries:QueryDict, selection: int) -> ResultsDict:
+    new_scores = {}
+    for reskey in scores:
+        qid = reskey[0]
+        thequery = thequeries[qid]
+        if selection == g_analysis:
+            if thequery.level.lower() not in error_levels:
+                new_scores[reskey] = scores[reskey]
+        elif selection == g_errors:
+            if thequery.level.lower() in error_levels:
+                new_scores[reskey] = scores[reskey]
+    return new_scores
+
+
+
 def mk_analysis_table(atp: AnalysisTableParameters) -> Table:
 
-    goldscores = exact2results(atp.exactgoldscores)
-    silverscores = exact2results(atp.exactsilverscores)
+
+
+    raw_goldscores = exact2results(atp.exactgoldscores)
+    goldscores = select_scores(raw_goldscores, atp.themethod.queries, selection=atp.selection)
+    raw_silverscores = exact2results(atp.exactsilverscores)
+    silverscores = select_scores(raw_silverscores, atp.themethod.queries, selection=atp.selection)
 
     (inbase, inext) = os.path.splitext(atp.infilename)
     basepath, basefilename = os.path.split(atp.infilename)
@@ -202,7 +227,8 @@ def mk_analysis_table(atp: AnalysisTableParameters) -> Table:
     qcount = 0
     invalidqcount = 0
     undefinedqcount = 0
-    results: Dict[ResultsKey, ResultsCounter] = atp.allresults.coreresults
+    raw_results: Dict[ResultsKey, ResultsCounter] = atp.allresults.coreresults
+    results = select_scores(raw_results, atp.themethod.queries, selection=atp.selection)
     exact = True
 
     allrows = []

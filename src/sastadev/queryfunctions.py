@@ -1,28 +1,33 @@
 from typing import Callable, List, Optional, Tuple
 
 from sastadev.asta_queries import asta_delpv
-from sastadev.basicreplacements import is_pronominal_adverb
+from sastadev.basicreplacements import is_pronominal_adverb, wrongmorph, ervzvariants, basicreplacements
 from sastadev.celexlexicon import celex2dcoimap
 from sastadev.conf import settings
-from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_wordnoncompletion
+from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_wordnoncompletion, CHAT_omittedword
 from sastadev import correctionlabels
 from sastadev.deregularise import correctinflection, overgen, wrongovergen
+from sastadev.find_ngram import findmatches, ngram21
+from sastadev.iedims import getjeforms
 from sastadev.imperatives import wx, imperatives
-from sastadev.lexicon import vuwordslexicon, getwordposinfo, informlexicon
+from sastadev.lexicon import vuwordslexicon, filledpauseslexicon, getwordposinfo, informlexicon, type_I_adj_n_pairs
 from sastadev.macros import expandmacros
 from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
+from sastadev.normalise_lemma import normaliselemma
 # from sastadev.sasta_explanation import get_prefix_and_core
-from sastadev.sastatypes import SynTree
-from sastadev.stringfunctions import punctuationchars
+from sastadev.sastatypes import SynTree, WordInfo
+from sastadev.stringfunctions import endsinschwa, endsinschwa_n, punctuationchars, relative_edit_distance
 from sastadev.tblex import get_aanloop_and_core
-from sastadev.treebankfunctions import (adjacent, find1, get_left_siblings,
-                                        getattval, get_node, getnodeyield, get_word, mdbasedquery,
-                                        mdnameonlyxpathtemplate, parent)
+from sastadev.treebankfunctions import (adjacent, compoundsep, find1, get_left_siblings,
+                                        getattval, get_node, getnodeyield, get_word, getuttid, mdbasedquery,
+                                        mdnameonlyxpathtemplate, parent, getsentence, getorigutt, getxsid)
 
 gav = getattval
 
 comma = ','
+
+relative_edit_distance_threshold = 0.4
 
 articles = ['de', 'een', 'het', "'t", "'n"]
 
@@ -34,6 +39,13 @@ morph_error_xpath = f""".//xmeta[@name="{correctionlabels.morphologicalerror}" ]
 
 nietxpath = './/node[@lemma="niet"]'
 wordxpath = './/node[@pt]'
+
+def_det_xpath = expandmacros("""./node[%definite_det%]""")
+verb_no_pv_xpath = """.//node[@pt="ww" and (@wvorm!="pv") and @positie!="vrij" and not(ancestor::alpino_ds/descendant::node[@wvorm="pv"])
+      and @rel != "vc" and not(@rel="hd" and parent::node[@rel="vc"]) and not(parent/parent::node[@cat="oti" and @rel="vc"])
+]"""
+
+
 
 vzn1basexpath = './/node[ @cat="pp" and (node[@pt="vz"] and node[(@pt="n" or @pt="vnw") and not (%Rpronoun%) and @rel="obj1"] and not(node[@pt="vz" and @vztype="fin"]))]'
 vzn1xpath = expandmacros(vzn1basexpath)
@@ -76,6 +88,8 @@ verklsuffixes = ['je', 'jes', 'ie', 'ies', 'ke', 'kes']
 sva_error_xpath = f""".//xmeta[@name="{correctionlabels.grammarerror}" and @value="{correctionlabels.svaerror}"]"""
 regional_pv_variants = [('heb', 'heeft')]
 regular_pv_variants = [('kun', 'kan')]
+
+no_copula_xpath = """.//node[@rel="predc" and not(../node[@rel="hd" and @pt="ww"])]"""
 
 def notadjacent(n1, n2, t): return not adjacent(n1, n2, t)
 
@@ -434,6 +448,32 @@ def tarsp_dellid(stree: SynTree) -> List[SynTree]:
     return results
 
 
+def tarsp_sublid(stree: SynTree) -> List[SynTree]:
+    results = stap_sublid(stree)
+    return results
+
+def stap_sublid(stree: SynTree) -> List[SynTree]:
+    results = sublid(stree)
+    # no duplicates
+    results = list(set(results))
+
+    return results
+
+def adj_agreement_errors(stree:SynTree) -> List[SynTree]:
+    # adjectives incorrect e not needed dealt with by corrector + metadata
+    # results2 = wrong_adj_e(stree)
+    results1 = mdbasedquery(stree, correctionlabels.agreementerror, correctionlabels.incorrect_e_suffix)
+
+    # add cases where an e-suffix is incorrectly absent @@todo
+    results2 = adj_no_e_error(stree)
+
+    results = results1 + results2
+
+    #no duplicates
+    results = list(set(results))
+    return results
+
+
 
 def sublid(stree: SynTree) -> List[SynTree]:
 
@@ -448,41 +488,8 @@ def sublid(stree: SynTree) -> List[SynTree]:
     results = deheterror_nodes + hetdeerror_nodes + other_nodes
     return results
 
-def sub_pt(stree: SynTree, pt: str) -> List[SynTree]:
-    """
-    finds substitutions of words with part of speech == pt in stree
-    It finds them on the basis of the metadata
-    """
-    results = []
-    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
-    explanation_as_replacement_metadata = (
-        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
-    all_metadata = replacement_metadata + explanation_as_replacement_metadata
-    pt_replacement_metadata = []
-    for replacement in all_metadata:
-        annotated_list = eval(gav(replacement, 'annotatedwordlist'))
-        annotation_list = eval(gav(replacement, 'annotationwordlist'))
-        annotated = annotated_list[0] if annotated_list else None
-        annotation = annotation_list[0] if annotation_list else None
-        # if annotation in articles:    # this is not needed and may be wrong
-                                        # if there are unexpected variants of articles
-        #    pt_replacement_metadata.append(replacement)
-        pt_replacement_metadata.append(replacement)
-    for art_replacement in pt_replacement_metadata:
-        new_node = get_node(stree, art_replacement, xpath_cond=f'@pt="{pt}"', annotation=True)
-        if new_node is not None:
-            results.append(new_node)
-    return results
-
-
 def stap_congruentiefout(stree: SynTree) -> List[SynTree]:
     results = congruentiefout(stree)
-
-    delpv_results = asta_delpv(stree)
-
-    results += delpv_results
-
-
     return results
 
 def congruentiefout(stree: SynTree) -> List[SynTree]:
@@ -502,7 +509,8 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
     replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
     explanation_as_replacement_metadata = (
         stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
-    all_metadata = replacement_metadata + explanation_as_replacement_metadata
+    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion))
+    all_metadata = replacement_metadata + explanation_as_replacement_metadata + noncompletion_metadata
     for replacement in all_metadata:
         new_node = get_node(stree, replacement, xpath_cond=f'@pt="ww"', annotation=True)
         annotated = get_word(replacement, 'annotatedwordlist')
@@ -523,7 +531,8 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
                     annotated_lemma = annotated_word_info[3]
                     for annotation_word_info in annotation_word_infos:
                         annotation_lemma =annotation_word_info[3]
-                        if annotated_lemma == annotation_lemma:
+                        normalised_annotated_lemma = normaliselemma(annotated, annotated_lemma)
+                        if not lemmas_differ(normalised_annotated_lemma, annotation_lemma):
                             # check whether the grammatical properties only differ in pvagr
                             annotated_celex_infl = annotated_word_info[2]
                             annotation_celex_infl = annotation_word_info[2]
@@ -570,7 +579,7 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
 
 def vt_fout(stree: SynTree) -> List[SynTree]:
     overgen_nodes = get_overgeneralisations(stree)
-    replacement_nodes = get_replacement_nodes(stree)
+    replacement_nodes = get_replacement_nodes(stree, with_noncompletion=False)
     wrong_nodes = overgen_nodes + replacement_nodes
     results = [node for node in wrong_nodes if gav(node, 'wvorm') == 'pv' and gav(node, 'pvtijd') == 'verl']
     return results
@@ -583,17 +592,18 @@ def vd_fout(stree: SynTree) -> List[SynTree]:
     return results
 
 
-def get_replacement_metadata(stree: SynTree) -> List[SynTree]:
+def get_replacement_metadata(stree: SynTree, with_noncompletion=True) -> List[SynTree]:
     replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
     explanation_as_replacement_metadata = (
         stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
-    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion))
+    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion)) \
+        if with_noncompletion else []
     all_metadata = replacement_metadata + explanation_as_replacement_metadata + noncompletion_metadata
     return all_metadata
 
 
-def get_replacement_nodes(stree: SynTree) -> List[SynTree]:
-    all_metadata = get_replacement_metadata(stree)
+def get_replacement_nodes(stree: SynTree, with_noncompletion=True) -> List[SynTree]:
+    all_metadata = get_replacement_metadata(stree, with_noncompletion=with_noncompletion)
     raw_result = [get_node(stree, meta, annotation=True) for meta in all_metadata]
     result = [node for node in raw_result if node is not None]
     return result
@@ -625,6 +635,10 @@ def get_overgeneralisations(stree: SynTree) -> List[SynTree]:
         if new_node is not None:
             errors.append(new_node)
 
+    # based on replacements
+    replacement_overgeneralisation_nodes = get_overgeneralisation_replacement_nodes(stree)
+    errors += replacement_overgeneralisation_nodes
+
     # we do not want duplicate nodes
     errors = list(set(errors))
 
@@ -655,10 +669,663 @@ def get_overgeneralisation_replacement_nodes(stree: SynTree) -> List[SynTree]:
 
 
 
+def wrong_adj_e(stree: SynTree) -> List[SynTree]:
+    uttid = getuttid(stree)
+    results = []
+    leaves = getnodeyield(stree)
+    cleanleaves = [leave for leave in leaves if getattval(leave, 'word') not in filledpauseslexicon]
+    cleanwordlist = [getattval(leave, 'word') for leave in cleanleaves]
+    matches = findmatches(ngram21, cleanleaves)
+    # matches = sipvjpvjsi(cleanleaves, tree)
+    for match in matches:
+        adj_node = cleanleaves[match[0]+1]
+        if not valid_adj_e(adj_node):
+            results.append(adj_node)
+    return results
+
+def valid_adj_e(stree: SynTree) -> bool:
+    adj_rel = gav(stree, 'rel')
+    adj_parent = stree.getparent()
+    adj_parent_cat = gav(adj_parent, 'cat')
+    if adj_parent_cat == 'np':
+        np_node =adj_parent
+    elif adj_parent_cat == 'ap' and adj_rel == 'hd':
+        np_node = adj_parent.getparent()
+    elif adj_parent_cat == 'mwu':
+        np_node = adj_parent.getparent()
+    else:
+        np_node = None
+    if np_node is None:
+        return False
+    result = is_definite_np(np_node)
+    return result
+
+def is_definite_np(node: SynTree) -> bool:
+    node_cat = gav(node, 'cat')
+    if node_cat != 'np':
+        return False
+    dets = node.xpath(def_det_xpath)
+    result = dets != []
+    return result
+
+
+adj_no_e = """(@pt="adj" and @buiging="zonder" and @positie!="nom" and @graad!="sup")"""
+def_np_parent = expandmacros("""(parent::node[@cat="np" and node[%definite_det%]])""")
+adj_no_e_in_def_np_xpath = f""".//node[@rel="mod" and {adj_no_e} and
+                                       {def_np_parent}
+                                      ]"""
+ap_no_e_in_def_np_xpath = f""".//node[@rel="hd" and {adj_no_e} and 
+                                      parent::node[@cat="ap" and @rel="mod" and {def_np_parent}]
+                                      ]"""
+
+
+def get_adj_n_pair(adj: SynTree) -> Tuple[str,str]:
+    result = ('', '')
+    adj_word = gav(adj, 'word')
+    adj_parent = adj.getparent()
+    adj_parent_cat = gav(adj_parent, 'cat')
+    if adj_parent_cat == 'np':
+        np_node = adj_parent
+    elif adj_parent_cat == 'ap':
+        np_node = adj_parent.getparent()
+    else:
+        np_node = None
+    if np_node is not None:
+        n_node = find1(np_node, './node[@rel="hd"]')
+        if n_node is not None:
+            n_word = gav(n_node, 'word')
+            result = (adj_word, n_word)
+    return result
+
+
+
+def adj_no_e_error(stree: SynTree) -> List[SynTree]:
+    cand_adjs1 = stree.xpath(adj_no_e_in_def_np_xpath)
+    cand_adjs2 = stree.xpath(ap_no_e_in_def_np_xpath)
+    cand_adjs = cand_adjs1 + cand_adjs2
+    adjs = [cand_adj for cand_adj in cand_adjs
+                if not endsinschwa_n(gav(cand_adj, 'word')) and
+                   not endsinschwa(gav(cand_adj, 'word'))]
+    results = [adj for adj in adjs if get_adj_n_pair(adj) not in type_I_adj_n_pairs]
+
+
+    return results
+
+
+def ww_pred_agr_error(stree: SynTree) -> List[SynTree]:
+    results = mdbasedquery(stree, correctionlabels.agreementerror, correctionlabels.predc_v_agreement_error)
+    return results
+
+def regional_dim(stree: SynTree) -> List[SynTree]:
+    results = mdbasedquery(stree, correctionlabels.regionalform, correctionlabels.iedim)
+    return results
+
+def regional_case_form(stree: SynTree) -> List[SynTree]:
+    results = mdbasedquery(stree, correctionlabels.regionalform, correctionlabels.casevariant)
+    return results
+
+def wrong_morphology(stree: SynTree) -> List[SynTree]:
+    results = mdbasedquery(stree, wrongmorph)
+    return results
+
+
+
+def verb_no_pv(stree: SynTree) -> List[SynTree]:
+    results = stree.xpath(verb_no_pv_xpath)
+    return results
+
+def no_copula(stree: SynTree) -> list[SynTree]:
+    results = stree.xpath(no_copula_xpath)
+    return results
+
+
+def is_iedim(word: str, replacement: str) -> bool:
+    je_forms = getjeforms(word)
+    result = replacement in je_forms
+    return result
+
+
+def test_iedims():
+    test_pairs = [('kersie', 'kersje'), ('kleppie', 'klepje')]
+    for word, replacement in test_pairs:
+        ok = is_iedim(word, replacement)
+        print(f'{word}: {ok}')
+
+def er_replacement(word:str) -> bool:
+    result = word in ervzvariants
+    return result
+
+def missing_er(word:str, replacement:str) -> bool:
+    result = f'er{word}' == er_replacement
+    return result
+
+def sub_vz(stree: SynTree) -> List[SynTree]:
+    results = sub_pt(stree, 'vz')
+    return results
+
+def overige_fouten(stree: SynTree) -> int:
+# helemaal herformuleren als een post query
+    errors = []
+
+    errors += sub_vz(stree)
+
+    result = 1 if errors != [] else 0
+    return result
+
+
+def sub_pt(stree: SynTree, pt: str, cond: Callable = lambda x: True) -> List[SynTree]:
+    """
+    finds substitutions of words where replacement and replacee have  part of speech == pt in stree
+    It finds them on the basis of the metadata
+    """
+    results = []
+    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
+    explanation_as_replacement_metadata = (
+        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
+    all_metadata = replacement_metadata + explanation_as_replacement_metadata
+    pt_replacement_metadata = []
+    for replacement in all_metadata:
+        annotated_list = eval(gav(replacement, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement, 'annotationwordlist'))
+        annotationpos_list = eval(gav(replacement, 'annotationposlist'))
+        annotation_begin = str(annotationpos_list[0])
+        annotated_word = annotated_list[0] if annotated_list else None
+        if not informlexicon(annotated_word):   # to avoid simple wrong pronunciations
+            continue
+        annotation_node = find1(stree, f'.//node[@word and @begin="{annotation_begin}"]')
+        annotation_pt = gav(annotation_node, 'pt')
+        annotated_wordinfos = []
+        for annotated in annotated_list:
+            annotated_wordinfos += getwordposinfo(annotated, pt)
+        if annotated_wordinfos != [] and annotation_pt == pt:
+            pt_replacement_metadata.append(replacement)
+    for pt_replacement in pt_replacement_metadata:
+        new_node = get_node(stree, pt_replacement, xpath_cond=f'@pt="{pt}"', annotation=True)
+        if new_node is not None and cond(new_node):
+            results.append(new_node)
+    return results
+
+def omitted_pt(stree: SynTree, pt: str, cond: Callable = lambda x: True) -> List[SynTree]:
+    """
+    finds omitted words with part of speech = pt in stree, based on the CHAT metadata
+    """
+    results = []
+    omitted_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_omittedword))
+    associate_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.omitted_node_associate))
+    for omitted_meta in omitted_metadata:
+        associates = [associate_meta for associate_meta in associate_metadata
+                      if gav(associate_meta, 'annotationposlist') == gav(omitted_meta, 'annotatedposlist') and
+                      gav(associate_meta,'omitted_pt') == pt]
+        associate = associates[0] if associates else None
+        if associate is not None:
+            new_node = get_node(stree, associate, annotation=False)
+            if new_node is not None and cond(new_node):
+                results.append(new_node)
+    return results
+
+def del_vz(stree: SynTree) -> List[SynTree]:
+    results = omitted_pt(stree, 'vz')
+    return results
+
+def del_bw(stree: SynTree) -> List[SynTree]:
+    results = omitted_pt(stree, 'bw')
+    results += omitted_pt(stree, 'adj', cond= lambda x: is_adverbial_word(x))
+    return results
+
+def sub_bw(stree: SynTree) -> List[SynTree]:
+    results = sub_pt(stree, 'bw')
+    results += sub_pt(stree, 'adj', cond= lambda x: is_adverbial_word(x))
+    return results
+
+def sub_vnw(stree: SynTree) -> List[SynTree]:
+    results = sub_pt(stree, 'vnw')
+    return results
+
+def sub_vg(stree: SynTree) -> List[SynTree]:
+    results = sub_pt(stree, 'vg')
+    return results
+
+def del_vg(stree: SynTree) -> List[SynTree]:
+    results = omitted_pt(stree, 'vg')
+    return results
+
+def del_er(stree: SynTree) -> List[SynTree]:
+    results = omitted_pt(stree, 'vnw', cond=lambda x: gav(x, 'lemma')== 'er')
+    return results
+
+def is_adverbial_word(node: SynTree) -> bool:
+    node_pt = gav(node, 'pt')
+    node_rel = gav(node, 'rel')
+    node_parent = node.getparent()
+    node_parent_cat = gav(node_parent, 'cat')
+    node_parent_rel = gav(node_parent, 'rel')
+    node_grandparent = node_parent.getparent()
+    node_grandparent_cat = gav(node_grandparent, 'cat')
+    if node_pt == 'bw':
+        return True
+    elif node_pt == 'adj' and node_rel == "mod" and node_parent_cat != "np":
+        return True
+    elif node_pt == 'adj' and node_rel not in ['hd', 'predc']:
+        return True
+    elif node_pt == 'adj' and node_rel =='hd' and node_parent_rel not in ['predc']:
+        return True
+    elif node_pt == 'adj' and node_rel =='hd' and node_parent_rel == 'mod' and node_grandparent_cat != 'np':
+        return True
+    else:
+        return False
+
+
+def get_lemma_nodes(stree: SynTree, lemmas: List[str]) -> List[SynTree]:
+    xpath_conds1 = [f'@original_lemma ="{lemma}"' for lemma in lemmas]
+    xpath_cond1 = f"@original_lemma and ({' or '.join(xpath_conds1)})"
+    nodes1 = stree.xpath(f'.//node[{xpath_cond1}]')
+    xpath_conds2 = [f'@lemma ="{lemma}"' for lemma in lemmas]
+    xpath_cond2 = f"@lemma and ({' or '.join(xpath_conds2)})"
+    nodes2 = stree.xpath(f'.//node[{xpath_cond2}]')
+
+    nodes = nodes1 + nodes2
+    # no duplicates
+    nodes = list(set(nodes))
+    return nodes
+
+def dan_toen_fout(stree: SynTree) -> List[SynTree]:
+    """
+    Certain subordinate conjunctions must occur with past or perfect tenses, others cannot co-occur
+    with past or perfect tense.
+
+    * combines with past or perfect only: *toen*
+    * combines with not(past or perfect) only:  *als*, *dan*, and *wanneer*.
+
+    The words "wanneer" and "als" (in the meaning of "wanneer" can occur with past tense in the adults' language,
+    but this involves generic statements that young children do not yet make.
+
+    In a als...dan construction, both als and dan can occur with past and perfect tenses, so we exclude these.
+    """
+    results = []
+    dan_nodes = get_lemma_nodes(stree, ["dan", "als", "wanneer"])
+    for dan_node in dan_nodes:
+        clause = get_dan_toen_clause(dan_node)
+        if clause is not None and not is_als_dan(dan_node) and is_past_or_perfect(clause):
+            results.append(dan_node)
+    toen_nodes = get_lemma_nodes(stree, ["toen"])
+    for toen_node in toen_nodes:
+        clause = get_dan_toen_clause(toen_node)
+        if clause is not None and  not is_past_or_perfect(clause):
+            results.append(toen_node)
+    return results
+
+def has_corresponding_node(node, lemma, nodeyield, right=True) -> bool:
+    result = False
+    for ctr, n in enumerate(nodeyield):
+        if n == node:
+            if right:
+                result = any([gav(nd, 'lemma') == lemma for nd in nodeyield[ctr+1:]])
+            else:
+                result = any([gav(nd, 'lemma') == lemma for nd in nodeyield[:ctr]])
+    return result
+
+
+def is_als_dan(node: SynTree) -> bool:
+    result = False
+    top_node = find1(node, 'ancestor::alpino_ds')
+    if top_node is None:
+        return False
+    nodeyield = getnodeyield(top_node)
+    node_lemma = gav(node, 'lemma')
+    if node_lemma == 'als':
+        result = has_corresponding_node(node, 'dan', nodeyield, right=True)
+    elif node_lemma == 'dan':
+        result = has_corresponding_node(node, 'als', nodeyield, right=False)
+    return result
+
+def get_dan_toen_clause(dan: SynTree) -> Optional[SynTree]:
+    dan_parent = dan.getparent()
+    dan_parent_cat = gav(dan_parent, 'cat')
+    dan_pt = gav(dan, 'pt')
+    dan_rel = gav(dan, 'rel')
+    sister_cp = find1(dan, '../node[@cat="ssub" or @cat="cp"]' )
+    if dan_parent_cat == 'advp' and sister_cp is not None:
+        result = sister_cp
+    elif dan_pt == 'vg' and sister_cp is not None:
+        result = sister_cp
+    elif dan_rel == 'rhd' and sister_cp is not None:
+        result = sister_cp
+    elif dan_pt == 'bw':
+        result = get_finite_ancestor(dan)
+    else:
+        result = None
+    return result
+
+def get_finite_ancestor(node: SynTree) -> Optional[SynTree]:
+    node_parent = node.getparent()
+    if node_parent is None:
+        return None
+    pv = find1(node_parent, './node[@pt="ww" and @wvorm="pv"]')
+    if pv is None:
+        result = get_finite_ancestor(node_parent)
+        return result
+    else:
+        return node_parent
+
+def is_past_or_perfect(stree: SynTree) -> bool:
+    thehead = find1(stree, './node[@rel="hd"]')
+    head_tense = gav(thehead, 'pvtijd')
+    head_lemma = gav(thehead, 'lemma')
+    vc_ppart = find1(stree, './node[@rel="vc" and @cat="ppart" ]')
+    if head_tense == 'verl':
+        return True
+    elif head_lemma in ['hebben', 'zijn'] and vc_ppart is not None:
+        return True
+    else:
+        return False
+
+def sub_tijd(stree: SynTree) -> List[SynTree]:
+    results = []
+    replacement_metadata = get_replacement_metadata(stree)
+    for replacement_meta in replacement_metadata:
+        annotated_list = eval(gav(replacement_meta, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement_meta, 'annotationwordlist'))
+        if len(annotation_list) > 1:
+            continue
+        annotated = annotated_list[0]
+        if not informlexicon(annotated):
+            continue
+        annotation = annotation_list[0]
+        annotated_node = get_node(stree, replacement_meta, annotation=True)
+        annotated_pt = gav(annotated_node, 'pt')
+        if annotated_pt != 'ww':
+            continue
+        annotated_pvtijd = gav(annotated_node, 'pvtijd')
+        annotation_wordinfos = getwordposinfo(annotation, annotated_pt)
+        replacement_results = []
+        for annotation_wordinfo in annotation_wordinfos:
+            infl = annotation_wordinfo[2]
+            annotation_featdict = celex2dcoimap[infl] if infl in celex2dcoimap else {}
+            annotation_pvtijd = annotation_featdict['pvtijd'] if 'pvtijd' in annotation_featdict else ''
+            if annotation_wordinfo[0] == annotated_pt and \
+                annotation_pvtijd != '' and \
+                annotated_pvtijd != '' and \
+                annotation_pvtijd != annotated_pvtijd:
+                replacement_results = [annotated_node]
+            if annotation_wordinfo[0] == annotated_pt and \
+                annotation_pvtijd != '' and \
+                annotated_pvtijd != '' and \
+                annotation_pvtijd == annotated_pvtijd:
+                replacement_results = []
+                break
+        results.extend(replacement_results)
+
+
+    return results
+
+def get_base_lemma(lemma: str) -> str:
+    lemma_parts = lemma.split(compoundsep)
+    result = lemma_parts[-1]
+    return result
+
+def lemmas_differ(lemma1:str, lemma2:str) -> bool:
+    lemma1_parts = lemma1.split(compoundsep)
+    lemma2_parts = lemma2.split(compoundsep)
+    if len(lemma1_parts) == 1 and  len(lemma2_parts) > 1:
+        result = lemma1 != lemma2_parts[-1]
+    elif len(lemma1_parts) > 1 and  len(lemma2_parts) == 1:
+        result = lemma2 != lemma1_parts[-1]
+    else:
+        result = lemma1 != lemma2
+    return result
+
+lexical_error_pts = ['n', 'adj', 'ww', 'bw']
+known_pronunciation_variants = [('boon', 'gewoon'), ('doe', 'toen'),('es', 'eens'),
+                                ('gun', 'ging'), ('his', 'wist'), ('me', 'maar'), ('na', 'dan'),
+                                ('sas', 'zag'), ('teek', 'betekent'), ('tof', 'toch'), ('wa', 'had')]
+def sub_lexical(stree: SynTree) -> List[SynTree]:
+    results = []
+    replacement_metadata = get_replacement_metadata(stree, with_noncompletion=False)
+    for replacement_meta in replacement_metadata:
+        annotated_list = eval(gav(replacement_meta, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement_meta, 'annotationwordlist'))
+        annotated = annotated_list[0]
+        annotation = annotation_list[0]
+        # exclude uninterpreable speech codes
+        if annotated in ['x', 'xx', 'xxx']:
+            continue
+        # exclude dan/toen
+        if (annotated, annotation) in [('dan', 'toen'), ('toen', 'dan')]:
+            continue
+            # try basicreplacements voor annotated and check again vklstap  STAP_02, 22 dee/was
+        if not informlexicon(annotated):
+            if annotated in basicreplacements:
+                annotated = basicreplacements[annotated][0][0] if basicreplacements[annotated][0] != [] else annotated
+            else:
+                continue
+        # exclude pronunciation variants
+        if is_pronunciation_variant(annotated, annotation):
+            continue
+        annotated_node = get_node(stree, replacement_meta, annotation=True)
+        annotated_pt = gav(annotated_node, 'pt')
+        annotated_lemma = gav(annotated_node, 'original_lemma')
+        annotation_lemma = gav(annotated_node, 'lemma')
+        if (annotated_lemma != '' and annotation_lemma != '' and
+                lemmas_differ(annotation_lemma, annotated_lemma) and annotated_pt in lexical_error_pts):
+            results.append(annotated_node)
+    return results
+
+def is_pronunciation_variant(annotated:str, annotation:str) -> bool:
+    # realword1 = informlexicon(annotated)
+    # realword2 = informlexicon(annotation)
+    # if realword1 and not realword2:
+    #     return True
+    # if not realword1 and realword2:
+    #     return True
+    # next includes cases of noncompletion of a word
+    if annotated in ['x', 'xx', 'xxx']:
+        return False
+    if annotated in annotation or annotation in annotated:
+        return True
+    if (annotated, annotation) in known_pronunciation_variants:
+        return True
+    if relative_edit_distance(annotated, annotation) < relative_edit_distance_threshold:
+        return True
+    return False
+
+def select_wordinfos(word_infos, criterion: Callable) -> List[WordInfo]:
+    results = []
+    for word_info in word_infos:
+        infl = word_info[2]
+        props = celex2dcoimap[infl]
+        if criterion(props):
+            results.append(word_info)
+    return results
+
+def is_past_tense(props) -> bool:
+    result = ('pt' in props and props['pt'] == 'ww' and
+              'pvtijd' in props and props['pvtijd'] == 'verl' )
+    return result
+
+def vt_fout(stree: SynTree) -> List[SynTree]:
+    results = []
+    raw_overgen_nodes = get_overgeneralisations(stree)
+    overgen_nodes = [nd for nd in raw_overgen_nodes if gav(nd, 'pvtijd') == 'verl']
+    results += overgen_nodes
+    replacement_metadata = get_replacement_metadata(stree, with_noncompletion=False)
+    for replacement_meta in replacement_metadata:
+        annotated_list = eval(gav(replacement_meta, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement_meta, 'annotationwordlist'))
+        annotated = annotated_list[0]
+        annotation = annotation_list[0]
+        annotated_node = get_node(stree, replacement_meta, annotation=True)
+        annotated_pt = gav(annotated_node, 'pt')
+        annotated_tijd = gav(annotated_node, 'pvtijd')
+        annotated_pvagr = gav(annotated_node, 'pvagr')
+        annotated_lemma = gav(annotated_node, 'original_lemma')
+        annotation_lemma = gav(annotated_node, 'lemma')
+        if annotated_pt != "ww":
+            continue
+        annotation_wordinfos = getwordposinfo(annotation, 'ww')
+        if not informlexicon(annotated):
+            if annotated in basicreplacements:
+                annotated = basicreplacements[annotated][0][0] if basicreplacements[annotated][0] != [] else annotated
+            else:
+                continue
+        # if the annotated word is an existing verb form, it is not a vt_fout
+        # but an alternative form (wou/wilde), a different person/number (wou/wouden),
+        # an ov:sub_tijd (viel/valt) or sub_lexical (was/ging), or identical (dee->deed/deed)
+        if informlexicon(annotated) and annotation_wordinfos != []:
+            continue
+        # the next is covered by the preceding and therefore put in comments
+        # # exclude correct different past forms of the same lemma: # to exclude wou /wouden STAPVoorbeeld10042026, 39
+        # relevant_wordinfos = select_wordinfos(annotation_wordinfos,
+        #                 lambda wi: not is_past_tense(wi) )
+        # if relevant_wordinfos != []:
+        #     continue
+        # if annotated_pt != 'ww' or annotated_tijd != 'verl':
+        #     continue
+        # exclude uninterpreable speech codes
+        if annotated in ['x', 'xx', 'xxx']:
+            continue
+        # next notrelevant for verbs
+        # # exclude dan/toen
+        # if (annotated, annotation) in [('dan', 'toen'), ('toen', 'dan')]:
+        #     continue
+            # try basicreplacements voor annotated and check again vklstap  STAP_02, 22 dee/was
+        # exclude pronunciation variants
+        if is_pronunciation_variant(annotated, annotation):
+            continue
+        results.append(annotated_node)
+
+    return results
+
+def get_pronunciation_variants(stree: SynTree) -> List[SynTree]:
+    results = []
+    informal_pronunciation_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.informalpronunciation))
+    for ipm in informal_pronunciation_metadata:
+        ipm_node = get_node(stree, ipm)
+        if ipm_node is None:
+            annotated, annotation = get_meta_pair(ipm)
+            report_missing_node(stree, annotated, annotation)
+        else:
+            results.append(ipm_node)
+
+    overgeneralisation_nodes = get_overgeneralisation_replacement_nodes(stree)
+    # SASTA noncompletion
+    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.noncompletion))
+    for ncm in noncompletion_metadata:
+        if have_same_lemma(ncm, annotation=False):
+            continue
+        annotated, annotation = get_meta_pair(ncm)
+        annotated_node = get_node(stree, ncm, annotation=False)
+        if annotated_node in overgeneralisation_nodes:
+            continue
+        if annotated_node is None:
+            report_missing_node(stree, annotated, annotation)
+        elif is_pronunciation_variant(annotated, annotation):
+            results.append(annotated_node)
 
 
 
 
+    # CHAT noncompletion
+    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion))
+    for ncm in noncompletion_metadata:
+        if have_same_lemma(ncm, annotation=False):
+            continue
+        if is_vd_morph_error(ncm, annotation=False):
+            continue
+        annotated, annotation = get_meta_pair(ncm)
+        annotated_node = get_node(stree, ncm, annotation=False)
+        if annotated_node in overgeneralisation_nodes:
+            continue
+        if annotated_node is None:
+            report_missing_node(stree, annotated, annotation)
+        elif  is_pronunciation_variant(annotated, annotation):
+            results.append(annotated_node)
+
+
+
+    # replacements that are pronunciation variants
+    raw_replacement_metadata = get_replacement_metadata(stree, with_noncompletion=False)
+    replacement_metadata = []
+    for replacement_meta in raw_replacement_metadata:
+        if have_same_lemma(replacement_meta, annotation=True):
+            continue
+        if is_vd_morph_error(replacement_meta, annotation=True):
+            continue
+        annotated, annotation = get_meta_pair(replacement_meta)
+        annotated_node = get_node(stree, replacement_meta, annotation=True)
+        if annotated_node in overgeneralisation_nodes:
+            continue
+        if annotated_node is None:
+            report_missing_node(stree, annotated, annotation)
+        elif is_pronunciation_variant(annotated, annotation):
+            results.append(annotated_node)
+
+    # add basic replacements that are informal pronunciations
+    basic_replacement_metadata = stree.xpath('.//xmeta[@cat="{basicreplacements.pron}"]')
+    for brm in basic_replacement_metadata:
+        nd = get_node(stree, brm)
+        if nd is None:
+            annotated, annotation = get_meta_pair(brm)
+            report_missing_node(stree, annotated, annotation)
+        else:
+            results.append(nd)
+
+    # do something for contractions? ???
+
+    # no duplicates
+    results = list(set(results))
+
+    return results
+
+def report_missing_node(stree: SynTree, annotated: str, annotation: str) -> None:
+    origutt = getorigutt(stree)
+    sentence = getsentence(stree)
+    uttid = getxsid(stree)
+    settings.LOGGER.error(
+        f'Node not found for ({annotated}, {annotation}) in utterance {uttid}:\nsentence: {sentence}\norigutt:  {origutt}')
+
+
+def get_meta_pair(meta: SynTree) -> Tuple[str, str]:
+    annotated_list = eval(gav(meta, 'annotatedwordlist'))
+    annotation_list = eval(gav(meta, 'annotationwordlist'))
+    annotated = annotated_list[0] if annotated_list != [] else ''
+    annotation = annotation_list[0] if annotation_list != [] else ''
+    return annotated, annotation
+
+
+def is_vd_morph_error(meta: SynTree, annotation=False) -> bool:
+    stree = find1(meta, 'ancestor::alpino_ds')
+    annotated, annotation = get_meta_pair(meta)
+    annotated_node = get_node(stree, meta, annotation=annotation)
+    if annotated_node is not None:
+        annotated, annotation = get_meta_pair(meta)
+        annotated_pt = gav(annotated_node, 'pt')
+        annotated_lemma = gav(annotated_node, 'lemma')
+        annotated_wvorm = gav(annotated_node, 'wvorm')
+        annotated_word = gav(annotated_node, 'word')
+        normalised_lemma = normaliselemma(annotated_word, annotated_lemma)
+        if annotated_wvorm == 'vd':
+            annotation_wordinfos = getwordposinfo(annotation, annotated_pt)
+            result = annotation_wordinfos == [] or any([wordinfo[3] == normalised_lemma for wordinfo in annotation_wordinfos])
+        else:
+            result = False
+    else:
+        result = False
+    return result
+
+
+def have_same_lemma(meta: SynTree, annotation=False) -> bool:
+    stree = find1(meta, 'ancestor::alpino_ds')
+    annotated, annotation = get_meta_pair(meta)
+    annotated_node = get_node(stree, meta, annotation=annotation)
+    if annotated_node is not None:
+        annotated, annotation = get_meta_pair(meta)
+        annotated_pt = gav(annotated_node, 'pt')
+        annotated_lemma = gav(annotated_node, 'lemma')
+        annotation_wordinfos = getwordposinfo(annotation, annotated_pt)
+        result = any([not lemmas_differ(wordinfo[3], annotated_lemma) for wordinfo in annotation_wordinfos])
+    else:
+        result = False
+    return result
 
 
 

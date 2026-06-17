@@ -30,6 +30,7 @@ apomiss = 'Missing Apostrophe'
 addschwa = 'Schwa addition'
 onsetred = 'Onset Reduction'
 d_er = 'd-onset on er'
+r0_er = 'r dropped in er'
 spellerr = 'Spelling Error'
 varpron = 'Alternative Pronunciation'
 pronerr = 'Wrong Pronunciation'
@@ -127,11 +128,11 @@ def get_pronadv_head_lemma(raw_wrd: str) -> Optional[str]:
 ervzvariants: List[BasicReplacement] = \
     [('der' + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
     [("d'r" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
-    [("e'" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
+    [("e'" + vz, 'er' + vz, pron, varpron, r0_er, dp) for vz in Rvzlist] + \
     [("d'" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
     [("dr" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
     [("de" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist] + \
-    [("e" + vz, 'er' + vz, pron, varpron, d_er, dp) for vz in Rvzlist]
+    [("e" + vz, 'er' + vz, pron, varpron, r0_er, dp) for vz in Rvzlist]
 
 ervzvariantsdict = {tpl[0]: tpl for tpl in ervzvariants }
 

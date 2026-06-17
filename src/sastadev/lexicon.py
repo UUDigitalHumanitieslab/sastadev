@@ -63,6 +63,10 @@ hwwilemmas = {'behoren', 'blijven', 'doen', 'gaan', 'hoeven', 'horen', 'komen', 
 
 question_promotors = {'nou', 'nu', 'toch', 'dan'}
 
+adj_e_exceptions = [('onder', 'andere')]
+
+type_I_adj_n_pairs = [('Nederlands', 'elftal'), ('academisch', 'ziekenhuis')]
+
 def initializelexicon(lexiconfilename) -> set:
     lexicon = set()
     fptuples = readcsv(lexiconfilename, header=False)

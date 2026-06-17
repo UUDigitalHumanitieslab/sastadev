@@ -1,4 +1,5 @@
 import re
+from editdistance import distance
 import unicodedata
 from collections import Counter
 from typing import Any, Callable, List, Match, Optional, Sequence, Set
@@ -403,6 +404,9 @@ def endsinschwa(word: str) -> bool:
         result = False
     return result
 
+def endsinschwa_n(word: str) -> bool:
+    result = word[-1] == 'n' and endsinschwa(word[:-1])
+    return result
 
 def isdiphthong(d: str) -> bool:
     '''
@@ -677,7 +681,11 @@ def disj(wlist: List[str], conjunct='of') -> str:
     result = coord(wlist, conjunct)
     return result
 
-
+def relative_edit_distance(wrd1: str, wrd2:str) -> float:
+    ed = distance(wrd1, wrd2)
+    maxlen  = max(len(wrd1), len(wrd2))
+    result = ed / maxlen
+    return result
 
 if __name__ == '__main__':
     test()

@@ -20,6 +20,7 @@ freerun	zwem
 freerunt	zwemt
 freerunde	zwom
 freerunden	zwommen
+gejuicet	geperst
 gefreerund	gezwommen
 cakeje	koekje
 cakejes	koekjes

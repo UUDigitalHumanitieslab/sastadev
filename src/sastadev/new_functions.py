@@ -1,84 +1,136 @@
 """
 scratch file to add new functions while the system is running so we do not want to change files that are in use
 """
+from lxml import etree
+import copy
 from sastadev import correctionlabels
-from sastadev.CHAT_Annotation import CHAT_replacement
+from sastadev.basicreplacements import wrongmorph, ervzvariants, basicreplacements
+from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_omittedword
 from sastadev.celexlexicon import celex2dcoimap
 from sastadev.conf import settings
 from sastadev.deregularise import correctinflection, overgen, wrongovergen
-from sastadev.lexicon import getwordposinfo, informlexicon
+from sastadev.filefunctions import get_corrected_tree_fullname
+from sastadev.iedims import getjeforms
+from sastadev.find_ngram import findmatches, is_def_det, ngram21
+from sastadev.lexicon import getwordinfo, getwordposinfo, filledpauseslexicon, informlexicon
 from sastadev.macros import expandmacros
 from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
+from sastadev.normalise_lemma import normaliselemma
+from sastadev.queryfunctions import get_replacement_metadata
 from sastadev.sastatypes import SynTree
 from sastadev.sastatoken import Token
-
-from sastadev.treebankfunctions import getattval, get_node, getnodeyield, get_word, mdnameonlyxpathtemplate
-from typing import List
+from sastadev.smallclauses import mkinsertmeta, realword, word
+from sastadev.test_functions import test_f, get_stree, test_transform_f
+from sastadev.tokenmd import TokenListMD
+from sastadev.treebankfunctions import (find1, getattval, get_node, getnodeyield, getorigutt, getsentence, getuttid, get_word,
+                                        mktoken2nodemap, mdbasedquery,
+                                        mdnameonlyxpathtemplate)
+from typing import List, Optional
 
 gav = getattval
 
-infl_error_xpath = f""".//xmeta[@name="{correctionlabels.morphologicalerror}" and 
-                                (@value="{overgen}" or @value="{wrongovergen}")]"""
 
 
-def vt_fout(stree: SynTree) -> List[SynTree]:
-    overgen_nodes = get_overgeneralisations(stree)
-    replacement_nodes = get_replacement_nodes(stree)
-    wrong_nodes = overgen_nodes + replacement_nodes
-    results = [node for node in wrong_nodes if gav(node, 'wvorm') == 'pv' and gav(node, 'pvtijd') == 'verl']
+def sub_tijd(stree: SynTree) -> List[SynTree]:
+    results = []
+    replacement_metadata = get_replacement_metadata(stree)
+    for replacement_meta in replacement_metadata:
+        annotated_list = eval(gav(replacement_meta, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement_meta, 'annotationwordlist'))
+        if len(annotation_list) > 1:
+            continue
+        annotated = annotated_list[0]
+        if not informlexicon(annotated):
+            continue
+        annotation = annotation_list[0]
+        annotated_node = get_node(stree, replacement_meta, annotation=True)
+        annotated_pt = gav(annotated_node, 'pt')
+        if annotated_pt != 'ww':
+            continue
+        annotated_pvtijd = gav(annotated_node, 'pvtijd')
+        annotation_wordinfos = getwordposinfo(annotation, annotated_pt)
+        for annotation_wordinfo in annotation_wordinfos:
+            infl = annotation_wordinfo[2]
+            annotation_featdict = celex2dcoimap[infl] if infl in celex2dcoimap else {}
+            annotation_pvtijd = annotation_featdict['pvtijd'] if 'pvtijd' in annotation_featdict else ''
+            if annotation_wordinfo[0] == annotated_pt and \
+                annotation_pvtijd != '' and \
+                annotated_pvtijd != '' and \
+                annotation_pvtijd != annotated_pvtijd:
+                results.append(annotated_node)
+                break
+    return results
+
+lexical_error_pts = ['n', 'adj', 'ww']
+def lexical_error(stree: SynTree) -> List[SynTree]:
+    results = []
+    replacement_metadata = get_replacement_metadata(stree)
+    for replacement_meta in replacement_metadata:
+        annotated_list = eval(gav(replacement_meta, 'annotatedwordlist'))
+        annotation_list = eval(gav(replacement_meta, 'annotationwordlist'))
+        annotated = annotated_list[0]
+        if not informlexicon(annotated):
+            continue
+        annotation = annotation_list[0]
+        annotated_node = get_node(stree, replacement_meta, annotation=True)
+        annotated_pt = gav(annotated_node, 'pt')
+        annotated_lemma = gav(annotated_node, 'original_lemma')
+        annotation_lemma = gav(annotated_node, 'lemma')
+        if annotated_lemma != '' and annotated_lemma != annotation_lemma and annotated_pt in lexical_error_pts:
+            results.append(annotated_node)
     return results
 
 
-def get_replacement_metadata(stree: SynTree) -> List[Meta]:
-    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
-    explanation_as_replacement_metadata = (
-        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
-    all_metadata = replacement_metadata + explanation_as_replacement_metadata
-    return all_metadata
+lexical_error_triples = [('test_stap', 'test_stap', '16'),
+           ('vklstap', 'STAP_04', '26'),
+           ('vklstap', 'STAP_08', '31'),
+           ('vklstap', 'STAP_07', '29'),
+           ('vklstapfase2', 'STAP_024', '16'),
+           ]
+
+sub_tijd_triples = [ ('test_stap', 'test_stap', '11'),
+                    ('vklstap', 'STAP_02', '11'),
+                    ('vklstap', 'STAP_02', '17'),
+                    ('vklstap', 'STAP_02', '34'),
+                    ('vklstap', 'STAP_02', '47'),
+                    ('vklstap', 'STAP_02', '48'),
+                    ('vklstap', 'STAP_02', '47'),
+                    ('vklstap', 'STAP_08', '3'),
+                    ('vklstap', 'STAP_09', '41')]
 
 
-def get_replacement_nodes(stree: SynTree) -> List[SynTree]:
-    all_metadata = get_replacement_metadata(stree)
-    result = [get_node(meta) for meta in all_metadata]
-    return result
-
-def get_overgeneralisations(stree: SynTree) -> List[SynTree]:
-    errors = []
-
-    # based on corrections by SASTA
-    infl_error_metadata = stree.xpath(infl_error_xpath)
-    for infl_error_meta in infl_error_metadata:
-        new_node = get_node(stree, infl_error_meta)
-        # annotated = get_word(infl_error_meta, 'annotatedwordlist')
-        # annotation = get_word(infl_error_meta, 'annotationwordlist')
-
-        if new_node is not None:
-            errors.append(new_node)
 
 
-    # we do not want duplicate nodes
-    errors = list(set(errors))
+main_with_als_xpath = './/node[@cat="smain" and node[@rel="mod" and @cat="cp" and node[@rel="cmp" and @lemma="als"]]]'
+def transform_als_dan(in_stree: SynTree) -> SynTree:
+    stree = copy.deepcopy(in_stree)
+    als_dan_clauses = stree.xpath(main_with_als_xpath)
 
-    return errors
+    for als_dan_clause in als_dan_clauses:
+        cp_node = find1(als_dan_clause, './node[@rel="mod" and @cat="cp" and node[@rel="cmp" and @lemma="als"]]')
+        cp_nodes = getnodeyield(cp_node)
+        if cp_nodes != [] and gav(cp_nodes[-1], 'lemma') == 'dan':
+            dan_node = cp_nodes[-1]
+            dan_parent = dan_node.getparent()
+            dan_parent.remove(dan_node)
+            als_dan_clause.append(dan_node)
+    return stree
 
-def get_overgeneralisation_replacement_nodes(stree: SynTree) -> List[SynTree]:
-    errors = []
+als_dan_triples = [('vklstap', 'stap_04', '44'),
+('vklstap', 'stap_05', '25'),
+('vklstap', 'stap_05', '26'),
+('vklstap', 'stap_08', '31'),
+('vkltarsp', 'tarsp_07', '24'),
+('handreiking4-12', 'handreiking4-12', '73'),
+('handreiking4-12', 'handreiking4-12', '95'),
+('handreiking4-12', 'handreiking4-12', '118'),
+]
 
-    # based on CHAT-replacements
-    all_metadata = get_replacement_metadata(stree)
-    for replacement in all_metadata:
-        annotated = get_word(replacement, 'annotatedwordlist')
-        annotation = get_word(replacement, 'annotationwordlist')
-        corrected_inflections = []
-        if not informlexicon(annotated):
-            raw_corrected_inflections = correctinflection(annotated)
-            corrected_inflections = [ci for ci in raw_corrected_inflections if ci[0] == annotation]
-        if corrected_inflections != []:
-            new_node = get_node(stree, replacement, xpath_cond='', annotation=True)
-            errors.append(new_node)
-
-    # no duplicates
-    errors = list(set(errors))
-    return errors
+if __name__ == '__main__':
+    pass
+    # test_f(lexical_error_triples, lexical_error)
+    # sub_tijd_triples = [sub_tijd_triples[0], sub_tijd_triples[7]]
+    # test_f(sub_tijd_triples, sub_tijd)
+    test_transform_f(als_dan_triples, transform_als_dan)
 

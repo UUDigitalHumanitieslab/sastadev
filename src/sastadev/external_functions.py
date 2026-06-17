@@ -29,9 +29,14 @@ from sastadev.dedup import correct, mlux, onvolledig, samplesize
 from sastadev.imperatives import bbx, wond4, wond5plus, wondx, wx, wxy, wxyz, wxyz5
 from sastadev.methods import allok, astalemmafilter
 from sastadev.missing_det import get_missing_det
-from sastadev.queryfunctions import (bx, congruentiefout, VzN, get_avn, hequery, into, ov2, pv_regionale_vorm,
-                                     stam, sublid,
-                                     tarsp_dellid, tarsp_mvzn, tarsp_verkl,
+from sastadev.queryfunctions import (adj_agreement_errors, bx, congruentiefout,
+                                     dan_toen_fout, del_bw, del_er, del_vg, del_vz,
+                                     VzN, get_avn, get_pronunciation_variants, hequery, into,
+                                     no_copula, pv_regionale_vorm,
+                                     stam, sublid, stap_congruentiefout, stap_sublid,
+                                     sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
+                                     tarsp_dellid, tarsp_mvzn, tarsp_sublid,  tarsp_verkl,
+                                     verb_no_pv,
                                      vobij, voslashbij, vd_fout, vt_fout, vudivers, xneg_neg,
                                      xneg_x)
 from sastadev.stapforms import makestapform
@@ -71,21 +76,24 @@ def oldgetfname(f: Callable) -> str:
 
 
 # Initialisation
-thetarspfunctions = [bx, bbx, congruentiefout, get_avn, get_missing_det, getcompounds, hequery,
-                     into, ov2, sziplus6, xenx, vr5plus, wx, wxy, wxyz, wxyz5, wondx, wond4, wond5plus,
+thetarspfunctions = [bx, bbx, congruentiefout, del_vz, get_avn, get_missing_det, getcompounds, hequery,
+                     into, sziplus6, xenx, vr5plus, wx, wxy, wxyz, wxyz5, wondx, wond4, wond5plus,
                      tarsp_screening, vutotaal, gofase, gtotaal, mk_toelichting, pf2, pf3, pf4, pf5, pf6, pf7, pf,
                      pv_regionale_vorm,
                      xneg_x, xneg_neg,
-                     mktarspform, stam, sublid, tarsp_dellid,
+                     mktarspform, stam, sub_vz, tarsp_sublid, tarsp_dellid,
                      tarsp_mvzn, tarsp_verkl, VzN, vobij, voslashbij,vd_fout, vt_fout, vudivers]
 
-thestapfunctions = [BB_totaal, congruentiefout, get_missing_det, GLVU, GL5LVU, makestapform, sublid,
-                    vd_fout, vt_fout]
+thestapfunctions = [adj_agreement_errors, BB_totaal, stap_congruentiefout,
+                    dan_toen_fout, del_bw, del_er, del_vg, del_vz,
+                    get_missing_det, get_pronunciation_variants, GLVU, GL5LVU, makestapform,  no_copula,
+                    stap_sublid, sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
+                    vd_fout, verb_no_pv, vt_fout]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
                     asta_bijzin, asta_lex, asta_delpv, asta_xxx, allok, pv_regionale_vorm, sempar, phonpar,
-                    astalemmafilter, asta_lemma,
+                    astalemmafilter, asta_lemma, adj_agreement_errors,
                     astalemmafunction, asta_dellid, sublid, congruentiefout]
 
 thefunctions = thetarspfunctions + thestapfunctions + theastafunctions

@@ -1993,9 +1993,9 @@ def deletewordnode(tree: SynTree, begin: Position, wordsonly=False) -> Optional[
             associate_node = get_associate(thenode)
             if associate_node is not None:
                 # add associate metadata
-                annotationposlist = [gav(thenode, 'begin')]
+                annotationposlist = [int(gav(thenode, 'begin'))]
                 annotationwordlist = [gav(thenode, 'word')]
-                annotatedposlist = [gav(associate_node, 'begin')]
+                annotatedposlist = [int(gav(associate_node, 'begin'))]
                 annotatedwordlist = [gav(associate_node, 'word')]
                 associate_meta = Meta(name=correctionlabels.omitted_node_associate, value = annotationwordlist,
                                       annotatedposlist=annotatedposlist, annotatedwordlist=annotatedwordlist,
@@ -2118,12 +2118,12 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False) -> 
                 associate_node = get_associate(child)
                 # add associate metadata
                 if associate_node is not None:
-                    annotatedposlist = [gav(associate_node, 'begin')]
+                    annotatedposlist = [int(gav(associate_node, 'begin'))]
                     annotatedwordlist = [gav(associate_node, 'word')]
                 else:
                     annotatedposlist = ['0']
                     annotatedwordlist = []
-                annotationposlist = [gav(child, 'begin')]
+                annotationposlist = [int(gav(child, 'begin'))]
                 annotationwordlist = [gav(child, 'word')]
                 omitted_pt = gav(child, 'pt')
                 omitted_rel = gav(child, 'rel')
@@ -2643,7 +2643,7 @@ def get_associate(node: SynTree) -> Optional[SynTree]:
     If there is none, the marking will be on the whole sentence
     """
     node_pt = gav(node, 'pt')
-    node_conjtype = gav(node, 'vwtype')
+    node_conjtype = gav(node, 'conjtype')
     node_rel = gav(node, 'rel')
     the_head = find1(node, '../node[@rel="hd"]')
     if node_pt == '':     # only defined for word nodes with a pt attributes
@@ -2660,7 +2660,7 @@ def get_associate(node: SynTree) -> Optional[SynTree]:
     elif node_pt == "vg" and node_conjtype == 'neven':
         node_parent = node.getparent()
         first_conjunct = find1(node_parent, f"./node[@rel='cnj' and @begin = {gav(node_parent, 'begin')}]")
-        result = get_first_word_node_of(first_conjunct)
+        result = get_first_word_node_of(first_conjunct) if first_conjunct is not None else None
     # if function word then the head of its complement if there is one else its governing head
     elif node_pt == "vz" and node_rel == 'hd':
         compl = find1(node, '../node[@rel="obj1" or @rel="pobj1"]')
@@ -2668,11 +2668,16 @@ def get_associate(node: SynTree) -> Optional[SynTree]:
             result = getheadof(compl)
         else:
             result = compl
+        if result is None:
+            result = get_first_word_node_of(compl)
         if gav(result, 'cat') == 'mwu':
             result = get_first_word_node_of(result)
-    elif node_pt == "vw" and node_conjtype == 'onder':
+    elif node_pt == "vg" and node_conjtype == 'onder':
         compl = find1(node, '../node[@rel="body"]')
-        result = get_first_word_node_of(compl)
+        if compl is not None:
+            result = get_first_word_node_of(compl)
+        else:
+            result = get_next_word(node)
         # complements, determiners and modifiers take the head as associate
     elif node_rel != 'hd' and the_head is not None:
         compl = the_head
@@ -2683,6 +2688,18 @@ def get_associate(node: SynTree) -> Optional[SynTree]:
     else:
         result = None
     return result
+
+
+def get_next_word(node: SynTree) -> Optional[SynTree]:
+    if 'word' not in node.attrib:
+        return None
+    top_node = find1(node, 'ancestor::alpino_ds')
+    word_nodes = getnodeyield(top_node)
+    for ctr, word_node in enumerate(word_nodes):
+        if word_node == node and ctr < len(word_nodes) - 1:
+            return word_nodes[ctr + 1]
+    return None
+
 
 def get_first_word_node_of(node: SynTree) -> Optional[SynTree]:
     if 'word' in node.attrib:
@@ -2702,8 +2719,10 @@ def get_nodes(stree: SynTree, meta: etree.Element, xpath_cond="", annotation=Fal
     results = []
     xpath_cond_str = f'and {xpath_cond}' if xpath_cond != '' else ''
     for pos in poslist:
-        new_node = find1(stree, f'.//node[@word and @begin="{pos}" {xpath_cond_str}]')
-        results.append(new_node)
+        xpath_query = f'.//node[@word and @begin="{str(pos)}" {xpath_cond_str}]'
+        new_node = find1(stree, xpath_query)
+        if new_node is not None:
+            results.append(new_node)
     return results
 
 def get_node(stree: SynTree, meta: etree.Element, xpath_cond="", annotation=False) -> SynTree:
@@ -2720,10 +2739,10 @@ mdnameonlyxpathtemplate = """.//xmeta[@name="{mdname}"]"""
 ptposxpathtemplate = './/node[@pt and @begin="{position}"]'
 
 
-def mdbasedquery(stree: SynTree, mdname: str, mdvalue: str) -> List[SynTree]:
+def mdbasedquery(stree: SynTree, mdname: str, mdvalue: Optional[str] = None) -> List[SynTree]:
     '''
     The function *mdbasedquery* searches for metadata in *stree* with name = *mdname*
-    and value = *mdvalue*. It then obtains the position of the node to which the
+    and value = *mdvalue* (if present). It then obtains the position of the node to which the
     metadata apply, and next finds all nodes with that position as value for its *begin* attribute.
     '''
     mdnamemdxpath = mdnameonlyxpathtemplate.format(
@@ -2731,9 +2750,13 @@ def mdbasedquery(stree: SynTree, mdname: str, mdvalue: str) -> List[SynTree]:
     mdnamemds = stree.xpath(mdnamemdxpath)
     results = []
     for mdnamemd in mdnamemds:
-        valuestr = mdnamemd.attrib['value']
-        thevaluelist = eval(valuestr) if '[' in valuestr else [valuestr]
-        if mdvalue in thevaluelist:
+        if mdvalue is not None:
+            valuestr = mdnamemd.attrib['value']
+            thevaluelist = eval(valuestr) if '[' in valuestr else [valuestr]
+            ok = mdvalue in thevaluelist
+        else:
+            ok = True
+        if ok:
             annotatedposstr = mdnamemd.attrib['annotatedposlist']
             if annotatedposstr != '':
                 mdbeginval = annotatedposstr[1:-1]

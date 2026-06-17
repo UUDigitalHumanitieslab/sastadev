@@ -12,6 +12,8 @@ currentanalysisfolder = currentfolder
 current_sasfolder = currentfolder
 corrfolder = 'corr'
 nocorrfolder = 'nocorr'
+gramerr_suffix = '_analysis_gramerr'
+gramerr_tsv_suffix = '_analysis_gramerr.tsv'
 overallsasfolder = '_SAS_overall'
 previousanalysisfolder = 'previous'
 previous_sasfolder = 'previous'
@@ -37,6 +39,7 @@ persistentfolder = 'persistent'
 resultsfolder = 'results'
 sas_analyses_folder = 'sas_analyses'
 sasanalysissuffix = '_sasanalysis'
+sasanalysistsvsuffix = '_sasanalysis.tsv'
 sasfolder = 'SAS'
 sasimpact_sheetname = 'SAS_impact'
 sas_mismatches_filename = 'sas_mismatches.xlsx'
@@ -74,3 +77,7 @@ platinumeditedsuffix = '.platinum-edited.tsv'
 
 errorsummarysuffix = '_errorsummary'
 errorloggingsuffix = '_errorlogging'
+
+analysis_mode = 0
+sas_mode = 1
+gramerr_mode = 2

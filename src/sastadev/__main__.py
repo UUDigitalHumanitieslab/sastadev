@@ -158,7 +158,7 @@ from sastadev.childesspellingcorrector import (children_correctionsdict, childre
 from sastadev.conf import settings
 from sastadev.constants import (analysissuffix, bronzefolder, bronzesuffix,
                                 byuttscoressuffix, checksuffix,
-                                correctedsuffix, formsfolder,
+                                correctedsuffix, formsfolder, gramerr_suffix,
                                 intreebanksfolder, loggingfolder,
                                 outtreebanksfolder, resultsfolder, sasanalysissuffix,
                                 silverfolder, silverpermfolder, silversuffix)
@@ -181,7 +181,7 @@ from sastadev.history import (adult_samplecorrections,
 from sastadev.macros import expandmacros
 from sastadev.methods import Method, supported_methods, treatmethod
 from sastadev.mismatches import exactmismatches, informcol, literalmissedmatches, samplecol, uttidcol
-from sastadev.mk_analysis_table import mk_analysis_table, AnalysisTableParameters, get_qid_reskeys
+from sastadev.mk_analysis_table import mk_analysis_table, AnalysisTableParameters, get_qid_reskeys, g_analysis, g_errors
 # from sastadev.parsetreestore import storedparsesdict, storedparsesfullname
 from sastadev.permcomments import (getallcomments, pcheaders,
                                    platinumcheck_column_widths)
@@ -1406,11 +1406,11 @@ def main():
 
     qid_reskeys = get_qid_reskeys(allresults, themethod)
 
-    # statement to fill the atp object:
+    # statement to fill the atp object for grammatical analysis:
     atp = AnalysisTableParameters(allresults=allresults, exactgoldscores=exactgoldscores,
                                   exactsilverscores=exactsilverscores, themethod=themethod, invalidqueries=invalidqueries,
                                   platinuminfilefound=platinuminfilefound, infilename=options.infilename, allannutts=allannutts,
-                                  reffilename=reffilename, qid_reskeys=qid_reskeys)
+                                  reffilename=reffilename, qid_reskeys=qid_reskeys, selection=g_analysis)
 
     analysis_table = mk_analysis_table(atp)
     (base, ext) = os.path.splitext(options.infilename)
@@ -1418,12 +1418,33 @@ def main():
         resultspath, corefilename + analysissuffix + tsvext + txtext)
     # outfile = open(outputfullname, 'w', encoding='utf8')
     #
-    outxlsx = os.path.join(resultspath, corefilename + "_analysis" + xlsxext)
+    outxlsx = os.path.join(resultspath, corefilename + analysissuffix + xlsxext)
     analysis_column_widths = {'A:AZ': 8.11}
     outworkbook = mkworkbook(outxlsx, [resultsheaderrow], analysis_table, freeze_panes=(4,1),
                              column_widths=analysis_column_widths )
     outworkbook.close()
     writecsv(analysis_table, outputfullname, header=resultsheaderrow)
+
+    # statement to fill the atp object for grammatical errors:
+    atp = AnalysisTableParameters(allresults=allresults, exactgoldscores=exactgoldscores,
+                                  exactsilverscores=exactsilverscores, themethod=themethod, invalidqueries=invalidqueries,
+                                  platinuminfilefound=platinuminfilefound, infilename=options.infilename, allannutts=allannutts,
+                                  reffilename=reffilename, qid_reskeys=qid_reskeys, selection=g_errors)
+
+    analysis_table = mk_analysis_table(atp)
+    (base, ext) = os.path.splitext(options.infilename)
+    outputfullname = os.path.join(
+        resultspath, corefilename + gramerr_suffix + tsvext + txtext)
+    # outfile = open(outputfullname, 'w', encoding='utf8')
+    #
+    outxlsx = os.path.join(resultspath, corefilename + gramerr_suffix + xlsxext)
+    analysis_column_widths = {'A:AZ': 8.11}
+    outworkbook = mkworkbook(outxlsx, [resultsheaderrow], analysis_table, freeze_panes=(4,1),
+                             column_widths=analysis_column_widths )
+    outworkbook.close()
+    writecsv(analysis_table, outputfullname, header=resultsheaderrow)
+
+
 
     # statement to fill the atp object for sas-results:
 
@@ -1436,7 +1457,7 @@ def main():
     atp = AnalysisTableParameters(allresults=sas_allresults, exactgoldscores=exactgoldscores,
                                   exactsilverscores=exactsilverscores, themethod=themethod, invalidqueries=invalidqueries,
                                   platinuminfilefound=platinuminfilefound, infilename=options.infilename, allannutts=allannutts,
-                                  reffilename=reffilename, qid_reskeys=qid_reskeys)
+                                  reffilename=reffilename, qid_reskeys=qid_reskeys, selection=g_analysis)
     sas_analysis_table = mk_analysis_table(atp)
     (base, ext) = os.path.splitext(options.infilename)
     sas_outputfullname = os.path.join(
@@ -1478,7 +1499,7 @@ def main():
     # breakpoint()
 
     wb = mkworkbook(platinumcheckxlfullname, pcheaders, allrows, freeze_panes=(1, 9),
-                    column_widths=platinumcheck_column_widths, filters=[(informcol, "inform == yes")])
+                    column_widths=platinumcheck_column_widths, filters=[(informcol, "inform != no")])
     wb.close()
 
     writecsv(allrows, platinumcheckfilename, header=pcheaders[0])

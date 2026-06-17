@@ -41,6 +41,7 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, attach_meta
                                         updatetokenpos)
 from sastadev.treetransform import (adaptlemmas, dotreetransformations)
 
+gav = getattval
 ampersand = '&'
 
 corr0, corr1, corrn = '0', '1', 'n'
@@ -201,11 +202,47 @@ def adaptpv(node):
         node.attrib['postag'] = 'WW(pv,tgw,mv)'
 
 
-def get_newnode_from_celex(word: str, node:SynTree) -> Optional[SynTree]:
+def wrong_get_newnode_from_celex(word: str, node:SynTree) -> Optional[SynTree]:
     """
     check whether word has a pt equal to the node's pt in CELEX. If so, create a node for one of them with
     DCOI-properties derived from the CELEX properties. If the inflectional properties differ, return it as the
     result. In all other cases, return None . Example word=pas, node for past
+
+    modification: we first see if there is a candidate that satisfies the criteria and has the same emma, otherwise we take the ones with a different lemma
+    :param word:
+    :param node:
+    :return:
+    """
+    nodept = getattval(node, 'pt')
+    nodelemma = getattval(node, 'lemma')
+    wordinfos = getwordposinfo(word, nodept)
+    same_lemma_wordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[3] == nodelemma]
+    for wordinfo in same_lemma_wordinfos:
+        (pt, dehet, infl, lemma) = wordinfo
+        dcoi_infl = celex2dcoi(word, infl, lemma)
+        if is_infl_different(dcoi_infl, node.attrib):
+            newnodeattrib = mkattrib(word, lemma, pt, dcoi_infl)
+            newnode = etree.Element('node', attrib=newnodeattrib)
+            return newnode
+    # if no node has been returned yet we try all other cases
+    diff_lemma_wordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[3] != nodelemma]
+    for wordinfo in diff_lemma_wordinfos:
+        (pt, dehet, infl, lemma) = wordinfo
+        dcoi_infl = celex2dcoi(word, infl, lemma)
+        if is_infl_different(dcoi_infl, node.attrib):
+            newnodeattrib = mkattrib(word, lemma, pt, dcoi_infl)
+            newnode = etree.Element('node', attrib=newnodeattrib)
+            return newnode
+
+    return None
+
+
+def get_newnode_from_celex(word: str, node: SynTree) -> Optional[SynTree]:
+    """
+    check whether word has a pt equal to the node's pt in CELEX. If so, create a node for one of them with
+    DCOI-properties derived from the CELEX properties. If the inflectional properties differ, return it as the
+    result. In all other cases, return None . Example word=pas, node for past
+
     :param word:
     :param node:
     :return:
@@ -270,6 +307,7 @@ def smartreplace(node: SynTree, word: str, method: Method) -> SynTree:
             not isrobustnoun(newnode) and \
             newnodelemma not in nochildwords and (word, nodeword) not in smartreplacepairs:
         result = newnode
+        result.set('original_lemma', nodelemma)
         if nodept == 'ww' and '_' in nodelemma and newnodelemma in nodelemma and '_' not in newnodelemma:
             # e.g. nodelemma == 'op_hebben', newnodelemma='hebben'
             cpseppos = nodelemma.find('_')
@@ -286,12 +324,13 @@ def smartreplace(node: SynTree, word: str, method: Method) -> SynTree:
             adaptpv(result)
     else:
         result = copy(node)
-        result.attrib['word'] = word
+        result.set('word', word)
         nodept = getattval(node, 'pt')
+        result.set('original_lemma', newnodelemma)
         if is_er_pronoun(nodelemma) and word not in ervzvariantsdict:
-            result.attrib['lemma'] = word
+            result.set('lemma', word)
         elif '_' in node.attrib['lemma'] and countsyllables(word) == 1 and nodept == 'n':
-            result.attrib['lemma'] = word
+            result.set('lemma', word)
     return result
 
 
@@ -904,6 +943,8 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
                 contextoldnode = contextualise(oldnode, newnode)
                 if curbackplacement == bpl_node_nolemma:
                     newnodelemma = getattval(newnode, 'lemma')
+                    oldnodelemma = getattval(oldnode, 'lemma')
+                    contextoldnode.set('original_lemma', oldnodelemma)
                     contextoldnode.set('lemma', newnodelemma)
                 thetree = transplant_node(newnode, contextoldnode, thetree)
         elif curbackplacement == bpl_paspast:
@@ -967,7 +1008,8 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
             if curbackplacement == bpl_wordlemma:
                 if newnode is not None and oldnode is not None:
                     if 'lemma' in newnode.attrib and 'lemma' in oldnode.attrib:
-                        newnode.attrib['lemma'] = oldnode.attrib['lemma']
+                        newnode.set('original_lemma', gav(newnode,'lemma'))
+                        newnode.set('lemma', gav(oldnode, 'lemma'))
                         thetree = adaptsentence(thetree)
                     else:
                         if 'lemma' not in oldnode.attrib:

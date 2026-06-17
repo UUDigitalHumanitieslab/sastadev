@@ -17,6 +17,8 @@ from sastadev.conf import settings
 from sastadev.sastatypes import WordInfo
 
 
+wordinfo_exceptions = {'Efteling': [('n', '1', 'e', 'Efteling')], 'efteling': [('n', '1', 'e', 'Efteling')]}
+
 def getalpinowordinfo(word: str) -> List[WordInfo]:
     '''
     The function *getalpinowordinfo* parses the input word in isolation, extracts its properties and returns some of
@@ -76,7 +78,13 @@ def getdehetwordinfo(wrd: str, dehet=None) -> Tuple[List[WordInfo], str]:
     .. autofunction:: sastadev.alpino::getalpinowordinfo
     '''
 
-    wordinfos = lexicon.getwordinfo(wrd)
+    wordinfos = []
+    if wrd in wordinfo_exceptions:
+        wordinfos = wordinfo_exceptions[wrd]
+        source = 'exceptions'
+
+    if wordinfos == []:
+        wordinfos = lexicon.getwordinfo(wrd)
 
     # we only want to consider nouns or words of unknown word class (such as kopje in CELEX)
     raw_wordinfos = [wordinfo for wordinfo in wordinfos if wordinfo[0] in ['n', 'None']]

@@ -219,7 +219,7 @@ def cond20(ns, _, i): return pt(ns[1]) == 'vnw' and getattval(ns[1], 'vwtype') =
 def cond21(ns, _, i): return pt(ns[1]) =='adj' and getattval(ns[1], 'buiging') == 'met-e' and \
                             pt(ns[2]) == 'n' and getattval(ns[2], 'getal') == 'ev' and \
                             getattval(ns[2], 'genus') == 'onz' and \
-                            not is_def_det(ns[0])
+                            not is_def_det(ns[0]) and not(word(ns[0]) == 'onder' and word(ns[1]) == 'andere')
 
 ngram1 = Ngram(4, cond1)
 ngram2 = Ngram(4, cond2)

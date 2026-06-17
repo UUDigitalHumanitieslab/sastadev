@@ -2,13 +2,17 @@ from typing import List
 
 from sastadev.conf import settings
 from sastadev.lexicon import isalpinonouncompound
+from sastadev.metadata import defaultpenalty
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.smallclauses import mkinsertmeta, realword, word
 from sastadev.tokenmd import TokenListMD
 from sastadev.treebankfunctions import getattval, getnodeyield, mktoken2nodemap
 
+gav = getattval
 lonelytoe = 'Lonely toe'
+een_beetje = 'lonely beetje'
+
 
 def isdet(node) -> bool:
     nodept = getattval(node, 'pt')
@@ -113,3 +117,44 @@ def isnominal(node: SynTree) -> bool:
 #         ldnode = ldclause.xpath(' node[@rel="ld" and (@pt="n" or @cat="np")]')
 #         ldnode.attrib["rel"] = "su"
 #     return newstree
+
+
+
+def beetje(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
+
+    insertion_done = False
+    leaves = getnodeyield(tree)
+    reducedleaves = [leave for leave in leaves if realword(leave)]
+    tokens = tokensmd.tokens
+    treewords = [word(tokennode) for tokennode in leaves]
+    tokenwords = [token.word for token in tokens if not token.skip]
+    if treewords != tokenwords:
+        settings.LOGGER.warning(
+            'Token mismatch: {} v. {}'.format(treewords, tokenwords))
+        return []
+    token2nodemap = mktoken2nodemap(tokens, tree)
+    metadata = tokensmd.metadata
+
+    newtokens = []
+    for i, token in enumerate(tokens):
+        prevtoken = tokens[i-1] if i > 0 else None
+        if token.word == 'beetje':
+            prevtoken_node = token2nodemap[prevtoken.pos]
+            prevtoken_pt = gav(prevtoken_node, 'pt')
+            if prevtoken_pt == 'adj':
+                prevprevtoken = tokens[i-2] if i > 0 else None
+                art_token = prevprevtoken
+            else:
+                art_token = prevtoken
+            art_token_node = token2nodemap[art_token.pos]
+            art_token_lemma = gav(art_token_node, 'lemma')
+            if art_token_lemma != 'een':
+                insert_position = art_token.pos if art_token is not None else 0
+                een_token = Token('een', insert_position, subpos=5)
+                insert_tokens = [een_token]
+                metadata += mkinsertmeta(insert_tokens, newtokens, cat=een_beetje, penalty=-defaultpenalty)
+                newtokens.append(een_token)
+                insertion_done = True
+        newtokens.append(token)
+    result = [TokenListMD(newtokens, metadata)] if insertion_done else []
+    return result
