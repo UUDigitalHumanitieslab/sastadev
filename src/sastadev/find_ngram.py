@@ -2,9 +2,12 @@ import os
 
 from sastadev.conf import settings
 from sastadev.constants import intreebanksfolder, outtreebanksfolder
+from sastadev.datasets import alldatasets, trainingdatasets, testdatasets
 from sastadev.dedup import filledpauseslexicon
+from sastadev.sastatypes import FileName
 from sastadev.treebankfunctions import (getattval, getnodeyield, getstree,
                                         getuttid, getyield, onbvnwdet)
+from typing import List
 
 digits2 = r'\d\d'
 
@@ -23,18 +26,15 @@ def shorten(fullname):
     return basename
 
 
-def getpaths(dataset):
-    result = [os.path.join(settings.DATAROOT, dataset, intreebanksfolder),
-              os.path.join(settings.DATAROOT, dataset, outtreebanksfolder)]
+def getpaths(dataset, source='both'):
+    result = []
+    if source in ['in', 'both']:
+        result += [os.path.join(settings.DATAROOT, dataset, intreebanksfolder)]
+    if source in ['out', 'both']:
+        result += [os.path.join(settings.DATAROOT, dataset, outtreebanksfolder)]
     return result
 
 
-paths = {}
-
-paths[stap] = getpaths('VKLStap')
-paths[asta] = getpaths('VKLASTA')
-paths[tarsp] = getpaths('VKLTarsp')
-paths[dld] = getpaths('Auris')
 
 ext = '.xml'
 
@@ -77,14 +77,23 @@ def findmatches(ngram, leaves):
             matches.append(newmatch)
     return matches
 
+def get_paths(ds, source='both') -> List[FileName]:
+    base_path = os.path.join(settings.DATAROOT, ds.name)
+    results = []
+    if source in ['in', 'both']:
+        results += [os.path.join(base_path, intreebanksfolder)]
+    if source in ['out', 'both']:
+        results += [os.path.join(base_path, outtreebanksfolder)]
+    return results
 
-def getfilenames(ds, session=None):
-    inpath = paths[ds]
+
+def getfilenames(ds, session=None, source='both'):
+    thepaths = get_paths(ds, source)
     if session is not None:
         def cond(x): return (x + 1 == session)
     else:
         def cond(_): return True
-    infullnames = [os.path.join(path, ifn) for path in paths[ds] for ifn in os.listdir(path) if ifn.endswith('.xml')]
+    infullnames = [os.path.join(path, ifn) for path in thepaths for ifn in os.listdir(path) if ifn.endswith('.xml')]
     return infullnames
 
 
@@ -221,6 +230,13 @@ def cond21(ns, _, i): return pt(ns[1]) =='adj' and getattval(ns[1], 'buiging') =
                             getattval(ns[2], 'genus') == 'onz' and \
                             not is_def_det(ns[0]) and not(word(ns[0]) == 'onder' and word(ns[1]) == 'andere')
 
+def cond22(raw_ns, _, i):
+    ns = [n for n in raw_ns if pt(n) != 'let']
+    if len(ns) >= 3:
+        return pt(ns[0]) not in ['vg', 'tsw'] and lemma(ns[1]) in ['die'] and pt(ns[2]) == 'ww' and gav(ns[2], 'wvorm') == 'pv'
+    else:
+        return False
+
 ngram1 = Ngram(4, cond1)
 ngram2 = Ngram(4, cond2)
 ngram3 = Ngram(2, cond3)
@@ -244,12 +260,14 @@ ngram18 = Ngram(2, cond18)  # met dit
 ngram19 = Ngram(2, cond19) # omdat doordat
 ngram20 = Ngram(4, cond20) # heb ik zie ik: pv vnw pv vnw
 ngram21 = Ngram(3, cond21) # een mooie meisje
+ngram22 = Ngram(3, cond22) # (dit is een man) die heeft een mooi jasje
 
 def main():
 
     infullnames = []
-    for ds in [tarsp, asta, stap, dld]:
-        infullnames += getfilenames(ds)
+    thedatasets = trainingdatasets + testdatasets
+    for ds in thedatasets:
+        infullnames += getfilenames(ds, source='in')
 
     # for ds in [asta]:
     #    infullnames += getfilenames(ds, session=4)
@@ -264,7 +282,7 @@ def main():
                 leaves = getnodeyield(tree)
                 cleanleaves = [leave for leave in leaves if getattval(leave, 'word') not in filledpauseslexicon]
                 cleanwordlist = [getattval(leave, 'word') for leave in cleanleaves]
-                matches = findmatches(ngram21, cleanleaves)
+                matches = findmatches(ngram22, cleanleaves)
                 # matches = sipvjpvjsi(cleanleaves, tree)
                 for match in matches:
                     uttid = getuttid(tree)

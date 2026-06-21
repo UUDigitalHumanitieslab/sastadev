@@ -519,7 +519,7 @@ kijkvuadverbs = ['eens', 'dan', 'hier', 'zo']
 
 chatcodes = ["xxx", "xx", "yyy", "yy"]
 
-shortrep_exceptions = ['de']
+shortrep_exceptions = ['de', 'we', 'ze', 'me', 'je', 'te']
 
 
 hebben_zijn_map = {'hebben': 'zijn', 'gehad': 'geweest', 'hebbend': 'zijnd',

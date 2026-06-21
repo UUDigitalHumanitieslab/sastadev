@@ -592,6 +592,7 @@ def combinesorted(toklist1: List[Token], toklist2: List[Token]) -> List[Token]:
     return sortedresult
 
 def wasem(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    emfound = False
     rawtokens = tokensmd.tokens
     newmetadata = copy.deepcopy(tokensmd.metadata)
     newtokens = []
@@ -611,10 +612,11 @@ def wasem(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListM
                         penalty=defaultpenalty, backplacement=bpl_none
                         )
             newmetadata.append(meta)
+            emfound = True
         else:
             newtokens.append(token)
-    result = TokenListMD(newtokens, newmetadata)
-    return [result]
+    result = [TokenListMD(newtokens, newmetadata)] if emfound else []
+    return result
 
 def ezo2zon(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
     rawtokens = tokensmd.tokens
@@ -691,6 +693,7 @@ def getauxcorrections(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]
 
     """
     allresults = []
+    aux_corrected = False
     tokens = tokensmd.tokens
     reducedtokens = [token for token in tokens if not token.skip]
     metadata = copy.deepcopy(tokensmd.metadata)
@@ -729,12 +732,13 @@ def getauxcorrections(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]
                                cat=correctionlabels.syntax,
                                backplacement=bpl_word, source=SASTA)
                 metadata.append(newmeta)
+                aux_corrected = True
             else:
                 newtokens.append(token)
         else:
             newtokens.append(token)
     newtokensmd = TokenListMD(newtokens, metadata)
-    allresults = [newtokensmd]
+    allresults = [newtokensmd] if aux_corrected else []
     return allresults
 
 def getcorrections(rawtokens: List[Token], correctionparameters: CorrectionParameters,

@@ -1,11 +1,12 @@
 import copy
-from typing import List
+from typing import Any, Callable, List, Optional
 
 from lxml import etree
 from sastadev import correctionlabels
 from sastadev.conf import settings
 from sastadev.lexicon import (getinflforms, getwordposinfo, informlexiconpos,
                               pvinfl2dcoi)
+from sastadev.list_functions import pred
 from sastadev.metadata import bpl_node_nolemma, mkSASTAMeta
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree, UttId
@@ -16,6 +17,7 @@ from sastadev.treebankfunctions import (copymodifynode, find1, getattval,
                                         nominal, rbrother, showtree,
                                         simpleshow)
 
+gav = getattval
 debug = False
 
 nominalpts = ['n', 'vnw', 'tw']
@@ -141,6 +143,161 @@ pvnodestringtemplate = """
 """
 
 precedingjequerytemplate = ".//node[@word='je' and @end='{nounbegin}']"
+
+
+def get_dir_distance(node1, node2, nodelist) -> int:
+    node1_pos = None
+    node2_pos = None
+    for i, node in enumerate(nodelist):
+        if node == node1:
+            node1_pos = i
+        if node == node2:
+            node2_pos = i
+    if node1_pos is not None and node2_pos is not None:
+        result = node2_pos - node1_pos
+    else:
+        result = None
+    return result
+
+
+def findclosest(rawcands: List[SynTree], thepv: SynTree, attvals: dict, nodelist:List[SynTree]) -> Optional[SynTree]:
+    cands = [node for node in rawcands
+             if all([gav(node, att) == val for att,val in attvals.items()])]
+    if cands == []:
+        return None
+    mindiff = 100
+    result = None
+    for cand in cands:
+        dirdiff = get_dir_distance(cand, thepv, nodelist)
+        if dirdiff is not None:
+            diff = abs(dirdiff)
+            if diff < mindiff:
+                mindiff = diff
+                result = cand
+    return result
+
+def get_leftmost(thelist: list, cond: Callable = lambda x: True, sortkey: Callable= lambda x: True) -> Any:
+    sorted_list = sorted(thelist, key= sortkey)
+    for el in sorted_list:
+        if cond(el):
+            return el
+    return None
+
+
+
+def find_best_subject(potsubjs: List[SynTree], thepv: SynTree, nodelist, start_from:int=0, used_subjects=[]) -> Optional[SynTree]:
+    """
+    The  word that is most likely the subject of *thepv* if
+    * if it is behind *thepv* and the distance is 1 and it is nominative and there is no equally distant potsubj not preceded by a pv
+    * otherwise if it is the nominative node that is closest to *thepv*
+    * otherwise if it is the leftmost node to the right of the *start_from*
+
+    hij gaat denk ik naar huis
+    gaat hij denk je naar huis
+    hij gaat ik denk naar huis
+    ik denk dat de man het boek koopt
+    """
+    cands = [node for node in potsubjs if int(gav(node, 'begin')) >= start_from]
+    if cands == []:
+        return None
+    closest_cands = []
+    mindiff = 100
+    for cand in potsubjs:
+        dir_distance = get_dir_distance(thepv, cand, nodelist)
+        if dir_distance is not None:
+            diff = abs(dir_distance)
+            if diff <= mindiff:
+                if diff == mindiff:
+                    closest_cands.append((cand, dir_distance))
+                else:
+                    closest_cands = [(cand, dir_distance)]
+                mindiff = diff
+    leftmost_cand = get_leftmost(cands,
+                                 cond=lambda x: int(gav(x, 'begin')) >= start_from and x not in used_subjects,
+                                 sortkey=lambda x: int(gav(x, 'begin')))
+
+    # there can be at  most 2, one before, one after thepv
+    beforenodes = [(node, dd) for node, dd in closest_cands if dd < 0]
+    behindnodes = [(node, dd) for node, dd in closest_cands if dd > 0]
+    beforenode = beforenodes[0] if beforenodes else None
+    behindnode = behindnodes[0] if behindnodes else None
+    before_is_perspro = (beforenode is not None and gav(beforenode[0], 'pt') == 'vnw' and
+                         gav(beforenode[0], 'vwtype') in ['pers', 'pr'])
+    behind_is_perspro = (behindnode is not None and gav(behindnode[0], 'pt') == 'vnw' and
+                         gav(behindnode[0], 'vwtype') in ['pers', 'pr'])
+    before_case = gav(beforenode[0], 'naamval') if beforenode is not None else ''
+    behind_case = gav(behindnode[0], 'naamval') if behindnode is not None else ''
+    if beforenode is None and behindnode is not None:
+        result = behindnode[0]
+    elif beforenode is not None and behindnode is None:
+        if before_is_perspro and before_case in ['nomin', 'stan'] and beforenode not in used_subjects:
+            result = beforenode[0]
+        else:
+            result = leftmost_cand
+    elif beforenode is None and behindnode is None:   # should not occur
+        result = None
+        settings.LOGGER.error(f'Error determining before and behind node: {closest_cands}')
+    elif beforenode is not None and behindnode is not None:
+        if behind_is_perspro and behind_case in ['nomin', 'stan'] and behindnode not in used_subjects:
+            prev_pv = pred(thepv, nodelist)
+            result = behindnode[0] if prev_pv not in potsubjs else beforenode[0]
+        else:
+            result = leftmost_cand
+    else:
+        #cannot occur
+        result = None
+    return result
+
+
+def find_best_nominative(potsubjs: List[SynTree], thepv: SynTree, nodelist) -> Optional[SynTree]:
+    """
+    The nominative word that is most likely the subject of *thepv* if
+    * if it is behind *thepv* and the distance is 1 and there is no equally distant potsubj not preceded by a pv
+    * otherwise if it is the node that is closest to *thepv*
+
+    hij gaat denk ik naar huis
+    gaat hij denk je naar huis
+    hij gaat ik denk naar huis
+    """
+    cands = [node for node in potsubjs if gav(node, 'naamval') == 'nomin']
+    if cands == []:
+        return None
+    closest_cands = []
+    mindiff = 100
+    for cand in cands:
+        dir_distance = get_dir_distance(thepv, cand, nodelist)
+        if dir_distance is not None:
+            diff = abs(dir_distance)
+            if diff <= mindiff:
+                if diff == mindiff:
+                    closest_cands.append((cand, dir_distance))
+                else:
+                    closest_cands = [(cand, dir_distance)]
+                mindiff = diff
+
+    # there can be at  most 2, one before, one after thepv
+    beforenodes = [(node, dd) for node, dd in closest_cands if dd < 0]
+    behindnodes = [(node, dd) for node, dd in closest_cands if dd > 0]
+    beforenode = beforenodes[0] if beforenodes else None
+    behindnode = behindnodes[0] if behindnodes else None
+    if beforenode is None and behindnode is not None:
+        result = behindnode[0]
+    elif beforenode is not None and behindnode is None:
+        result = beforenode[0]
+    elif beforenode is None and behindnode is None:   # should not occur
+        result = None
+        settings.LOGGER.error(f'Error determining before and behind node: {closest_cands}')
+    elif beforenode is not None and behindnode is not None:
+        prev_pv = pred(thepv, nodelist)
+        result = behindnode[0] if prev_pv not in potsubjs else beforenode[0]
+    else:
+        #cannot occur
+        result = None
+    return result
+
+
+
+
 
 
 def findfirst(nodelist, att, values):
@@ -458,7 +615,10 @@ def getsvacorrectedutt(snode, thepv, tokens, metadata):
     return results
 
 
-def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> List[TokenListMD]:
+
+
+
+def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId, start_from: int = 0, used_subjects=[]) -> List[TokenListMD]:
     '''
 
     :param tokensmd: the input sequence of tokens plus metadata
@@ -505,6 +665,8 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> 
 
 
     '''
+    overall_results = []
+    new_used_subjects = copy.deepcopy(used_subjects)
     debug = False
     if debug:
         showtree(rawtree, text='rawtree')
@@ -516,12 +678,16 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> 
         metadata = copy.deepcopy(tokensmd.metadata)
         ltokens = len(tokens)
         newtokens = []
+        nodeyield = getnodeyield(tree)
 
-        pvs = getpvs(tokensmd, tree, uttid)
+        rawpvs = getpvs(tokensmd, tree, uttid)
+        pvs = [pv for pv in rawpvs if int(gav(pv, 'begin')) >= start_from]
+        if pvs == []:
+            return []
         abnormalobj2matches = tree.xpath(abnormalobj2sentencexpath)
-        if len(pvs) != 1:
-            results = []
-        elif (tree.xpath(normalsentencexpath) != [] and abnormalobj2matches == []) or \
+        # if len(pvs) != 1:
+        #     results = []
+        if (tree.xpath(normalsentencexpath) != [] and abnormalobj2matches == []) or \
                 tree.xpath(normalwhqsentencexpath) != []:
             thesubjs = tree.xpath(subjxpath)
             if thesubjs != []:
@@ -551,9 +717,10 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> 
             if potsubjs == []:
                 results = []
             else:
-                nominativenode = findfirst(potsubjs, 'naamval', {'nomin'})
-                if nominativenode is not None:
-                    thesubj = nominativenode
+                subject_node = find_best_subject(potsubjs, thepv, nodeyield, start_from=start_from, used_subjects=used_subjects)
+                if subject_node is not None:
+                    thesubj = subject_node
+                    new_used_subjects.append(thesubj)
                 # next left out because dealt with in a different way
                 #   elif pvstype == 'imparative' and zijnimperativeok(thepv) and not modalinv(thepv):
                 #       sunode = findfirst(potsubjs, 'rel', {'su'})
@@ -569,8 +736,7 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> 
                 #              jenode = etree.fromstring(jenodestring)
                 #              thesubj = jenode
                 else:
-                    sortedpotsubjs = sorted(potsubjs, key=lambda x: getattval(x, 'end'))
-                    thesubj = sortedpotsubjs[0]
+                    return []
                 thesubjlemma = getattval(thesubj, 'lemma')
                 if thesubjlemma == 'u':
                     usgnode = getnode(usgnodestringtemplate, thesubj)
@@ -583,7 +749,13 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId) -> 
                 else:
                     results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
 
-        return results
+        overall_results += results
+        new_start_from = int(gav(thepv, 'end'))
+        for result in results+[tokensmd]:
+            overall_results += getsvacorrections(result, rawtree, uttid, start_from=new_start_from,
+                                                 used_subjects=new_used_subjects)
+
+        return overall_results
 
 
 def getpersons(vnode):
