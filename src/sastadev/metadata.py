@@ -135,7 +135,7 @@ class Meta:
         self.xmlformat = xmlformat
 
     def __repr__(self):
-        reprfmstr = 'Meta({},{},annotationwordlist={},annotationposlist={},annotatedposlist{},annotatedwordlist={},' \
+        reprfmstr = 'Meta({},{},annotationwordlist={},annotationposlist={},annotatedposlist={},annotatedwordlist={},' \
                     ' atype={}, cat={}, subcat={}, source={}, penalty={}, backplacement={})'
         result = reprfmstr.format(repr(self.name), repr(self.value), repr(self.annotationwordlist),
                                   repr(self.annotationposlist),

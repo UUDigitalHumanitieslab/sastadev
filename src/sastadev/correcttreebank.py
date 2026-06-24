@@ -26,6 +26,7 @@ from sastadev.sastatoken import Token, insertinflate, tokenlist2stringlist, toke
 from sastadev.sastatypes import (AltId, CorrectionMode, ErrorDict, MetaElement,
                                  MethodName, Position, PositionStr,
                                  SynTree, Targets, Treebank, UttId)
+from sastadev.stringfunctions import separate_punctuation
 from sastadev.syllablecount import countsyllables
 from sastadev.targets import get_mustbedone
 from sastadev.tblex import isrealwordnode
@@ -35,7 +36,7 @@ from sastadev.treebankfunctions import (adaptsentence, add_metadata, attach_meta
                                         getptsubclass,
                                         getsentid, getsentence, gettokenpos_str, gettokposlist, getxsid,
                                         getyield, is_infl_different, mkattrib, myfind,
-                                        showflatxml,
+                                        showflatxml, show_nodeyield,
                                         showtree, simpleshow, subclasscompatible, transplant_node,
                                         treeinflate, treewithtokenpos,
                                         updatetokenpos)
@@ -620,6 +621,8 @@ def bare_angled_brackets_replace_tree(stree: SynTree) -> SynTree:
     if origutt is None:
         return stree
     cleanutt, chatmetadata = cleantext(origutt, False, tokenoutput=False)
+    # surround punctuation by spaces because Alpino does it incorrectly
+    cleanutt = separate_punctuation(cleanutt)
     if any([meta.name == bare_angled_brackets for meta in chatmetadata]):
         newstree = settings.PARSE_FUNC(cleanutt)
         if newstree is None:
@@ -1036,7 +1039,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
             pass
         elif curbackplacement == bpl_delete:
             orignodebegin = str(meta.annotatedposlist[-1])
-            # just gather the begin sof the nodes to be deleted
+            # just gather the begins of the nodes to be deleted
             nodes2deletebegins.append(orignodebegin)
         elif curbackplacement == bpl_indeze:
             nodebegin = meta.annotatedposlist[-1]

@@ -4,7 +4,7 @@ from sastadev.filefunctions import get_corrected_tree_fullname
 from sastadev.sastatypes import SynTree
 from sastadev.macros import expandmacros
 from sastadev.test_functions import test_f
-from sastadev.treebankfunctions import getattval as gav
+from sastadev.treebankfunctions import getattval as gav, indextransform
 from typing import Callable, List
 
 
@@ -31,6 +31,7 @@ synsel = {('doen', 'ww') : [[su, obj1], [su, vc], [su, si('mod', '@lemma="zo"')]
           ('hebben', 'ww'): [[su, obj1], [su, vc], [su, si('svp', '@lemma="vrij"')]],
           ('zijn', 'ww'): [[su, predc], [su, pc], [su, vc ], [su, ld],
                            [su, si('mod', '%new_STAP_BB_p%')], [su, predm],
+                           [su, si('mod', '%new_STAP_BB_t% and ../node[@rel="hd" and @wvorm="vd"]')],     # ik ben nog een keer geweest, ik ben in januari geweest
                            [si('su', f'{defpron}'), si('mod', '@cat="cp"')]],
           ('willen', 'ww'): [[su, obj1], [su, vc], [su, ld], [su, mod]],
           ('kennen', 'ww'): [[su, obj1]],
@@ -52,8 +53,9 @@ def extend_syns(syns, head) -> dict:
 
 
 
-def omitted_phrase(stree: SynTree) -> List[SynTree]:
+def omitted_phrase(in_stree: SynTree) -> List[SynTree]:
     results = []
+    stree = indextransform(in_stree)
     heads = stree.xpath('.//node[@word and @rel="hd"]')
     for head in heads:
         # exclude imperatives

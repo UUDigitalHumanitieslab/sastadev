@@ -65,7 +65,7 @@ from sastadev.toe import lonelytoe, beetje
 from sastadev.tokenmd import TokenListMD, TokenMD, mdlist2listmd
 from sastadev.treebankfunctions import (fatparse, getattval, getmeta, getnodeyield, gettokenpos_str, getxsid,
                                         inflate_step, isdefdet, keycheck,
-                                        mktoken2nodemap, showtree)
+                                        mktoken2nodemap, requires_plural_tw, showtree)
 from sastadev.treetransform import dotreetransformations
 from sastadev.wrong_ie_dims import get_je_from_wrong_ie_dim
 
@@ -2613,8 +2613,3 @@ def get_plural(node: SynTree) -> List[str]:
         newwords = getinflforms(lemma, ncode, 'm')
     return newwords
 
-def requires_plural_tw(node: SynTree) -> bool:
-    lemma = gav(node, 'lemma')
-    pt = gav(node, 'pt')
-    result = pt == 'tw' and lemma != 'één'
-    return result

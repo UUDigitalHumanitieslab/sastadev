@@ -687,6 +687,16 @@ def relative_edit_distance(wrd1: str, wrd2:str) -> float:
     result = ed / maxlen
     return result
 
+def separate_punctuation(sent: str) -> str:
+    result = ''
+    for c in sent:
+        if c in punctuationchars and c !="'":
+            result += f' {c} '
+        else:
+            result += c
+    return result
+
+
 if __name__ == '__main__':
     test()
     # testpuncs()

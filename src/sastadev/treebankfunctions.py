@@ -2089,21 +2089,39 @@ def childless(node: SynTree):
     result = children == []
     return result
 
+def get_bare_index_nodes(stree: SynTree, words_only=False) -> List[SynTree]:
+    full_word_index_nodes = stree.xpath('.//node[@word and @index]')
+    bare_index_nodes = stree.xpath('.//node[not(@word) and not(@cat) and @index]')
+    if words_only:
+        full_word_indexes = [gav(n, 'index') for n in full_word_index_nodes]
+        results = [n for n in bare_index_nodes if gav(n, 'index') in full_word_indexes]
+    else:
+        results = bare_index_nodes
+    return results
+
+
+def is_bare_index_node(node: SynTree) -> bool:
+    result = 'word' not in node.attrib and 'cat' not in node.attrib and 'index' in node.attrib
+    return result
+
 
 def deletewordnodes(tree: SynTree, begins: List[Position], wordsonly=False) -> SynTree:
     newtree = deepcopy(tree)
-    newtree, metadata = deletewordnodes2(newtree, begins, wordsonly=wordsonly)
+    word_bare_index_nodes = get_bare_index_nodes(newtree, words_only=True)
+    word_bare_indexes = [gav(n, 'index') for n in word_bare_index_nodes]
+    newtree, metadata = deletewordnodes2(newtree, begins, wordsonly=wordsonly, word_bare_indexes=word_bare_indexes)
     newtree = adaptsentence(newtree)
     return newtree, metadata
 
 
-def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False) -> Tuple[Optional[SynTree], List[Meta]]:
+def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
+                     word_bare_indexes: List[str]=[]) -> Tuple[Optional[SynTree], List[Meta]]:
     result_metadata = []
     if tree is None:
         return tree, []
     for child in tree:
         if child.tag == 'node':
-            newchild, newchild_metadata = deletewordnodes2(child, begins, wordsonly=wordsonly)
+            newchild, newchild_metadata = deletewordnodes2(child, begins, wordsonly=wordsonly, word_bare_indexes=word_bare_indexes)
             result_metadata += newchild_metadata
 
         else:
@@ -2112,8 +2130,10 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False) -> 
         if child.tag == 'node':
             childbegin = getattval(child, 'begin')
             childbeginint = int(childbegin)
-            childisaword = 'word' in child.attrib
-            childmustgo = childisaword if wordsonly else True
+            child_index = gav(child, 'index')
+            # we must delet words
+            child_is_a_word = 'word' in child.attrib
+            childmustgo = child_is_a_word if wordsonly else True
             if childbeginint in begins and childless(child) and childmustgo:
                 associate_node = get_associate(child)
                 # add associate metadata
@@ -2138,6 +2158,10 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False) -> 
                 result_metadata.append(associate_meta)
 
                 tree.remove(child)
+            # we must also delete bare index nodes with with a word as antecedent
+            if is_bare_index_node(child) and childbeginint in begins:
+                if child_index in word_bare_indexes:
+                    tree.remove(child)
             # if its children have been deleted earlier
             elif 'cat' in child.attrib and childless(child):
                 tree.remove(child)
@@ -2779,7 +2803,25 @@ def get_word(meta: SynTree, attr: str) -> Optional[str]:
     word = word_list[0] if word_list != [] else None
     return word
 
+def show_nodeyield(stree: SynTree) -> str:
+    node_list = getnodeyield(stree)
+    result = show_node_list(node_list)
+    return result
 
+def show_node_list(node_list: List[SynTree]) -> str:
+    show_list = [show_node(n) for n in node_list]
+    result = ', '.join(show_list)
+    return result
+
+def show_node(node: SynTree) -> str:
+    result = f'{gav(node, 'begin')}:{gav(node, 'word')}'
+    return result
+
+def requires_plural_tw(node: SynTree) -> bool:
+    lemma = gav(node, 'lemma')
+    pt = gav(node, 'pt')
+    result = pt == 'tw' and lemma not in ['één', '1']
+    return result
 
 if __name__ == '__main__':
     # test()
