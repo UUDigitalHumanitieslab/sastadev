@@ -2117,7 +2117,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
             if (zerel == '--' or zerel == 'mwp' or (zerel == 'obj1' and zeparentcat == 'pp')) and 'n' in nexttokenpts:
                 newword = "z'n" if token.word in ['ze', 'su'] else "m'n"
                 newtokenmds = updatenewtokenmds(newtokenmds, token, [newword], beginmetadata,
-                                                name=correctionlabels.pronunciationvariant, value='N-less informal possessive pronoun',
+                                                name=correctionlabels.informalpronunciation, value='N-less informal possessive pronoun',
                                                 cat=correctionlabels.pronunciation, backplacement=bpl_word,
                                                 penalty=-defaultpenalty)
 

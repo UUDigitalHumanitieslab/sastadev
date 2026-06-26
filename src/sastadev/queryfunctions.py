@@ -10,8 +10,8 @@ from sastadev.deregularise import correctinflection, overgen, wrongovergen
 from sastadev.find_ngram import findmatches, ngram21
 from sastadev.iedims import getjeforms
 from sastadev.imperatives import wx, imperatives
-from sastadev.lexicon import (vuwordslexicon, filledpauseslexicon, getwordposinfo, informlexicon,
-                              type_I_adj_n_pairs, known_pronunciation_variants)
+from sastadev.lexicon import (vuwordslexicon, filledpauseslexicon, getwordinfo, getwordposinfo, informlexicon,
+                              type_I_adj_n_pairs, known_pronunciation_variants, known_pronunciation_variants_map)
 from sastadev.macros import expandmacros
 from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
@@ -1198,16 +1198,43 @@ def vt_fout(stree: SynTree) -> List[SynTree]:
 
     return results
 
+alpino_replacements_lexicon = {('me', 'mijn')}
+def get_alpino_replacements(stree: SynTree) -> List[SynTree]:
+    results = []
+    word_nodes = stree.xpath('.//node[@word]')
+    for word_node in word_nodes:
+        word = gav(word_node, 'word')
+        lemma = gav(word_node, 'lemma')
+        if (word, lemma) in alpino_replacements_lexicon:
+            results.append(word_node)
+    return results
+
+def get_known_pronunciation_variants_nodes(stree: SynTree) -> List[SynTree]:
+    results = []
+    word_nodes = stree.xpath('.//node[@word]')
+    for word_node in word_nodes:
+        word = gav(word_node, 'word')
+        if word in known_pronunciation_variants_map and not informlexicon(word):
+            results.append(word_node)
+    return results
+
+
 def get_pronunciation_variants(stree: SynTree) -> List[SynTree]:
     results = []
     informal_pronunciation_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.informalpronunciation))
-    for ipm in informal_pronunciation_metadata:
+    pronunciation_variant_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.pronunciationvariant))
+    all_pronunciation_variant_metadata = informal_pronunciation_metadata + pronunciation_variant_metadata
+    for ipm in all_pronunciation_variant_metadata:
         ipm_node = get_node(stree, ipm)
         if ipm_node is None:
             annotated, annotation = get_meta_pair(ipm)
             report_missing_node(stree, annotated, annotation)
         else:
             results.append(ipm_node)
+
+    # alpino replacements
+    alpino_replacements = get_alpino_replacements(stree)
+    results.extend(alpino_replacements)
 
     overgeneralisation_nodes = get_overgeneralisation_replacement_nodes(stree)
     # SASTA noncompletion
@@ -1225,7 +1252,9 @@ def get_pronunciation_variants(stree: SynTree) -> List[SynTree]:
             results.append(annotated_node)
 
 
-
+    # known pronunciation variants of which the original string is not a valid word
+    new_results = get_known_pronunciation_variants_nodes(stree)
+    results.extend(new_results)
 
     # CHAT noncompletion
     noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion))
@@ -1316,6 +1345,13 @@ def is_vd_morph_error(meta: SynTree, annotation=False) -> bool:
     return result
 
 
+def get_annotated_lemma(meta: SynTree, pt: str) -> str:
+    annotated_list = eval(gav(meta, 'annotatedwordlist'))
+    annotated = annotated_list[0] if annotated_list != [] else ''
+    wordinfos = getwordposinfo(annotated, pt)
+    result = wordinfos[0][3] if wordinfos != [] else None
+    return result
+
 def have_same_lemma(meta: SynTree, annotation=False) -> bool:
     stree = find1(meta, 'ancestor::alpino_ds')
     annotated, annotation = get_meta_pair(meta)
@@ -1323,7 +1359,20 @@ def have_same_lemma(meta: SynTree, annotation=False) -> bool:
     if annotated_node is not None:
         annotated, annotation = get_meta_pair(meta)
         annotated_pt = gav(annotated_node, 'pt')
-        annotated_lemma = gav(annotated_node, 'lemma')
+        annotation_word_list = eval(gav(meta, 'annotationwordlist'))
+        if len(annotation_word_list) > 1:
+            return False
+        annotated_lemma = None
+        if 'original_lemma' in annotated_node.attrib:
+            original_lemma = gav(annotated_node, 'original_lemma')
+            lemma = gav(annotated_node, 'lemma')
+            if lemma != original_lemma:
+                return False
+                # annotated_lemma = original_lemma
+            else:
+                annotated_lemma = get_annotated_lemma(meta, annotated_pt)
+        if annotated_lemma is None:
+            annotated_lemma = gav(annotated_node, 'word')
         annotation_wordinfos = getwordposinfo(annotation, annotated_pt)
         result = any([not lemmas_differ(wordinfo[3], annotated_lemma) for wordinfo in annotation_wordinfos])
     else:

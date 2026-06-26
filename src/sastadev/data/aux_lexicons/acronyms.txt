@@ -35,6 +35,7 @@ CJIB	Centraal Justitieel Incassobureau
 COBA	Interdepartementale Commissie voor Ontwikkeling van de Beleidsanalyse 
 CPB	Centraal Planbureau 
 CRIEM	Criminaliteit in relatie tot etnische minderheden 
+CVA	Cerebro Vasculair Accident.
 CWI	Centra voor Werk en Inkomen 
 DBC	Diagnose-behandelcombinaties 
 DGW&T	Directie Gebouwen Werken & Terreinen 
@@ -86,6 +87,7 @@ HPIC	Heavely Indebted Poor Countries
 HSL	Hoge Snelheidslijn 
 I/D-banen	Instroom- en Doorstroombanen 
 IB	Inkomstenbelasting 
+IC	Intensive Care
 IBO	Interdepartementaal Beleidsonderzoek 
 ICT	Informatie- en Communicatietechnologie 
 IDA	International Development Association 
@@ -178,6 +180,7 @@ SPAK	Specifieke Afdrachtskorting
 SUWI	Structuur Uitvoering Werk en Inkomen 
 SZA	Sector Sociale Zekerheid en Arbeidsmarkt 
 SZW	Ministerie van Sociale Zaken en Werkgelegenheid 
+TIA	ransient Ischaemic Attack 
 TK	Tweede Kamer der Staten-Generaal 
 TNO	Nederlandse organisatie voor toegepast natuurwetenschappelijk onderzoek 
 TPG	TNT Post Group 

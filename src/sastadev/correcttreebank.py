@@ -620,6 +620,7 @@ def bare_angled_brackets_replace_tree(stree: SynTree) -> SynTree:
     origutt = getorigutt(stree)
     if origutt is None:
         return stree
+    metadata = find1(stree, './/metadata')
     cleanutt, chatmetadata = cleantext(origutt, False, tokenoutput=False)
     # surround punctuation by spaces because Alpino does it incorrectly
     cleanutt = separate_punctuation(cleanutt)
@@ -627,8 +628,13 @@ def bare_angled_brackets_replace_tree(stree: SynTree) -> SynTree:
         newstree = settings.PARSE_FUNC(cleanutt)
         if newstree is None:
             newstree = stree
+        else:
+            # append the original metadata no do not check
+            # newstree.append(metadata)
+            pass
     else:
         newstree = stree
+
     return newstree
 
 

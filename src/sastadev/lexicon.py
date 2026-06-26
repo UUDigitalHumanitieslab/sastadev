@@ -336,6 +336,12 @@ def isalpinonouncompound(wrd: str) -> bool:
     else:
         return False
 
+def tuple_lexicon_2_map(tuple_lexicon: set) -> dict:
+    result = defaultdict(list)
+    for k, v in tuple_lexicon:
+        result[k].append(v)
+    return result
+
 
 def isallersuperlative(wrd:str) -> bool:
     result = wrd.startswith('aller') and (wrd.endswith('st') or wrd.endswith('ste')) and informlexicon(wrd[5:])
@@ -473,6 +479,7 @@ known_pronunciation_variants_filename = 'known_pronunciation_variants.txt'
 known_pronunciation_variants_fullname = os.path.join(settings.SD_DIR, lexiconfoldername,
                                                      known_pronunciation_variants_filename)
 known_pronunciation_variants = get_tuple_lexicon(known_pronunciation_variants_fullname)
+known_pronunciation_variants_map = tuple_lexicon_2_map(known_pronunciation_variants)
 
 # put off contains too many wrong words, e.g. so
 # lexiconfoldername = 'data/spellingcorrectorlexicon'
