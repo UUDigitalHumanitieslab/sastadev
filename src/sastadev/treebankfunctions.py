@@ -90,6 +90,8 @@ trueclausecats = ['smain', 'cp', 'rel', 'whrel', 'whsub', 'whq', 'sv1', 'svan']
 complrels = ['su', 'obj1', 'pobj1', 'obj2',
              'se', 'pc', 'vc', 'svp', 'predc', 'ld']
 
+modrels = ['mod', 'predm']
+
 headrels = ['hd', 'crd']
 
 extendedheadrels  = ['hdf']
@@ -2135,7 +2137,7 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
             child_is_a_word = 'word' in child.attrib
             childmustgo = child_is_a_word if wordsonly else True
             if childbeginint in begins and childless(child) and childmustgo:
-                associate_node = get_associate(child)
+                associate_node = get_associate(child, begins)
                 # add associate metadata
                 if associate_node is not None:
                     annotatedposlist = [int(gav(associate_node, 'begin'))]
@@ -2158,7 +2160,7 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
                 result_metadata.append(associate_meta)
 
                 tree.remove(child)
-            # we must also delete bare index nodes with with a word as antecedent
+            # we must also delete bare index nodes with a word as antecedent
             if is_bare_index_node(child) and childbeginint in begins:
                 if child_index in word_bare_indexes:
                     tree.remove(child)
@@ -2661,7 +2663,7 @@ def getposcat(node: SynTree) -> str:
     else:
         return ''
 
-def get_associate(node: SynTree) -> Optional[SynTree]:
+def get_associate(node: SynTree, begins: List[Position]) -> Optional[SynTree]:
     """
     function to obtain the word node that an omitted word should be marked on. Possibly none is found.
     If there is none, the marking will be on the whole sentence
@@ -2710,6 +2712,9 @@ def get_associate(node: SynTree) -> Optional[SynTree]:
             result = get_first_word_node_of(compl)
     # else None
     else:
+        result = None
+    # an associate candidate that is going to be deleted itself should not be an associate
+    if result is not None and gav(result, 'begin') in begins:
         result = None
     return result
 
@@ -2821,6 +2826,34 @@ def requires_plural_tw(node: SynTree) -> bool:
     lemma = gav(node, 'lemma')
     pt = gav(node, 'pt')
     result = pt == 'tw' and lemma not in ['één', '1']
+    return result
+
+def is_expletive_er(node: SynTree) -> bool:
+    node_lemma = gav(node, 'lemma')
+    node_rel = gav(node, 'rel')
+    node_int_end = int(gav(node, 'end'))
+    subject = find1(node.getparent(), 'node[@rel="su"]')
+    subject_int_begin = int(gav(subject, 'begin')) if subject is not None else 0
+    result = node_lemma == 'er' and (subject is None or node_int_end <= subject_int_begin)
+    return result
+
+
+def omitted_er_is_expletive(meta: SynTree) -> bool:
+    stree = find1(meta, 'ancestor::alpino_ds')
+    hd_node = get_node(stree, meta)
+    if hd_node is None:
+        sentence = getsentence(stree)
+        uttid = getuttid(stree)
+        settings.LOGGER.error(f'No node found for meta {str(meta)} in {sentence} (uttid={uttid}')
+        return False
+    subject = find1(hd_node.getparent(), 'node[@rel="su"]')
+    subject_int_begin = int(gav(subject, 'begin')) if subject is not None else 0
+    omitted_lemma = gav(meta, 'omitted_lemma')
+    annotationposlist = eval(gav(meta, 'annotationposlist'))
+    er_int_end = int(annotationposlist[0]) if annotationposlist != [] else 1000
+    cond1 = omitted_lemma == 'er'
+    cond2 = subject is None or er_int_end <= subject_int_begin
+    result = cond1 and cond2
     return result
 
 if __name__ == '__main__':

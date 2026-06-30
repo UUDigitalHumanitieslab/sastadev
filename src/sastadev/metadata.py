@@ -109,7 +109,7 @@ class Meta:
                  annotatedwordlist=[], annotationcharlist=[
     ], annotationcharposlist=[], annotatedcharlist=[],
             annotatedcharposlist=[], atype='text', cat=None, subcat=None, source=None,
-                 omitted_pt=None, omitted_rel=None, omitted_lemma=None, omitted_word=None,
+                 omitted_pt=None, omitted_rel=None, omitted_lemma=None, omitted_word=None, omitted_governor=None,
                  penalty=defaultpenalty, backplacement=defaultbackplacement):
         self.atype = atype
         self.name = name

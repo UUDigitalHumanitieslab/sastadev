@@ -32,16 +32,15 @@ from sastadev.missing_det import get_missing_det
 from sastadev.queryfunctions import (adj_agreement_errors, bx, congruentiefout,
                                      dan_toen_fout, del_bw, del_er, del_vg, del_vz,
                                      VzN, get_avn, get_pronunciation_variants, hequery, into,
-                                     no_copula, pv_regionale_vorm,
+                                     no_copula, omitted_phrase, pv_regionale_vorm,
                                      stam, sublid, stap_congruentiefout, stap_sublid,
                                      sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
                                      tarsp_dellid, tarsp_mvzn, tarsp_sublid,  tarsp_verkl,
-                                     verb_no_pv,
+                                     topic_drop, verb_no_pv,
                                      vobij, voslashbij, vd_fout, vt_fout, vudivers, xneg_neg,
                                      xneg_x)
 from sastadev.stapforms import makestapform
 from sastadev.STAPpostfunctions import GL5LVU, GLVU, BB_totaal
-from sastadev.synsel import omitted_phrase
 from sastadev.Sziplus import sziplus6, vr5plus
 from sastadev.tarspform import mktarspform
 from sastadev.TARSPpostfunctions import (gofase, gtotaal, mk_toelichting, pf, pf2, pf3, pf4,
@@ -90,7 +89,7 @@ thestapfunctions = [adj_agreement_errors, BB_totaal, stap_congruentiefout,
                     get_missing_det, get_pronunciation_variants, GLVU, GL5LVU, makestapform,  no_copula,
                     omitted_phrase,
                     stap_sublid, sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
-                    vd_fout, verb_no_pv, vt_fout]
+                    topic_drop, vd_fout, verb_no_pv, vt_fout]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,

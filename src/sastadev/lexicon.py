@@ -468,8 +468,8 @@ acronyms_lexicon = {entry[0]:entry[1] for entry in raw_acronyms_lexicon}
 validnouns = {'knijper', 'roosvicee'}
 
 lemmalexiconfilename = 'lemmalexicon.txt'
-lemmalexiconfulname = os.path.join(settings.SD_DIR, lexiconfoldername, lemmalexiconfilename)
-lemmalexicon = initializelexicondict(lemmalexiconfulname)
+lemmalexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, lemmalexiconfilename)
+lemmalexicon = initializelexicondict(lemmalexiconfullname)
 
 cardinallexiconfilename = 'cardinalnumerals.tsv'
 cardinallexiconfullname = os.path.join(settings.SD_DIR, lexiconfoldername, cardinallexiconfilename)
@@ -480,6 +480,18 @@ known_pronunciation_variants_fullname = os.path.join(settings.SD_DIR, lexiconfol
                                                      known_pronunciation_variants_filename)
 known_pronunciation_variants = get_tuple_lexicon(known_pronunciation_variants_fullname)
 known_pronunciation_variants_map = tuple_lexicon_2_map(known_pronunciation_variants)
+
+dat_su_verbs_filename = 'dat_su_verbs.txt'
+dat_su_verbs_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, dat_su_verbs_filename)
+dat_su_verbs = initializelexicon(dat_su_verbs_fullname)
+
+dat_obj1_verbs_filename = 'dat_obj1_verbs.txt'
+dat_obj1_verbs_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, dat_obj1_verbs_filename)
+dat_obj1_verbs = initializelexicon(dat_obj1_verbs_fullname)
+
+predicative_pp_expressions_filename = 'predicative_pp_expressions.txt'
+predicative_pp_expressions_fullname = os.path.join(settings.SD_DIR, lexiconfoldername, predicative_pp_expressions_filename)
+predicative_pp_expressions = initializelexicon(predicative_pp_expressions_fullname)
 
 # put off contains too many wrong words, e.g. so
 # lexiconfoldername = 'data/spellingcorrectorlexicon'

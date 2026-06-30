@@ -10,8 +10,9 @@ from sastadev.deregularise import correctinflection, overgen, wrongovergen
 from sastadev.find_ngram import findmatches, ngram21
 from sastadev.iedims import getjeforms
 from sastadev.imperatives import wx, imperatives
-from sastadev.lexicon import (vuwordslexicon, filledpauseslexicon, getwordinfo, getwordposinfo, informlexicon,
+from sastadev.lexicon import (dat_obj1_verbs, dat_su_verbs, vuwordslexicon, filledpauseslexicon, getwordinfo, getwordposinfo, informlexicon,
                               type_I_adj_n_pairs, known_pronunciation_variants, known_pronunciation_variants_map)
+from sastadev.list_functions import pred
 from sastadev.macros import expandmacros
 from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
@@ -19,10 +20,13 @@ from sastadev.normalise_lemma import normaliselemma
 # from sastadev.sasta_explanation import get_prefix_and_core
 from sastadev.sastatypes import SynTree, WordInfo
 from sastadev.stringfunctions import endsinschwa, endsinschwa_n, punctuationchars, relative_edit_distance
+from sastadev.synsel import extend_syns, parent_imperative_xpath, synsel, tag_s_xpath
 from sastadev.tblex import get_aanloop_and_core
-from sastadev.treebankfunctions import (adjacent, compoundsep, find1, get_left_siblings,
-                                        getattval, get_node, getnodeyield, get_word, getuttid, mdbasedquery,
-                                        mdnameonlyxpathtemplate, parent, getsentence, getorigutt, getxsid)
+from sastadev.treebankfunctions import (adjacent, complrels, compoundsep, find1, get_left_siblings,
+                                        getattval, get_node, getnodeyield, get_word, getuttid,
+                                        indextransform, mdbasedquery,
+                                        mdnameonlyxpathtemplate, parent, getsentence, getorigutt, getxsid,
+                                        omitted_er_is_expletive, trueclausecats)
 
 gav = getattval
 
@@ -1378,6 +1382,153 @@ def have_same_lemma(meta: SynTree, annotation=False) -> bool:
     else:
         result = False
     return result
+
+
+def is_3p_sg(node: SynTree) -> bool:
+    pvagr = gav(node, 'pvagr')
+    pvtijd = gav(node, 'pvtijd')
+    word = gav(node, 'word')
+    result = word in ['kan', 'wil', 'mag', 'heeft', 'is'] and word not in ['hebt', 'bent']
+    if not result:
+        result = pvagr != 'mv' and (not(pvagr=='ev' and pvtijd == 'tgw') or word[-1] == 't')
+    return result
+
+def is_topic_drop_verb(hd: SynTree) -> bool:
+    ww_lemma = gav(hd, 'lemma')
+    parent = hd.getparent()
+    obj1 = find1(parent, 'node[@rel="obj1"]')
+    su = find1(parent, 'node[@rel="su"]')
+    vc = find1(parent, 'node[@rel="vc"]')
+    vc_head = find1(vc, 'node[@rel="hd"]') if vc is not None else None
+    vc_head_lemma = gav(vc_head, 'lemma')
+
+    topic_drop_found = (obj1 is None and su is not None and vc is None and ww_lemma in dat_obj1_verbs) or \
+                       (su is None and vc is None and ww_lemma in dat_su_verbs and is_3p_sg(hd)) or \
+                       (su is None and ww_lemma in dat_su_verbs and vc_head_lemma in dat_su_verbs and is_3p_sg(hd))
+    return topic_drop_found
+
+
+sv1_topic_drop_xpath = expandmacros('.//node[@cat="sv1" and @rel!="body" and %declarative%]')
+
+def get_main_clause(verb:SynTree) -> Optional[SynTree]:
+    clause_found = False
+    cur_node = verb
+    while not clause_found:
+        if cur_node is not None:
+            cand = cur_node.getparent()
+        else:
+            return None
+        cur_node = cand
+        clause_found = True
+        cand_cat = gav(cand, 'cat')
+        cand_rel = gav(cand, 'rel')
+        if cand_cat in trueclausecats:
+            clause_found = True
+        if ((cand_cat == 'smain' and cand_rel == '--') or         # condition on rel becasue smain with rel=nucl
+                                                                  # preceded by dlink vg must be excluded
+            (cand_cat == 'sv1' and cand_rel != 'body')):
+            result = cand
+        else:
+            result = None
+        cur_node =cand
+    return result
+
+def topic_drop(stree: SynTree) -> List[SynTree]:
+    results = []
+    # case 1:  declarative and v.sentype = topicdrop or no obj1 or vc but su and verb transitive
+
+    nodeyield = getnodeyield(stree)
+
+    verbs = stree.xpath('.//node[@rel="hd" and @pt="ww"]')
+    for verb in verbs:
+        main_clause = get_main_clause(verb)
+        main_clause_cat = gav(main_clause, 'cat')
+        main_clause_rel = gav(main_clause, 'rel')
+        if main_clause_cat == 'sv1' and main_clause_rel != 'tag':
+            if main_clause == verb.getparent():
+               pred_node = pred(verb, nodeyield)
+               pred_node_pt = gav(pred_node, 'pt') # we want to exclude case where an adverb immediately precedes the verb vklstap, stap_04:22
+            else:
+                pred_node_pt = ''
+            if is_topic_drop_verb(verb) and pred_node_pt not in ['bw']:
+                results.append(verb)
+        if main_clause_cat == 'smain':
+            main_clause_yield = getnodeyield(main_clause)
+            main_clause_yield_first = main_clause_yield[0] if main_clause_yield != [] else None
+            main_clause_yield_first_pt = gav(main_clause_yield_first, 'pt')
+            main_clause_yield_first_wvorm = gav(main_clause_yield_first, 'wvorm')
+            if (main_clause_yield_first_pt == 'ww' and main_clause_yield_first_wvorm == 'pv' and
+                is_topic_drop_verb(verb) ):
+                results.append(verb)
+
+    # remove vrwond+ cases
+    vrwondplus_cases = stree.xpath(expandmacros(".//node[%vrwondplus%]"))
+    results = [n for n in results if n.getparent() not in vrwondplus_cases]
+
+    return results
+
+
+
+def omitted_phrase(in_stree: SynTree) -> List[SynTree]:
+    results = []
+    stree = indextransform(in_stree)
+    heads = stree.xpath('.//node[@word and @rel="hd"]')
+    for head in heads:
+        # exclude imperatives
+        imperatives = head.xpath(parent_imperative_xpath)
+        if imperatives != []:
+            continue
+        # head_lemma = gav(head, 'original_lemma') if gav(head, 'original_lemma') != '' else gav(head, 'lemma')- dit is fout
+        head_lemma = gav(head, 'lemma')
+        head_pt = gav(head, 'pt')
+        if (head_lemma, head_pt) in synsel:
+            base_syns = synsel[(head_lemma, head_pt)]
+            syns = extend_syns(base_syns, head)
+            overall_ok = False
+            for syn in syns:
+                all_items_found_so_far = True
+                for item in syn:
+                    rel = item.rel
+                    cond = f'and {expandmacros(item.cond)}' if item.cond != "" else ""
+                    item_nodes1 = head.xpath(f'../node[@rel="{rel}" {cond}]')
+                    item_nodes = [n for n in item_nodes1 if item.python_cond(n)]
+                    item_result = item_nodes != []
+                    all_items_found_so_far = all_items_found_so_far and item_result
+                    if not all_items_found_so_far:
+                        continue
+                if all_items_found_so_far:
+                    overall_ok = True
+                    break
+            if not overall_ok:
+                results.append(head)
+
+        # include CHAT-omitted cases
+        associate_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.omitted_node_associate))
+        for associate_meta in associate_metadata:
+            if gav(associate_meta, 'omitted_rel') in complrels or omitted_er_is_expletive(associate_meta):
+                the_node = get_node(stree, associate_meta)
+                if the_node is not None:
+                    results.append(the_node)
+
+        #remove duplicates
+        results = list(set(results))
+
+
+        # remove topic drop cases
+        topic_drop_cases = topic_drop(stree)
+        results = [n for n in results if n not in topic_drop_cases]
+
+        # remove tag/sv1 cases
+        tag_sv1_cases = stree.xpath(tag_s_xpath)
+        results = [n for n in results if n not in tag_sv1_cases]
+
+        # remove vrwond+ cases
+        vrwondplus_cases = stree.xpath(expandmacros(".//node[%vrwondplus%]"))
+        results = [n for n in results if n.getparent() not in vrwondplus_cases]
+
+    return results
+
+
 
 
 

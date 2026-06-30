@@ -305,7 +305,7 @@ def smartreplace(node: SynTree, word: str, method: Method) -> SynTree:
     newnodelemma = getattval(newnode, 'lemma')
     if isvalidword(word, mn) and \
             (issamewordclass(node, newnode) or is_pronadv_dempro(node, newnode)) and \
-            not isrobustnoun(newnode) and \
+            not isrobustnoun(newnode) and gav(newnode, 'pvagr') != 'conj' and \
             newnodelemma not in nochildwords and (word, nodeword) not in smartreplacepairs:
         result = newnode
         result.set('original_lemma', nodelemma)
