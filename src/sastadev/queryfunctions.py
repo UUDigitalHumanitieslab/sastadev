@@ -1582,13 +1582,25 @@ def omitted_phrase(in_stree: SynTree) -> List[SynTree]:
 locadv_condition = expandmacros('%new_STAP_BB_p%')
 def get_preceding_locadvs(subject: SynTree) -> List[SynTree]:
     parent = subject.getparent()
-    locadvs = parent.xpath(f'./node[{locadv_condition}]') if parent is not None else []
+    locadvs = parent.xpath(f'.//node[{locadv_condition}]') if parent is not None else []
     for locadv in locadvs:
         locadv_int_end = int(gav(locadv, 'end'))
         subject_int_begin = int(gav(subject, 'begin'))
         if locadv_int_end <= subject_int_begin:
             return True
     return False
+
+r_p_xpath = expandmacros(f'.//node[@cat="pp"]/node[@rel="obj1" and %Rpronoun%]')
+def get_preceding_r_p(subject: SynTree) -> List[SynTree]:
+    parent = subject.getparent()
+    r_ps = parent.xpath(r_p_xpath)
+    for r_p in r_ps:
+        r_p_int_end = int(gav(r_p, 'end'))
+        subject_int_end = int(gav(subject, 'begin'))
+        if r_p_int_end <= subject_int_end:
+            return True
+    return False
+
 
 def su_n_precedes_pv_in_smain(subject, pv) -> bool:
     su_pt = gav(subject, 'pt')
@@ -1617,6 +1629,7 @@ def omitted_expletive_er(stree: SynTree) -> List[SynTree]:
             wi_subject = find1(subject, weak_indefinite_subject_xpath)
             if wi_subject is not None and not su_n_precedes_pv_in_smain(wi_subject, pv):
                 left_locadvs = get_preceding_locadvs(wi_subject)
+                left_r_ps = get_preceding_r_p(wi_subject)
                 dependent_verbs = get_ww_dependent_verbs(pv)
                 strong_objs = pv.xpath(strong_obj_xpath)
                 omitted_strong_objects = get_omitted_strong_objects(pv)
@@ -1629,7 +1642,7 @@ def omitted_expletive_er(stree: SynTree) -> List[SynTree]:
                 predc = find1(pv, '../node[@rel="predc"]')
                 if predc is not None and (x_isnominal(predc) or gav(predc, 'cat') == 'cp'):
                     continue
-                if not left_locadvs  and strong_objs == [] and not omitted_strong_object_found:
+                if not left_locadvs  and not left_r_ps and strong_objs == [] and not omitted_strong_object_found:
                     results.append(pv)
 
     return results
