@@ -18,7 +18,7 @@ from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
 from sastadev.queryfunctions import get_replacement_metadata
-from sastadev.sastatypes import SynTree
+from sastadev.sastatypes import Relation, SynTree
 from sastadev.sastatoken import Token
 from sastadev.smallclauses import mkinsertmeta, realword, word
 from sastadev.test_functions import test_f, get_stree, test_transform_f
@@ -26,7 +26,7 @@ from sastadev.tokenmd import TokenListMD
 from sastadev.treebankfunctions import (find1, getattval, get_node, getnodeyield, getorigutt, getsentence, getuttid, get_word,
                                         mktoken2nodemap, mdbasedquery,
                                         mdnameonlyxpathtemplate)
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 gav = getattval
 
@@ -126,6 +126,20 @@ als_dan_triples = [('vklstap', 'stap_04', '44'),
 ('handreiking4-12', 'handreiking4-12', '95'),
 ('handreiking4-12', 'handreiking4-12', '118'),
 ]
+
+dependent_verb_xpath = ('../node[@rel="vc" and (@cat="inf" or @cat="ppart")]/node[@rel="hd" and @pt="ww"] |'
+                        '../node[@rel="vc" and (@cat="ti"]/node[@cat="inf"]/node[@rel="hd" and @pt="ww"]')
+def get_ww_dependent_verbs(ww: SynTree) -> List[SynTree]:
+    dependent_verbs = ww.xpath(dependent_verb_xpath)
+    results = dependent_verbs
+    for dependent_verb in dependent_verbs:
+        rec_dependent_verbs = get_ww_dependent_verbs(dependent_verb)
+        results += rec_dependent_verbs
+    return results
+
+
+
+
 
 if __name__ == '__main__':
     pass

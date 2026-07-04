@@ -24,6 +24,8 @@ from sastadev.sastatypes import (FileName, OptPhiTriple, PhiTriple, Position,
                                  PositionMap, PositionStr, Span, SynTree,
                                  UttId)
 from sastadev.stringfunctions import allconsonants, string2list
+# from sastadev.toe import getantecedentof
+
 
 # from sastadev.tblex import recognised_wordnode, recognised_lemmanode, recognised_wordnodepos, recognised_lemmanodepos
 
@@ -450,6 +452,7 @@ def lastconstituentof(stree: SynTree) -> SynTree:
     curlastend = 0
     topnodes = stree.xpath('.//node[@cat="top"]')
     topnode = topnodes[0]
+    result = None
     for child in topnode:
         if 'cat' in child.attrib:
             childend = int(getattval(child, 'end'))
@@ -538,6 +541,7 @@ def getextendedheadof(node: SynTree) -> SynTree:
         else:
             print('here it goes wrong')
             pass
+            result = None
 
     else:
         result = result1
@@ -2111,20 +2115,22 @@ def deletewordnodes(tree: SynTree, begins: List[Position], wordsonly=False) -> S
     newtree = deepcopy(tree)
     word_bare_index_nodes = get_bare_index_nodes(newtree, words_only=True)
     word_bare_indexes = [gav(n, 'index') for n in word_bare_index_nodes]
-    newtree, metadata = deletewordnodes2(newtree, begins, wordsonly=wordsonly, word_bare_indexes=word_bare_indexes)
+    newtree, metadata, omitted_nodes = deletewordnodes2(newtree, begins, wordsonly=wordsonly, word_bare_indexes=word_bare_indexes)
     newtree = adaptsentence(newtree)
-    return newtree, metadata
+    return newtree, metadata, omitted_nodes
 
 
 def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
-                     word_bare_indexes: List[str]=[]) -> Tuple[Optional[SynTree], List[Meta]]:
+                     word_bare_indexes: List[str]=[]) -> Tuple[Optional[SynTree], List[Meta], List[SynTree]]:
     result_metadata = []
+    omitted_nodes = []
     if tree is None:
         return tree, []
     for child in tree:
         if child.tag == 'node':
-            newchild, newchild_metadata = deletewordnodes2(child, begins, wordsonly=wordsonly, word_bare_indexes=word_bare_indexes)
+            newchild, newchild_metadata, newchild_omitted_nodes = deletewordnodes2(child, begins, wordsonly=wordsonly, word_bare_indexes=word_bare_indexes)
             result_metadata += newchild_metadata
+            omitted_nodes += newchild_omitted_nodes
 
         else:
             newchild = child
@@ -2151,6 +2157,9 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
                 omitted_rel = gav(child, 'rel')
                 omitted_lemma = gav(child, 'lemma')
                 omitted_word = gav(child, 'word')
+                child_copy = deepcopy(child)
+                child_copy.tag = 'omitted_node'   # we must rename it because we do not want found as node by queries
+                omitted_nodes.append(child_copy)
 
                 associate_meta = Meta(name=correctionlabels.omitted_node_associate, value=annotationwordlist,
                                       annotatedposlist=annotatedposlist, annotatedwordlist=annotatedwordlist,
@@ -2174,7 +2183,7 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
             (minbegin, maxend) = getbeginend(newchildren)
             tree.attrib['begin'] = minbegin
             tree.attrib['end'] = maxend
-    return tree, result_metadata
+    return tree, result_metadata, omitted_nodes
 
 
 def olddeletewordnodes2(tree: SynTree, begins: List[Position]):
@@ -2855,6 +2864,68 @@ def omitted_er_is_expletive(meta: SynTree) -> bool:
     cond2 = subject is None or er_int_end <= subject_int_begin
     result = cond1 and cond2
     return result
+
+
+def isdet(node) -> bool:
+    nodept = getattval(node, 'pt')
+    nodepdtype = getattval(node, 'pdtype' )
+    result = nodept in ['lw'] or (nodept in  ['vnw'] and nodepdtype in ['det'])
+    return result
+
+
+def contentword(node) -> bool:
+    nodept = getattval(node, 'pt')
+    result = nodept in ['n', 'ww', 'adj', 'bw']
+    return result
+
+
+
+
+def x_gav(node: SynTree, att: str) -> str:
+    """
+    looks up the value of att in node, and
+    when node is a bare index node, it looks the value of att up in the antecedent of node
+    """
+    if 'word' in node.attrib or 'cat' in node.attrib:
+        return gav(node, att)
+    else:
+        antecedent = getantecedentof(node)
+        return gav(antecedent, att)
+
+
+def get_omitted_phrases(stree: SynTree, cond: Callable) -> List[SynTree]:
+    results = []
+    omitted_nodes = stree.xpath(f'.//omitted_node')
+    for omitted_node in omitted_nodes:
+        if cond(omitted_node):
+            results.append(omitted_node)
+    return results
+
+def find_omitted_phrase(ww: SynTree, cond: Callable) -> List[SynTree]:
+    results = []
+    stree =  find1(ww, './/ancestor::alpino_ds')
+    associate_metadata = stree.xpath(f'.//xmeta[@name="{correctionlabels.omitted_node_associate}"]')
+    ww_begin_int = int(gav(ww, 'begin'))
+    for associate_meta in associate_metadata:
+        annotated_poslist = eval(gav(associate_meta, 'annotatedposlist'))
+        if ww_begin_int in annotated_poslist:
+            annotation_poslist = eval(gav(associate_meta, 'annotationposlist'))
+            newcond = lambda x: cond(x) and int(gav(x, 'begin')) in annotation_poslist
+            results = get_omitted_phrases(stree, newcond)
+    return results
+
+
+dependent_verb_xpath1 = """../node[@rel="vc" and (@cat="inf" or @cat="ppart")]/node[@rel="hd" and @pt="ww"]"""
+dependent_verb_xpath2 = """../node[@rel="vc" and @cat="ti"]/node[@cat="inf"]/node[@rel="hd" and @pt="ww"]"""
+def get_ww_dependent_verbs(ww: SynTree) -> List[SynTree]:
+    dependent_verbs = ww.xpath(dependent_verb_xpath1)
+    dependent_verbs += ww.xpath(dependent_verb_xpath2)
+    results = dependent_verbs
+    for dependent_verb in dependent_verbs:
+        rec_dependent_verbs = get_ww_dependent_verbs(dependent_verb)
+        results += rec_dependent_verbs
+    return results
+
 
 if __name__ == '__main__':
     # test()

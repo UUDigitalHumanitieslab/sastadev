@@ -12,7 +12,7 @@ from sastadev.auchannsettings import settings as auchannsettings
 from sastadev.chatundo import chatundo
 from sastadev.cleanCHILDEStokens import cleantext
 from sastadev.conf import settings as sdsettings
-from sastadev.lexicon import alldutchwords, known_word, allfillers
+from sastadev.lexicon import alldutchwords, allfillers, known_word
 from sastadev.metadata import (MetaValue, bpl_replacement, fromElement,
                                mkSASTAMeta)
 from sastadev.sastatok import gettokensplusxmeta

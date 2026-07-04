@@ -8,7 +8,7 @@ from sastadev.conf import settings
 from sastadev.constants import datafolder, outtreebanksfolder
 from sastadev import correctionlabels
 from sastadev.lexicon import beroepen, both_exceptions, mass_exceptions, n_v_expression_list, vz_count_n_combinations, \
-    cardinallexicon
+    cardinallexicon, detless_count_nouns, predc_detless_count_nouns, color_names
 from sastadev.readcsv import readcsv
 from sastadev.stringfunctions import compoundsep
 from sastadev.sastatypes import SynTree
@@ -88,30 +88,6 @@ wellformed_vz_n_combinations = [tuple(el.split()) for el in vz_count_n_combinati
 # n_v_expression_list = ['stage lopen', 'rekening houden']
 n_v_expression_pairs = [tuple(el.split()) for el in n_v_expression_list]
 
-detless_count_nouns = ['papa', 'mama', 'oma', 'opa', 'moeder', 'sinterklaas', 'mam'] + \
-                       ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september',
-                        'oktober', 'november', 'december'] + \
-                       ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'] + \
-                       ['morgen', 'overmorgen', 'gisteren'] + \
-                       ['kerstmis', 'pasen', 'pinksteren'] +\
-                       ['eentje']
-
-predc_detless_count_nouns = ['avond', 'ochtend', 'middag', 'nacht', 'weer']
-
-color_names = ['rood', 'wit', 'blauw', 'oranje', 'zwart', 'geel', 'groen']
-# moved to lexicon
-# mass_exceptions = ['acquisitie', 'acte', 'appel_sap', 'begeleiding', 'bezoek', 'brood', 'buiten',
-#                    'cement', 'coördinatie', 'deeg', 'druk', 'goed', 'gym',
-#                    'klei', 'hout', 'geld',  'informatie', 'ijzer', 'kaas',  'kraak_been',
-#                    'kracht', 'last', 'logo', 'melk', 'migraine',
-#                    'pap', 'patat', 'plastic', 'plezier', 'pijn', 'productie',
-#                    'speelgoed', 'spul', 'suiker',  'thee', 'tijd', 'trek', 'uitzicht', 'vakantie', 'verf', 'visite', 'vloeistof',
-#                     'water', 'werk', 'yogi_drink', 'zeep' ] + color_names
-# both_exceptions = ['ananas', 'angst', 'beeld', 'familie', 'flapoor',
-#                    'geluid', 'geschiedenis',  'glas', 'groente', 'hersen_letsel',  'hulp', 'kip', 'onderzoek',
-#                    'pak_DIM_avond', 'pizza', 'ruzie', 'saxofoon', 'saxofoon_les', 'spons', 'straf', 'techniek',
-#                    'troep' , 'verkoop', 'vis', 'vuur',
-#                    'worst', 'zekerheid', 'zijde',  'zin', 'zwem_les']
 count_exceptions = []
 excluded_nouns = [ 'boem', 'hop', 'klik', 'piep', 'plons', 'stop', 'tik', 'facilitair']
 
@@ -120,11 +96,6 @@ volgend_vorig_nouns = ['jaar','keer', 'maand', 'week', 'seizoen', 'semester']
 
 special_vzs = ['zonder', 'per', 'ter', 'ten']
 
-# replaced by cardinallexicon
-# small_tw_lemmas = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien',
-#                    'elf', 'twaalf', 'dertien', 'veertien', 'vijftien', 'zestien', 'zeventien',
-#                    'achttien', 'negentien', 'twintig', 'dertig', 'veertig', 'vijftig', 'zestig',
-#                    'zeventig', 'tachtig', 'negentig', 'honderd', 'duizend']
 
 bare_noun_xpath = """.//node[@pt="n" and @getal="ev"  and 
                              not(@rel="hd" and parent::node[@cat="np"]) and

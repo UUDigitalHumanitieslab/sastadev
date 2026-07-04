@@ -22,11 +22,13 @@ from sastadev.sastatypes import SynTree, WordInfo
 from sastadev.stringfunctions import endsinschwa, endsinschwa_n, punctuationchars, relative_edit_distance
 from sastadev.synsel import extend_syns, parent_imperative_xpath, synsel, tag_s_xpath
 from sastadev.tblex import get_aanloop_and_core
-from sastadev.treebankfunctions import (adjacent, complrels, compoundsep, find1, get_left_siblings,
+from sastadev.toe import x_isnominal
+from sastadev.treebankfunctions import (adjacent, complrels, compoundsep, find1,
+                                        get_ww_dependent_verbs, get_left_siblings,
                                         getattval, get_node, getnodeyield, get_word, getuttid,
                                         indextransform, mdbasedquery,
                                         mdnameonlyxpathtemplate, parent, getsentence, getorigutt, getxsid,
-                                        omitted_er_is_expletive, trueclausecats)
+                                        omitted_er_is_expletive, trueclausecats, find_omitted_phrase)
 
 gav = getattval
 
@@ -850,7 +852,9 @@ def sub_pt(stree: SynTree, pt: str, cond: Callable = lambda x: True) -> List[Syn
             results.append(new_node)
     return results
 
-def omitted_pt(stree: SynTree, pt: str, cond: Callable = lambda x: True) -> List[SynTree]:
+def omitted_pt(stree: SynTree, pt: str,
+               omitted_cond: Callable = lambda meta: True,
+               associate_cond: Callable = lambda meta: True) -> List[SynTree]:
     """
     finds omitted words with part of speech = pt in stree, based on the CHAT metadata
     """
@@ -858,13 +862,15 @@ def omitted_pt(stree: SynTree, pt: str, cond: Callable = lambda x: True) -> List
     omitted_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_omittedword))
     associate_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.omitted_node_associate))
     for omitted_meta in omitted_metadata:
+        if not omitted_cond(omitted_meta):
+            continue
         associates = [associate_meta for associate_meta in associate_metadata
                       if gav(associate_meta, 'annotationposlist') == gav(omitted_meta, 'annotatedposlist') and
-                      gav(associate_meta,'omitted_pt') == pt]
+                      gav(associate_meta,'omitted_pt') == pt and associate_cond(associate_meta)]
         associate = associates[0] if associates else None
         if associate is not None:
             new_node = get_node(stree, associate, annotation=False)
-            if new_node is not None and cond(new_node):
+            if new_node is not None:
                 results.append(new_node)
     return results
 
@@ -874,7 +880,7 @@ def del_vz(stree: SynTree) -> List[SynTree]:
 
 def del_bw(stree: SynTree) -> List[SynTree]:
     results = omitted_pt(stree, 'bw')
-    results += omitted_pt(stree, 'adj', cond= lambda x: is_adverbial_word(x))
+    results += omitted_pt(stree, 'adj', associate_cond= lambda meta: is_meta_for_omitted_adverbial_word(meta))
     return results
 
 def sub_bw(stree: SynTree) -> List[SynTree]:
@@ -894,9 +900,25 @@ def del_vg(stree: SynTree) -> List[SynTree]:
     results = omitted_pt(stree, 'vg')
     return results
 
+
 def del_er(stree: SynTree) -> List[SynTree]:
-    results = omitted_pt(stree, 'vnw', cond=lambda x: gav(x, 'lemma')== 'er')
+    results = omitted_pt(stree, 'vnw', omitted_cond=lambda meta: eval(gav(meta, 'annotationwordlist')) == ['er'])
+    newresults = omitted_expletive_er(stree)
+    results += newresults
     return results
+
+def is_meta_for_omitted_adverbial_word(meta: SynTree) -> bool:
+    meta_pt = gav(meta, 'omitted_pt')
+    meta_rel = gav(meta, 'omitted_rel')
+    if meta_pt == 'bw':
+        return True
+    elif meta_pt == 'adj' and meta_rel == "mod":  # except when it occurs in a NP
+        return True
+    elif meta_pt == 'adj' and meta_rel not in ['hd', 'predc']:
+        return True
+    else:
+        return False
+
 
 def is_adverbial_word(node: SynTree) -> bool:
     node_pt = gav(node, 'pt')
@@ -908,16 +930,17 @@ def is_adverbial_word(node: SynTree) -> bool:
     node_grandparent_cat = gav(node_grandparent, 'cat')
     if node_pt == 'bw':
         return True
-    elif node_pt == 'adj' and node_rel == "mod" and node_parent_cat != "np":
+    elif node_pt == 'adj' and node_rel == "mod" and node_parent_cat not in ['np']:  # except when it occurs in a NP
         return True
     elif node_pt == 'adj' and node_rel not in ['hd', 'predc']:
         return True
-    elif node_pt == 'adj' and node_rel =='hd' and node_parent_rel not in ['predc']:
+    elif node_pt == 'adj' and node_rel in ['hd'] and node_grandparent_cat not in ['np']:
         return True
-    elif node_pt == 'adj' and node_rel =='hd' and node_parent_rel == 'mod' and node_grandparent_cat != 'np':
+    elif node_pt == 'adj' and node_rel in ['hd'] and node_parent_rel not in ['predc']:
         return True
     else:
         return False
+
 
 
 def get_lemma_nodes(stree: SynTree, lemmas: List[str]) -> List[SynTree]:
@@ -1393,7 +1416,7 @@ def is_3p_sg(node: SynTree) -> bool:
         result = pvagr != 'mv' and (not(pvagr=='ev' and pvtijd == 'tgw') or word[-1] == 't')
     return result
 
-def is_topic_drop_verb(hd: SynTree) -> bool:
+def is_topic_drop_verb(hd: SynTree, include_subjects=False) -> bool:
     ww_lemma = gav(hd, 'lemma')
     parent = hd.getparent()
     obj1 = find1(parent, 'node[@rel="obj1"]')
@@ -1401,12 +1424,32 @@ def is_topic_drop_verb(hd: SynTree) -> bool:
     vc = find1(parent, 'node[@rel="vc"]')
     vc_head = find1(vc, 'node[@rel="hd"]') if vc is not None else None
     vc_head_lemma = gav(vc_head, 'lemma')
+    cond1 = obj1 is None and su is not None and vc is None and ww_lemma in dat_obj1_verbs
+    cond2 = su is None and vc is None and ww_lemma in dat_su_verbs and is_3p_sg(hd) if include_subjects else False
+    cond3 = su is None and ww_lemma in dat_su_verbs and vc_head_lemma in dat_su_verbs and is_3p_sg(hd) \
+        if include_subjects else False
 
-    topic_drop_found = (obj1 is None and su is not None and vc is None and ww_lemma in dat_obj1_verbs) or \
-                       (su is None and vc is None and ww_lemma in dat_su_verbs and is_3p_sg(hd)) or \
-                       (su is None and ww_lemma in dat_su_verbs and vc_head_lemma in dat_su_verbs and is_3p_sg(hd))
+    topic_drop_found = cond1 or cond2 or cond3
     return topic_drop_found
 
+
+def is_dp_dp_sv1(node: SynTree) -> bool:
+    """
+    determines whether dp/sv1 node us immediately preceded by a dp/ node
+    """
+    node_rel = gav(node, 'rel')
+    node_cat = gav(node, 'cat')
+    node_parent = node.getparent()
+    node_siblings = sorted([n for n in node_parent], key = lambda n: int(gav(n, 'begin')))
+    node_pred = pred(node, node_siblings)
+    node_pred_rel = gav(node_pred, 'rel')
+    result = node_cat == 'sv1' and node_rel == 'dp' and node_pred is not None and node_pred_rel == 'dp'
+    return result
+
+def is_declarative(node: SynTree) -> bool:
+    declarative_clauses = node.xpath(expandmacros('self::node[%declarative%]'))
+    result = node in declarative_clauses
+    return result
 
 sv1_topic_drop_xpath = expandmacros('.//node[@cat="sv1" and @rel!="body" and %declarative%]')
 
@@ -1442,6 +1485,12 @@ def topic_drop(stree: SynTree) -> List[SynTree]:
     verbs = stree.xpath('.//node[@rel="hd" and @pt="ww"]')
     for verb in verbs:
         main_clause = get_main_clause(verb)
+        if main_clause is None:
+            continue
+        if not is_declarative(main_clause):
+            continue
+        if is_dp_dp_sv1(main_clause):
+            continue
         main_clause_cat = gav(main_clause, 'cat')
         main_clause_rel = gav(main_clause, 'rel')
         if main_clause_cat == 'sv1' and main_clause_rel != 'tag':
@@ -1502,12 +1551,12 @@ def omitted_phrase(in_stree: SynTree) -> List[SynTree]:
             if not overall_ok:
                 results.append(head)
 
-        # include CHAT-omitted cases
+        # include CHAT-omitted cases but exclude er (covered by ov:del_er)
         associate_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.omitted_node_associate))
         for associate_meta in associate_metadata:
-            if gav(associate_meta, 'omitted_rel') in complrels or omitted_er_is_expletive(associate_meta):
+            if gav(associate_meta, 'omitted_rel') in complrels:
                 the_node = get_node(stree, associate_meta)
-                if the_node is not None:
+                if the_node is not None and gav(the_node, 'lemma') != 'er':
                     results.append(the_node)
 
         #remove duplicates
@@ -1530,6 +1579,67 @@ def omitted_phrase(in_stree: SynTree) -> List[SynTree]:
 
 
 
+locadv_condition = expandmacros('%new_STAP_BB_p%')
+def get_preceding_locadvs(subject: SynTree) -> List[SynTree]:
+    parent = subject.getparent()
+    locadvs = parent.xpath(f'./node[{locadv_condition}]') if parent is not None else []
+    for locadv in locadvs:
+        locadv_int_end = int(gav(locadv, 'end'))
+        subject_int_begin = int(gav(subject, 'begin'))
+        if locadv_int_end <= subject_int_begin:
+            return True
+    return False
+
+def su_n_precedes_pv_in_smain(subject, pv) -> bool:
+    su_pt = gav(subject, 'pt')
+    su_parent = subject.getparent()
+    su_parent_cat = gav(su_parent, 'cat')
+    if su_pt == 'n' and su_parent_cat == 'smain':
+        su_end_int = int(gav(subject, 'end'))
+        pv_begin_int = int(gav(pv, 'begin'))
+        result = su_end_int <= pv_begin_int
+    else:
+        result = False
+    return result
 
 
+weak_indefinite_subject_xpath = expandmacros('self::node[@rel="su" and (%weak_indefinite_np% or %weak_indefinite_single_word%) ]')
+strong_obj_xpath = expandmacros('../node[@rel="obj1" and %strong_phrase%]')
+def omitted_expletive_er(stree: SynTree) -> List[SynTree]:
+    results = []
+    pvs = stree.xpath('.//node[@pt="ww" and @rel="hd" and @wvorm="pv"]')
+    for pv in pvs:
+        subject = find1(pv, '../node[@rel="su"]')
+        if subject is None:
+            pass
+            # results.append(pv) # only in impersonal passives but not in imperatives, omitted subjects
+        else:
+            wi_subject = find1(subject, weak_indefinite_subject_xpath)
+            if wi_subject is not None and not su_n_precedes_pv_in_smain(wi_subject, pv):
+                left_locadvs = get_preceding_locadvs(wi_subject)
+                dependent_verbs = get_ww_dependent_verbs(pv)
+                strong_objs = pv.xpath(strong_obj_xpath)
+                omitted_strong_objects = get_omitted_strong_objects(pv)
+                for ww in dependent_verbs:
+                    ww_strong_objs = ww.xpath(strong_obj_xpath)
+                    strong_objs += ww_strong_objs
+                    ww_omitted_strong_objs = get_omitted_strong_objects(ww)
+                    omitted_strong_objects += ww_omitted_strong_objs
+                omitted_strong_object_found = omitted_strong_objects != []
+                predc = find1(pv, '../node[@rel="predc"]')
+                if predc is not None and (x_isnominal(predc) or gav(predc, 'cat') == 'cp'):
+                    continue
+                if not left_locadvs  and strong_objs == [] and not omitted_strong_object_found:
+                    results.append(pv)
 
+    return results
+
+self_strong_phrase_xpath = expandmacros('self::omitted_node[%strong_phrase%]')
+def get_omitted_strong_objects(ww: SynTree) -> List[SynTree]:
+    results = []
+    omitted_objs = find_omitted_phrase(ww, lambda x: gav(x, 'rel') == 'obj1')
+    for omitted_object in omitted_objs:
+        is_strong = omitted_object.xpath(self_strong_phrase_xpath) != []
+        if is_strong:
+            results.append(omitted_object)
+    return results

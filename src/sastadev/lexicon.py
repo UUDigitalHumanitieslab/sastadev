@@ -21,6 +21,7 @@ from sastadev.namepartlexicon import (namepart_isa_namepart,
 from sastadev.readcsv import readcsv
 from sastadev.sastatypes import CELEX_INFL, DCOITuple, Lemma, SynTree, WordInfo
 from sastadev.stringfunctions import ispunctuation, strip_accents
+from sastadev.tblex import isalpinonouncompound
 
 alpinoparse = settings.PARSE_FUNC
 space = ' '
@@ -270,71 +271,72 @@ def chatspecial(word: str) -> bool:
     result = word in chatspecials
     return result
 
-
-def known_word(word: str, includealpinonouncompound=True) -> bool:
-    '''
-    a word is considered to be a known_word if it occurs in the word form lexicon,
-    if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words,
-    or  a compound noun recognised as such by Alpino (the latter unless excluded)
-    but not in the nonwordslexicon
-    :param word:
-    :return:
-    '''
-    result = informlexicon(word)  or isa_namepart(word) or \
-             chatspecial(word) or word in additionalwordslexicon or \
-             word in spellingadditions or isallersuperlative(word) or issuperadjective(word)
-    if includealpinonouncompound:
-        result = result or isalpinonouncompound(word)
-    result = result and word not in nonwordslexicon
-    return result
-
+# moved to tblex
+# def known_word(word: str, includealpinonouncompound=True) -> bool:
+#     '''
+#     a word is considered to be a known_word if it occurs in the word form lexicon,
+#     if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words,
+#     or  a compound noun recognised as such by Alpino (the latter unless excluded)
+#     but not in the nonwordslexicon
+#     :param word:
+#     :return:
+#     '''
+#     result = informlexicon(word)  or isa_namepart(word) or \
+#              chatspecial(word) or word in additionalwordslexicon or \
+#              word in spellingadditions or isallersuperlative(word) or issuperadjective(word)
+#     if includealpinonouncompound:
+#         result = result or isalpinonouncompound(word)
+#     result = result and word not in nonwordslexicon
+#     return result
+#
 
 comma = ','
 compoundsep = '_'
 
-def validword(wrd: str, methodname: MethodName, includealpinonouncompound=True) -> bool:
-    result = wrd == '' or known_word(wrd, includealpinonouncompound=includealpinonouncompound)
-    if methodname in {tarsp, stap}:
-        result = result and not nochildword(wrd)
-    return result
-
-def validnotalpinocompoundword(wrd: str, methodname: MethodName) -> bool:
-    result = validword(wrd, methodname, includealpinonouncompound=False)
-    return result
+# def validword(wrd: str, methodname: MethodName, includealpinonouncompound=True) -> bool:
+#     result = wrd == '' or known_word(wrd, includealpinonouncompound=includealpinonouncompound)
+#     if methodname in {tarsp, stap}:
+#         result = result and not nochildword(wrd)
+#     return result
+#
+# def validnotalpinocompoundword(wrd: str, methodname: MethodName) -> bool:
+#     result = validword(wrd, methodname, includealpinonouncompound=False)
+#     return result
 
 
 def nochildword(wrd: str) -> bool:
     result = wrd in nochildwords
     return result
 
-def isalpinonouncompound(wrd: str) -> bool:
-    if ispunctuation(wrd):
-        return False
-    fullstr = f'geen {wrd}'  # geen makes it a noun and can combine with uter and neuter, count and mass, sg and plural
-    tree = alpinoparse(fullstr)
-    # find the noun
-    if tree is None:
-        settings.LOGGER.error(f'Parsing {fullstr} failed')
-        return False
-    nounnode = treebankfunctions.find1(tree, './/node[@pt="n"]')
-    if nounnode is None:
-        # settings.LOGGER.error(f'No noun found in {fullstr} parse')
-        return False
-    nounwrd = treebankfunctions.getattval(nounnode, 'word')
-    if nounwrd != wrd:
-        settings.LOGGER.error(f'Wrong noun ({nounwrd}) found in {fullstr} parse')
-        return False
-    nounlemma = treebankfunctions.getattval(nounnode, 'lemma')
-    if compoundsep in nounlemma:
-        parts = nounlemma.split(compoundsep)
-        unknownparts = [part for part in parts if not known_word(part) and part != "DIM"]
-        result = unknownparts == []
-        if not result:
-            settings.LOGGER.error(f'Unknown words ({comma.join(unknownparts)}) found in {fullstr} parse')
-            return False
-        return True
-    else:
-        return False
+# moved to tblex.py
+# def isalpinonouncompound(wrd: str) -> bool:
+#     if ispunctuation(wrd):
+#         return False
+#     fullstr = f'geen {wrd}'  # geen makes it a noun and can combine with uter and neuter, count and mass, sg and plural
+#     tree = alpinoparse(fullstr)
+#     # find the noun
+#     if tree is None:
+#         settings.LOGGER.error(f'Parsing {fullstr} failed')
+#         return False
+#     nounnode = treebankfunctions.find1(tree, './/node[@pt="n"]')
+#     if nounnode is None:
+#         # settings.LOGGER.error(f'No noun found in {fullstr} parse')
+#         return False
+#     nounwrd = treebankfunctions.getattval(nounnode, 'word')
+#     if nounwrd != wrd:
+#         settings.LOGGER.error(f'Wrong noun ({nounwrd}) found in {fullstr} parse')
+#         return False
+#     nounlemma = treebankfunctions.getattval(nounnode, 'lemma')
+#     if compoundsep in nounlemma:
+#         parts = nounlemma.split(compoundsep)
+#         unknownparts = [part for part in parts if not known_word(part) and part != "DIM"]
+#         result = unknownparts == []
+#         if not result:
+#             settings.LOGGER.error(f'Unknown words ({comma.join(unknownparts)}) found in {fullstr} parse')
+#             return False
+#         return True
+#     else:
+#         return False
 
 def tuple_lexicon_2_map(tuple_lexicon: set) -> dict:
     result = defaultdict(list)
@@ -552,9 +554,43 @@ disambig_words = {'gebeurd': {"buiging":"zonder", 'frame': 'verb(zijn,psp,intran
                               'sc': 'intransitive', 'sense': 'gebeur', "word": "gebeurd", "wvorm": "vd" }}
 
 
+
+detless_count_nouns = ['papa', 'mama', 'oma', 'opa', 'moeder', 'sinterklaas', 'mam'] + \
+                       ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september',
+                        'oktober', 'november', 'december'] + \
+                       ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'] + \
+                       ['morgen', 'overmorgen', 'gisteren'] + \
+                       ['kerstmis', 'pasen', 'pinksteren', 'kerst'] +\
+                       ['eentje'] + \
+                       ['buiten', 'binnen']
+
+predc_detless_count_nouns = ['avond', 'ochtend', 'middag', 'nacht', 'weer']
+
+color_names = ['rood', 'wit', 'blauw', 'oranje', 'zwart', 'geel', 'groen']
+
+
 junk = 0
 
 # to have a breakpoint after the last lexicon read
+
+
+
+def known_word(word: str, includealpinonouncompound=True) -> bool:
+    '''
+    a word is considered to be a known_word if it occurs in the word form lexicon,
+    if it is a name part, or if it is a chatspecial item, or in a lexicon with additional words,
+    or  a compound noun recognised as such by Alpino (the latter unless excluded)
+    but not in the nonwordslexicon
+    :param word:
+    :return:
+    '''
+    result = informlexicon(word)  or isa_namepart(word) or \
+             chatspecial(word) or word in additionalwordslexicon or \
+             word in spellingadditions or isallersuperlative(word) or issuperadjective(word)
+    if includealpinonouncompound:
+        result = result or isalpinonouncompound(word)
+    result = result and word not in nonwordslexicon
+    return result
 
 def is_acronym(wrd: str) -> bool:
     result = wrd in acronyms_lexicon
@@ -562,3 +598,12 @@ def is_acronym(wrd: str) -> bool:
     return result
 
 
+def validword(wrd: str, methodname: MethodName, includealpinonouncompound=True) -> bool:
+    result = wrd == '' or known_word(wrd, includealpinonouncompound=includealpinonouncompound)
+    if methodname in {tarsp, stap}:
+        result = result and not nochildword(wrd)
+    return result
+
+def validnotalpinocompoundword(wrd: str, methodname: MethodName) -> bool:
+    result = validword(wrd, methodname, includealpinonouncompound=False)
+    return result

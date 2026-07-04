@@ -7,6 +7,7 @@ from sastadev.NLtypes import Animate, AnyType, Event, Human, Object, SemType, Un
 from sastadev.sastatypes import ExactResultsDict, List, SynTree
 from sastadev.semtypelexicon import sh, vnwsemdict, wwsemdict, wwreqsemdict, defaultreqsemdict, get_n_semtype
 from sastadev.treebankfunctions import bareindexnode, find1, getattval, getheadof, getsentence
+from sastadev.toe import getantecedentof
 
 comma = ','
 
@@ -193,15 +194,6 @@ def makepassivesemreq(semreqlist: List[dict]) -> List[dict]:
 
 
 
-def getantecedentof(stree: SynTree):
-    idx = getattval(stree, 'index')
-    antecedentxpath = f'./ancestor::alpino_ds/descendant::node[(@word or @cat) and @index="{idx}"]'
-    antecedents = stree.xpath(antecedentxpath)
-    if antecedents != []:
-        antecedent = antecedents[0]
-    else:
-        antecedent = None
-    return antecedent
 
 def compatible(alt1: Alt, alt2: Alt) -> bool:
     result = altaltcompatible(alt1, alt2)

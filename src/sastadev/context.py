@@ -6,7 +6,7 @@ from sastadev.conf import settings
 from sastadev.constants import outtreebanksfolder
 from sastadev.datasets import infiguresdatasets
 from sastadev.filefunctions import getbasename
-from sastadev.lexicon import known_word, validword
+from sastadev.lexicon import validword, known_word
 from sastadev.sastatypes import TreeBank, SynTree
 from sastadev.treebankfunctions import getattval, getorigutt, getmeta, getxsid
 from sastadev.xlsx import mkworkbook

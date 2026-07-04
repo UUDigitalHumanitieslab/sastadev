@@ -63,7 +63,7 @@ ParsedCorrection = Tuple[List[str], SynTree, List[Meta]]
 TupleNint = Tuple[19 * (int,)]
 
 
-smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn'), ('me', 'we')]
+smartreplacepairs = [('me', 'mijn'), ('ze', 'zijn'), ('me', 'we'), ('gaat', 'laat')]
 smartreplacedict = {w1: w2 for w1, w2 in smartreplacepairs}
 
 
@@ -1068,7 +1068,18 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         showtree(thetree, text='thetree before deletion:')
 
     nodes2deleteintbegins = [int(b) for b in nodes2deletebegins]
-    thetree, deletion_metadata = deletewordnodes(thetree, nodes2deleteintbegins, wordsonly=True)
+    thetree1, deletion_metadata, omitted_nodes = deletewordnodes(thetree, nodes2deleteintbegins, wordsonly=True)
+
+    # add the omitted_nodes as a new type of metadata
+    omitted_nodes_element = find1(thetree1, './/omitted_nodes')
+    if omitted_nodes_element is None:
+        omitted_nodes_element = etree.Element('omitted_nodes')
+    for omitted_node in omitted_nodes:
+        omitted_nodes_element.append(omitted_node)
+
+    thetree = deepcopy(thetree1)
+    thetree.append(omitted_nodes_element)
+
 
     if debug:
         showtree(thetree, text='thetree after deletion:')

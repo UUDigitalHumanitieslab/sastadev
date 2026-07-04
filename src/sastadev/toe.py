@@ -1,30 +1,18 @@
 from typing import List
 
 from sastadev.conf import settings
-from sastadev.lexicon import isalpinonouncompound
 from sastadev.metadata import defaultpenalty
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import SynTree
 from sastadev.smallclauses import mkinsertmeta, realword, word
+from sastadev.tblex import isalpinonouncompound
 from sastadev.tokenmd import TokenListMD
-from sastadev.treebankfunctions import getattval, getnodeyield, mktoken2nodemap
+from sastadev.treebankfunctions import  getattval, getnodeyield, isdet,  mktoken2nodemap
 
 gav = getattval
-lonelytoe = 'Lonely toe'
+lonelytoestr = 'Lonely toe'
 een_beetje = 'lonely beetje'
 
-
-def isdet(node) -> bool:
-    nodept = getattval(node, 'pt')
-    nodepdtype = getattval(node, 'pdtype' )
-    result = nodept in ['lw'] or (nodept in  ['vnw'] and nodepdtype in ['det'])
-    return result
-
-
-def contentword(node) -> bool:
-    nodept = getattval(node, 'pt')
-    result = nodept in ['n', 'ww', 'adj', 'bw']
-    return result
 
 
 def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
@@ -59,7 +47,7 @@ def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
                 if isdet(thisnode) and getattval(nextnode, 'pt') == 'n':
                     naartoken = Token('naar', token.pos, subpos=5)
                     inserttokens = [naartoken]
-                    metadata += mkinsertmeta(inserttokens, newtokens, cat=lonelytoe)
+                    metadata += mkinsertmeta(inserttokens, newtokens, cat=lonelytoestr)
                     naarfound = True
                     newtokens.append(naartoken)
                     insertiondone = True
@@ -84,17 +72,6 @@ def lonelytoe(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     else:
         result = []
     return result
-
-nominalpts = ['n', 'vnw']
-def isnominal(node: SynTree) -> bool:
-    pt = getattval(node, 'pt' )
-    wrd = getattval(node, 'word')
-    if pt in nominalpts:
-        return True
-    elif isalpinonouncompound(wrd):
-        return True
-    else:
-        return False
 
 
 
@@ -158,3 +135,36 @@ def beetje(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
         newtokens.append(token)
     result = [TokenListMD(newtokens, metadata)] if insertion_done else []
     return result
+
+nominalpts = ['n', 'vnw']
+def isnominal(node: SynTree) -> bool:
+    pt = getattval(node, 'pt' )
+    wrd = getattval(node, 'word')
+    if pt in nominalpts:
+        return True
+    elif isalpinonouncompound(wrd):
+        return True
+    else:
+        return False
+
+def x_isnominal(node: SynTree) -> bool:
+    """
+    checks whether node is nominal;
+    when node is a bare index node, it checks whether the antecedent of node s nominal
+    """
+    if 'word' in node.attrib or 'cat' in node.attrib:
+        return isnominal(node)
+    else:
+        antecedent = getantecedentof(node)
+        return isnominal(antecedent)
+
+
+def getantecedentof(stree: SynTree):
+    idx = getattval(stree, 'index')
+    antecedentxpath = f'./ancestor::alpino_ds/descendant::node[(@word or @cat) and @index="{idx}"]'
+    antecedents = stree.xpath(antecedentxpath)
+    if antecedents != []:
+        antecedent = antecedents[0]
+    else:
+        antecedent = None
+    return antecedent

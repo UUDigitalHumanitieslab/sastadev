@@ -27,6 +27,7 @@ infpron = 'Informal Pronunciation'
 initdev = 'Initial Devoicing'
 codared = 'Coda Reduction'
 apomiss = 'Missing Apostrophe'
+apotoomuch = "Wrong superfluous apostrophe"
 addschwa = 'Schwa addition'
 onsetred = 'Onset Reduction'
 d_er = 'd-onset on er'
@@ -307,6 +308,7 @@ basicreplacementlist: List[BasicReplacement] = [('as', 'als', pron, infpron, cod
                                                 ('allemaal', ' veel', grammar, alpino_unknown_word, '', dp),
                                                 ("'em", "'m", orth, spellerr, spellingerror, -dp),
                                                 ('der', 'er', pron, infpron,d_er, dp),
+                                                ("'ie", 'ie', orth, typo, apotoomuch, -dp)
                                                 # ("k", "'k'", orth, spellerr, apomiss, -dp ) # Alpino takes care of this
                                                 # ("pas", "past", pron, infpron, codared, -dp) # moved to correrctor
                                                 # ('kijke', 'kijk', pron, infpron, emphasis, dp), # TD05, 32 moved to disambuguationdict

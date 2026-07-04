@@ -40,7 +40,7 @@ from typing import List
 from sastadev.conf import settings
 from sastadev import correctionlabels
 from sastadev.dedup import filledpauseslexicon
-from sastadev.lexicon import getwordinfo, known_word, question_promotors, tswnouns
+from sastadev.lexicon import getwordinfo, question_promotors, tswnouns, known_word
 from sastadev.metadata import (SASTA, Meta, bpl_delete, bpl_none,
                                defaultpenalty, insertion,
                                insertiontokenmapping)
