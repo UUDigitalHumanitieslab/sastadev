@@ -1913,7 +1913,7 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
            not issuperlative(token) and \
            isnounsgneut(nexttoken) and \
            (prevtoken is None or not isdefdet(prevtoken)) and \
-            (prevtoken.word, token.word) not in adj_e_exceptions:
+           (prevtoken is None or  (prevtoken.word, token.word) not in adj_e_exceptions):
             newwords = [token.word[:-1]] if iscomparative(token) else [get_lemma(token, 'adj')]
             if newwords != [token.word]:    # otherwise we will have an infinite recursion eg. andere -> andere
                 # ASTA_06 13

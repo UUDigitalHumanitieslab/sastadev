@@ -18,6 +18,7 @@ import sastadev.anonymization
 # import lexicon as lex
 from sastadev.conf import settings
 from sastadev import correctionlabels
+# from sastadev.macros import expandmacros  # causes import problems
 from sastadev.metadata import Meta, bpl_none
 from sastadev.sastatoken import Token
 from sastadev.sastatypes import (FileName, OptPhiTriple, PhiTriple, Position,
@@ -2169,10 +2170,15 @@ def deletewordnodes2(tree: SynTree, begins: List[Position], wordsonly=False,
                 result_metadata.append(associate_meta)
 
                 tree.remove(child)
-            # we must also delete bare index nodes with a word as antecedent
+            # we must also delete bare index nodes with a word as antecedent if it is a bigpro,
+            # cf vkltarsp, tarsp_10, 14, 41 and many others tarsp_02, 48; tarsp_03, 2,8,15;
+            # otherwise no we just remove the index for auristrain td06 25,31
             if is_bare_index_node(child) and childbeginint in begins:
                 if child_index in word_bare_indexes:
-                    tree.remove(child)
+                    if is_bigpro(child):
+                        tree.remove(child)
+                    else:
+                        child.attrib.pop('index')
             # if its children have been deleted earlier
             elif 'cat' in child.attrib and childless(child):
                 tree.remove(child)
@@ -2881,16 +2887,6 @@ def contentword(node) -> bool:
 
 
 
-def x_gav(node: SynTree, att: str) -> str:
-    """
-    looks up the value of att in node, and
-    when node is a bare index node, it looks the value of att up in the antecedent of node
-    """
-    if 'word' in node.attrib or 'cat' in node.attrib:
-        return gav(node, att)
-    else:
-        antecedent = getantecedentof(node)
-        return gav(antecedent, att)
 
 
 def get_omitted_phrases(stree: SynTree, cond: Callable) -> List[SynTree]:
@@ -2925,6 +2921,12 @@ def get_ww_dependent_verbs(ww: SynTree) -> List[SynTree]:
         rec_dependent_verbs = get_ww_dependent_verbs(dependent_verb)
         results += rec_dependent_verbs
     return results
+
+bigpro_cond = """(@rel="su" and not(@cat) and not(@pt) and not(@word) and not(@pos) and parent::node[@cat="inf" or @cat="ppart"])"""
+self_bigpro_xpath = f'self::node[{bigpro_cond}]'
+def is_bigpro(node: SynTree) -> bool:
+    result = node.xpath(self_bigpro_xpath) != []
+    return result
 
 
 if __name__ == '__main__':

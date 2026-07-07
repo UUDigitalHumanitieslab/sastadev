@@ -22,7 +22,7 @@ from sastadev.sastatypes import SynTree, WordInfo
 from sastadev.stringfunctions import endsinschwa, endsinschwa_n, punctuationchars, relative_edit_distance
 from sastadev.synsel import extend_syns, parent_imperative_xpath, synsel, tag_s_xpath
 from sastadev.tblex import get_aanloop_and_core
-from sastadev.toe import x_isnominal
+from sastadev.toe import x_isnominal, x_is_nominal_phrase
 from sastadev.treebankfunctions import (adjacent, complrels, compoundsep, find1,
                                         get_ww_dependent_verbs, get_left_siblings,
                                         getattval, get_node, getnodeyield, get_word, getuttid,
@@ -1602,11 +1602,12 @@ def get_preceding_r_p(subject: SynTree) -> List[SynTree]:
     return False
 
 
-def su_n_precedes_pv_in_smain(subject, pv) -> bool:
+def su_precedes_pv_in_smain(subject, pv, single_word_only=False) -> bool:
     su_pt = gav(subject, 'pt')
     su_parent = subject.getparent()
     su_parent_cat = gav(su_parent, 'cat')
-    if su_pt == 'n' and su_parent_cat == 'smain':
+    must_be_done = su_pt in ['n', 'vnw'] if single_word_only else True
+    if must_be_done and su_parent_cat == 'smain':
         su_end_int = int(gav(subject, 'end'))
         pv_begin_int = int(gav(pv, 'begin'))
         result = su_end_int <= pv_begin_int
@@ -1626,8 +1627,12 @@ def omitted_expletive_er(stree: SynTree) -> List[SynTree]:
             pass
             # results.append(pv) # only in impersonal passives but not in imperatives, omitted subjects
         else:
-            wi_subject = find1(subject, weak_indefinite_subject_xpath)
-            if wi_subject is not None and not su_n_precedes_pv_in_smain(wi_subject, pv):
+            raw_wi_subject = find1(subject, weak_indefinite_subject_xpath)
+            if raw_wi_subject is not None:
+                wi_subject = None if is_phrase_with_omitted_def_det(raw_wi_subject) else raw_wi_subject
+            else:
+                wi_subject = raw_wi_subject
+            if wi_subject is not None and not su_precedes_pv_in_smain(wi_subject, pv):
                 left_locadvs = get_preceding_locadvs(wi_subject)
                 left_r_ps = get_preceding_r_p(wi_subject)
                 dependent_verbs = get_ww_dependent_verbs(pv)
@@ -1640,7 +1645,10 @@ def omitted_expletive_er(stree: SynTree) -> List[SynTree]:
                     omitted_strong_objects += ww_omitted_strong_objs
                 omitted_strong_object_found = omitted_strong_objects != []
                 predc = find1(pv, '../node[@rel="predc"]')
-                if predc is not None and (x_isnominal(predc) or gav(predc, 'cat') == 'cp'):
+                if (predc is not None and
+                        (x_isnominal(predc) or
+                         x_is_nominal_phrase(predc) or
+                         gav(predc, 'cat') == 'cp')):
                     continue
                 if not left_locadvs  and not left_r_ps and strong_objs == [] and not omitted_strong_object_found:
                     results.append(pv)
@@ -1656,3 +1664,18 @@ def get_omitted_strong_objects(ww: SynTree) -> List[SynTree]:
         if is_strong:
             results.append(omitted_object)
     return results
+
+self_definite_det_xpath = expandmacros('self::omitted_node[%definite_det%]')
+def is_phrase_with_omitted_def_det(phrase: SynTree) -> bool:
+    if 'cat' in phrase.attrib:
+        hd = find1(phrase, './node[@rel="hd"]')
+    elif 'word' in phrase.attrib:
+        hd = phrase
+    else:
+        return False
+    omitted_dets = find_omitted_phrase(hd, lambda n: gav(n, 'rel') == 'det')
+    for omitted_det in omitted_dets:
+        is_definite = omitted_det.xpath(self_definite_det_xpath) != []
+        if is_definite:
+            return True
+    return False

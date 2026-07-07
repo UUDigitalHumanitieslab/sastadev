@@ -1054,7 +1054,8 @@ indefinite_pt_det = """((@pt="vnw" and @vwtype="onbep") or
 				        (@pt="lid" and @lwtype="onbep") or
 					    %indefinite_adj_det% or
 						%indefinite_bw_det% or
-					    (@pt="tw")
+        				(@pt="tw" and @numtype="hoofd")
+
 					   )"""
 					   
 indefinite_detp = """(@cat="detp" and node[@rel="hd" and %indefinite_pt_det%])"""
@@ -1077,17 +1078,24 @@ indefinite_det = """(@rel="det" and
 definite_det = """(@rel="det" and not(%indefinite_det%)
                   )"""
 				  
-weak_indefinite_np = """(@cat="np" and node[@rel="hd" and ((@pt="n" and @ntype!="eigen") or (@pt="vnw" and @vwtype="onbep"))] and not(node[@rel="app"]) and (not(node[@rel="det"]) or node[@rel="det" and %weak_indefinite_det%]))"""
+weak_indefinite_np = """(@cat="np" and 
+                          node[@rel="hd" and 
+						       ((@pt="n" and @ntype!="eigen") or 
+							   (@pt="vnw" and @vwtype="onbep"))] and 
+						   not(node[@rel="app"]) and 
+						   not(node[%pseudonym%]) and 
+						   not(node[@rel="mod" and @pt="tw" and @numtype="rang"]) and 
+						   (not(node[@rel="det"]) or node[@rel="det" and %weak_indefinite_det%]))"""
 
-indefinite_np = """(@cat="np" and node[@rel="hd" and @pt="n" and @ntype!="eigen" and not(%tswnoun_noun%)] and not(node[%superlative%])and not(node[@rel="det"]) or (node[@rel="det" and %indefinite_det%]))"""
+indefinite_np = """(@cat="np" and node[@rel="hd" and @pt="n" and @ntype!="eigen" and not(%tswnoun_noun%)] and not(node[%superlative%]) and   not(node[%pseudonym%]) and not(node[@rel="mod" and @pt="tw" and @numtype="rang"]) and not(node[@rel="det"]) or (node[@rel="det" and %indefinite_det%]))"""
 
 definite_np = """(@cat="np" and not(%indefinite_np%))"""
 
-indefinite_single_word = """((@pt="n" and @ntype!="eigen" and not(%tswnoun_noun%) and not(%definite_noun%)) or
+indefinite_single_word = """((@pt="n" and @ntype!="eigen" and not(%tswnoun_noun%) and not(%definite_noun%) and not(%pseudonym%)) or
                              (@pt="vnw" and @vwtype="onbep" and @lemma!="diegene" and @lemma!="degene")
 							)"""
 
-definite_single_word = """((@pt="vnw" and @vwtype!="onbep") or (@pt="n" and @ntype!="eigen") or %definite_noun%)"""
+definite_single_word = """((@pt="vnw" and @vwtype!="onbep") or (@pt="n" and @ntype!="eigen") or %definite_noun% or %pseudonym%)"""
 
 weak_indefinite_single_word = """(%indefinite_single_word% and %weak_indefinite% and not(%tswnoun%) and not(%tswnoun_noun%) )"""
 
@@ -1099,10 +1107,10 @@ weak_indefinite_det = """(
 				%een_aantal_np%  or 
 				(%indefinite_bw_det%) or 
 				%indefinite_adj_det% or 
-				@pt="tw" and @numtype="hoofd") or
+				(@pt="tw" and @numtype="hoofd") or
 				%indefinite_detp% or
 				(@cat="ap" and node[@rel="hd" and %weak_indefinite%])
-				
+				)
 			"""
 
 weak_indefinite = """(@lemma!="elk" and @lemma!="elke" and @lemma!="ieder" and @lemma!="al" and @lemma!="alle" and @lemma!="andermans" and @lemma!="sommig" and

@@ -428,6 +428,7 @@ def getpotsubjs(tree):
             nodeword = getattval(node, 'word').lower()
             node_pdtype = getattval(node, 'pdtype')
             node_lemma = getattval(node, 'lemma')
+            node_rel = getattval(node, 'rel')
             if nodeword == 'zij':
                 zijnode = getnode(zijsgnodestringtemplate, node)
                 results.append(zijnode)
@@ -436,7 +437,7 @@ def getpotsubjs(tree):
             #    results.append(zenode)
             elif nodept == 'vnw' and nodevwtype == 'pers' and nodecase == 'obl' and nodeword not in ['je']:
                 pass  # exclude pronouns such as me, hem, mij, etc as subjects
-            elif nodept == 'vnw' and node_pdtype == 'det' and node_lemma not in det_pron_vnws:
+            elif nodept == 'vnw' and (node_pdtype == 'det' or node_rel == 'det') and node_lemma not in det_pron_vnws:
                 pass
             else:
                 results += ptsubjcheck(node)
@@ -890,10 +891,11 @@ def phicompatible(snode, vnode):
         return False
     subjnode = snode
     subjnodelemma = getlemma(subjnode)
+    subjnodeword = getattval(subjnode, 'word')
     inversion = inverted(subjnode, vnode)
     if subjnodelemma in ['het', 'u', 'je']:
         subjgetal = 'ev'
-    elif subjnodelemma in tswnouns:
+    elif subjnodelemma in tswnouns and subjnodeword == subjnodelemma:
         subjgetal = 'ev'
     else:
         subjgetal = getattval(subjnode, 'getal')
