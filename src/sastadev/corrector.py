@@ -12,7 +12,8 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from sastadev.alpino import getdehetwordinfo, filter_wordinfos
 from sastadev.basicreplacements import (basicexpansions, basicreplacementpairs, basicreplacements, ervzvariantsdict,
-                                        disambiguationdict, adult_disambiguationdict, is_er_pronoun, Rvzlist)
+                                        disambiguationdict, adult_disambiguationdict, is_er_pronoun, Rvzlist,
+                                        special_replacements)
 from sastadev.celexlexicon import getinflforms, pos2posnum
 from sastadev.CHAT_Annotation import CHAT_retracing
 from sastadev.childesspellingcorrector import (adult_correctionsdict, children_correctionsdict,
@@ -44,10 +45,11 @@ from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl
                                janeenou, longrep, mkinsertmeta, mkSASTAMeta, modifypenalty as mp, repeated,
                                repeatedjaneenou, repeatedseqtoken, shortrep,
                                substringrep, unknownsymbol,
-                               SASTA, ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT, HISTORY, THISSAMPLECORRECTIONS,
-                               CHILDRENSPELLINGCORRECTION,
-                               EXTRAGRAMMATICAL
-                              )
+                               SASTA, ADULTSPELLINGCORRECTION, ALLSAMPLECORRECTIONS, BASICREPLACEMENTS, CONTEXT,
+                               HISTORY, THISSAMPLECORRECTIONS,
+                               CHILDRENSPELLINGCORRECTION, SPECIAL_REPLACEMENTS,
+                               EXTRAGRAMMATICAL, bpl_replacement
+                               )
 from sastadev.queryfunctions import get_aanloop_and_core, getuitloop
 from sastadev.sasta_explanation import explanationasreplacement
 from sastadev.sastatoken import mktokenlist, Token, tokenlist2stringlist
@@ -99,7 +101,7 @@ aposfollowers = {'ochtends', 'middags', 'avonds', 'nachts', 'morgens', 'werelds'
 #: The constant *wrongdet_excluded_words* contains words that lead to incorrect
 #: replacement of uter determiners (e.g. *die zijn* would be replaced by *dat zijn*) and
 #: therefore have to be excluded from determiner replacement.
-wrongdet_excluded_words = [ 'af', 'alles', 'dicht', 'ik',  'is', 'mee', 'meer', 'met', 'niet', 'spelen',
+wrongdet_excluded_words = [ 'af', 'alles', 'dicht', 'echt', 'ik',  'is', 'mee', 'meer', 'met', 'niet', 'spelen',
                             'wat', 'waren', 'weet', 'wel', 'zijn']
 
 #: The constant *e2een_excluded_nouns* contains words that lead to incorrect
@@ -1580,6 +1582,18 @@ def getalternativetokenmds(tokenmd: TokenMD,  tokens: List[Token], tokenctr: int
         newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
                                         name=correctionlabels.emphasis, value='Phoneme Duplication', cat=correctionlabels.pronunciation,
                                         backplacement=bpl_word)
+
+    if token.word in special_replacements:
+        thetokennode = tokennodes[tokenctr]
+        thetokennode_pt = gav(thetokennode, 'pt')
+        thetokennode_rel = gav(thetokennode, 'rel')
+        if thetokennode_pt == 'n': # and thetokennode_rel != 'hd': # latter put off as experiment
+            newwords = [special_replacements[token.word]]
+            newtokenmds = updatenewtokenmds(newtokenmds, token, newwords, beginmetadata,
+                                            name=correctionlabels.disambiguation, value=token.word, cat=correctionlabels.lexicon,
+                                            source=f'{SASTA}/{SPECIAL_REPLACEMENTS}',
+                                            backplacement=bpl_replacement, penalty=defaultpenalty)
+
 
     # basic replacements replace as by als, isse by is
     # here come the replacements

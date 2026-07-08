@@ -618,9 +618,9 @@ def mk_stage_report(allresults: AllResults, thequeries: QueryDict, report_data) 
     # comparison with norm table 1
     newpars = [""]
     report.extend(newpars)
-    age = report_data.speaker_metadata['childage'] if 'childage' in report_data.speaker_metadata else None
-    gender = report_data.speaker_metadata['sex'] if 'sex' in report_data.speaker_metadata else None
-    ses = report_data.speaker_metadata['SES'] if 'SES' in report_data.speaker_metadata else None
+    age = report_data.speaker_metadata['childage'] if 'childage' in report_data.speaker_metadata else 'unknown_age'
+    gender = report_data.speaker_metadata['sex'] if 'sex' in report_data.speaker_metadata else 'unknown_gender'
+    ses = report_data.speaker_metadata['SES'] if 'SES' in report_data.speaker_metadata else 'unknown_SES'
     newpars = compare_with_norm_stage(roman_stage, age, gender, ses)
     report.extend(newpars)
 
@@ -791,7 +791,11 @@ def get_GZW(allresults: AllResults) -> tuple:
     word_counts = [wc for _, wc in allresults.commwordcounts]
     total_wc = sum(word_counts)
     utt_count = len(allresults.commwordcounts)
-    result = total_wc / utt_count
+    if utt_count == 0:
+        settings.LOGGER.error(f'Zero utt_count in {allresults.filename}')
+        result = 0
+    else:
+        result = total_wc / utt_count
     return total_wc, utt_count, result
 
 def mk_GZW_report_data(allresults: AllResults, thequeries: QueryDict, report_data: ReportData) -> ReportData:
@@ -969,8 +973,8 @@ def mk_speaker_report(report_data) -> List[str]:
     speaker_metadata = report_data.speaker_metadata
     sample = report_data.sample_name
 
-    gender = normalise_gender(speaker_metadata['sex'])
-    age = normalise_age(speaker_metadata['childage'])
+    gender = normalise_gender(speaker_metadata['sex']) if 'sex' in speaker_metadata else 'unknown_gender'
+    age = normalise_age(speaker_metadata['childage']) if 'childage' in speaker_metadata else 'unknonw_age'
     if gender not in {boy, girl}:
         gender_str = child
     else:

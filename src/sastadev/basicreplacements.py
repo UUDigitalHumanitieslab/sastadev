@@ -78,6 +78,8 @@ ww_vnw_ambiguity = 'Verb - Pronoun ambiguity'
 spellingerror = 'Spelling Errror'
 
 
+special_replacements = {'weg': 'ervandoor', 'val': 'valt', 'kom': 'komt'}
+
 def combine(strlist: List[str]) -> str:
     return ampersand.join(strlist)
 
