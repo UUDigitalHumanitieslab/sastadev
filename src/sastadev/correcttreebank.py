@@ -1092,7 +1092,7 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
         meta.annotationwordlist for meta in newcorrection2 if meta.name == 'cleanedtokenpositions']
     cleantokpos = cleantokposlist[0] if cleantokposlist != [] else []
     insertbegins = [
-        meta.annotatedposlist for meta in newcorrection2 if meta.name == insertion]
+        meta.annotatedposlist for meta in newcorrection2 if meta.name in correctionlabels.insertion_meta_names]
     flatinsertbegins = [str(v) for el in insertbegins for v in el]
     purenodes2deletebegins = [
         str(v) for v in nodes2deletebegins if str(v) not in flatinsertbegins]

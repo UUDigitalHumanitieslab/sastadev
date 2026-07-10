@@ -2,7 +2,7 @@ import re
 from typing import List
 
 from lxml import etree
-from sastadev.correctionlabels import repeatedword
+from sastadev.correctionlabels import repeatedword, insertion
 from sastadev.sastatypes import Penalty
 
 bpl_none, bpl_word, bpl_node, bpl_delete, bpl_indeze, bpl_extra_grammatical, bpl_wordlemma, \
@@ -248,7 +248,7 @@ substringrep = 'Substring repetition'
 repetition = 'Repetition'
 fstoken = 'Retraced token'
 falsestart = 'Retracing with Correction'
-insertion = 'Insertion'
+# insertion = 'Insertion'
 smallclause = 'Small Clause Treatment'
 tokenmapping = 'Token Mapping'
 insertiontokenmapping = 'Insertion Token Mapping'
@@ -257,13 +257,13 @@ def modifypenalty(pct:int) -> Penalty:
     newpen = int(pct /100 * defaultpenalty)
     return newpen
 
-def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty, cat=smallclause):
+def mkinsertmeta(inserttokens, resultlist, penalty=defaultpenalty, name=insertion, cat=smallclause):
     insertposs = [token.pos + token.subpos for token in inserttokens]
     insertwordlist = [token.word for token in inserttokens]
     tokenmappinglist = [token.pos if token.subpos == 0 else None for token in resultlist]
-    metadata1 = [Meta(insertion, [insertword], annotatedposlist=[insertpos],
+    metadata1 = [Meta(name, [insertword], annotatedposlist=[insertpos],
                  annotatedwordlist=[], annotationposlist=[insertpos],
-                 annotationwordlist=[insertword], cat=smallclause, source=SASTA, penalty=penalty,
+                 annotationwordlist=[insertword], cat=cat, source=SASTA, penalty=penalty,
                  backplacement=bpl_delete) for insertword, insertpos in zip(insertwordlist, insertposs)]
     meta2 = Meta(insertiontokenmapping, tokenmappinglist, cat=tokenmapping, source=SASTA, penalty=0,
                  backplacement=bpl_none)

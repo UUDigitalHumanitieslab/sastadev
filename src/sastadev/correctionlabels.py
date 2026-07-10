@@ -1,4 +1,7 @@
 
+
+
+
 aanloop = "Word in aanloop"
 agreementerror = 'Agreement Error'
 alpinoimprovement = 'Alpino Improvement'
@@ -27,6 +30,7 @@ hetdeerror = 'hetdeerror'
 incorrect_e_suffix = 'Incorrect e-suffix'
 inflectionerror = 'InflectionError'
 informalpronunciation = 'Informal Pronunciation'
+insertion = 'Insertion'
 leggenliggen = 'leggen instead of liggen'
 lexicalerror = 'Lexical Error'
 lexicon = 'Lexicon'
@@ -37,6 +41,7 @@ noncompletion = 'Noncompletion'
 nocorrectiontype = 'nocorrectiontype'
 number_error = 'number error'
 omitted_node_associate ='omitted_node_associate'
+omitted_subject_inserted = 'omitted subject inserted'
 onsetandcodadrop = 'Onset and Coda drop'
 onsetreduction = 'Onset reduction'
 orthography = 'Orthography'
@@ -68,3 +73,5 @@ wrong_iedim = 'wrong_ieDim'
 wordunknowntoalpino = 'Word unknown to Alpino'
 wrongpronunciation = 'Wrong pronunciation'
 zoeenerror = "Word order error zo'n"
+
+insertion_meta_names = [insertion, omitted_subject_inserted]

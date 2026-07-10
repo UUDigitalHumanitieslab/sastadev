@@ -40,7 +40,7 @@ from sastadev.lexicon import (adj_e_exceptions, alt_pt_ww_n_pairdict, WordInfo, 
                               wordsunknowntoalpinolexicondict, en_must_do_words_lexicon)
 from sastadev.macros import expandmacros
 from sastadev.metadata import (Meta, bpl_word_delprec, bpl_indeze, bpl_node, bpl_none, bpl_paspast, bpl_word,
-                               bpl_wordlemma, defaultbackplacement,
+                               bpl_wordlemma, defaultbackplacement, bpl_delete,
                                defaultpenalty, filled_pause, fstoken, intj,
                                janeenou, longrep, mkinsertmeta, mkSASTAMeta, modifypenalty as mp, repeated,
                                repeatedjaneenou, repeatedseqtoken, shortrep,
@@ -688,6 +688,64 @@ def subjectlessga(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
             allresults = [result]
     return allresults
 
+suspect_subjects = ['weg']
+suspect_subjects_compl_rels = ['obj1', 'obj2', 'se', 'predc', 'ld']
+def adapt_suspect_subjects(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[TokenListMD]:
+    rawtokens = tokensmd.tokens
+    metadata = tokensmd.metadata
+    nodeyield = getnodeyield(tree)
+    themap = mktoken2nodemap(rawtokens, tree)
+    newtokens = []
+    meta = None
+    insertion_done = False
+    for i, token in enumerate(rawtokens):
+        if token.skip:
+            newtokens.append(token)
+            continue
+        prevtoken = rawtokens[i-1] if i > 0 else None
+        prevtoken_pos = prevtoken.pos if prevtoken is not None else 0
+        tokennode = themap[token.pos] if token.pos in themap else None
+        if tokennode is None:
+            newtokens.append(token)
+            continue
+        tokennode_pt = gav(tokennode, 'pt')
+        tokennode_rel = gav(tokennode, 'rel')
+        tokennode_wvorm = gav(tokennode, 'wvorm')
+        tokennode_parent =tokennode.getparent()
+        tokennode_parent_cat = gav(tokennode_parent, 'cat')
+        if tokennode_pt == 'ww' and tokennode_rel == 'hd' and tokennode_wvorm == 'pv' and tokennode_parent_cat in ['smain', 'sv1']:
+            parent_nodeyield = getnodeyield(tokennode_parent)
+            suspect_subject_found = any([gav(n, 'word') and gav(n, 'pt') == 'n'
+                                         and gav(n, 'rel') == 'su' in suspect_subjects for n in parent_nodeyield])
+            no_other_complements_found = not any ([gav(n, 'rel') in suspect_subjects_compl_rels for n in parent_nodeyield])
+            if suspect_subject_found and no_other_complements_found:
+                if tokennode_parent_cat == 'smain':
+                    newtokens.append(token)
+                    newtoken = Token('dat', token.pos, subpos=5)
+                    newtokens.append(newtoken)
+                    insert_pos = token.pos
+                elif tokennode_parent_cat == 'sv1':
+                    newtoken = Token('dat', prevtoken_pos, subpos=5)
+                    newtokens.append(newtoken)
+                    newtokens.append(token)
+                    insert_pos = prevtoken_pos
+                insert_tokens = [newtoken]
+                result_tokens = mktokenlist(rawtokens, insert_pos, insert_tokens)
+                newmetadata = mkinsertmeta(insert_tokens, result_tokens, name=correctionlabels.omitted_subject_inserted,
+                                           cat=correctionlabels.syntax, penalty=-defaultpenalty)
+                metadata += newmetadata
+                insertion_done = True
+            else:
+                newtokens.append(token)
+        else:
+            newtokens.append(token)
+    if insertion_done:
+        results = [TokenListMD(newtokens, metadata)]
+    else:
+        results = []
+    return results
+
+
 
 def getauxcorrections(tokensmd: TokenListMD, tree: SynTree) -> List[TokenListMD]:
     """
@@ -933,6 +991,20 @@ def getalternatives(origtokensmd: TokenListMD,  tree: SynTree, uttid: UttId,
         uttalternativemds = getsvacorrections(uttmd, fatntree, uttid)
         newresults += uttalternativemds
     allalternativemds += newresults
+
+    newresults = []
+    for uttmd in allalternativemds:
+        # utterance = space.join([token.word for token in uttmd.tokens])
+        utterance, _ = mkuttwithskips(uttmd.tokens)
+        noskiptokens = [t for t in uttmd.tokens if not t.skip]
+        fatntree = fatparse(utterance, noskiptokens)
+        debug = False
+        if debug:
+            showtree(fatntree)
+        uttalternativemds = adapt_suspect_subjects(uttmd, fatntree, uttid)
+        newresults += uttalternativemds
+    allalternativemds += newresults
+
 
     newresults = []
     for uttmd in allalternativemds:

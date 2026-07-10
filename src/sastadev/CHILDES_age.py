@@ -90,9 +90,12 @@ def normalise_age(age: str) -> str:
 def month_diff(age1 :str, age2:str) -> int:
     ch_age1 = childes_age_from_string(age1)
     ch_age2 = childes_age_from_string(age2)
-    months1 = 12 * ch_age1.years + ch_age1.months
-    months2 = 12 * ch_age2.years + ch_age2.months
-    result = months1 - months2
+    if ch_age1 is not None and ch_age2 is not None:
+        months1 = 12 * ch_age1.years + ch_age1.months
+        months2 = 12 * ch_age2.years + ch_age2.months
+        result = months1 - months2
+    else:
+        result = 0
     return result
 
 ok= 'ok'

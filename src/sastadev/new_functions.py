@@ -5,7 +5,7 @@ from lxml import etree
 import copy
 from sastadev import correctionlabels
 from sastadev.basicreplacements import wrongmorph, ervzvariants, basicreplacements
-from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_omittedword
+from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_omittedword, CHAT_retracing
 from sastadev.celexlexicon import celex2dcoimap
 from sastadev.conf import settings
 from sastadev.deregularise import correctinflection, overgen, wrongovergen
@@ -14,11 +14,11 @@ from sastadev.iedims import getjeforms
 from sastadev.find_ngram import findmatches, is_def_det, ngram21
 from sastadev.lexicon import getwordinfo, getwordposinfo, filledpauseslexicon, informlexicon
 from sastadev.macros import expandmacros
-from sastadev.metadata import Meta
+from sastadev.metadata import Meta, bpl_delete, mkinsertmeta, mkSASTAMeta, defaultpenalty
 from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
 from sastadev.queryfunctions import get_replacement_metadata
-from sastadev.sastatypes import Relation, SynTree
+from sastadev.sastatypes import Relation, SynTree, UttId
 from sastadev.sastatoken import Token
 from sastadev.smallclauses import mkinsertmeta, realword, word
 from sastadev.test_functions import test_f, get_stree, test_transform_f
@@ -137,9 +137,31 @@ def get_ww_dependent_verbs(ww: SynTree) -> List[SynTree]:
         results += rec_dependent_verbs
     return results
 
+def get_retracing_position(cleanedtoken_annotationposlist: List[int], retracing_annotationposlist: List[int]) -> int:
+    # it is presupposed that these lists are sorted
+    last_retracing_position = retracing_annotationposlist[-1]
+    for pos in cleanedtoken_annotationposlist:
+        if pos > last_retracing_position:
+            return pos
+    return 0
 
-
-
+def false_start(stree: SynTree) -> List[SynTree]:
+    results = []
+    retracings = stree.xpath(f'.//xmeta[@name="{CHAT_retracing}"]')
+    cleanedtokenpositions_meta = find1(stree, './/xmeta[@name="cleanedtokenpositions"]')
+    if cleanedtokenpositions_meta is not None:
+        cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+        for retracing in retracings:
+            retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+            if (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+                    not(cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0])):
+                position = get_retracing_position(cleanedtokens_annotationposlist, retracing_annotationposlist)
+                result = find1(stree, f'.//node[@begin="{position}"]')
+                if result is None:
+                    stree_nodeyield = getnodeyield(stree)
+                    result = stree_nodeyield[0]
+                results.append(result)
+    return results
 
 if __name__ == '__main__':
     pass
