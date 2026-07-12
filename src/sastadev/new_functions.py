@@ -8,6 +8,7 @@ from sastadev.basicreplacements import wrongmorph, ervzvariants, basicreplacemen
 from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_omittedword, CHAT_retracing
 from sastadev.celexlexicon import celex2dcoimap
 from sastadev.conf import settings
+from sastadev.constants import false_start_mode, repetition_mode, self_correction_mode
 from sastadev.deregularise import correctinflection, overgen, wrongovergen
 from sastadev.filefunctions import get_corrected_tree_fullname
 from sastadev.iedims import getjeforms
@@ -18,15 +19,16 @@ from sastadev.metadata import Meta, bpl_delete, mkinsertmeta, mkSASTAMeta, defau
 from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
 from sastadev.queryfunctions import get_replacement_metadata
-from sastadev.sastatypes import Relation, SynTree, UttId
+from sastadev.sastatypes import Relation, SynTree, TreeBank, UttId
 from sastadev.sastatoken import Token
 from sastadev.smallclauses import mkinsertmeta, realword, word
 from sastadev.test_functions import test_f, get_stree, test_transform_f
 from sastadev.tokenmd import TokenListMD
-from sastadev.treebankfunctions import (find1, getattval, get_node, getnodeyield, getorigutt, getsentence, getuttid, get_word,
+from sastadev.treebankfunctions import (find1, getattval, get_node, getnodeyield, getorigutt, getsentence,
+                                        getxsid, getuttid, get_word,
                                         mktoken2nodemap, mdbasedquery,
                                         mdnameonlyxpathtemplate)
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 gav = getattval
 
@@ -137,31 +139,66 @@ def get_ww_dependent_verbs(ww: SynTree) -> List[SynTree]:
         results += rec_dependent_verbs
     return results
 
-def get_retracing_position(cleanedtoken_annotationposlist: List[int], retracing_annotationposlist: List[int]) -> int:
-    # it is presupposed that these lists are sorted
-    last_retracing_position = retracing_annotationposlist[-1]
-    for pos in cleanedtoken_annotationposlist:
-        if pos > last_retracing_position:
-            return pos
-    return 0
-
-def false_start(stree: SynTree) -> List[SynTree]:
-    results = []
+def get_retracing_word_count(stree: SynTree, mode=None) -> int:
+    result = 0
     retracings = stree.xpath(f'.//xmeta[@name="{CHAT_retracing}"]')
     cleanedtokenpositions_meta = find1(stree, './/xmeta[@name="cleanedtokenpositions"]')
+    cleanedtokenisation = find1(stree, './/xmeta[@name="cleanedtokenisation"]')
     if cleanedtokenpositions_meta is not None:
         cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+        cleanedtokens_wordlist = eval(gav(cleanedtokenisation, 'annotationwordlist'))
         for retracing in retracings:
             retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
-            if (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
-                    not(cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0])):
-                position = get_retracing_position(cleanedtokens_annotationposlist, retracing_annotationposlist)
-                result = find1(stree, f'.//node[@begin="{position}"]')
-                if result is None:
-                    stree_nodeyield = getnodeyield(stree)
-                    result = stree_nodeyield[0]
-                results.append(result)
+            if mode is false_start_mode:
+                cond = is_false_start(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            elif mode == self_correction_mode:
+                cond = is_self_correction(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            elif mode == repetition_mode:
+                cond = is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            else:
+                cond = True
+            if cond:
+                result += len(retracing_annotationposlist)
+    return result
+
+def get_tb_false_start_word_counts(tb: TreeBank) -> List[Tuple[UttId, int]]:
+    results = []
+    for stree in tb:
+        xsid = getxsid(stree)
+        fs_count = get_retracing_word_count(stree, mode=false_start_mode)
+        results.append((xsid, fs_count))
     return results
+
+
+
+def is_false_start(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+    result = (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+            not (cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0]) and
+            not is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta))
+    return result
+
+def is_self_correction(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+    result = (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+                cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0] and
+                not is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta))
+    return result
+
+def is_repetition(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+    result = (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+            not (cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0]) and
+            not is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta))
+    return result
+
+
+
+def is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    return False
 
 if __name__ == '__main__':
     pass

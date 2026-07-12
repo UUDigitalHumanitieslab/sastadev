@@ -11,6 +11,8 @@ from sastadev.forms import getformfilename
 
 scoresheetname = 'STAP 1 - 5'
 extrasheetname = 'extra'
+ws68_name = 'STAP 6 - 8'
+max_retrace_utt_count = 26
 maxutt = 50
 zerocount = 0
 basexl = os.path.join(settings.SD_DIR, 'data', 'form_templates', 'STAP Excel VUmc 2018.xlsx')
@@ -130,6 +132,15 @@ def makestapform(allresults, _, basexl=basexl, in_memory=False):
     sorted_commwordcounts = sorted(allresults.commwordcounts, key=lambda x: x[1], reverse=True)
     top5 = sorted_commwordcounts[:5]
 
+    ws68 = wb[ws68_name]
+    # false starts
+    ws68 = fill_form(allresults, allresults.false_start_word_counts, ws68, start_col='B', start_row=5)
+    # self_corrections
+    ws68 = fill_form(allresults, allresults.self_correction_word_counts, ws68, start_col='B', start_row=11)
+    # repetitions
+    ws68 = fill_form(allresults, allresults.repetition_word_counts, ws68, start_col='B', start_row=17)
+    # mengconstructions stull to be added
+
     wsextra = wb[extrasheetname]
     colids = ['D', 'E', 'F', 'G', 'H']
     for i, el in enumerate(top5):
@@ -146,6 +157,25 @@ def makestapform(allresults, _, basexl=basexl, in_memory=False):
     # return the workbook- not needed
     return target
 
+def fill_form(allresults, word_counts, sheet, start_col: str, start_row: int):
+    start_col_ord = ord(start_col)
+    cur_col = start_col
+    filtered_false_start_words = [(uttid, count) for uttid, count in word_counts if count != 0]
+    if len(filtered_false_start_words) > max_retrace_utt_count:
+        settings.LOGGER.warning(f'More than {max_retrace_utt_count} in {allresults.filename}. Restricted to the first {max_retrace_utt_count} words.')
+        restricted_filtered_false_start_word_counts  = filtered_false_start_words[:max_retrace_utt_count]
+    else:
+        restricted_filtered_false_start_word_counts = filtered_false_start_words
+    for (uttid, count) in restricted_filtered_false_start_word_counts[:50]:
+        uttid_cell_key = f'{cur_col}{str(start_row)}'
+        count_cell_key = f'{cur_col}{str(start_row + 1)}'
+        sheet[uttid_cell_key] = uttid
+        sheet[count_cell_key] = count
+        cur_col = chr(ord(cur_col) + 1)
+    return sheet
+
+
+
 
 def test():
     coreresults = {NS: {'1': 3}, OS: {'1': 2, '2': 6}}
@@ -157,6 +187,8 @@ def test():
     fnbase, _ = os.path.splitext(fn)
     formxl = fnbase + '_form' + '.xlsx'
     makestapform(allresults, _)
+
+
 
 
 if __name__ == '__main__':

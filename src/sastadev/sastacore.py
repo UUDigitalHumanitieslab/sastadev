@@ -9,6 +9,7 @@ from sastadev.allresults import (AllResults, ExactResultsDict, getexactbyutt, Ma
 from sastadev.ASTApostfunctions import getastamaxsamplesizeuttidsandcutoff
 from sastadev.comm_ncomm import get_tb_comm_word_count, get_tb_noncomm_word_count
 from sastadev.conf import settings
+from sastadev.constants import false_start_mode, self_correction_mode, repetition_mode
 from sastadev.external_functions import str2functionmap
 from sastadev.grammarerrors import find_grammar_errors_in_allresults
 from sastadev.macros import expandmacros
@@ -16,6 +17,7 @@ from sastadev.methods import Method, astamethods, stapmethods, tarspmethods
 from sastadev.mismatches import getmarkposition
 from sastadev.query import (Query, form_process, is_core, is_literal, is_pre,
                             post_process, query_exists)
+from sastadev.queryfunctions import get_tb_retracing_word_counts
 from sastadev.reduceresults import exact2results, reduceallresults
 from sastadev.sas_impact import maxutt
 from sastadev.sas_queries import synxsid, hasxsid
@@ -197,8 +199,15 @@ def sastacore(origtreebank: Optional[TreeBank], correctedtreebank: TreeBank,
     commwordcounts: List[Tuple[UttId, int]] = get_tb_comm_word_count(correctedtreebank)
     noncommwordcounts: List[Tuple[UttId, int]] = get_tb_noncomm_word_count(correctedtreebank)
 
+    false_start_word_counts = get_tb_retracing_word_counts(correctedtreebank, mode= false_start_mode)
+    self_correction_word_counts = get_tb_retracing_word_counts(correctedtreebank, mode=self_correction_mode)
+    repetition_word_counts = get_tb_retracing_word_counts(correctedtreebank, mode=repetition_mode)
+
     allresults.commwordcounts = commwordcounts
     allresults.noncommwordcounts = noncommwordcounts
+    allresults.false_start_word_counts = false_start_word_counts
+    allresults.self_correction_word_counts = self_correction_word_counts
+    allresults.repetition_word_counts = repetition_word_counts
 
     samplesizefunction = getsamplesizefunction(methodname)
     samplesizetuple: SampleSizeTuple = samplesizefunction(allresults)

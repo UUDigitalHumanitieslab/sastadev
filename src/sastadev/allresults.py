@@ -50,7 +50,8 @@ def getqueryid(reskeystr: str) -> QId:
 class AllResults:
     def __init__(self, uttcount, coreresults, exactresults, postresults, allmatches, filename,
                  analysedtrees, allutts, annotationinput=False, sasresults=[], fullsasresults=[],
-                 commwordcounts=[], noncommwordcounts=[], speaker_metadata={}):
+                 commwordcounts=[], noncommwordcounts=[], speaker_metadata={}, false_start_word_counts=[],
+                 self_correction_word_counts=[], repetition_word_counts=[]):
         self.uttcount: int = uttcount
         self.coreresults: Dict[ResultsKey, ResultsCounter] = coreresults
         self.exactresults: ExactResultsDict = exactresults
@@ -64,6 +65,9 @@ class AllResults:
         self.fullsasresults: List[SAS_Result] = fullsasresults
         self.commwordcounts: List[Tuple[UttId, int]] = commwordcounts
         self.noncommwordcounts: List[Tuple[UttId, int]] = noncommwordcounts
+        self.false_start_word_counts: List[Tuple[UttId, int]] = false_start_word_counts
+        self.self_correction_word_counts: List[Tuple[UttId, int]] = self_correction_word_counts
+        self.repetition_word_counts: List[Tuple[UttId, int]] = repetition_word_counts
         self.speaker_metadata: Dict[str, str] = speaker_metadata
 
 

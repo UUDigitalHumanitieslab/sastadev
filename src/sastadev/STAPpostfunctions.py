@@ -71,3 +71,5 @@ def fouten_count(qids: List[QId], allresults) -> int:
         if reskey in allresults.coreresults:
             result += sumfreq(allresults.coreresults[reskey])
     return result
+
+

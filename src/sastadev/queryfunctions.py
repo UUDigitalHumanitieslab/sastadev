@@ -4,7 +4,9 @@ from sastadev.asta_queries import asta_delpv
 from sastadev.basicreplacements import is_pronominal_adverb, wrongmorph, ervzvariants, basicreplacements
 from sastadev.celexlexicon import celex2dcoimap
 from sastadev.conf import settings
-from sastadev.CHAT_Annotation import CHAT_replacement, CHAT_wordnoncompletion, CHAT_omittedword
+from sastadev.CHAT_Annotation import (CHAT_replacement, CHAT_wordnoncompletion, CHAT_omittedword,
+                                      CHAT_repetition, CHAT_retracing)
+from sastadev.constants import false_start_mode, repetition_mode, self_correction_mode
 from sastadev import correctionlabels
 from sastadev.deregularise import correctinflection, overgen, wrongovergen
 from sastadev.find_ngram import findmatches, ngram21
@@ -18,7 +20,7 @@ from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
 # from sastadev.sasta_explanation import get_prefix_and_core
-from sastadev.sastatypes import SynTree, WordInfo
+from sastadev.sastatypes import SynTree, TreeBank, UttId, WordInfo
 from sastadev.stringfunctions import endsinschwa, endsinschwa_n, punctuationchars, relative_edit_distance
 from sastadev.synsel import extend_syns, parent_imperative_xpath, synsel, tag_s_xpath
 from sastadev.tblex import get_aanloop_and_core
@@ -1679,3 +1681,151 @@ def is_phrase_with_omitted_def_det(phrase: SynTree) -> bool:
         if is_definite:
             return True
     return False
+
+def get_retracing_position(cleanedtoken_annotationposlist: List[int], retracing_annotationposlist: List[int]) -> int:
+    # it is presupposed that these lists are sorted
+    last_retracing_position = retracing_annotationposlist[-1]
+    for pos in cleanedtoken_annotationposlist:
+        if pos > last_retracing_position:
+            return pos
+    return 0
+
+def false_start(stree: SynTree) -> List[SynTree]:
+    results = retracing(stree, mode=false_start_mode)
+    return results
+
+
+def retracing(stree: SynTree, mode=None) -> List[SynTree]:
+    results = []
+    retracings = stree.xpath(f'.//xmeta[@name="{CHAT_retracing}"]')
+    cleanedtokenpositions_meta = find1(stree, './/xmeta[@name="cleanedtokenpositions"]')
+    cleanedtokenisation = find1(stree, './/xmeta[@name="cleanedtokenisation"]')
+    if cleanedtokenpositions_meta is not None:
+        cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+        cleanedtokens_wordlist = eval(gav(cleanedtokenisation, 'annotationwordlist'))
+        for retracing in retracings:
+            retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+            if mode is false_start_mode:
+                cond = is_false_start(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            elif mode == self_correction_mode:
+                cond = is_self_correction(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            elif mode == repetition_mode:
+                cond = is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            else:
+                cond = True
+            if cond:
+                position = get_retracing_position(cleanedtokens_annotationposlist, retracing_annotationposlist)
+                result = find1(stree, f'.//node[@word and @begin="{position}"]')
+                if result is None:
+                    stree_nodeyield = getnodeyield(stree)
+                    result = stree_nodeyield[0]
+                results.append(result)
+    return results
+
+def self_correction(stree: SynTree) -> List[SynTree]:
+    results = retracing(stree, mode=self_correction_mode)
+    return results
+
+
+def repetition(stree: SynTree) -> List[SynTree]:
+    results = []
+    repetitions = stree.xpath(f'.//xmeta[@name="{CHAT_repetition}"]')
+    cleanedtokenpositions_meta = find1(stree, './/xmeta[@name="cleanedtokenpositions"]')
+    if cleanedtokenpositions_meta is not None:
+        cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+        for repetition in repetitions:
+            retracing_annotationposlist = eval(gav(repetition, 'annotationposlist'))
+            position = get_retracing_position(cleanedtokens_annotationposlist, retracing_annotationposlist)
+            result = find1(stree, f'.//node[@word and @begin="{position}"]')
+            if result is None:
+                stree_nodeyield = getnodeyield(stree)
+                result = stree_nodeyield[0]
+            results.append(result)
+
+    # add retracings that are actually repetitions
+    new_results = retracing(stree, mode=repetition_mode)
+
+    results += new_results
+
+    return results
+
+def is_repetition_retracing(retracing: SynTree, cleanedtokenisation: SynTree, cleanedtokenpositions: SynTree) -> bool:
+    retracing_wordlist = eval(gav(retracing, 'annotationwordlist'))
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokenisation_annotationwordlist = eval(gav(cleanedtokenisation, 'annotationwordlist'))
+    cleanedtokenpositions_annotationposlist = eval(gav(cleanedtokenpositions, 'annotationposlist'))
+    for i, pos in enumerate(cleanedtokenpositions_annotationposlist):
+        if pos > retracing_annotationposlist[-1]:
+            break
+    end_pos = i + len(retracing_wordlist)
+    if end_pos < len(cleanedtokenisation_annotationwordlist):
+        result = cleanedtokenisation_annotationwordlist[i:end_pos] == retracing_wordlist
+    else:
+        result = False
+    return result
+
+def is_false_start(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+    result = (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+            not (cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0]) and
+            not is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta))
+    return result
+
+def is_self_correction(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+    result = (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+                cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0] and
+                not is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta))
+    return result
+
+def is_repetition(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
+    retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+    cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+    result = (cleanedtokens_annotationposlist != [] and retracing_annotationposlist != [] and
+            not (cleanedtokens_annotationposlist[0] < retracing_annotationposlist[0]) and
+            not is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta))
+    return result
+
+
+def get_retracing_word_count(stree: SynTree, mode=None) -> int:
+    result = 0
+    true_retracings = stree.xpath(f'.//xmeta[@name="{CHAT_retracing}"]')
+    repetitions = stree.xpath(f'.//xmeta[@name="{CHAT_repetition}"]')
+    retracings = true_retracings + repetitions
+    cleanedtokenpositions_meta = find1(stree, './/xmeta[@name="cleanedtokenpositions"]')
+    cleanedtokenisation = find1(stree, './/xmeta[@name="cleanedtokenisation"]')
+    if cleanedtokenpositions_meta is not None:
+        cleanedtokens_annotationposlist = eval(gav(cleanedtokenpositions_meta, 'annotationposlist'))
+        cleanedtokens_wordlist = eval(gav(cleanedtokenisation, 'annotationwordlist'))
+        for retracing in retracings:
+            retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
+            if mode is false_start_mode:
+                cond = is_false_start(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            elif mode == self_correction_mode:
+                cond = is_self_correction(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            elif mode == repetition_mode:
+                cond = is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta)
+            else:
+                cond = True
+            if cond:
+                result += len(retracing_annotationposlist)
+    return result
+
+def get_tb_retracing_word_counts(tb: TreeBank, mode=None) -> List[Tuple[UttId, int]]:
+    results = []
+    count = 0
+    for stree in tb:
+        xsid = getxsid(stree)
+        if xsid != '0':
+            count += 1
+            fs_count = get_retracing_word_count(stree, mode=mode)
+            if count <= 50:
+                results.append((xsid, fs_count))
+            else:
+                settings.LOGGER.warning(f'More than 50 utterances encountered. Over 50 ignored for non communicative word analysis')
+    return results
+
+
+

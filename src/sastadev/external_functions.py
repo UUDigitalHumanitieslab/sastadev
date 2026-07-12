@@ -31,8 +31,9 @@ from sastadev.methods import allok, astalemmafilter
 from sastadev.missing_det import get_missing_det
 from sastadev.queryfunctions import (adj_agreement_errors, bx, congruentiefout,
                                      dan_toen_fout, del_bw, del_er, del_vg, del_vz,
-                                     VzN, get_avn, get_pronunciation_variants, hequery, into,
+                                     VzN, false_start, get_avn, get_pronunciation_variants, hequery, into,
                                      no_copula, omitted_phrase, pv_regionale_vorm,
+                                     repetition, self_correction,
                                      stam, sublid, stap_congruentiefout, stap_sublid,
                                      sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
                                      tarsp_dellid, tarsp_mvzn, tarsp_sublid,  tarsp_verkl,
@@ -85,9 +86,9 @@ thetarspfunctions = [bx, bbx, congruentiefout, del_vz, get_avn, get_missing_det,
                      tarsp_mvzn, tarsp_verkl, VzN, vobij, voslashbij,vd_fout, vt_fout, vudivers]
 
 thestapfunctions = [adj_agreement_errors, BB_totaal, stap_congruentiefout,
-                    dan_toen_fout, del_bw, del_er, del_vg, del_vz,
+                    dan_toen_fout, del_bw, del_er, del_vg, del_vz, false_start,
                     get_missing_det, get_pronunciation_variants, GLVU, GL5LVU, makestapform,  no_copula,
-                    omitted_phrase,
+                    omitted_phrase, repetition, self_correction,
                     stap_sublid, sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
                     topic_drop, vd_fout, verb_no_pv, vt_fout]
 

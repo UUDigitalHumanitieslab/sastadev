@@ -11,7 +11,7 @@ WordCountPair = (int, int)
 xmetadata_xpath = './/xmeta'
 cleanedtokenisation_xpath = f'.//xmeta[@name="{cleanedtokenisation}"]'
 
-non_comm_xmetas = [CHAT_retracing, CHAT_repetition, CHAT_phonological_fragment]
+non_comm_xmetas = [CHAT_retracing, CHAT_repetition]   #, CHAT_phonological_fragment]
 
 def get_comm_word_count(stree: SynTree) -> int:
     xmetadata = stree.xpath(cleanedtokenisation_xpath)
@@ -30,11 +30,11 @@ def get_comm_word_count(stree: SynTree) -> int:
                 f'Multiple cleaned tokenisations in utterance {xsid}:  origutt={origutt}')
     return result
             
-def get_noncomm_word_count(stree: SynTree) -> int:
+def get_noncomm_word_count(stree: SynTree, xmetas=non_comm_xmetas) -> int:
     xmetadata = stree.xpath(xmetadata_xpath)
     non_comm_count = 0
     for xmeta in xmetadata:
-        if gav(xmeta, 'name') in non_comm_xmetas:
+        if gav(xmeta, 'name') in xmetas:
             annotation_wordlist = eval(gav(xmeta, 'annotationwordlist'))
             non_comm_count += len(annotation_wordlist)
     return non_comm_count
@@ -49,12 +49,22 @@ def get_tb_comm_word_count(treebank: TreeBank) -> List[Tuple[UttId, int]]:
             resultlist.append(newtuple)
     return resultlist
 
-def get_tb_noncomm_word_count(treebank: TreeBank) -> List[Tuple[UttId, int]]:
+def get_tb_noncomm_word_count(treebank: TreeBank, xmetas=non_comm_xmetas) -> List[Tuple[UttId, int]]:
     resultlist = []
     for stree in treebank:
         xsid = getxsid(stree)
         if xsid != '0':
-            noncomm_word_count = get_noncomm_word_count(stree)
+            noncomm_word_count = get_noncomm_word_count(stree, xmetas)
             newtuple = (xsid, noncomm_word_count)
             resultlist.append(newtuple)
     return resultlist
+
+# the next two ones are not used - must be dealt with in a different way to make the distinction between
+# false start and selfcorrections, and some retracings are actually repetitions
+def get_tb_repetition_word_count(treebank: TreeBank) -> List[Tuple[UttId, int]]:
+    result = get_tb_noncomm_word_count(treebank, xmetas=[CHAT_repetition])
+    return result
+
+def get_tb_retracing_word_count(treebank: TreeBank) -> List[Tuple[UttId, int]]:
+    result = get_tb_noncomm_word_count(treebank, xmetas=[CHAT_retracing])
+    return result
