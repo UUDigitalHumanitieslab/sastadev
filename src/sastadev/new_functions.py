@@ -20,6 +20,7 @@ from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
 from sastadev.queryfunctions import get_replacement_metadata
 from sastadev.sastatypes import Relation, SynTree, TreeBank, UttId
+from sastadev import sastatok
 from sastadev.sastatoken import Token
 from sastadev.smallclauses import mkinsertmeta, realword, word
 from sastadev.test_functions import test_f, get_stree, test_transform_f
@@ -200,10 +201,173 @@ def is_repetition(retracing, cleanedtokenisation, cleanedtokenpositions_meta) ->
 def is_repetition_retracing(retracing, cleanedtokenisation, cleanedtokenpositions_meta) -> bool:
     return False
 
+CHAT_repetition_code = '[/]'
+CHAT_retracing_code = '[//]'
+space = ' '
+
+def correct_chat(utt:str) -> str:
+    # tokenize the utt
+    tokens = sastatok.sasta_tokenize(utt)
+    words = [t.word for t in tokens]
+    new_words = correct_chat_words(words)
+    raw_new_utt = space.join(new_words)
+    new_utt = space.join(raw_new_utt.split())
+    return new_utt
+
+def correct_chat_words(words:List[str]) -> List[str]:
+    # detect (w+) < \1 > [/] different
+    # (w+) = repeating_words
+    #  \1 = repeated_words
+    # different = following_words
+    # transform to < \1 > [/] w+
+    new_words = []
+    for i, word in enumerate(words):
+        if word in [CHAT_repetition_code]:
+            CHAT_code = word
+            repeated_words = find_repeated_words(words[:i])
+            l_repeated_words = len(repeated_words)
+            if repeated_words != []:
+                end = len(i + 1 + l_repeated_words)
+                if end < len(words):
+                    following_words = [w for w in words[i + 1:end]]
+                    following_differs = repeated_words != following_words
+                else:
+                    following_differs = True
+                repeating_words_begin = i - 2 * l_repeated_words - 2
+                repeating_words_end = i - l_repeated_words - 2
+                if following_differs and repeating_words_begin >= 0:
+                        repeating_words = [w for w in words[repeating_words_begin:repeating_words_end]]
+                        if repeating_words == repeated_words:
+                            new_repeated_words = ['<'] + repeating_words + ['>']
+                            rest = correct_chat_words(words[i+1:])
+                            new_words = new_words[:repeating_words_begin] + new_repeated_words + [CHAT_code] + repeated_words + rest
+                        else:
+                            new_words.append(word)
+                else:
+                    new_words.append(word)
+            else:
+                new_words.append(word)
+        else:
+            new_words.append(word)
+    return new_words
+
+def find_repeated_words(words:List[str]) -> List[str]:
+    repeated_words = []
+    if words[-2] != '>':
+        return []
+    i = len(words) - 2
+    start = i
+    while i >= 0:
+        if words[i] != '<':
+            start = i
+            i = i - 1
+        else:
+            break
+    result = words[start:-1]
+    return result
+
+def clean_utt(utt:str) -> str:
+    utt_tokens = sastatok.sasta_tokenize(utt)
+    utt_words = [t.word for t in utt_tokens]
+    raw_result = space.join(utt_words)
+    result = space.join(raw_result.split())
+    return result
+
+def test_correct_chat():
+    for wrong, raw_correct in correction_tuples:
+        correct = clean_utt(raw_correct)
+        correction = correct_chat(correct)
+        if correction == correct:
+            print(f'OK: {wrong} correctly changed into {correction}')
+        else:
+            print(f'NO: {wrong} changed into \n{correction}\n{correct}')
+
+
+correction_tuples = [
+    ("ik denk van een <van een> [/] geheime kluis <geheime kluis> [/]. [+ VU]",
+     "ik denk <van een> [/] van een   <geheime kluis> [/] geheime kluis. [+ VU]"),
+    ("of van vroeger deze <deze> [/]? [+ VU]",
+     "of van vroeger  <deze> [/] deze? [+ VU]"),
+    ("<hij is> [//] hij <hij> [/] moest eigenlijk zeggen ik <ik> [/] doe het zelf. [+ VU]",
+     "<hij is> [//]  <hij> [/] hij moest eigenlijk zeggen  <ik> [/] ik doe het zelf. [+ VU]"),
+    ("er is <er is> [/] een paadje. [+ VU]",
+     " <er is> [/] er is een paadje. [+ VU]"),
+    ("dan ga <dan ga> [/] je ruilen. [+ VU]",
+     "<dan ga> [/] dan ga je ruilen. [+ VU]"),
+    ("<zo> [//] dan <dan> [/] is de andere op de <de> [/] zwarte. [+ VU]",
+     "<zo> [//]  <dan> [/] dan is de andere op  <de> [/] de zwarte. [+ VU]")
+   ]
+
+
+def partition(wlist:List[str]) -> List[List[str]]:
+    """
+    split wlist into a number of identical sublists
+    """
+    no_sub_parts = [wlist]
+    max =  len(wlist) // 2
+    partition_found = False
+    for i in range(max):
+        diff_found = False
+        if partition_found:
+            return parts
+        start = 0
+        parts = []
+        prev_part = None
+        while start < len(wlist):
+            new_part = wlist[start:start + i + 1]
+            parts.append(new_part)
+            if prev_part is not None and prev_part != new_part:
+                diff_found = True
+                break
+            prev_part = new_part
+            start += i + 1
+        if not diff_found:
+            partition_found = True
+    if partition_found:
+        return parts
+    else:
+        return no_sub_parts
+
+def convert_partition(parts:List[List[str]]) -> List[str]:
+    if parts == []:
+        return []
+#    elif len(parts) == 1:
+#        return parts[0]
+    l_part_1 = len(parts[0])
+    if l_part_1 > 1:
+        prefix = ['<']
+        suffix = ['>']
+    else:
+        prefix = []
+        suffix = []
+    results = []
+    for part in parts[:-1]:
+        results += prefix + part + suffix + ['[/]']
+    results += prefix + parts[-1] + suffix
+    return results
+
+def try_partition():
+    the_lists = [['a', 'a', 'a', 'a', 'a'],
+             ['a', 'b', 'a', 'b', 'a', 'b'],
+             ['a', 'b', 'c', 'a', 'b', 'c'],
+             ['a', 'b', 'c', 'd', 'e', 'f'],
+             ]
+    the_test_lists = the_lists
+    for the_list in the_test_lists:
+        the_partition = partition(the_list)
+        print(the_partition)
+        conversion = convert_partition(the_partition)
+        print(conversion)
+        print(space.join(conversion))
+
+
+
 if __name__ == '__main__':
     pass
     # test_f(lexical_error_triples, lexical_error)
     # sub_tijd_triples = [sub_tijd_triples[0], sub_tijd_triples[7]]
     # test_f(sub_tijd_triples, sub_tijd)
-    test_transform_f(als_dan_triples, transform_als_dan)
+    # test_transform_f(als_dan_triples, transform_als_dan)
+    # test_correct_chat()
+    try_partition()
 

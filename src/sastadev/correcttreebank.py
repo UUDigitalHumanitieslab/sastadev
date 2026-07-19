@@ -6,7 +6,7 @@ from lxml import etree
 
 from sastadev.adapt_pt import adapt_pt
 from sastadev.basicreplacements import ervzvariantsdict, is_er_pronoun, is_pronominal_adverb
-from sastadev.CHAT_correct import correct_dis_dit
+from sastadev.CHAT_correct import correct_dis_dit, correct_chat
 from sastadev.cleanCHILDEStokens import cleantext, bare_angled_brackets
 from sastadev.conf import settings
 from sastadev.displaytree import printtree
@@ -788,14 +788,30 @@ def correct_stree(stree: SynTree,  corr: CorrectionMode, correctionparameters: C
     # allmetadata += origmetadata
     # clean in the tokenized manner
 
-    cleanutttokens, chatmetadata = cleantext(origutt, False, tokenoutput=True)
+    # correct wrong repetitions
+    revised_utt = correct_chat(origutt)
+    if revised_utt != origutt:
+        repetition_metadata = [Meta('CHAT_correction', 'repetition_correction', cat='CHAT', source='SASTA')]
+        origutt_meta = find1(origmetadata, './/meta[@name="origutt"]')
+        if origutt_meta is not None:
+            pre_origmeta = etree.Element('meta',
+                                         {'name':'preorigutt', 'value': gav(origutt_meta, 'value'), 'type': 'text'})
+            new_origmeta = etree.Element('meta', {'name':'origutt', 'value': revised_utt, 'type': 'text'})
+            origmetadata.remove(origutt_meta)
+            origmetadata.extend([pre_origmeta, new_origmeta])
+        else:
+            pass  # give warning
+    else:
+        repetition_metadata = []
+
+    cleanutttokens, chatmetadata = cleantext(revised_utt, False, tokenoutput=True)
     # improve wrong CHAT annotations
-    newutt, correction_metadata = correct_dis_dit(origutt, chatmetadata)
+    newutt, correction_metadata = correct_dis_dit(revised_utt, chatmetadata)
     cleanutttokens, chatmetadata = cleantext(newutt, False, tokenoutput=True)
 
     # if not cleantextdone(origmetadata):  # otherwise we get double metadata for cleantext maar werkt niet goed
     #    allmetadata += chatmetadata
-    allmetadata += chatmetadata + [meta for meta in correction_metadata if meta not in chatmetadata]
+    allmetadata += chatmetadata + [meta for meta in correction_metadata if meta not in chatmetadata] + repetition_metadata
     # cleanutttokens = sasta_tokenize(cleanutt)
     cleanuttwordlist = [t.word for t in cleanutttokens]
     cleanutt = space.join(cleanuttwordlist)
