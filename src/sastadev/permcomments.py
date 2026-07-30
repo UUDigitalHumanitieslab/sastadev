@@ -2,7 +2,8 @@ from math import isnan
 import os
 from collections import Counter
 from sastadev.conf import settings
-from sastadev.constants import (checksuffix, errorsummaryfolder, errorsummarysuffix, intreebanksfolder,
+from sastadev.constants import (checksuffix, errorsummaryfolder, errorsummarysuffix, errors_overview_suffix,
+                                intreebanksfolder,
                                 silverpermfolder as permfolder, resultsfolder)
 from sastadev.counterfunctions import counter2liststr
 from sastadev.xlsx import  getxlsxdata, mkworkbook
@@ -91,6 +92,12 @@ def getallcomments(dataset, sample):
     for errorsummaryfilename in errorsummaryfilenames:
         errorsummaryfullname = os.path.join(errorsummarypath, errorsummaryfilename)
         permdatadict, errorsummaryheader = updatepermdict(errorsummaryfullname, permdatadict, sample=sample)
+
+
+    # read the errorsummaryoverview file, add to permadatadict
+    errors_overview_filename = f'{dataset}{errors_overview_suffix}.xlsx'
+    errors_overview_fullname = os.path.join(errorsummarypath, errors_overview_filename)
+    permdatadict, errorsummaryheader = updatepermdict(errors_overview_fullname, permdatadict, sample=sample)
 
 
     # make a copy of the original permfullname if it exists
