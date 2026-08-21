@@ -44,10 +44,17 @@ def GL5LVU(allresults, _):
     result = sum(counts[45:50]) / 5
     return result
 
-overige_fouten_qids =['S026', 'S027', 'S028', 'S029', 'S030', 'S031', 'S032', 'S033',]
-def overige_fouten_count(allresults, _) -> int:
+
+# # the functions below are not used because Excel computes the results inside the form
+overige_fouten_qids =['S026', 'S027', 'S028', 'S029', 'S030', 'S031', 'S032', 'S033', 'S038', 'S039']
+def overige_fouten_count(allresults, _) -> int:    ## this one is NOT used for the form but provides additional interesting information
     result = fouten_count(overige_fouten_qids, allresults)
     return result
+
+def ov_uiting_count(allresults, _) -> int:
+    result = uiting_met_fouten_count(overige_fouten_qids, allresults)
+    return result
+
 
 congruentie_fouten_qids = ['S022', 'S034', 'S035']
 def congruentie_fouten_count(allresults, _) -> int:
@@ -70,6 +77,34 @@ def fouten_count(qids: List[QId], allresults) -> int:
         reskey = mkresultskey(qid)
         if reskey in allresults.coreresults:
             result += sumfreq(allresults.coreresults[reskey])
+    return result
+
+def uiting_met_fouten_count(qids, allresults) -> int:
+    uttid_list = []
+    for qid in qids:
+        reskey = mkresultskey(qid)
+        if reskey in allresults.coreresults:
+            for uttid, cnt in allresults.coreresults[reskey].items():
+                uttid_list.append(uttid)
+    # remove duplicates
+    uttid_set = set(uttid_list)
+    result = len(uttid_set)
+    return result
+
+
+vt_fout_qids = ['S024']
+def vt_fout_count(allresults, _) -> int:
+    result = fouten_count(vt_fout_qids, allresults)
+    return result
+
+vd_fout_qids = ['S025']
+def vd_fout_count(allresults, _) -> int:
+    result = fouten_count(vd_fout_qids, allresults)
+    return result
+
+del_nmwg_qids = ['S036']
+def del_nmwg_count(allresults, _) -> int:
+    result = fouten_count(del_nmwg_qids, allresults)
     return result
 
 

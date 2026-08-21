@@ -2929,6 +2929,16 @@ def is_bigpro(node: SynTree) -> bool:
     return result
 
 
+def getmarkeduttbypositions(syntree: SynTree, thepositions: List[int]) -> str:
+    thewordlist = getyield(syntree)
+    themarkedyield = getmarkedyield(thewordlist, thepositions)
+    yieldstr = space.join(themarkedyield)
+    return yieldstr
+
+
+
+
+
 if __name__ == '__main__':
     # test()
     testindextransform()

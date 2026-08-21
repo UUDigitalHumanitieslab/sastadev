@@ -35,6 +35,9 @@ circumflexvowels = 'âêîôû\u0177'
 
 digits = '0123456789'
 consonants = 'bcdfghjklmnpqrstvwxz\u00E7'  # \u00E7 is c cedilla
+obstruents = 'bdkpqt'
+fricatives = 'fgsvz'
+
 dutch_base_vowels = barevowels + aiguvowels + \
                     gravevowels + tremavowels + circumflexvowels
 vowels = dutch_base_vowels
@@ -694,6 +697,24 @@ def separate_punctuation(sent: str) -> str:
             result += f' {c} '
         else:
             result += c
+    return result
+
+def ends_in_fricative(wrd:str) -> bool:
+    result = (wrd != '' and wrd[-1] in fricatives) or \
+             (len(wrd) > 1 and wrd[-2:] == 'ch')
+    return result
+
+def starts_with_fricative(wrd:str) -> bool:
+    result = (wrd != '' and wrd != wrd[0] in fricatives) or \
+             (len(wrd) > 1 and  wrd[:2] == 'ch')
+    return result
+
+def is_t_elision(wrong_word:str, correction: str, next_word:str) -> bool:
+
+    result =  (correction == f'{wrong_word}t' and
+            (wrong_word[-1] in obstruents or ends_in_fricative(wrong_word)) and
+        starts_with_fricative(next_word)
+    )
     return result
 
 

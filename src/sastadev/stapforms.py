@@ -1,13 +1,19 @@
 import os
-from collections import defaultdict
+from collections import Counter, defaultdict
 from io import BytesIO
 from shutil import copyfile, copyfileobj
 
 from openpyxl import load_workbook
 
+from sastadev.STAPpostfunctions import (congruentie_fouten_qids, vt_fout_qids, vd_fout_qids, del_nmwg_qids,
+                                        bepaler_weg_qids, bepaler_verkeerd_qids, overige_fouten_qids)
 from sastadev.allresults import AllResults, mkresultskey
 from sastadev.conf import settings
 from sastadev.forms import getformfilename
+from sastadev.queryfunctions import vt_fout
+from sastadev.sastatypes import UttId
+
+from typing import List, Tuple
 
 scoresheetname = 'STAP 1 - 5'
 extrasheetname = 'extra'
@@ -128,6 +134,52 @@ def makestapform(allresults, _, basexl=basexl, in_memory=False):
         ws[countcellkey] = count
         currentrow += 1
 
+    # STAP 4 ungrammatical VUs
+    startrow = 4
+
+    #HWW weg
+
+    #congr fout
+    column = 'L'
+    items = get_error_items(congruentie_fouten_qids, allresults)
+    write_error_items(ws, items, column, startrow)
+
+    # vt fout
+    column = 'M'
+    items = get_error_items(vt_fout_qids, allresults)
+    write_error_items(ws, items, column, startrow)
+
+    # vd fout
+    column = 'N'
+    items = get_error_items(vd_fout_qids, allresults)
+    write_error_items(ws, items, column, startrow)
+
+    # nmgr weg
+    column = 'O'
+    items = get_error_items(del_nmwg_qids, allresults)
+    write_error_items(ws, items, column, startrow)
+
+    # bepaler weg
+    column ='P'
+    items = get_error_items(bepaler_weg_qids, allresults)
+    write_error_items(ws, items, column, startrow)
+
+    # bepaler fout
+    column = 'Q'
+    items = get_error_items(bepaler_verkeerd_qids, allresults)
+    write_error_items(ws, items, column, startrow)
+
+    # wv fout
+    column = 'R'
+
+    # overige fouten
+    column = 'S'
+    items = get_error_items(overige_fouten_qids, allresults)
+    write_error_items(ws, items, column, startrow, count=False)
+
+
+
+
     # find the 5 longest utterances
     sorted_commwordcounts = sorted(allresults.commwordcounts, key=lambda x: x[1], reverse=True)
     top5 = sorted_commwordcounts[:5]
@@ -174,7 +226,25 @@ def fill_form(allresults, word_counts, sheet, start_col: str, start_row: int):
         cur_col = chr(ord(cur_col) + 1)
     return sheet
 
+def get_error_items(qids, allresults) -> List[Tuple[UttId, int]]:
+    err_counter = Counter()
+    for qid in qids:
+        reskey = mkresultskey(qid)
+        if reskey in allresults.coreresults:
+            err_counter += allresults.coreresults[reskey]
 
+    # get the items
+    err_items = err_counter.items()
+    sorted_err_items = sorted(err_items, key=lambda x: int(x[0]))
+    return sorted_err_items
+
+def write_error_items(ws, items, column, startrow, count=True):
+    for item in items:
+        uttid, frq = item
+        current_row = startrow + int(uttid)
+        cell_id = column + str(current_row)
+        thevalue = frq if count else 1
+        ws[cell_id] = thevalue
 
 
 def test():

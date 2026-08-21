@@ -27,7 +27,7 @@ tab = '\t'
 
 g_analysis, g_errors = 0, 1  # criteria om te selecteren voor verschillende tabellen
 
-error_levels = ['foutanalyse', 'grammaticale fout', 'foutenanalyse']
+error_levels = ['foutanalyse', 'grammaticale fout', 'foutenanalyse', 'sasta-opmerkingen']
 
 @dataclass
 class AnalysisTableParameters:

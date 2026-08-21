@@ -23,6 +23,7 @@ from sastadev.sastatypes import Relation, SynTree, TreeBank, UttId
 from sastadev import sastatok
 from sastadev.sastatoken import Token
 from sastadev.smallclauses import mkinsertmeta, realword, word
+from sastadev.stringfunctions import obstruents, ends_in_fricative, starts_with_fricative
 from sastadev.test_functions import test_f, get_stree, test_transform_f
 from sastadev.tokenmd import TokenListMD
 from sastadev.treebankfunctions import (find1, getattval, get_node, getnodeyield, getorigutt, getsentence,
@@ -359,6 +360,8 @@ def try_partition():
         conversion = convert_partition(the_partition)
         print(conversion)
         print(space.join(conversion))
+
+
 
 
 

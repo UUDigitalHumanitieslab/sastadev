@@ -21,13 +21,13 @@ from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
 # from sastadev.sasta_explanation import get_prefix_and_core
 from sastadev.sastatypes import SynTree, TreeBank, UttId, WordInfo
-from sastadev.stringfunctions import endsinschwa, endsinschwa_n, punctuationchars, relative_edit_distance
+from sastadev.stringfunctions import endsinschwa, endsinschwa_n, is_t_elision, punctuationchars, relative_edit_distance
 from sastadev.synsel import extend_syns, parent_imperative_xpath, synsel, tag_s_xpath
 from sastadev.tblex import get_aanloop_and_core
 from sastadev.toe import x_isnominal, x_is_nominal_phrase
 from sastadev.treebankfunctions import (adjacent, complrels, compoundsep, find1,
                                         get_ww_dependent_verbs, get_left_siblings,
-                                        getattval, get_node, getnodeyield, get_word, getuttid,
+                                        getattval, get_next_word, get_node, getnodeyield, get_word, getuttid,
                                         indextransform, mdbasedquery,
                                         mdnameonlyxpathtemplate, parent, getsentence, getorigutt, getxsid,
                                         omitted_er_is_expletive, trueclausecats, find_omitted_phrase)
@@ -502,17 +502,22 @@ def stap_congruentiefout(stree: SynTree) -> List[SynTree]:
     return results
 
 def congruentiefout(stree: SynTree) -> List[SynTree]:
-    errors, regionals, variants = congruentie_afwijkingen(stree)
+    errors, _, _, _ = congruentie_afwijkingen(stree)
     return errors
 
 def pv_regionale_vorm(stree: SynTree) -> List[SynTree]:
-    errors, regionals, variants = congruentie_afwijkingen(stree)
+    _, regionals, _, _ = congruentie_afwijkingen(stree)
     return regionals
 
-def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree], List[SynTree]]:
+def pv_t_elisions(stree: SynTree) -> List[SynTree]:
+    _, _, _, t_elisions = congruentie_afwijkingen(stree)
+    return t_elisions
+
+def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree], List[SynTree], List[SynTree]]:
     errors = []
     regionals = []
     variants = []
+    t_elisions = []
 
     # part 1 based on CHAT-replacements
     replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
@@ -530,6 +535,11 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
                 continue
             if (annotated, annotation) in regular_pv_variants:
                 variants.append(new_node)
+                continue
+            next_node = get_next_word(new_node)
+            next_word = gav(next_node, 'word')
+            if is_t_elision(annotated, annotation, next_word):
+                t_elisions.append(new_node)
                 continue
             # determine the grammatical properties of annotated if it is a real word
             if informlexicon(annotated):
@@ -572,6 +582,12 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
         if (annotated, annotation) in regular_pv_variants:
             variants.append(new_node)
             continue
+        next_node = get_next_word(new_node)
+        next_word = gav(next_node, 'word')
+        if is_t_elision(annotated, annotation, next_word):
+            t_elisions.append(new_node)
+            continue
+
         if new_node is not None:
             errors.append(new_node)
 
@@ -580,8 +596,9 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
     errors = list(set(errors))
     regionals = list(set(regionals))
     variants = list(set(variants))
+    t_elisions = list(set(t_elisions))
 
-    return errors, regionals, variants
+    return errors, regionals, variants, t_elisions
 
 
 

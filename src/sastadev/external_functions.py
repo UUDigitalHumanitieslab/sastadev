@@ -32,7 +32,7 @@ from sastadev.missing_det import get_missing_det
 from sastadev.queryfunctions import (adj_agreement_errors, bx, congruentiefout,
                                      dan_toen_fout, del_bw, del_er, del_vg, del_vz,
                                      VzN, false_start, get_avn, get_pronunciation_variants, hequery, into,
-                                     no_copula, omitted_phrase, pv_regionale_vorm,
+                                     no_copula, omitted_phrase, pv_regionale_vorm, pv_t_elisions,
                                      repetition, self_correction,
                                      stam, sublid, stap_congruentiefout, stap_sublid,
                                      sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
@@ -41,7 +41,9 @@ from sastadev.queryfunctions import (adj_agreement_errors, bx, congruentiefout,
                                      vobij, voslashbij, vd_fout, vt_fout, vudivers, xneg_neg,
                                      xneg_x)
 from sastadev.stapforms import makestapform
-from sastadev.STAPpostfunctions import GL5LVU, GLVU, BB_totaal
+from sastadev.STAPpostfunctions import (GL5LVU, GLVU, BB_totaal, congruentie_fouten_count, vt_fout_count,
+                                        vd_fout_count, del_nmwg_count, bepaler_weg_count, bepaler_verkeerd_count,
+                                        ov_uiting_count)
 from sastadev.Sziplus import sziplus6, vr5plus
 from sastadev.tarspform import mktarspform
 from sastadev.TARSPpostfunctions import (gofase, gtotaal, mk_toelichting, pf, pf2, pf3, pf4,
@@ -83,14 +85,15 @@ thetarspfunctions = [bx, bbx, congruentiefout, del_vz, get_avn, get_missing_det,
                      pv_regionale_vorm,
                      xneg_x, xneg_neg,
                      mktarspform, stam, sub_vz, tarsp_sublid, tarsp_dellid,
-                     tarsp_mvzn, tarsp_verkl, VzN, vobij, voslashbij,vd_fout, vt_fout, vudivers]
+                     tarsp_mvzn, tarsp_verkl, VzN, vobij, voslashbij,vd_fout, vt_fout, vudivers, ov_uiting_count]
 
 thestapfunctions = [adj_agreement_errors, BB_totaal, stap_congruentiefout,
                     dan_toen_fout, del_bw, del_er, del_vg, del_vz, false_start,
                     get_missing_det, get_pronunciation_variants, GLVU, GL5LVU, makestapform,  no_copula,
-                    omitted_phrase, repetition, self_correction,
+                    omitted_phrase, pv_t_elisions, repetition, self_correction,
                     stap_sublid, sub_bw, sub_lexical, sub_vnw, sub_tijd, sub_vg, sub_vz,
-                    topic_drop, vd_fout, verb_no_pv, vt_fout]
+                    topic_drop, vd_fout, verb_no_pv, vt_fout, congruentie_fouten_count, vt_fout_count,
+                                        vd_fout_count, del_nmwg_count, bepaler_weg_count, bepaler_verkeerd_count]
 
 theastafunctions = [samplesize, mlux, neologisme, onvolledig, correct, wordcountperutt, countwordsandcutoff,
                     astaform, KMcount, finietheidsindex, getnounlemmas, getlexlemmas, getalllemmas, asta_noun,
