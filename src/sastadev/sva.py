@@ -831,6 +831,8 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId, sta
 
                 if phicompatible(thesubj, thepv):
                     results = []
+                elif is_zeheb(thesubj, thepv):
+                    results = mk_zeheeft(tokens, thepv, metadata)
                 else:
                     results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
 
@@ -842,6 +844,54 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId, sta
 
         return overall_results
 
+
+def is_zeheb(thesubj, thepv) -> bool:
+    thesubj_lemma = gav(thesubj, 'lemma')
+    thepv_word = gav(thepv, 'word')
+    result = thesubj_lemma in ['zij', 'ze'] and thepv_word.lower() == 'heb'
+    return result
+
+def mk_zeheeft(tokens, thepv, metadata):
+    verbose = False
+    wholetree = find1(thepv, './ancestor::alpino_ds')
+    thepvword = getattval(thepv, 'word')
+    wholetreeyieldstr = getyieldstr(wholetree)
+    if verbose:
+        print(gettokenpos_str(wholetree))
+    if wholetree is not None:
+        leaves = getnodeyield(wholetree)
+        token2nodemap = mktoken2nodemap(tokens, wholetree)
+        nodepos2tokenposmap = {int(getattval(n, 'begin')): tokpos for tokpos, n in token2nodemap.items()}
+    else:
+        nodepos2tokenposmap = {}
+        settings.LOGGER.error(f'No wholetree found for {thepvword} with subject {snodeyield} in {wholetreeyieldstr}')
+    newtokens = []
+    newmetadata = copy.deepcopy(metadata)
+    pvbegin = getattval(thepv, 'begin')
+    newpv = 'heeft'
+    ipvbegin = int(pvbegin)
+    if ipvbegin not in nodepos2tokenposmap:
+        settings.LOGGER.error(
+            f'{thepvword} in position {pvbegin} not in {nodepos2tokenposmap} for {wholetreeyieldstr}.\n No '
+            f'correction '
+            f'applied')
+        return []
+    newpos = nodepos2tokenposmap[ipvbegin]
+    newtoken = Token(newpv, newpos)
+    for token in tokens:
+        if token.pos != newpos:
+            newtokens.append(token)
+        else:
+            oldtoken = token
+            newtokens.append(newtoken)
+            meta = mkSASTAMeta(oldtoken, newtoken, name=correctionlabels.grammarerror,
+                               value=correctionlabels.svaerror,
+                               cat=correctionlabels.syntax,
+                               backplacement=bpl_node_nolemma)
+            newmetadata.append(meta)
+
+    results = [TokenListMD(newtokens, newmetadata)]
+    return results
 
 def getpersons(vnode):
     pvagr = getattval(vnode, 'pvagr')

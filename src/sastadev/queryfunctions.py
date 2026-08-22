@@ -1771,7 +1771,12 @@ def is_repetition_retracing(retracing: SynTree, cleanedtokenisation: SynTree, cl
     retracing_annotationposlist = eval(gav(retracing, 'annotationposlist'))
     cleanedtokenisation_annotationwordlist = eval(gav(cleanedtokenisation, 'annotationwordlist'))
     cleanedtokenpositions_annotationposlist = eval(gav(cleanedtokenpositions, 'annotationposlist'))
+    fulltree = find1(retracing, 'ancestor::alpino_ds')
+    xsid = 0 if fulltree is None else getxsid(fulltree)
     for i, pos in enumerate(cleanedtokenpositions_annotationposlist):
+        if retracing_annotationposlist == []:
+            settings.LOGGER.error(f'Empty retracingannotationposlist in {xsid}, probably due to an annotation error, e.g. <&de> [/] ')
+            break
         if pos > retracing_annotationposlist[-1]:
             break
     end_pos = i + len(retracing_wordlist)
@@ -1835,6 +1840,9 @@ def get_tb_retracing_word_counts(tb: TreeBank, mode=None) -> List[Tuple[UttId, i
     count = 0
     for stree in tb:
         xsid = getxsid(stree)
+        verbose = False
+        if verbose:
+            print(xsid)
         if xsid != '0':
             count += 1
             fs_count = get_retracing_word_count(stree, mode=mode)
