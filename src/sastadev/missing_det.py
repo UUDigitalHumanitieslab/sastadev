@@ -164,7 +164,8 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
                 vz_lemma  not in special_vzs and \
                     nlemma not in detless_count_nouns and \
                     not keeropkeer(bare_noun) and \
-                    not volgend_vorig(bare_noun):
+                    not volgend_vorig(bare_noun) and \
+                    not is_soort_van(bare_noun):
                 wrong_bare_count_nouns.append(bare_noun)
 
     bare_nouns_in_np = stree.xpath(bare_noun_in_np_xpath)
@@ -188,7 +189,8 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
                 not is_part_of_n_v_expressions(bare_noun) and \
                 not is_part_of_fixed_expression(bare_noun) and \
                 not in_als_cp(bare_noun) and\
-                not is_begin_vz(bare_noun):
+                not is_begin_vz(bare_noun) and \
+                not is_soort_van(bare_noun):
             wrong_bare_count_nouns.append(bare_noun)
 
     # find examples of CHAT-omitted articles
@@ -367,6 +369,21 @@ def get_fixed_expression_dict(fixed_expression_list) -> dict:
             expression_word_list = expression.split()
             fixed_expression_dict[word].append(expression_word_list)
     return fixed_expression_dict
+
+soort_van_n_xpath = """parent::node[@cat="pp" and node[@rel="hd" and @lemma="van"]]/parent::node[node[@rel="hd" and @lemma="soort"]]"""
+soort_van_np_xpath = """parent::node[@cat="np"]/parent::node[@cat="pp" and node[@rel="hd" and @lemma="van"]]/parent::node[node[@rel="hd" and @lemma="soort"]]"""
+soort_n_xpath = """parent::node[@cat="np" and node[@rel="hd" and @lemma="soort"]]"""
+soort_np_xpath = """parent::node[@cat="np"]/parent::node[@cat="np" and node[@rel="hd" and @lemma="soort"]]"""
+
+def is_soort_van(noun: SynTree) -> bool:
+    noun_rel = gav(noun, 'rel')
+    result1 = noun_rel == 'obj1' and noun.xpath(soort_van_n_xpath) != []
+    result2 = noun_rel == 'hd' and noun.xpath(soort_van_np_xpath) != []
+    result3 = noun_rel == 'mod' and noun.xpath(soort_n_xpath) != []
+    result4 = noun_rel == 'hd' and noun.xpath(soort_np_xpath) != []
+    result = result1 or result2 or result3 or result4
+    return result
+
 
 fixed_expression_list = ['dag en nacht', 'van lief en Lee']   # Alpino ontleed "lee" als de eigennaam "Lee"
 fixed_expression_dict = get_fixed_expression_dict(fixed_expression_list)
