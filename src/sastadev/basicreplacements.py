@@ -489,13 +489,13 @@ def welnietttp(token: Token, stree: SynTree) -> bool:
 #: **Remark** Currently no distinction is made between singular *count* and singular *mass* nouns: they are both replaced by the same word. This may have to be adapted.
 disambiguation_replacements: List[Tuple[TokenTreePredicate, List[str], str]] = \
     [(dtp, ['huis', 'water', 'paard', 'werk', 'stuur', 'feest', 'snoep', 'geluid',
-                                      'kwartet', 'kruis', 'bad'], 'gas'),
+                                      'kwartet', 'kruis', 'bad', 'punt'], 'gas'),  # I added punt which is het and de word
      (dtp, ['toren', 'fiets', 'puzzel', 'boom', 'vis', 'melk', 'zon', 'pot', 'klok',
             'school', 'boer', 'lepel', 'jas', 'tuin', 'fles', 'lucht', 'emmer', 'maan', 'kachel',
             'kwak', 'verf', 'hop', 'kam', 'spiegel', 'klap', 'stal', 'lijm', 'lift', 'kat',
             'wagen', 'schep', 'kus', 'wind', 'borstel', 'duim', 'strik', 'klik', 'pleister',
             'stok', 'knoop', 'rits', 'knikker', 'put', 'boor', 'plons', 'beurt', 'toeter', 'poot',
-            'punt', 'post', 'gom', 'tap', 'kraanwagen', 'drup', 'wieg', 'kriebel', 'pit', 'zaag',
+             'post', 'gom', 'tap', 'kraanwagen', 'drup', 'wieg', 'kriebel', 'pit', 'zaag',
             'slof', 'deuk', 'hark', 'jeuk', 'stift', 'aard', 'hamster', 'kiek', 'haak', 'schroef',
             'tape', 'vorm', 'klem', 'mot', 'druppel', 'knor'], 'teil'),
      (dtp, ['bomen', 'kussen', 'kaarten', 'beesten', 'weken', 'huizen', 'apen', 'poten',

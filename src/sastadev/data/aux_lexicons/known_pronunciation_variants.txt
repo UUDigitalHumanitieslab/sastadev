@@ -47,6 +47,10 @@ teesjut	tieshirt
 tiemen	klimmen
 tof	toch 
 u	een
+u	ik
+u	het
+u	hij
+u	op
 ukope	verkoper
 wa	had
 zeien	zeiden

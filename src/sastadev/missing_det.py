@@ -127,7 +127,7 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
                         len(gav(n, 'lemma')) != 1 and
                         'count' in gav(n, 'frame') and
                         not((gav(n, 'rel') == "predc" or no_verb_around(n) or predc_mwu_parent(n)) and
-                            is_beroep((gav(n, 'lemma'))  or gav(n, 'lemma') in predc_detless_count_nouns)) and
+                            (is_beroep_pred(n)  or gav(n, 'lemma') in predc_detless_count_nouns)) and
                         not is_pseudonym(gav(n, 'word')) and
                         not robust_is_pseudonym(gav(n, 'word')) and
                         not volgend_vorig(n) and
@@ -177,6 +177,8 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
             np = find1(bare_noun, 'parent::node[@cat="mwu"]/parent::node[@cat="np"]')
         np_rel = gav(np, 'rel') if np is not None else ''
         app = find1(bare_noun, app_xpath)
+        if is_modified_by_heel(bare_noun):
+            wrong_bare_count_nouns.append(bare_noun)
         if (not is_mass(bare_noun) and not is_both(bare_noun) and
             nlemma not in  detless_count_nouns + excluded_nouns and
             not is_numeral(gav(bare_noun, 'lemma')) and
@@ -218,6 +220,21 @@ def is_class_member(node: SynTree, theclass) -> bool:
     if len(parts) > 1 and parts[-1] in theclass:
         return True
     return False
+
+subj_xpath = """../node[@rel="su"]"""
+def is_beroep_pred(noun: SynTree) -> bool:
+    noun_lemma = gav(noun, 'lemma')
+    if not is_beroep(noun_lemma):
+        return False
+    subject = find1(noun, subj_xpath)
+    if subject is None:
+        return True
+    subject_lemma = gav(subject, 'lemma')
+    if subject_lemma in ['dit', 'dat', 'het']:
+        return False
+    else:
+        return True
+
 
 def is_beroep(lemma: str) -> bool:
     result = lemma in beroepen
@@ -303,8 +320,10 @@ def keeropkeer(node: SynTree) -> bool:
     return False
 
 def no_verb_around(n: SynTree) -> bool:
-    fulltree = n.xpath('ancestor::alpino_ds')
-    wordnodelist = getnodeyield(n)
+    fulltree = find1(n, 'ancestor::alpino_ds')
+    if fulltree is None:
+        return True
+    wordnodelist = getnodeyield(fulltree)
     result = all([gav(wn, 'pt') != 'ww' or gav(wn, 'positie') == 'prenom' for wn in wordnodelist])
     return result
 
@@ -382,6 +401,11 @@ def is_soort_van(noun: SynTree) -> bool:
     result3 = noun_rel == 'mod' and noun.xpath(soort_n_xpath) != []
     result4 = noun_rel == 'hd' and noun.xpath(soort_np_xpath) != []
     result = result1 or result2 or result3 or result4
+    return result
+
+modified_by_heel_xpath = """../node[@rel="mod" and @lemma="heel"]"""
+def is_modified_by_heel(noun: SynTree) -> bool:
+    result = noun.xpath(modified_by_heel_xpath) != []
     return result
 
 
