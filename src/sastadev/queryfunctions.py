@@ -573,20 +573,21 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
     sva_error_metadata = stree.xpath(sva_error_xpath)
     for sva_error_meta in sva_error_metadata:
         new_node = get_node(stree, sva_error_meta)
-        annotated = get_word(sva_error_meta, 'annotatedwordlist')
-        annotation = get_word(sva_error_meta, 'annotationwordlist')
+        if new_node is not None:
+            annotated = get_word(sva_error_meta, 'annotatedwordlist')
+            annotation = get_word(sva_error_meta, 'annotationwordlist')
 
-        if (annotated, annotation) in regional_pv_variants:
-            regionals.append(new_node)
-            continue
-        if (annotated, annotation) in regular_pv_variants:
-            variants.append(new_node)
-            continue
-        next_node = get_next_word(new_node)
-        next_word = gav(next_node, 'word')
-        if is_t_elision(annotated, annotation, next_word):
-            t_elisions.append(new_node)
-            continue
+            if (annotated, annotation) in regional_pv_variants:
+                regionals.append(new_node)
+                continue
+            if (annotated, annotation) in regular_pv_variants:
+                variants.append(new_node)
+                continue
+            next_node = get_next_word(new_node)
+            next_word = gav(next_node, 'word')
+            if is_t_elision(annotated, annotation, next_word):
+                t_elisions.append(new_node)
+                continue
 
         if new_node is not None:
             errors.append(new_node)
@@ -1852,5 +1853,9 @@ def get_tb_retracing_word_counts(tb: TreeBank, mode=None) -> List[Tuple[UttId, i
                 settings.LOGGER.warning(f'More than 50 utterances encountered. Over 50 ignored for non communicative word analysis')
     return results
 
-
+hoofdww_weg_xpath = """.//node[@rel="hd" and @pt="ww" and ../node[@rel="vc" and @cat="inf" and not(node[@rel="hd" and @pt="ww"])]]
+"""
+def hoofdww_weg(stree: SynTree) -> List[SynTree]:
+    results = stree.xpath(hoofdww_weg_xpath)
+    return results
 

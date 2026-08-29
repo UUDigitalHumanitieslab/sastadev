@@ -51,6 +51,11 @@ def overige_fouten_count(allresults, _) -> int:    ## this one is NOT used for t
     result = fouten_count(overige_fouten_qids, allresults)
     return result
 
+hoofdww_weg_qids = ['S050']
+def hoofdww_weg_count(allresults, _):
+    result = fouten_count(hoofdww_weg_qids, allresults)
+    return result
+
 def ov_uiting_count(allresults, _) -> int:
     result = uiting_met_fouten_count(overige_fouten_qids, allresults)
     return result
