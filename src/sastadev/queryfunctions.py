@@ -95,8 +95,9 @@ verklxpath = expandmacros(""".//node[(@pt="n" and @graad="dim" and not(%nodimlem
 verklsuffixes = ['je', 'jes', 'ie', 'ies', 'ke', 'kes']
 
 sva_error_xpath = f""".//xmeta[@name="{correctionlabels.grammarerror}" and @value="{correctionlabels.svaerror}"]"""
-regional_pv_variants = [('heb', 'heeft')]
-regular_pv_variants = [('kun', 'kan')]
+regional_pv_variants = [('heb', 'heeft'), ('heb', 'hebt'),  ('hebt', 'heb')]  # heef/heeft is considered a uitspraak_variant
+regular_pv_variants = [('kun', 'kan'), ('zul', 'zal'), ('wou', 'wilde'), ('wilde', 'wou')]
+sociolect_variants = [('hun', 'zij')]
 
 no_copula_xpath = """.//node[@rel="predc" and not(../node[@rel="hd" and @pt="ww"])]"""
 
@@ -512,6 +513,38 @@ def pv_regionale_vorm(stree: SynTree) -> List[SynTree]:
 def pv_t_elisions(stree: SynTree) -> List[SynTree]:
     _, _, _, t_elisions = congruentie_afwijkingen(stree)
     return t_elisions
+
+
+def sociolect(stree: SynTree) -> List[SynTree]:
+    results = pv_regionale_vorm(stree)
+
+
+    replacement_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_replacement))
+    explanation_as_replacement_metadata = (
+        stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.explanationasreplacement)))
+    noncompletion_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=CHAT_wordnoncompletion))
+    regional_metadata = stree.xpath(mdnameonlyxpathtemplate.format(mdname=correctionlabels.regionalform))
+    all_metadata = replacement_metadata + explanation_as_replacement_metadata + \
+                   noncompletion_metadata + regional_metadata
+    for replacement in all_metadata:
+        new_node = get_node(stree, replacement)
+        annotated = get_word(replacement, 'annotatedwordlist')
+        annotation = get_word(replacement, 'annotationwordlist')
+        if new_node is not None:
+            if (annotated, annotation) in sociolect_variants:
+                results.append(new_node)
+
+    # no duplicates
+    results = list(set(results))
+
+    # exclude t-elisions
+    t_elisions = pv_t_elisions(stree)
+    results = [n for n in results if n not in t_elisions]
+
+    return results
+
+
+
 
 def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree], List[SynTree], List[SynTree]]:
     errors = []
