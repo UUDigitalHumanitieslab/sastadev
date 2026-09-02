@@ -45,6 +45,15 @@ hwwwithsvpxpath = expandmacros(""".//node[@pt="ww" and %hwwwithsvp%  and not(%hw
                      ../node[@rel="svp" and  @pt="vz"] and 
                      ../node[@rel="mod" and %Rpronoun%]]""")
 
+bare_obj2_xpath = expandmacros("""//node[@rel="obj2" and 
+       (not(@cat) or @cat!="pp") and 
+       (not(@case) or @case="stan") and
+       ../node[@rel="hd" and @pt="ww" and @wvorm="pv"] and 
+       not(../node[@rel="su"]) and 
+       not(../node[@rel="obj1"]) and
+	   not(%basicimperative%)
+	   ]""")
+
 def transformtreeld(stree:SynTree) -> SynTree:
     debug = False
     if debug:
@@ -570,6 +579,13 @@ def transform_wrong_words(instree: SynTree) -> SynTree:
 
     return stree
 
+def transform_bare_obj2(instree: SynTree) -> SynTree:
+    stree = copy.deepcopy(instree)
+    bare_obj2 = find1(stree, bare_obj2_xpath)
+    if bare_obj2 is not None:
+        bare_obj2.set('rel', 'su')
+    return stree
+
 
 def dotreetransformations(fulltree: SynTree, method_name: MethodName) -> SynTree:
     fulltree = transformtagcomma(fulltree)
@@ -592,6 +608,7 @@ def dotreetransformations(fulltree: SynTree, method_name: MethodName) -> SynTree
     fulltree = transform_er_az(fulltree)
     fulltree = transform_w_vz(fulltree)
     fulltree = transform_wrong_words(fulltree)
+    # fulltree = transform_bare_obj2(fulltree)
     # fulltree = transform_met_np_pp(fulltree)  # not needed already covered
     # fulltree = transform_gaan_predc(fulltree) put off because it should be covered already in STAP at least
     # stree = nognietsplit(stree)  # put off because it should not be done

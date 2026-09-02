@@ -19,6 +19,7 @@ from sastadev.macros import expandmacros
 from sastadev.metadata import Meta
 from sastadev.missing_det import get_missing_det
 from sastadev.normalise_lemma import normaliselemma
+from sastadev.predcvagreement import get_predc_v_mismatching_heads
 # from sastadev.sasta_explanation import get_prefix_and_core
 from sastadev.sastatypes import SynTree, TreeBank, UttId, WordInfo
 from sastadev.stringfunctions import endsinschwa, endsinschwa_n, is_t_elision, punctuationchars, relative_edit_distance
@@ -96,8 +97,13 @@ verklsuffixes = ['je', 'jes', 'ie', 'ies', 'ke', 'kes']
 
 sva_error_xpath = f""".//xmeta[@name="{correctionlabels.grammarerror}" and @value="{correctionlabels.svaerror}"]"""
 regional_pv_variants = [('heb', 'heeft'), ('heb', 'hebt'),  ('hebt', 'heb')]  # heef/heeft is considered a uitspraak_variant
-regular_pv_variants = [('kun', 'kan'), ('zul', 'zal'), ('wou', 'wilde'), ('wilde', 'wou')]
+regular_pv_variants = [ ('wou', 'wilde'), ('wilde', 'wou')]
+conditional_regular_pv_variants = [('kun', 'kan'), ('zul', 'zal')]
 sociolect_variants = [('hun', 'zij')]
+congruentie_error_pairs = [('kant', 'kan'), ('zalt', 'zal')]
+# words that differ grammatically but have the same features in dcoi
+basic_dcoi_gap_pairs = [('hebt', 'heeft'), ('ben', 'is')]
+dcoi_gap_pairs = basic_dcoi_gap_pairs + [(el2, el1) for (el1, el2) in basic_dcoi_gap_pairs]
 
 no_copula_xpath = """.//node[@rel="predc" and not(../node[@rel="hd" and @pt="ww"])]"""
 
@@ -543,7 +549,18 @@ def sociolect(stree: SynTree) -> List[SynTree]:
 
     return results
 
-
+def is_regular_pv_variant(annotated: str, annotation:str, theverb: SynTree) -> bool:
+    if (annotated, annotation) in regular_pv_variants:
+        return True
+    if (annotated, annotation) in conditional_regular_pv_variants:
+        thesubject = find1(theverb, '../node[@rel="su"]')
+        if thesubject is None:
+            return False
+        thesubject_lemma = gav(thesubject, 'lemma')
+        thesubject_beginint = int(gav(thesubject, 'begin'))
+        theverb_beginint = int(gav(theverb, 'begin'))
+        result = thesubject_lemma in ['je', 'jij'] and theverb_beginint < thesubject_beginint
+        return result
 
 
 def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree], List[SynTree], List[SynTree]]:
@@ -566,13 +583,16 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
             if (annotated, annotation) in regional_pv_variants:
                 regionals.append(new_node)
                 continue
-            if (annotated, annotation) in regular_pv_variants:
+            if is_regular_pv_variant(annotated, annotation, new_node) :
                 variants.append(new_node)
                 continue
             next_node = get_next_word(new_node)
             next_word = gav(next_node, 'word')
             if is_t_elision(annotated, annotation, next_word):
                 t_elisions.append(new_node)
+                continue
+            if (annotated, annotation) in congruentie_error_pairs:
+                errors.append(new_node)
                 continue
             # determine the grammatical properties of annotated if it is a real word
             if informlexicon(annotated):
@@ -586,17 +606,20 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
                         normalised_annotated_lemma = normaliselemma(annotated, annotated_lemma)
                         if not lemmas_differ(normalised_annotated_lemma, annotation_lemma):
                             # check whether the grammatical properties only differ in pvagr
-                            annotated_celex_infl = annotated_word_info[2]
-                            annotation_celex_infl = annotation_word_info[2]
-                            if annotated_celex_infl in celex2dcoimap and annotation_celex_infl in celex2dcoimap:
-                               annotated_infl = celex2dcoimap[annotated_celex_infl]
-                               annotation_infl = celex2dcoimap[annotation_celex_infl]
-                               ok = annotation_infl['wvorm'] == annotated_infl['wvorm'] and \
-                                    annotation_infl['pvtijd'] == annotated_infl['pvtijd'] and \
-                                    annotation_infl['pvagr'] != annotated_infl['pvagr']
+                            if (annotated, annotation) in dcoi_gap_pairs:
+                                ok = True
                             else:
-                                ok = False
-                                settings.LOGGER.error(f'Missing value in celex2dcoimap: {annotated_celex_infl}.')
+                                annotated_celex_infl = annotated_word_info[2]
+                                annotation_celex_infl = annotation_word_info[2]
+                                if annotated_celex_infl in celex2dcoimap and annotation_celex_infl in celex2dcoimap:
+                                   annotated_infl = celex2dcoimap[annotated_celex_infl]
+                                   annotation_infl = celex2dcoimap[annotation_celex_infl]
+                                   ok = annotation_infl['wvorm'] == annotated_infl['wvorm'] and \
+                                        annotation_infl['pvtijd'] == annotated_infl['pvtijd'] and \
+                                        annotation_infl['pvagr'] != annotated_infl['pvagr']
+                                else:
+                                    ok = False
+                                    settings.LOGGER.error(f'Missing value in celex2dcoimap: {annotated_celex_infl}.')
                             if ok:
 
                                 errors.append(new_node)
@@ -613,7 +636,7 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
             if (annotated, annotation) in regional_pv_variants:
                 regionals.append(new_node)
                 continue
-            if (annotated, annotation) in regular_pv_variants:
+            if is_regular_pv_variant(annotated, annotation, new_node):
                 variants.append(new_node)
                 continue
             next_node = get_next_word(new_node)
@@ -624,7 +647,10 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
 
         if new_node is not None:
             errors.append(new_node)
+    # part 3 based on mismatch between predc and verb
 
+    predc_errors = get_predc_v_mismatching_heads(stree)
+    errors.extend(predc_errors)
 
     # we do not want duplicate nodes
     errors = list(set(errors))
@@ -1382,6 +1408,10 @@ def get_pronunciation_variants(stree: SynTree) -> List[SynTree]:
             results.append(nd)
 
     # do something for contractions? ???
+
+    # exclude congruentie_fouten
+    agreement_errors = congruentiefout(stree)
+    results = [result for result in results if result not in agreement_errors]
 
     # no duplicates
     results = list(set(results))

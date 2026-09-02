@@ -409,7 +409,7 @@ def ptsubjcheck(child):
         zijsgnodestring = zijsgnodestringtemplate.format(begin=childbegin, end=childend, rel=childrel)
         zijsgnode = etree.fromstring(zijsgnodestring)
         results.append(zijsgnode)
-    elif childpt in nominalpts and childspecial != "er_loc":
+    elif childpt in nominalpts and childspecial != "er_loc" and childspecial != "er":
         results.append(child)
     elif childlemma in tswnouns:
         results.append(child)
