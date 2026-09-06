@@ -109,6 +109,13 @@ bare_noun_in_np_xpath = f""".//node[(({count_noun}  and @rel="hd" and {in_detles
 core_app_cat = '(@pt="tw" or (@pt="n" and @ntype="eigen"))'
 app_xpath = f'../node[@rel="app" and ({core_app_cat} or (@cat="conj" and node[@rel="cnj" and {core_app_cat}]))]'
 
+# @@the next one still to be added
+sup_tw_mijne_xpath = """.//node[@positie="nom" and 
+       ((((@pt="vnw" and @vwtype="bez") ) and not(../node[@rel="det"])) or
+        (@pt="adj" and @aform="super" and not(../node[@rel="mwp" and @pt="lid"]) and not(../node[@rel="det"])) or
+        (@pt="tw" and @numtype="rang"  and not(../node[@rel="det"]) and not(@rel="predc" or @rel="dp" or @rel="--"))
+       )]"""
+
 def predc_mwu_parent(n: SynTree) -> bool:
     parent = n.getparent()
     result = gav(parent, 'cat') == 'mwu' and gav(parent, 'rel') == 'predc'

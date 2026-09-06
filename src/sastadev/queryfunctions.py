@@ -594,6 +594,10 @@ def congruentie_afwijkingen(stree: SynTree) -> Tuple[List[SynTree], List[SynTree
             if (annotated, annotation) in congruentie_error_pairs:
                 errors.append(new_node)
                 continue
+            # if newnode is not a pv, then ignore
+            new_node_wvorm = gav(new_node, 'wvorm')
+            if new_node_wvorm != 'pv':
+                continue
             # determine the grammatical properties of annotated if it is a real word
             if informlexicon(annotated):
                 annotated_word_infos = getwordposinfo(annotated, pos='ww')

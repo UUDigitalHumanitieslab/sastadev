@@ -265,7 +265,12 @@ def find_best_subject(potsubjs: List[SynTree], thepv: SynTree, nodelist, start_f
     before_case = gav(before_node, 'naamval')
     behind_case = gav(behind_node, 'naamval')
     if before_node is None and behind_node is not None:
-        result = behind_node
+        if not behind_is_perspro:
+            result = behind_node
+        elif behind_tuple[1] == 1 and not is_a_used_subject(behind_node, used_subjects):
+            result = behind_node
+        else:
+            result = None
     elif before_node is not None and behind_node is None:
         if before_is_perspro and before_case in ['nomin', 'stan'] and not is_a_used_subject(before_node, used_subjects):
             result = before_node
@@ -584,7 +589,9 @@ def getpvs(tokensmd: TokenListMD, tree: SynTree, uttid: UttId) -> List[SynTree]:
                                                                    pvagr=pvagr, pvtijd=pvtijd, begin=nounbegin, end=nounend)
                         pvnode = etree.fromstring(pvnodestring)
                         pvs.append(pvnode)
-        return pvs
+        # sort the pvs in the right order
+        sorted_pvs = sorted(pvs, key=lambda pvnode: int(gav(pvnode, 'begin')))
+        return sorted_pvs
 
 
 def zijnimperativeok(vnode):
@@ -795,6 +802,10 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId, sta
                 results = []
             else:
                 subject_node = find_best_subject(potsubjs, thepv, nodeyield, start_from=start_from, used_subjects=used_subjects)
+                # if no subject found in abnornalobj2matches try the normal way
+                if subject_node is None and abnormalobj2matches != []:
+                    potsubjs = getpotsubjs(tree)
+                    subject_node = find_best_subject(potsubjs, thepv, nodeyield, start_from=start_from, used_subjects=used_subjects)
                 if subject_node is not None:
                     thesubj = subject_node
                     new_used_subjects.append(thesubj)
@@ -812,30 +823,29 @@ def getsvacorrections(tokensmd: TokenListMD, rawtree: SynTree, uttid: UttId, sta
                 #              jenodestring = jenodestringtemplate.format(begin=thepvend, end=thepvend, rel='su' )
                 #              jenode = etree.fromstring(jenodestring)
                 #              thesubj = jenode
-                else:
-                    return []
-                thesubjlemma = getattval(thesubj, 'lemma')
-                if thesubjlemma == 'u':
-                    usgnode = getnode(usgnodestringtemplate, thesubj)
-                    thesubj = usgnode
-                thesubjpersoon = getattval(thesubj, 'persoon')
-                if thesubjpersoon == 'persoon' or thesubjpersoon == '':
-                    thesubj = copymodifynode(thesubj, {'persoon': '3'})
-                thesubjgetal = getattval(thesubj, 'getal')
-                if thesubjgetal == '':
-                    if requires_plural_tw(thesubj):
-                        thesubj = copymodifynode(thesubj, {'getal': 'mv'})
+                    thesubjlemma = getattval(thesubj, 'lemma')
+                    if thesubjlemma == 'u':
+                        usgnode = getnode(usgnodestringtemplate, thesubj)
+                        thesubj = usgnode
+                    thesubjpersoon = getattval(thesubj, 'persoon')
+                    if thesubjpersoon == 'persoon' or thesubjpersoon == '':
+                        thesubj = copymodifynode(thesubj, {'persoon': '3'})
+                    thesubjgetal = getattval(thesubj, 'getal')
+                    if thesubjgetal == '':
+                        if requires_plural_tw(thesubj):
+                            thesubj = copymodifynode(thesubj, {'getal': 'mv'})
+                        else:
+                            thesubj = copymodifynode(thesubj, {'getal': 'ev'})
+
+
+                    if phicompatible(thesubj, thepv):
+                        results = []
+                    elif is_zeheb(thesubj, thepv):
+                        results = mk_zeheeft(tokens, thepv, metadata)
                     else:
-                        thesubj = copymodifynode(thesubj, {'getal': 'ev'})
-
-
-                if phicompatible(thesubj, thepv):
-                    results = []
-                elif is_zeheb(thesubj, thepv):
-                    results = mk_zeheeft(tokens, thepv, metadata)
+                        results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
                 else:
-                    results = getsvacorrectedutt(thesubj, thepv, tokens, metadata)
-
+                    results = []
         overall_results += results
         new_start_from = int(gav(thepv, 'end'))
         for result in results+[tokensmd]:
