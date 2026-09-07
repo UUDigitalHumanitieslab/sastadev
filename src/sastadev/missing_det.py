@@ -7,7 +7,7 @@ from sastadev.anonymization import sasta_pseudonyms
 from sastadev.conf import settings
 from sastadev.constants import datafolder, outtreebanksfolder
 from sastadev import correctionlabels
-from sastadev.lexicon import beroepen, both_exceptions, mass_exceptions, n_v_expression_list, vz_count_n_combinations, \
+from sastadev.lexicon import beroepen, both_exceptions, chatspecial, mass_exceptions, n_v_expression_list, vz_count_n_combinations, \
     cardinallexicon, detless_count_nouns, predc_detless_count_nouns, color_names
 from sastadev.readcsv import readcsv
 from sastadev.stringfunctions import compoundsep
@@ -96,6 +96,7 @@ volgend_vorig_nouns = ['jaar','keer', 'maand', 'week', 'seizoen', 'semester']
 
 special_vzs = ['zonder', 'per', 'ter', 'ten']
 
+s_possessives = ['mijnes', 'jouwes', 'zijnes', 'hares', 'onzes', 'hunnes']
 
 bare_noun_xpath = """.//node[@pt="n" and @getal="ev"  and 
                              not(@rel="hd" and parent::node[@cat="np"]) and
@@ -109,12 +110,12 @@ bare_noun_in_np_xpath = f""".//node[(({count_noun}  and @rel="hd" and {in_detles
 core_app_cat = '(@pt="tw" or (@pt="n" and @ntype="eigen"))'
 app_xpath = f'../node[@rel="app" and ({core_app_cat} or (@cat="conj" and node[@rel="cnj" and {core_app_cat}]))]'
 
-# @@the next one still to be added
 sup_tw_mijne_xpath = """.//node[@positie="nom" and 
        ((((@pt="vnw" and @vwtype="bez") ) and not(../node[@rel="det"])) or
         (@pt="adj" and @aform="super" and not(../node[@rel="mwp" and @pt="lid"]) and not(../node[@rel="det"])) or
         (@pt="tw" and @numtype="rang"  and not(../node[@rel="det"]) and not(@rel="predc" or @rel="dp" or @rel="--"))
        )]"""
+
 
 def predc_mwu_parent(n: SynTree) -> bool:
     parent = n.getparent()
@@ -129,9 +130,11 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
     bare_count_nouns = [n for n in bare_nouns if
                         not is_mass(n) and
                         not is_both(n) and
+                        not chatspecial(gav(n, 'word')) and
                         not is_numeral(gav(n, 'lemma')) and
                         gav(n, 'lemma') not in detless_count_nouns + excluded_nouns and
                         len(gav(n, 'lemma')) != 1 and
+                        gav(n, 'lemma') not in s_possessives and
                         'count' in gav(n, 'frame') and
                         not((gav(n, 'rel') == "predc" or no_verb_around(n) or predc_mwu_parent(n)) and
                             (is_beroep_pred(n)  or gav(n, 'lemma') in predc_detless_count_nouns)) and
@@ -145,6 +148,8 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
                         not in_als_cp(n) and
                         not is_begin_vz(n)]
 
+    bare_sup_tw_mijnes = stree.xpath(sup_tw_mijne_xpath)
+    bare_count_nouns += bare_sup_tw_mijnes
 
     # exclude legal vz+ n pairs and n's governed by special vzs
     gov_prep_xpath = "./parent::node[@cat='pp']/node[@pt='vz' and @rel='hd']"
@@ -208,6 +213,9 @@ def get_missing_det(stree: SynTree) -> List[SynTree]:
         # we only want to include the ones that are articles and have not been found yet
         if associate_node not in wrong_bare_count_nouns:
             wrong_bare_count_nouns.append(associate_node)
+
+    # no duplicates
+    wrong_bare_count_nouns = list(set(wrong_bare_count_nouns))
 
     return wrong_bare_count_nouns
 
